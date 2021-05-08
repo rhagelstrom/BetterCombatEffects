@@ -23,6 +23,10 @@ Items that adjust an ability score to a number. Item of Giant Strength, Headband
 * Belt of Frost Giant Strength; STR: 19-X;
 * Headband of Intellect; INT: 19-X;
 
+Additionallly, effects that use ability score modifiers in the format [ ABILITYSCORE ] are handled automaticly. The score between [ ] is replaced with the correct modifier
+
+* Lifedrinker;DMG:[CHA], melee
+
 ## STACK
 
 Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be poisoned again. This however can be overridden with the STACK tag for effects that need to stack such as a shadow's Strength Drain. The ignore duplicates can be disabled in the options menu.
@@ -52,6 +56,16 @@ Adding effect with a dice string automatically rolls the dice when the effect is
 * **TURNRE** will cause the effect to be REMOVED at the END of the PC/NPC turn. This is useful for conditions like poison to be removed but do not require a saving throw.
 
   * Poisoned; Poisoned; TURNRE
+
+* **STURNRS** will cause the effect to be REMOVED on the START of the source of the effects turn. This is usefull for conditions with the text "until the start of your next turn"
+
+* **STURNRE** will cause the effect to be REMOVED on the END of the source of the effects turn. This is usefull for conditions with the text "until the end of your turn"
+
+* **STURNREN** will cause the effect to be REMOVED on the E ND of the source of the effects NEXT turn. This is usefull for conditions with the text "until the end of your turn next turn"
+
+  * Stunning Strike; Stunned; STURNREN
+
+
 
 ## Damage Modifiers
 
