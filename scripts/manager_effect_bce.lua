@@ -61,6 +61,17 @@ function onInit()
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect)
 end
 
+function onClose()
+	ActionDamage.onDamage = onDamage
+	EffectManager.addEffect = addEffect
+	if User.getRulesetName() == "5E" then
+		CombatManager2.rest = rest
+	end
+
+	ActionsManager.unregisterResultHandler("damage")
+	ActionsManager.unregisterResultHandler("effectbce")
+end
+
 --5E only. Deletes effets on long/short rest with tags to do so
 function customRest(bLong)
 	for _,nodeActor in pairs(CombatManager.getCombatantNodes()) do
@@ -68,10 +79,31 @@ function customRest(bLong)
 			sEffect = DB.getValue(nodeEffect, "label", "")
 			if sEffect:match("RESTL") or sEffect:match("RESTS") then
 				if bLong == false and sEffect:match("RESTS") then
-					nodeEffect.delete()
+					modifyEffect(nodeEffect, "Remove", sEffect)
 				end
 				if bLong == true then
-					nodeEffect.delete()
+					local nDelete = 1;
+					local aEffectComps = EffectManager.parseEffect(sEffect)
+					for i,sEffectComp in ipairs(aEffectComps) do
+						local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+						if rEffectComp.type:upper() == "EXHAUSTION" then
+							if rEffectComp.mod == nil then
+								break
+							end
+							local exhaustionLevel = tonumber(rEffectComp.mod)	
+							if  exhaustionLevel > 1 then
+								rEffectComp.mod =  tostring(exhaustionLevel - 1)
+								--rebuild the comp
+								aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
+								nDelete = 0;
+								sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
+								modifyEffect(nodeEffect, "Update", sEffect)
+							end
+						end
+					end
+					if nDelete == 1 then
+						modifyEffect(nodeEffect, "Remove", sEffect)
+					end
 				end
 			end
 		end
@@ -350,8 +382,46 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		elseif rNewEffect.sName:match("%[CHA]") then
 			rNewEffect.sName = rNewEffect.sName:gsub("%[CHA]", tostring(ActorManager5E.getAbilityBonus(rActor, "charisma")))
 		end
-
+	
+		--Check EXHAUSTION and combine if it already exists
+		local exhaustionLevel = 0;
+		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
+		for i,sEffectComp in ipairs(aEffectComps) do
+			if sEffectComp:upper() == "EXHAUSTION" then
+				exhaustionLevel = 1;
+			end
+			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+			if rEffectComp.type:upper() == "EXHAUSTION" then
+				if rEffectComp.mod == nil then
+					exhaustionLevel = 1;
+				else
+					exhaustionLevel = tonumber(rEffectComp.mod)
+				end
+			end
+		end
+		-- Adding exhaustion, do we have exhaustion to combine?
+		if exhaustionLevel >= 1 then
+			for k, nodeEffect in pairs(nodeEffectsList.getChildren()) do
+				local sEffect = DB.getValue(nodeEffect, "label", "");
+				if sEffect:match("EXHAUSTION") then
+					local aEffectComps = EffectManager.parseEffect(sEffect)
+					for i,sEffectComp in ipairs(aEffectComps) do
+						local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+						if rEffectComp.type:upper() == "EXHAUSTION" then
+							if rEffectComp.mod ~= nil then
+								rEffectComp.mod = tonumber(rEffectComp.mod) + exhaustionLevel
+								aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
+								sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
+								modifyEffect(nodeEffect, "Update", sEffect)
+								return
+							end
+						end
+					end					
+				end	
+			end	
+		end
 	end
+		
 
 	-- The custom effects handlers are dangerous because they set the function to the last extension/ruleset that calls it
 	-- and therefore there is not really a good way to play nice with other extensions.
@@ -361,11 +431,15 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	-- We've added the STACK option to allow for duplicate effects if needed.
 	if OptionsManager.isOption("ALLOW_DUPLICATE_EFFECT", "off") then
 		local sDuplicateMsg = nil
-		for k, v in pairs(nodeEffectsList.getChildren()) do
-			if not rNewEffect.sName:match("STACK") then
-				if (DB.getValue(v, "label", "") == rNewEffect.sName) and
-						(DB.getValue(v, "init", 0) == rNewEffect.nInit) and
-						(DB.getValue(v, "duration", 0) == rNewEffect.nDuration) then
+		if not rNewEffect.sName:match("STACK") then
+			for k, nodeEffect in pairs(nodeEffectsList.getChildren()) do
+				if rNewEffect.nInit == nil then
+					rNewEffect.nInit = 0
+				end
+				if (DB.getValue(nodeEffect, "label", "") == rNewEffect.sName) and
+						(DB.getValue(nodeEffect, "init", 0) == rNewEffect.nInit) and
+						(DB.getValue(nodeEffect, "duration", 0) == rNewEffect.nDuration) and
+						(DB.getValue(nodeEffect,"source_name", "") == rNewEffect.sSource) then
 					sDuplicateMsg = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), rNewEffect.sName, Interface.getString("effect_status_exists"))
 					break
 				end
@@ -465,7 +539,7 @@ function matchEffect(sEffect)
 		if rEffectComp.type == "TDMGADDT" or rEffectComp.type == "TDMGADDS" or rEffectComp.type == "SDMGADDT" or rEffectComp.type == "SDMGADDS" then	
 			local aEffectLookup = rEffectComp.remainder
 			sEffectLookup = EffectManager.rebuildParsedEffect(aEffectLookup)
-			sEffectLookup = sEffectLookup:gsub("%", "")
+			sEffectLookup = sEffectLookup:gsub("%;", "")
 		end	
 	end
 	--Find the effect name in our custom effects list

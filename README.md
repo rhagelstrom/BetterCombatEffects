@@ -16,6 +16,16 @@ Download [BetterCombatEffects.zip](https://github.com/rhagelstrom/BetterCombatEf
 * True Seeing; VISION: 120 truesight; RESTS
 * Mage Armor; AC: 3; RESTL
 
+## Exhaustion Automation
+The exhaustion stack is automated if the RESTL tag is used. 
+Exhaustion; EXHAUSTION: 3; RESTL will be reapplied as Exhaustion; EXHAUSTION: 3; RESTL on a long rest. If EXHAUSTION is 1, the effect will be removed on long rest.
+
+Also, Exhaustion will be automaticlly added if a character already has exhaustion. Example, if the character has EXHAUSTION: 1, Applying the effect EXHAUSTION: 3 to the character will show EXHAUSTION: 4 in the CT. 
+
+* Exhaustion; EXHAUSTION; RESTL
+
+The above effect applied to the character will result in Exhaustion; EXHAUSTION: 1; RESTL on the combat tracker. Applied again will result in Exhaustion; EXHAUSTION: 2; RESTL
+
 ## Automatic Ability Score
 
 Items that adjust an ability score to a number. Item of Giant Strength, Headband of Intellect, are automatically calculated when added to the PC/NPC on the combat tracker if they use the **-X** format. The effect will need to be deleted the effect and re-added it on an ASI to have the value recalculated.
