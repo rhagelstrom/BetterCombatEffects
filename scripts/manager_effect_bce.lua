@@ -54,6 +54,7 @@ function onInit()
 
 	CombatManager.setCustomTurnStart(customTurnStart)
 	CombatManager.setCustomTurnEnd(customTurnEnd)
+	CombatManager.setCustomRoundStart(customRoundStart)
 	
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEACTIVATE, handleActivateEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect)
@@ -72,6 +73,26 @@ function onClose()
 	ActionsManager.unregisterResultHandler("effectbce")
 end
 
+function customRoundStart()
+	--Readjust init for effects if we are re-rolling inititive each round
+	if Session.IsHost and (User.getRulesetName() == "5E") and OptionsManager.isOption("HRIR", "on") then
+		local ctEntries = CombatManager.getSortedCombatantList()
+		for _, nodeCT in pairs(ctEntries) do
+			for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
+				if (DB.getValue(nodeEffect, "duration", "") ~= 0) then
+					sSource = DB.getValue(nodeEffect, "source_name", "")
+					if sSource == "" then
+						sSource	= ActorManager.getCTPathFromActorNode(nodeCT)
+					end
+					local nodeSource = ActorManager.getCTNode(sSource)
+					local nInit = DB.getValue(nodeSource, "initresult", 0)
+					DB.setValue(nodeEffect, "init", "number", nInit)
+				end
+			end
+		end
+	end
+end
+
 --5E only. Deletes effets on long/short rest with tags to do so
 function customRest(bLong)
 	for _,nodeActor in pairs(CombatManager.getCombatantNodes()) do
@@ -83,21 +104,23 @@ function customRest(bLong)
 				end
 				if bLong == true then
 					local nDelete = 1;
-					local aEffectComps = EffectManager.parseEffect(sEffect)
-					for i,sEffectComp in ipairs(aEffectComps) do
-						local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-						if rEffectComp.type:upper() == "EXHAUSTION" then
-							if rEffectComp.mod == nil then
-								break
-							end
-							local exhaustionLevel = tonumber(rEffectComp.mod)	
-							if  exhaustionLevel > 1 then
-								rEffectComp.mod =  tostring(exhaustionLevel - 1)
-								--rebuild the comp
-								aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
-								nDelete = 0;
-								sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
-								modifyEffect(nodeEffect, "Update", sEffect)
+					if User.getRulesetName() == "5E" then
+						local aEffectComps = EffectManager.parseEffect(sEffect)
+						for i,sEffectComp in ipairs(aEffectComps) do
+							local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+							if rEffectComp.type == "EXHAUSTION" then
+								if rEffectComp.mod == nil then
+									break
+								end
+								local exhaustionLevel = tonumber(rEffectComp.mod)	
+								if  exhaustionLevel > 1 then
+									rEffectComp.mod =  tostring(exhaustionLevel - 1)
+									--rebuild the comp
+									aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
+									nDelete = 0;
+									sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
+									modifyEffect(nodeEffect, "Update", sEffect)
+								end
 							end
 						end
 					end
@@ -112,7 +135,6 @@ function customRest(bLong)
 end
 
 function performRoll(draginfo, rActor, rRoll)
-	
 	ActionsManager.performAction(draginfo, rActor, rRoll)
 end
 
@@ -158,7 +180,6 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 	local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect)
 	local sMessage = string.format("%s ['%s'] -> [%s] -> [%s]", Interface.getString("effect_label"), sEffectOriginal,  sEffect, Interface.getString("effect_status_updated"))
 	EffectManager.message(sMessage, nodeSource, bGMOnly)
-
 end
 
 function customTurnStart(sourceNodeCT)
@@ -213,7 +234,6 @@ function customTurnEnd(sourceNodeCT)
 					sAction = "Remove"
 				end
 			else
-				--ActionManager.getCTNodeName(sourceNodeCT)
 				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 				if sEffectSource ~= nil  and sSourceName == sEffectSource then
 					if sEffect:match("STURNREN") then
@@ -228,7 +248,6 @@ function customTurnEnd(sourceNodeCT)
 			if sAction ~= nil then
 				modifyEffect(nodeEffect, sAction, sEffect)			
 			end
-	
 		end
 	end
 end
@@ -317,112 +336,33 @@ function customOnDamage(rSource, rTarget, rRoll)
 	end
 end
 
--- Add the ability to replace the dice description with a roll and the value
 function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if not nodeCT or not rNewEffect or not rNewEffect.sName then
 		return
 	end
-
 	local nodeEffectsList = nodeCT.createChild("effects")
 	if not nodeEffectsList then
 		return
 	end
 
-	-- Any effect that modifies ability score and is coded with -X
-	-- has the -X replaced with the targets ability score and then calculated
+	local nDuration = rNewEffect.nDuration
+	local rActor = ActorManager.resolveActor(nodeCT)
+	
 	-- The following should be done with a customOnEffectAddStart if the handlers worked properly
 	if User.getRulesetName() == "5E" then
-		local rActor = ActorManager.resolveActor(nodeCT)
-		-- check contains -X to see if this is interesting enough to continue
-		if rNewEffect.sName:match("%-X") then
-			local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
-			for _,sEffectComp in ipairs(aEffectComps) do
-				local rEffectComp = EffectManager5E.parseEffectComp(sEffectComp)
-				local nAbility = 0
-
-				if rEffectComp.type == "STR" then			
-					nAbility = ActorManager5E.getAbilityScore(rActor, "strength")
-				elseif rEffectComp.type  == "DEX" then
-					nAbility = ActorManager5E.getAbilityScore(rActor, "dexterity")
-				elseif rEffectComp.type  == "CON" then
-					nAbility = ActorManager5E.getAbilityScore(rActor, "constitution")
-				elseif rEffectComp.type  == "INT" then
-					nAbility = ActorManager5E.getAbilityScore(rActor, "intelligence")
-				elseif rEffectComp.type  == "WIS" then
-					nAbility = ActorManager5E.getAbilityScore(rActor, "wisdom")
-				elseif rEffectComp.type  == "CHA" then
-					nAbility = ActorManager5E.getAbilityScore(rActor, "charisma")
-				end
-
-				if(rEffectComp.remainder[1]:match("%-X")) then
-					local sMod = rEffectComp.remainder[1]:gsub("%-X", "")
-					local nMod = tonumber(sMod)
-					if nMod ~= nil then
-						if(nMod > nAbility) then
-							nAbility = nMod - nAbility
-						else
-							nAbility = 0
-						end
-						local sReplace = rEffectComp.type ..": " .. tostring(nAbility)
-						local sMatch =  rEffectComp.type ..":%s-%d+%-X"
-						rNewEffect.sName = rNewEffect.sName:gsub(sMatch, sReplace)
-					end
-				end
-			end
-		elseif rNewEffect.sName:match("%[STR]") then
-			rNewEffect.sName = rNewEffect.sName:gsub("%[STR]", tostring(ActorManager5E.getAbilityBonus(rActor, "strength")))
-		elseif rNewEffect.sName:match("%[DEX]") then
-			rNewEffect.sName = rNewEffect.sName:gsub("%[DEX]", tostring(ActorManager5E.getAbilityBonus(rActor, "dexterity")))
-		elseif rNewEffect.sName:match("%[CON]") then
-			rNewEffect.sName = rNewEffect.sName:gsub("%[CON]", tostring(ActorManager5E.getAbilityBonus(rActor, "constitution")))
-		elseif rNewEffect.sName:match("%[WIS]") then
-			rNewEffect.sName = rNewEffect.sName:gsub("%[WIS]", tostring(ActorManager5E.getAbilityBonus(rActor, "wisdom")))
-		elseif rNewEffect.sName:match("%[INT]") then
-			rNewEffect.sName = rNewEffect.sName:gsub("%[INT]", tostring(ActorManager5E.getAbilityBonus(rActor, "intelligence")))
-		elseif rNewEffect.sName:match("%[CHA]") then
-			rNewEffect.sName = rNewEffect.sName:gsub("%[CHA]", tostring(ActorManager5E.getAbilityBonus(rActor, "charisma")))
+		if rNewEffect.sUnits == "minute" then
+			nDuration = nDuration * 10
+		elseif rNewEffect.sUnits == ("hour" or "day") then
+			nDuration = 0
 		end
-	
-		--Check EXHAUSTION and combine if it already exists
-		local exhaustionLevel = 0;
-		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
-		for i,sEffectComp in ipairs(aEffectComps) do
-			if sEffectComp:upper() == "EXHAUSTION" then
-				exhaustionLevel = 1;
-			end
-			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-			if rEffectComp.type:upper() == "EXHAUSTION" then
-				if rEffectComp.mod == nil then
-					exhaustionLevel = 1;
-				else
-					exhaustionLevel = tonumber(rEffectComp.mod)
-				end
-			end
-		end
-		-- Adding exhaustion, do we have exhaustion to combine?
-		if exhaustionLevel >= 1 then
-			for k, nodeEffect in pairs(nodeEffectsList.getChildren()) do
-				local sEffect = DB.getValue(nodeEffect, "label", "");
-				if sEffect:match("EXHAUSTION") then
-					local aEffectComps = EffectManager.parseEffect(sEffect)
-					for i,sEffectComp in ipairs(aEffectComps) do
-						local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-						if rEffectComp.type:upper() == "EXHAUSTION" then
-							if rEffectComp.mod ~= nil then
-								rEffectComp.mod = tonumber(rEffectComp.mod) + exhaustionLevel
-								aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
-								sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
-								modifyEffect(nodeEffect, "Update", sEffect)
-								return
-							end
-						end
-					end					
-				end	
-			end	
+
+		replaceAbilityScores(rNewEffect, rActor)
+		replaceAbilityModifier(rNewEffect, rActor)
+		dropConcentration(rNewEffect, nDuration)
+		if sumExhaustion(rNewEffect, nodeEffectsList) == 1 then
+			return
 		end
 	end
-		
-
 	-- The custom effects handlers are dangerous because they set the function to the last extension/ruleset that calls it
 	-- and therefore there is not really a good way to play nice with other extensions.
 	-- The following should be done with a setCustomOnEffectAddIgnoreCheck if the handlers worked properly.
@@ -438,7 +378,7 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 				end
 				if (DB.getValue(nodeEffect, "label", "") == rNewEffect.sName) and
 						(DB.getValue(nodeEffect, "init", 0) == rNewEffect.nInit) and
-						(DB.getValue(nodeEffect, "duration", 0) == rNewEffect.nDuration) and
+						(DB.getValue(nodeEffect, "duration", 0) == nDuration) and
 						(DB.getValue(nodeEffect,"source_name", "") == rNewEffect.sSource) then
 					sDuplicateMsg = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), rNewEffect.sName, Interface.getString("effect_status_exists"))
 					break
@@ -452,11 +392,9 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
 
 	-- The following should be done with a customOnEffectAddStart if the handlers worked properly
-	
 	local rRoll = {}
 	rRoll = isDie(rNewEffect.sName)
 	if next(rRoll) ~= nil then
-		local rActor = ActorManager.resolveActor(nodeCT)
 		rRoll.rActor = rActor
 		if rNewEffect.nGMOnly  then
 			rRoll.bSecret = true
@@ -468,6 +406,135 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 
 	-- Play nice with others
 	addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+end
+
+-- Any effect that modifies ability score and is coded with -X
+-- has the -X replaced with the targets ability score and then calculated
+function replaceAbilityScores(rNewEffect, rActor)
+	-- check contains -X to see if this is interesting enough to continue
+	if rNewEffect.sName:match("%-X") then
+		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
+		for _,sEffectComp in ipairs(aEffectComps) do
+			local rEffectComp = EffectManager5E.parseEffectComp(sEffectComp)
+			local nAbility = 0
+
+			if rEffectComp.type == "STR" then			
+				nAbility = ActorManager5E.getAbilityScore(rActor, "strength")
+			elseif rEffectComp.type  == "DEX" then
+				nAbility = ActorManager5E.getAbilityScore(rActor, "dexterity")
+			elseif rEffectComp.type  == "CON" then
+				nAbility = ActorManager5E.getAbilityScore(rActor, "constitution")
+			elseif rEffectComp.type  == "INT" then
+				nAbility = ActorManager5E.getAbilityScore(rActor, "intelligence")
+			elseif rEffectComp.type  == "WIS" then
+				nAbility = ActorManager5E.getAbilityScore(rActor, "wisdom")
+			elseif rEffectComp.type  == "CHA" then
+				nAbility = ActorManager5E.getAbilityScore(rActor, "charisma")
+			end
+
+			if(rEffectComp.remainder[1]:match("%-X")) then
+				local sMod = rEffectComp.remainder[1]:gsub("%-X", "")
+				local nMod = tonumber(sMod)
+				if nMod ~= nil then
+					if(nMod > nAbility) then
+						nAbility = nMod - nAbility
+					else
+						nAbility = 0
+					end
+					local sReplace = rEffectComp.type ..": " .. tostring(nAbility)
+					local sMatch =  rEffectComp.type ..":%s-%d+%-X"
+					rNewEffect.sName = rNewEffect.sName:gsub(sMatch, sReplace)
+				end
+			end
+		end
+	end
+end
+
+function replaceAbilityModifier(rNewEffect, rActor)
+	if rNewEffect.sName:match("%[STR]") then
+		rNewEffect.sName = rNewEffect.sName:gsub("%[STR]", tostring(ActorManager5E.getAbilityBonus(rActor, "strength")))
+	elseif rNewEffect.sName:match("%[DEX]") then
+		rNewEffect.sName = rNewEffect.sName:gsub("%[DEX]", tostring(ActorManager5E.getAbilityBonus(rActor, "dexterity")))
+	elseif rNewEffect.sName:match("%[CON]") then
+		rNewEffect.sName = rNewEffect.sName:gsub("%[CON]", tostring(ActorManager5E.getAbilityBonus(rActor, "constitution")))
+	elseif rNewEffect.sName:match("%[WIS]") then
+		rNewEffect.sName = rNewEffect.sName:gsub("%[WIS]", tostring(ActorManager5E.getAbilityBonus(rActor, "wisdom")))
+	elseif rNewEffect.sName:match("%[INT]") then
+		rNewEffect.sName = rNewEffect.sName:gsub("%[INT]", tostring(ActorManager5E.getAbilityBonus(rActor, "intelligence")))
+	elseif rNewEffect.sName:match("%[CHA]") then
+		rNewEffect.sName = rNewEffect.sName:gsub("%[CHA]", tostring(ActorManager5E.getAbilityBonus(rActor, "charisma")))
+	end
+end
+
+--5E Only -Check if added effect is EXHAUSTION and sums the exhaustion level with existing exhaustion
+function sumExhaustion(rNewEffect, nodeEffectsList)
+	nSummed = 0
+	if(rNewEffect.sName:match("EXHAUSTION")) then
+		local exhaustionLevel = 0;
+		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
+		for i,sEffectComp in ipairs(aEffectComps) do
+			if sEffectComp == "EXHAUSTION" then
+				sEffectComp = sEffectComp .. ": 1"
+				aEffectComps[i] = sEffectComp
+				rNewEffect.sName = EffectManager.rebuildParsedEffect(aEffectComps)
+			end
+			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+			if rEffectComp.type == "EXHAUSTION" then
+				exhaustionLevel = tonumber(rEffectComp.mod)
+			end
+		end
+		-- Adding exhaustion, do we have exhaustion to combine?
+		if exhaustionLevel >= 1 then
+			for k, nodeEffect in pairs(nodeEffectsList.getChildren()) do
+				local sEffect = DB.getValue(nodeEffect, "label", "");
+				if sEffect:match("EXHAUSTION") then
+					local aEffectComps = EffectManager.parseEffect(sEffect)
+					for i,sEffectComp in ipairs(aEffectComps) do
+						local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+						if rEffectComp.type == "EXHAUSTION" then
+							if rEffectComp.mod ~= nil then
+								rEffectComp.mod = tonumber(rEffectComp.mod) + exhaustionLevel
+								aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
+								sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
+								modifyEffect(nodeEffect, "Update", sEffect)
+								nSummed = 1
+								break
+							end
+						end
+					end					
+				end	
+			end	
+		end
+	end
+	return nSummed
+end
+
+--5E Only - Check if this effect has concentration and drop all previous effects of concentration from the source
+function dropConcentration(rNewEffect, nDuration)
+	if(rNewEffect.sName:match("%(C%)")) then
+		local nodeCT = CombatManager.getActiveCT()
+		local sSourceName = rNewEffect.sSource
+		if sSourceName == "" then
+			sSourceName = ActorManager.getCTPathFromActorNode(nodeCT)
+		end
+		local sSource
+		local ctEntries = CombatManager.getSortedCombatantList()
+		for _, nodeCTConcentration in pairs(ctEntries) do
+			if nodeCT == nodeCTConcentration then
+				sSource = ""
+			else
+				sSource = sSourceName
+			end
+			for _,nodeEffect in pairs(DB.getChildren(nodeCTConcentration, "effects")) do
+				local sEffect = DB.getValue(nodeEffect, "label", "")
+				if (sEffect:match("%(C%)") and (DB.getValue(nodeEffect, "source_name", "") == sSource)) and 
+						((DB.getValue(nodeEffect, "label", "") ~= rNewEffect.sName) or
+						((DB.getValue(nodeEffect, "label", "") == rNewEffect.sName) and (DB.getValue(nodeEffect, "duration", 0) ~= nDuration))) then
+					modifyEffect(nodeEffect, "Remove", sEffect)
+				end
+			end
+		end
+	end
 end
 
 function isDie(sEffect)
@@ -549,30 +616,24 @@ function matchEffect(sEffect)
 		-- Is this the effeect we are looking for?
 		-- Name is parsed to index 1 in the array
 		if aEffectComps[1]:lower() == sEffectLookup:lower() then
-			local nGMOnly =  0
 			local nodeGMOnly = DB.getChild(v, "isgmonly")	
 			if nodeGMOnly then
-				nGMOnly = nodeGMOnly.getValue()
+				rEffect.nGMOnly = nodeGMOnly.getValue()
 			end
 
-			local nEffectDuration = 0
 			local nodeEffectDuration = DB.getChild(v, "duration")
 			if nodeEffectDuration then
-				nEffectDuration = nodeEffectDuration.getValue()
+				rEffect.nDuration = nodeEffectDuration.getValue()
 			end
 			
 			if User.getRulesetName() == "5E" then
-				local sUnits = nil
 				local nodeUnits = DB.getChild(v, "unit")
 				if nodeUnits then
-					sUnits = nodeUnits.getValue()
-					rEffect.sUnits = sUnits
+					rEffect.sUnits = nodeUnits.getValue()
 				end
 			end
 
 			rEffect.sName = sEffect
-			rEffect.nGMOnly = nGMOnly
-			rEffect.nDuration = nEffectDuration
 			break
 		end
 	end
@@ -598,7 +659,7 @@ function modifyEffect(nodeEffect, sAction, sEffect)
 			sendOOB(nodeEffect, OOB_MSGTYPE_BCEDEACTIVATE)
 		end
 	end
-	-- Remove turn start/end/damage take
+	-- Remove turn start/end/damage taken
 	if sAction == "Remove" then
 		sendOOB(nodeEffect, OOB_MSGTYPE_BCEREMOVE)
 	end
@@ -648,7 +709,6 @@ function handleActivateEffect(msgOOB)
 		ChatManager.SystemMessage(Interface.getString("ct_error_effectapplyfail") .. " (" .. msgOOB.sNodeEffect .. ")")
 		return
 	end
-	
 	activateEffect(nodeActor, nodeEffect)
 end
 
@@ -665,7 +725,6 @@ function handleDeactivateEffect(msgOOB)
 		ChatManager.SystemMessage(Interface.getString("ct_error_effectdeletefail") .. " (" .. msgOOB.sNodeEffect .. ")")
 		return
 	end
-
 	EffectManager.deactivateEffect(nodeActor, nodeEffect)
 end
 
@@ -682,13 +741,7 @@ function handleRemoveEffect(msgOOB)
 		ChatManager.SystemMessage(Interface.getString("ct_error_effectdeletefail") .. " (" .. msgOOB.sNodeEffect .. ")")
 		return
 	end
-
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect)
-	local sMessage = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), sEffect, Interface.getString("effect_status_expired"))
-	
-	EffectManager.removeEffect(nodeActor, sEffect)
-	EffectManager.message(sMessage, nodeActor, bGMOnly)
+	EffectManager.expireEffect(nodeActor, nodeEffect, 0)
 end
 
 function handleUpdateEffect(msgOOB)
@@ -705,8 +758,6 @@ function handleUpdateEffect(msgOOB)
 		return
 	end
 	updateEffect(nodeActor, nodeEffect, msgOOB.sLabel)
-	local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect)
-	--EffectManager.message(sMessage, nodeActor, bGMOnly)
 end 
 
 function sendOOB(nodeEffect,type, sEffect)
