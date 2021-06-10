@@ -4,12 +4,9 @@ FantasyGrounds 5E extension
 5E Better Combat Effects extension allows for fine tuning of when effects are enabled, disabled, removed, and added.
 
 ## Installation
-
 Download [BetterCombatEffects.zip](https://github.com/rhagelstrom/BetterCombatEffects/raw/main/BetterCombatEffects.zip) Unzip and place the .ext in the extensions subfolder of the Fantasy Grounds data folder and the .mod in the modules subfolder.
 
-
 ## Rest Tags
-
 **RESTL**, for long rest and **RESTS** for short rest. These tags will REMOVE an effect on short rest or long rest. Effects with RESTS will also be removed on long rest.
 
 * Exhaustion; EXHAUSTION: 1; RESTL
@@ -18,7 +15,7 @@ Download [BetterCombatEffects.zip](https://github.com/rhagelstrom/BetterCombatEf
 
 ## Exhaustion Automation
 The exhaustion stack is automated if the RESTL tag is used. 
-Exhaustion; EXHAUSTION: 3; RESTL will be reapplied as Exhaustion; EXHAUSTION: 3; RESTL on a long rest. If EXHAUSTION is 1, the effect will be removed on long rest.
+Exhaustion; EXHAUSTION: 3; RESTL will be reapplied as Exhaustion; EXHAUSTION: 2; RESTL on a long rest. If EXHAUSTION is 1, the effect will be removed on long rest.
 
 Also, Exhaustion will be automaticlly added if a character already has exhaustion. Example, if the character has EXHAUSTION: 1, Applying the effect EXHAUSTION: 3 to the character will show EXHAUSTION: 4 in the CT. 
 
@@ -27,7 +24,6 @@ Also, Exhaustion will be automaticlly added if a character already has exhaustio
 The above effect applied to the character will result in Exhaustion; EXHAUSTION: 1; RESTL on the combat tracker. Applied again will result in Exhaustion; EXHAUSTION: 2; RESTL
 
 ## Automatic Ability Score
-
 Items that adjust an ability score to a number. Item of Giant Strength, Headband of Intellect, are automatically calculated when added to the PC/NPC on the combat tracker if they use the **-X** format. The effect will need to be deleted the effect and re-added it on an ASI to have the value recalculated.
 
 * Belt of Frost Giant Strength; STR: 19-X;
@@ -38,17 +34,20 @@ Additionallly, effects that use ability score modifiers in the format [ ABILITYS
 * Lifedrinker;DMG:[CHA], melee
 
 ## STACK
-
 Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be poisoned again. This however can be overridden with the STACK tag for effects that need to stack such as a shadow's Strength Drain. The ignore duplicates can be disabled in the options menu.
 
 * Strength Drain; STR: -1d4; STACK; RESTL
 
-## Dice in Effect
+## Concentration
+Adding an new spell effect that requires concentration will automaticlly remove the previous concentration effects if any exist. 
 
-Adding effect with a dice string automatically rolls the dice when the effect is applied. The Shadow's Strength Drain can now be automated.
+## Roll Inititve Each Round
+If the House Rule "Roll init each round" is enabled, the inititive to adjust on values for effects will be adjusted accordiningly 
+
+## Dice in Effect
+Adding effect with a dice string automatically rolls the dice when the effect is applied. The Shadow's Strength Drain can now be automated. Only die that modify ability scores (STR,DEX,CON,WIS,INT,CHA) will be rolled
 
 ## Turn Modifiers
-
 * **TURNAS** will cause an effect to ACTIVIATE on the START of the PC/NPC turn. Using TURNAS along with DMGDT allows items such as the Cloak of Displacement or a Displacer Beast's Displacement to function properly.
 
   * Cloak of Displacement; GRANTDISATK; TURNAS; DMGDT
@@ -78,7 +77,6 @@ Adding effect with a dice string automatically rolls the dice when the effect is
 
 
 ## Damage Modifiers
-
 * **DMGAT** will cause an effect to ACTIVIATE when the PC/NPC takes damage.
 
 * **DMGDT** will cause an effect to DEACTIVIATE when the PC/NPC takes damage. Allows items like Cloak of Displacement to function properly.
@@ -91,8 +89,7 @@ Adding effect with a dice string automatically rolls the dice when the effect is
   * Sleep; Unconscious; DMGRT
 
 ## Add Effect on Damage Modifiers
-
-Effects can be automatically added to the source or the target on the damage by either the source of the damage or the target of the damage. For this to work we need two different effects. Only die that modify ability scores (STR,DEX,CON,WIS,INT,CHA) will be rolled Example:
+Effects can be automatically added to the source or the target on the damage by either the source of the damage or the target of the damage. For this to work we need two different effects.  Example:
 
   * Shadow; SDMGADDT: Strength Drain
 
@@ -101,7 +98,6 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Strength Drain; STR: -1d4; STACK; RESTL
 
 ## Add Effect on Damage Modifiers
-
 * **TDMGADDT** the TARGET of the attack will add an effect to the TARGET (itself) when damage is done. Consider we have the following magic item. The target of the damages puts the effect "Shield of the 300 Bonus" on itself whenever it takes damage.
 
   * Shield of the 300; TDMGADDT: Shield of the 300 Bonus
