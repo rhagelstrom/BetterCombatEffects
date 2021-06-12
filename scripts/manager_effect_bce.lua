@@ -78,7 +78,6 @@ function onClose()
 	ActionsManager.unregisterResultHandler("effectbce")
 end
 
-
 function customRoundStart()
 	--Readjust init for effects if we are re-rolling inititive each round
 	if Session.IsHost and (User.getRulesetName() == "5E") and OptionsManager.isOption("HRIR", "on") then
