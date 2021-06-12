@@ -11,7 +11,6 @@
 -- TURNDE  deactivate end of turn
 -- TURNRE  remove end of turn
 -- STURNRE remove at the end of the source of the effect turn
--- STURNREN remove at the end of the source of the effect next turn
 -- STURNRS remove at the start of the source of the effect turn
 -- DMGDT deactivate when target takes damage 
 -- DMGAT activate when target takes damage
@@ -36,6 +35,11 @@ function onInit()
 	"option_Temp_Is_Damage", "option_entry_cycler", 
 	{ labels = "option_val_on", values = "on",
 		baselabel = "option_val_off", baseval = "off", default = "off" })  
+	
+	OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects", 
+	"option_Concentrate_Restrict", "option_entry_cycler", 
+	{ labels = "option_val_on", values = "on",
+		baselabel = "option_val_off", baseval = "off", default = "off" })  
 
 	-- save off the originals so we play nice with others
 	onDamage = ActionDamage.onDamage
@@ -47,6 +51,7 @@ function onInit()
 	if User.getRulesetName() == "5E" then
 		rest = CombatManager2.rest
 		CombatManager2.rest = customRest
+		EffectManager.setCustomOnEffectAddStart(onCustomEffectAddStart)
 	end
 
 	ActionsManager.registerResultHandler("damage", customOnDamage)
@@ -72,6 +77,7 @@ function onClose()
 	ActionsManager.unregisterResultHandler("damage")
 	ActionsManager.unregisterResultHandler("effectbce")
 end
+
 
 function customRoundStart()
 	--Readjust init for effects if we are re-rolling inititive each round
@@ -197,13 +203,13 @@ function customTurnStart(sourceNodeCT)
 					sAction = "Activate"
 				elseif sEffect:match("TURNDS") then
 					sAction = "Deactivate"
-				elseif sEffect:match("TURNRS") and not sEffect:match("STURNRS") then
+				elseif sEffect:match("TURNRS") and not sEffect:match("STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 					sAction = "Remove"
 				end
 			else
 				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 				if sEffectSource ~= nil  and sSourceName == sEffectSource then
-					if sEffect:match("STURNRS") then
+					if sEffect:match("STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 						sAction = "Remove"
 					end
 				end
@@ -230,16 +236,13 @@ function customTurnEnd(sourceNodeCT)
 					sAction = "Activate"
 				elseif sEffect:match("TURNDE") then
 					sAction = "Deactivate"
-				elseif sEffect:match(" TURNRE") and not sEffect:match("STURNRE") then	
+				elseif sEffect:match(" TURNRE") and not sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then	
 					sAction = "Remove"
 				end
 			else
 				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 				if sEffectSource ~= nil  and sSourceName == sEffectSource then
-					if sEffect:match("STURNREN") then
-						sEffect = sEffect:gsub("STURNREN", "STURNRE")
-						sAction = "Update"
-					elseif sEffect:match("STURNRE") then
+					if sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 						sAction = "Remove"
 					end
 				end
@@ -336,6 +339,13 @@ function customOnDamage(rSource, rTarget, rRoll)
 	end
 end
 
+function onCustomEffectAddStart(rEffect)
+	EffectManager5E.onEffectAddStart(rEffect)
+	if rEffect.sName:match("TURNRS") and rEffect.nDuration > 0 then
+		rEffect.nDuration =  rEffect.nDuration + 1
+	end
+end
+
 function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if not nodeCT or not rNewEffect or not rNewEffect.sName then
 		return
@@ -358,7 +368,9 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 
 		replaceAbilityScores(rNewEffect, rActor)
 		replaceAbilityModifier(rNewEffect, rActor)
-		dropConcentration(rNewEffect, nDuration)
+		if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
+			dropConcentration(rNewEffect, nDuration)
+		end
 		if sumExhaustion(rNewEffect, nodeEffectsList) == 1 then
 			return
 		end

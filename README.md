@@ -39,10 +39,10 @@ Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be
 * Strength Drain; STR: -1d4; STACK; RESTL
 
 ## Concentration
-Adding an new spell effect that requires concentration will automaticlly remove the previous concentration effects if any exist. 
+Default off: When on, adding an new spell effect that requires concentration will automaticlly remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
 
-## Roll Inititve Each Round
-If the House Rule "Roll init each round" is enabled, the inititive to adjust on values for effects will be adjusted accordiningly 
+## Roll Initiative Each Round
+If the House Rule "Roll init each round" is enabled, the Initiative to adjust on values for effects will be adjusted accordiningly 
 
 ## Dice in Effect
 Adding effect with a dice string automatically rolls the dice when the effect is applied. The Shadow's Strength Drain can now be automated. Only die that modify ability scores (STR,DEX,CON,WIS,INT,CHA) will be rolled
@@ -54,27 +54,23 @@ Adding effect with a dice string automatically rolls the dice when the effect is
 
 * **TURNDS** will cause an effect to DEACTIVIATE on the START of the PC/NPC turn.
 
-* **TURNRS** will cause the effect to be REMOVED on the START of the PC/NPC turn. This is useful for conditions such as prone where a creature will typically get up at the start of their turn and the DM forgets to remove the effect.
+* **TURNRS** will cause the effect to be REMOVED on the START of the PC/NPC turn if current duration is 1. 
 
-  * Prone; PRONE; TURNRS
+  * Dodge; TURNRS
 
 * **TURNAE** will cause an effect to ACTIVIATE on the END of the PC/NPC turn.
 
 * **TURNDE** will cause an effect to DEACTIVIATE on the END of the PC/NPC turn.
 
-* **TURNRE** will cause the effect to be REMOVED at the END of the PC/NPC turn. This is useful for conditions like poison to be removed but do not require a saving throw.
+* **TURNRE** will cause the effect to be REMOVED at the END of the PC/NPC turn if current duration is 1. This is useful for conditions like poison to be removed but do not require a saving throw.
 
   * Poisoned; Poisoned; TURNRE
 
-* **STURNRS** will cause the effect to be REMOVED on the START of the source of the effects turn. This is usefull for conditions with the text "until the start of your next turn"
+* **STURNRS** will cause the effect to be REMOVED on the START of the source of the effects turn if current duration is 1. This is usefull for conditions with the text "until the start of your next turn"
 
-* **STURNRE** will cause the effect to be REMOVED on the END of the source of the effects turn. This is usefull for conditions with the text "until the end of your turn"
+* **STURNRE** will cause the effect to be REMOVED on the END of the source of the effects turn if current duration is 1. This is usefull for conditions with the text "until the end of your turn"
 
-* **STURNREN** will cause the effect to be REMOVED on the E ND of the source of the effects NEXT turn. This is usefull for conditions with the text "until the end of your turn next turn"
-
-  * Stunning Strike; Stunned; STURNREN
-
-
+  * Stunning Strike; Stunned; STURNRE
 
 ## Damage Modifiers
 * **DMGAT** will cause an effect to ACTIVIATE when the PC/NPC takes damage.
