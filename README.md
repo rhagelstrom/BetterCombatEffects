@@ -17,7 +17,7 @@ Download [BetterCombatEffects.zip](https://github.com/rhagelstrom/BetterCombatEf
 The exhaustion stack is automated if the RESTL tag is used. 
 Exhaustion; EXHAUSTION: 3; RESTL will be reapplied as Exhaustion; EXHAUSTION: 2; RESTL on a long rest. If EXHAUSTION is 1, the effect will be removed on long rest.
 
-Also, Exhaustion will be automaticlly added if a character already has exhaustion. Example, if the character has EXHAUSTION: 1, Applying the effect EXHAUSTION: 3 to the character will show EXHAUSTION: 4 in the CT. 
+Also, Exhaustion will be automatically added if a character already has exhaustion. Example, if the character has EXHAUSTION: 1, Applying the effect EXHAUSTION: 3 to the character will show EXHAUSTION: 4 in the CT. 
 
 * Exhaustion; EXHAUSTION; RESTL
 
@@ -29,7 +29,7 @@ Items that adjust an ability score to a number. Item of Giant Strength, Headband
 * Belt of Frost Giant Strength; STR: 19-X;
 * Headband of Intellect; INT: 19-X;
 
-Additionallly, effects that use ability score modifiers in the format [ ABILITYSCORE ] are handled automaticly. The score between [ ] is replaced with the correct modifier
+Additionally, effects that use ability score modifiers in the format [ ABILITYSCORE ] are handled automatically. The score between [ ] is replaced with the correct modifier
 
 * Lifedrinker;DMG:[CHA], melee
 
@@ -39,10 +39,10 @@ Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be
 * Strength Drain; STR: -1d4; STACK; RESTL
 
 ## Concentration
-Default off: When on, adding an new spell effect that requires concentration will automaticlly remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
+Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
 
 ## Roll Initiative Each Round
-If the House Rule "Roll init each round" is enabled, the Initiative to adjust on values for effects will be adjusted accordiningly 
+If the House Rule "Roll init each round" is enabled, the Initiative to adjust on values for effects will be adjusted accordingly 
 
 ## Dice in Effect
 Adding effect with a dice string automatically rolls the dice when the effect is applied. The Shadow's Strength Drain can now be automated. Only die that modify ability scores (STR,DEX,CON,WIS,INT,CHA) will be rolled
@@ -66,9 +66,9 @@ Adding effect with a dice string automatically rolls the dice when the effect is
 
   * Poisoned; Poisoned; TURNRE
 
-* **STURNRS** will cause the effect to be REMOVED on the START of the source of the effects turn if current duration is 1. This is usefull for conditions with the text "until the start of your next turn"
+* **STURNRS** will cause the effect to be REMOVED on the START of the source of the effects turn if current duration is 1. This is useful for conditions with the text "until the start of your next turn"
 
-* **STURNRE** will cause the effect to be REMOVED on the END of the source of the effects turn if current duration is 1. This is usefull for conditions with the text "until the end of your turn"
+* **STURNRE** will cause the effect to be REMOVED on the END of the source of the effects turn if current duration is 1. This is useful for conditions with the text "until the end of your turn"
 
   * Stunning Strike; Stunned; STURNRE
 
@@ -110,3 +110,26 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Shadow; SDMGADDT: Strength Drain
 
 * **SDMGADDS** the SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done.
+
+## Ongoing Save Modifiers
+* **SAVES: [ability] [SDC]** Roll save at the start of turn. End on success
+
+  * Web; Restrained; SAVES: DEX [SDC] (C)
+
+* **SAVEE: [ability] [SDC]** Roll save at the end of turn. End on success 
+
+  * Frightful Presence; Frightened; SAVEE: WIS 16
+
+* **SAVEOS: [ability] [SDC]**  Roll save at start of turn. On failure do SAVEDMG. On success do nothing or half damage if the (H) tag is used. Intended  to be used in conjunction with SAVEDMG.
+
+  * Moonbeam; SAVEOS: CON [SDC] (H)(M)(C); SAVEDMG: 2d10 radiant
+
+* **SAVEOE: [ability] [SDC]** Roll save at end of turn. On failure do SAVEDMG. On success do nothing or half damage if the (H) tag is used. Intended  to be used in conjunction with SAVEDMG. 
+
+  * Wall of Thorns; SAVEOE: DEX [SDC] (H)(C); SAVEDMG: 7d8 slashing
+
+* **SAVEDMG: (N) [damage type]** Damage done on a failed ongoing save. (N) can be number or dice string.
+
+* **[SDC]** When an effect with [SDC] is applied from a PC, [SDC] will be replaced with the PCs spell save DC based off of its spellcasting ability. Future updates will automate this from NPCs as well.
+
+* **(H) (M)** (H) will deal half damage on a successful ongoiong save. (M) will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.

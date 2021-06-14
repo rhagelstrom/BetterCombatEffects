@@ -3,81 +3,10 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
--- Better Combat Effects CT Values
--- TURNAS  activate start of turn
--- TURNDS  deactivate start of turn
--- TURNRS  remove start of turn
--- TURNAE  activate end of turn
--- TURNDE  deactivate end of turn
--- TURNRE  remove end of turn
--- STURNRE remove at the end of the source of the effect turn
--- STURNRS remove at the start of the source of the effect turn
--- DMGDT deactivate when target takes damage 
--- DMGAT activate when target takes damage
--- DMGRT remove when target takes damage 
--- TDMGADDT target add effect to the target when damage taken
--- TDMGADDS target add effect to the source of the damage
--- SDMGADDT source add effect to the target when damage taken
--- SDMGADDS source add effect to the source of the damage
-
 OOB_MSGTYPE_BCEACTIVATE = "activateeffect"
 OOB_MSGTYPE_BCEDEACTIVATE = "deactivateeffect"
 OOB_MSGTYPE_BCEREMOVE = "removeeffect"
 OOB_MSGTYPE_BCEUPDATE = "updateeffect"
-
-function onInit()
-	OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects", 
-	"option_Allow_Duplicate", "option_entry_cycler", 
-	{ labels = "option_val_on", values = "on",
-	  baselabel = "option_val_off", baseval = "off", default = "off" })
-
-	OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects", 
-	"option_Temp_Is_Damage", "option_entry_cycler", 
-	{ labels = "option_val_on", values = "on",
-		baselabel = "option_val_off", baseval = "off", default = "off" })  
-	
-	OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects", 
-	"option_Concentrate_Restrict", "option_entry_cycler", 
-	{ labels = "option_val_on", values = "on",
-		baselabel = "option_val_off", baseval = "off", default = "off" })  
-
-	-- save off the originals so we play nice with others
-	onDamage = ActionDamage.onDamage
-	addEffect = EffectManager.addEffect
-
-	ActionDamage.onDamage = customOnDamage
-	EffectManager.addEffect = customAddEffect
-
-	if User.getRulesetName() == "5E" then
-		rest = CombatManager2.rest
-		CombatManager2.rest = customRest
-		EffectManager.setCustomOnEffectAddStart(onCustomEffectAddStart)
-	end
-
-	ActionsManager.registerResultHandler("damage", customOnDamage)
-	ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
-
-	CombatManager.setCustomTurnStart(customTurnStart)
-	CombatManager.setCustomTurnEnd(customTurnEnd)
-	CombatManager.setCustomRoundStart(customRoundStart)
-	
-	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEACTIVATE, handleActivateEffect)
-	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect)
-	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect)
-	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect)
-end
-
-function onClose()
-	ActionDamage.onDamage = onDamage
-	EffectManager.addEffect = addEffect
-	if User.getRulesetName() == "5E" then
-		CombatManager2.rest = rest
-	end
-
-	ActionsManager.unregisterResultHandler("damage")
-	ActionsManager.unregisterResultHandler("effectbce")
-end
-
 
 function customRoundStart()
 	--Readjust init for effects if we are re-rolling inititive each round
@@ -109,7 +38,7 @@ function customRest(bLong)
 					modifyEffect(nodeEffect, "Remove", sEffect)
 				end
 				if bLong == true then
-					local nDelete = 1;
+					local bDelete = true;
 					if User.getRulesetName() == "5E" then
 						local aEffectComps = EffectManager.parseEffect(sEffect)
 						for i,sEffectComp in ipairs(aEffectComps) do
@@ -120,17 +49,21 @@ function customRest(bLong)
 								end
 								local exhaustionLevel = tonumber(rEffectComp.mod)	
 								if  exhaustionLevel > 1 then
-									rEffectComp.mod =  tostring(exhaustionLevel - 1)
+									rEffectComp.mod =  exhaustionLevel - 1
 									--rebuild the comp
-									aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
-									nDelete = 0;
+									aEffectComps[i] = rEffectComp.type .. ": " .. tostring(rEffectComp.mod)							
+									bDelete = false;
 									sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
+									local sActor = nodeEffect.getParent().getParent().getPath() -- Node this effect is on
+									local rActor = ActorManager.resolveActor(DB.findNode(sActor))
+									local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor);					
+									sEffect = exhaustionText(sEffect, nodeActor, rEffectComp.mod)
 									modifyEffect(nodeEffect, "Update", sEffect)
 								end
 							end
 						end
 					end
-					if nDelete == 1 then
+					if bDelete == true then
 						modifyEffect(nodeEffect, "Remove", sEffect)
 					end
 				end
@@ -145,47 +78,82 @@ function performRoll(draginfo, rActor, rRoll)
 end
 
 function onEffectRollHandler(rSource, rTarget, rRoll)
-	local nodeSource = ActorManager.getCTNode(rSource)
-	local nResult = ActionsManager.total(rRoll)
-
-	if rRoll.sType ~= "effectbce" then
-		return
-	end
-
 	if not Session.IsHost then
 		ChatManager.SystemMessage(Interface.getString("ct_error_effectclient"))
 		return
 	end
-	
-	local sEffect = ""
-	local sEffectOriginal = ""
-	local nodeEffect = nil
-	for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
-		sEffect = DB.getValue(nodeEffect, "label", "")
-		if sEffect == rRoll.sEffect then
-			sEffectOriginal = sEffect
-			local sResult = tostring(nResult)
-			local sValue = rRoll.sValue
-			local sReverseValue = string.reverse(sValue)
-			---Needed to get creative with patern matching - to correctly process
-			-- if the negative is to total, or do we have a negative modifier
-			if sValue:match("%+%d+") then
-				sValue = sValue:gsub("%+%d+", "") .. "%+%d+"
-			elseif  (sReverseValue:match("%d+%-") and rRoll.nMod ~= 0) then
-				sReverseValue = sReverseValue:gsub("%d+%-", "", 1)
-				sValue = "%-?" .. string.reverse(sReverseValue) .. "%-*%d?"
-			elseif (sReverseValue:match("%d+%-") and rRoll.nMod == 0) then
-				sValue = "%-*" .. sValue:gsub("%-", "")
+	local nodeSource = ActorManager.getCTNode(rSource)
+	local nResult = tonumber(ActionsManager.total(rRoll))
+
+	if rRoll.sType == "effectbce" then
+		local sEffect = ""
+		local sEffectOriginal = ""
+		for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
+			sEffect = DB.getValue(nodeEffect, "label", "")
+			if sEffect == rRoll.sEffect then
+				sEffectOriginal = sEffect
+				local sResult = tostring(nResult)
+				local sValue = rRoll.sValue
+				local sReverseValue = string.reverse(sValue)
+				---Needed to get creative with patern matching - to correctly process
+				-- if the negative is to total, or do we have a negative modifier
+				if sValue:match("%+%d+") then
+					sValue = sValue:gsub("%+%d+", "") .. "%+%d+"
+				elseif  (sReverseValue:match("%d+%-") and rRoll.nMod ~= 0) then
+					sReverseValue = sReverseValue:gsub("%d+%-", "", 1)
+					sValue = "%-?" .. string.reverse(sReverseValue) .. "%-*%d?"
+				elseif (sReverseValue:match("%d+%-") and rRoll.nMod == 0) then
+					sValue = "%-*" .. sValue:gsub("%-", "")
+				end
+				sEffect = sEffect:gsub(sValue, sResult)
+				DB.setValue(nodeEffect, "label", "string", sEffect)
+				break
 			end
-			sEffect = sEffect:gsub(sValue, sResult)
-			DB.setValue(nodeEffect, "label", "string", sEffect)
-			break
+		end
+	elseif rRoll.sType == "savebce" then
+		local nodeEffect = DB.findNode(rRoll.sEffectPath)
+		if not nodeEffect then
+			return
+		end
+		local sName = ActorManager.getDisplayName(nodeSource);		
+		ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
+		if nResult >= tonumber(rRoll.nTarget) then
+			if rRoll.sSaveType == "Save" then
+				modifyEffect(nodeEffect, "Remove")
+			elseif rRoll.sSaveType == "SaveOngoing" and rRoll.sDesc:match( " %[HALF ON SAVE%]") then
+				applyOngoingDamage(rSource, rTarget, nodeEffect)
+			end
+		elseif rRoll.sSaveType == "SaveOngoing" then
+			applyOngoingDamage(rSource, rTarget, nodeEffect)
 		end
 	end
-	-- Deliver message
-	local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect)
-	local sMessage = string.format("%s ['%s'] -> [%s] -> [%s]", Interface.getString("effect_label"), sEffectOriginal,  sEffect, Interface.getString("effect_status_updated"))
-	EffectManager.message(sMessage, nodeSource, bGMOnly)
+end
+
+function applyOngoingDamage(rSource, rTarget, nodeEffect)
+	local sEffect = DB.getValue(nodeEffect, "label", "")
+	local aEffectComps = EffectManager.parseEffect(sEffect)
+	local rAction = {};
+	rAction.label =  ""
+	rAction.clauses = {};
+	for _,sEffectComp in ipairs(aEffectComps) do 
+		local rEffectComp = EffectManager5E.parseEffectComp(sEffectComp)
+		if rEffectComp.type == "SAVEDMG" then	
+			local aClause = {};
+			aClause.dice = rEffectComp.dice;	
+			aClause.modifier = rEffectComp.mod;
+			aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ","))
+			table.insert(rAction.clauses, aClause);
+		elseif rEffectComp.type == "" and rAction.label == "" then
+			rAction.label = sEffectComp
+		end
+	end
+	if rAction.label == "" then
+		rAction.label = "Ongoing Effect"
+	end
+	if rAction.clauses ~= {} then
+		local rRoll = ActionDamage.getRoll(rTarget, rAction)
+		ActionsManager.actionRoll(rSource, {{rTarget}}, {rRoll})
+	end	
 end
 
 function customTurnStart(sourceNodeCT)
@@ -205,6 +173,10 @@ function customTurnStart(sourceNodeCT)
 					sAction = "Deactivate"
 				elseif sEffect:match("TURNRS") and not sEffect:match("STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 					sAction = "Remove"
+				elseif sEffect:match("SAVES") then -- Check if something might be interesting
+					saveEffect(nodeEffect, sourceNodeCT, "Save")
+				elseif sEffect:match("SAVEOS") then -- Check if something might be interesting
+					saveEffect(nodeEffect, sourceNodeCT, "SaveOngoing")
 				end
 			else
 				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
@@ -238,6 +210,10 @@ function customTurnEnd(sourceNodeCT)
 					sAction = "Deactivate"
 				elseif sEffect:match(" TURNRE") and not sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then	
 					sAction = "Remove"
+				elseif sEffect:match("SAVEE") then -- Check if something might be interesting
+					saveEffect(nodeEffect, sourceNodeCT, "Save")
+				elseif sEffect:match("SAVEOE") then -- Check if something might be interesting
+					saveEffect(nodeEffect, sourceNodeCT, "SaveOngoing")
 				end
 			else
 				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
@@ -247,7 +223,6 @@ function customTurnEnd(sourceNodeCT)
 					end
 				end
 			end
-
 			if sAction ~= nil then
 				modifyEffect(nodeEffect, sAction, sEffect)			
 			end
@@ -256,83 +231,78 @@ function customTurnEnd(sourceNodeCT)
 end
 
 function customOnDamage(rSource, rTarget, rRoll)
+	if not rTarget or not rSource or not rRoll  then
+		return onDamage(rSource, rTarget, rRoll)
+	end
+	
 	local nodeTarget = ActorManager.getCTNode(rTarget)
-	local nodeSource = ActorManager.getCTNode(rSource)
+	local nodeSource = ActorManager.getCTNode(rSource)	
+	-- save off temp hp and wounds before damage
+	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
 
-	if rTarget == nil then
-		onDamage(rSource, rTarget, rRoll)
-	else
+	-- Play nice with others
+	-- Do damage first then modify any effects
+	onDamage(rSource, rTarget, rRoll)
 
-		-- save off temp hp and wounds before damage
-		local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
-
-		-- Play nice with others
-		-- Do damage first then modify any effects
-		onDamage(rSource, rTarget, rRoll)
-
-		if rTarget == nil then
+	-- get temp hp and wounds after damage
+	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
+	
+	if OptionsManager.isOption("TEMP_IS_DAMAGE", "on") then
+		-- If no damage was applied then return
+		if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP then
 			return
 		end
-		-- get temp hp and wounds after damage
-		local nTempHP, nWounds = getTempHPAndWounds(rTarget)
-		
-		if OptionsManager.isOption("TEMP_IS_DAMAGE", "on") then
-			-- If no damage was applied then return
-			if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP then
+		else
+			if nWoundsPrev >= nWounds then
 				return
-			end
-			else
-				if nWoundsPrev >= nWounds then
-					return
-			end
+		end
+	end
+
+	-- Loop through effects on the target of the damage
+	for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
+		local sEffect = DB.getValue(nodeEffect, "label", "")
+		local sAction = nil
+		-- TODO --
+		-- Add support for only trigger on specific damage types.
+		if sEffect:match("DMGAT") then
+			sAction = "Activate"
+		elseif sEffect:match("DMGDT") then
+			sAction = "Deactivate"
+		elseif sEffect:match("DMGRT") then	
+			sAction = "Remove"
 		end
 
-		-- Loop through effects on the target of the damage
-		for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
-			local sEffect = DB.getValue(nodeEffect, "label", "")
-			local sAction = nil
-			-- TODO --
-			-- Add support for only trigger on specific damage types.
-			if sEffect:match("DMGAT") then
-				sAction = "Activate"
-			elseif sEffect:match("DMGDT") then
-				sAction = "Deactivate"
-			elseif sEffect:match("DMGRT") then	
-				sAction = "Remove"
-			end
-
-			if sEffect:match("TDMGADDT") or sEffect:match("TDMGADDS") then
-				local rEffect = matchEffect(sEffect)
-				if rEffect.sName ~= nil then
-					-- Set the node that applied the effect
-					rEffect.sSource = ActorManager.getCTNodeName(rTarget)
-					nodeTarget = ActorManager.getCTNode(rTarget)
-					rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
-					if sEffect:match("TDMGADDT") then
-						EffectManager.addEffect("", "", ActorManager.getCTNode(rTarget), rEffect, true)
-					elseif sEffect:match("TDMGADDS") then
-						EffectManager.addEffect("", "", ActorManager.getCTNode(rSource), rEffect, true)
-					end
+		if sEffect:match("TDMGADDT") or sEffect:match("TDMGADDS") then
+			local rEffect = matchEffect(sEffect)
+			if rEffect.sName ~= nil then
+				-- Set the node that applied the effect
+				rEffect.sSource = ActorManager.getCTNodeName(rTarget)
+				nodeTarget = ActorManager.getCTNode(rTarget)
+				rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
+				if sEffect:match("TDMGADDT") then
+					EffectManager.addEffect("", "", ActorManager.getCTNode(rTarget), rEffect, true)
+				elseif sEffect:match("TDMGADDS") then
+					EffectManager.addEffect("", "", ActorManager.getCTNode(rSource), rEffect, true)
 				end
 			end
-			if sAction ~= nil then
-				modifyEffect(nodeEffect, sAction)		
-			end
 		end
-		-- Loop though the effects on the source of the damage
-		for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
-			local sEffect = DB.getValue(nodeEffect, "label", "")
-			if sEffect:match("SDMGADDT") or sEffect:match("SDMGADDS") then
-				local rEffect = matchEffect(sEffect)
-				if rEffect.sName ~= nil then
-					rEffect.sSource = ActorManager.getCTNodeName(sSource)
-					nodeSource = ActorManager.getCTNode(rSource)
-					rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
-					if sEffect:match("SDMGADDT") then
-						EffectManager.addEffect("", "", ActorManager.getCTNode(rTarget), rEffect, true)
-					elseif sEffect:match("SDMGADDS") then
-						EffectManager.addEffect("", "", ActorManager.getCTNode(rSource), rEffect, true)
-					end
+		if sAction ~= nil then
+			modifyEffect(nodeEffect, sAction)		
+		end
+	end
+	-- Loop though the effects on the source of the damage
+	for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
+		local sEffect = DB.getValue(nodeEffect, "label", "")
+		if sEffect:match("SDMGADDT") or sEffect:match("SDMGADDS") then
+			local rEffect = matchEffect(sEffect)
+			if rEffect.sName ~= nil then
+				rEffect.sSource = ActorManager.getCTNodeName(sSource)
+				nodeSource = ActorManager.getCTNode(rSource)
+				rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
+				if sEffect:match("SDMGADDT") then
+					EffectManager.addEffect("", "", ActorManager.getCTNode(rTarget), rEffect, true)
+				elseif sEffect:match("SDMGADDS") then
+					EffectManager.addEffect("", "", ActorManager.getCTNode(rSource), rEffect, true)
 				end
 			end
 		end
@@ -366,6 +336,12 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 			nDuration = 0
 		end
 
+		if rNewEffect.sSource ~= nil  then
+			replaceSaveDC(rNewEffect, ActorManager.resolveActor(rNewEffect.sSource))
+		else
+			replaceSaveDC(rNewEffect, rActor)
+		end
+		replaceSaveDC(rNewEffect, rActor)
 		replaceAbilityScores(rNewEffect, rActor)
 		replaceAbilityModifier(rNewEffect, rActor)
 		if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
@@ -402,7 +378,6 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 			return
 		end
 	end
-
 	-- The following should be done with a customOnEffectAddStart if the handlers worked properly
 	local rRoll = {}
 	rRoll = isDie(rNewEffect.sName)
@@ -415,9 +390,31 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		end
 		performRoll(nil, rActor, rRoll)
 	end
-
 	-- Play nice with others
 	addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+end
+
+function replaceSaveDC(rNewEffect, rActor)
+	if rNewEffect.sName:match("%[SDC]") and  
+			(rNewEffect.sName:match("SAVEE") or 
+			rNewEffect.sName:match("SAVES") or 
+			rNewEffect.sName:match("SAVEOS") or 
+			rNewEffect.sName:match("SAVEOE")) then
+		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor);
+		if sNodeType == "pc" then
+			local nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf");
+			for _,nodeFeature in pairs(DB.getChildren(nodeActor, "featurelist")) do
+				local sFeatureName = StringManager.trim(DB.getValue(nodeFeature, "name", ""):lower());
+				if sFeatureName == "spellcasting" then
+					local sDesc = DB.getValue(nodeFeature, "text", ""):lower();
+					local sStat = sDesc:match("(%w+) is your spellcasting ability") or "";
+					nSpellcastingDC = nSpellcastingDC + ActorManager5E.getAbilityBonus(rActor, sStat) 
+					break;
+				end
+			end
+			rNewEffect.sName = rNewEffect.sName:gsub("%[SDC]", tostring(nSpellcastingDC))
+		end
+	end
 end
 
 -- Any effect that modifies ability score and is coded with -X
@@ -503,15 +500,17 @@ function sumExhaustion(rNewEffect, nodeEffectsList)
 					local aEffectComps = EffectManager.parseEffect(sEffect)
 					for i,sEffectComp in ipairs(aEffectComps) do
 						local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-						if rEffectComp.type == "EXHAUSTION" then
-							if rEffectComp.mod ~= nil then
-								rEffectComp.mod = tonumber(rEffectComp.mod) + exhaustionLevel
-								aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
-								sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
-								modifyEffect(nodeEffect, "Update", sEffect)
-								nSummed = 1
-								break
-							end
+						if rEffectComp.type == "EXHAUSTION" and rEffectComp.mod ~= nil then
+							rEffectComp.mod = tonumber(rEffectComp.mod) + exhaustionLevel
+							aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
+							sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
+							local sActor = nodeEffect.getParent().getParent().getPath() -- Node this effect is on
+							local rActor = ActorManager.resolveActor(DB.findNode(sActor))
+							local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
+							sEffect = exhaustionText(sEffect, nodeActor, rEffectComp.mod)
+							modifyEffect(nodeEffect, "Update", sEffect)
+							nSummed = 1
+							break
 						end
 					end					
 				end	
@@ -519,6 +518,75 @@ function sumExhaustion(rNewEffect, nodeEffectsList)
 		end
 	end
 	return nSummed
+end
+
+
+--Add extra text and also comptibility with Mad Nomads Character Sheet Effects Display
+function exhaustionText(sEffect, nodeActor,  nLevel)
+	local nSpeed = DB.getValue(nodeActor, "speed.base", 0)
+	local nHPMax = DB.getValue(nodeActor, "hp.base", 0)
+	local sSpeed = "; Speed-"
+	local sHPMax = "; MAXHP: -"
+	sEffect = sEffect:gsub(";%s?Speed%-?%+?%d+;?", "")
+	sEffect = sEffect:gsub(";%s?MAXHP%:%s?%-?%+?%d+;?", "")
+
+	if (nLevel == 2 or nLevel == 3) then
+		sEffect = sEffect .. sSpeed ..tostring(math.ceil(nSpeed / 2)) 
+	elseif (nLevel == 4) then
+		sEffect = sEffect .. sHPMax ..tostring(math.ceil(nHPMax / 2)) 
+		sEffect = sEffect .. sSpeed ..tostring(math.ceil(nSpeed / 2)) 
+	elseif (nLevel >= 5) then
+		sEffect = sEffect .. sHPMax ..tostring(math.ceil(nHPMax / 2))
+		sEffect = sEffect .. sSpeed .. tostring(nSpeed)
+	end
+	return sEffect
+end
+
+
+function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this effect is on, BCE String
+	local sEffect = DB.getValue(nodeEffect, "label", "")
+	
+	local aEffectComps = EffectManager.parseEffect(sEffect)
+	local sLabel = ""
+	for _,sEffectComp in ipairs(aEffectComps) do
+		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+		if rEffectComp.type == "SAVEE" or rEffectComp.type == "SAVES" or rEffectComp.type == "SAVEOE" or rEffectComp.type == "SAVEOS" then
+			local sAbility = DataCommon.ability_stol[rEffectComp.remainder[1]]
+			local nDC = tonumber(rEffectComp.remainder[2])
+			if  (nDC and sAbility) ~= nil then		
+				local sNodeEffectSource  = DB.getValue(nodeEffect, "source_name", "")
+				local rAction = {}
+				if sLabel == "" then
+					sLabel = "Ongoing Effect"
+				end
+				rAction.savemod = nDC
+				rAction.save =  sAbility -- save ability
+				rAction.label = sLabel--sEffect
+				if sEffectComp:match("%(H%)") then
+					rAction.onmissdamage =  "half"
+				end
+				rAction.magic =  sEffectComp:match("%(M%)")
+				local rSaveVsRoll = ActionPower.getSaveVsRoll(nodeTarget, rAction)
+				rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc;
+				rSaveVsRoll.sDesc =  "[SAVE] " .. sAbility .. rSaveVsRoll.sDesc:gsub("%[SAVE VS%]", "") 
+				if EffectManager.isGMEffect(sourceNodeCT, nodeEffect) or CombatManager.isCTHidden(sourceNodeCT) then
+					rSaveVsRoll.bSecret = true
+				end
+				rSaveVsRoll.sType = "savebce"
+				rSaveVsRoll.sSaveType = sSaveBCE
+				rSaveVsRoll.nTarget = nDC -- Save DC
+				rSaveVsRoll.sSource = sNodeEffectSource
+				local rRoll = ActionSave.getRoll(nodeTarget,sAbility) -- call to get the modifiers
+				rSaveVsRoll.nMod = rRoll.nMod -- Modfiers 
+				rSaveVsRoll.aDice = rRoll.aDice
+				rSaveVsRoll.sEffectPath = nodeEffect.getPath()
+				ActionsManager.actionRoll(sNodeEffectSource,{{nodeTarget}}, {rSaveVsRoll})
+				break  
+			end
+		elseif rEffectComp.type == "" and sLabel == "" then
+			sLabel = sEffectComp
+		end
+	end
 end
 
 --5E Only - Check if this effect has concentration and drop all previous effects of concentration from the source
@@ -560,7 +628,7 @@ function isDie(sEffect)
 			sType = aWords[1]:match("^([^:]+):")
 			-- Only roll dice for ability score mods
 			if sType and (sType == "STR" or sType == "DEX" or sType == "CON" or sType == "INT" or sType == "WIS" or sType == "CHA") then
-				nRemainderIndex = 2
+				local nRemainderIndex = 2
 
 				local sValueCheck = ""
 				local sTypeRemainder = aWords[1]:sub(#sType + 2)
@@ -577,7 +645,6 @@ function isDie(sEffect)
 				if StringManager.isDiceString(sValueCheck) then		
 					local aDice, nMod = StringManager.convertStringToDice(sValueCheck)
 					rRoll.sType = "effectbce"
-					
 					rRoll.sDesc = "[EFFECT " .. sEffect .. "] "
 					rRoll.aDice = aDice
 					rRoll.nMod = nMod
@@ -592,11 +659,13 @@ end
 
 function getTempHPAndWounds(rTarget)
 	local sTargetNodeType, nodeTarget = ActorManager.getTypeAndNode(rTarget)
+	if not nodeTarget then
+		return 0,0
+	end
+
 	local nTempHP = 0
 	local nWounds = 0
-	if not nodeTarget then
-		return
-	end
+
 	if sTargetNodeType == "pc" then
 		nTempHP = DB.getValue(nodeTarget, "hp.temporary", 0)
 		nWounds = DB.getValue(nodeTarget, "hp.wounds", 0)
@@ -644,7 +713,6 @@ function matchEffect(sEffect)
 					rEffect.sUnits = nodeUnits.getValue()
 				end
 			end
-
 			rEffect.sName = sEffect
 			break
 		end
@@ -652,9 +720,13 @@ function matchEffect(sEffect)
 	return rEffect
 end
 
+-- Needed for ongoing save. Have to flip source/target to get the correct mods
+function onModSaveHandler(rSource, rTarget, rRoll)
+	ActionSave.modSave(rTarget, rSource, rRoll);
+end
+
 function modifyEffect(nodeEffect, sAction, sEffect)
 	local nActive = DB.getValue(nodeEffect, "isactive", 0)
-	
 	-- Activate turn start/end/damage taken
 	if sAction == "Activate" then
 		if nActive == 1 then
@@ -675,7 +747,6 @@ function modifyEffect(nodeEffect, sAction, sEffect)
 	if sAction == "Remove" then
 		sendOOB(nodeEffect, OOB_MSGTYPE_BCEREMOVE)
 	end
-
 	-- Update the effect string to something different
 	if sAction == "Update" then
 		sendOOB(nodeEffect, OOB_MSGTYPE_BCEUPDATE, sEffect)
@@ -687,7 +758,6 @@ function activateEffect(nodeActor, nodeEffect)
 	if not nodeEffect then
 		return false
 	end
-
 	local sEffect = DB.getValue(nodeEffect, "label", "")
 	local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect)
 	
@@ -701,7 +771,6 @@ function updateEffect(nodeActor, nodeEffect, sLabel)
 	if not nodeEffect then
 		return false
 	end
-
 	DB.setValue(nodeEffect, "label", "string", sLabel)
 	local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect)
 	local sMessage = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), sLabel, Interface.getString("effect_status_updated"))
@@ -782,4 +851,61 @@ function sendOOB(nodeEffect,type, sEffect)
 		msgOOB.sLabel = sEffect
 	end
 	Comm.deliverOOBMessage(msgOOB, "")
+end
+
+function onInit()
+	OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects", 
+	"option_Allow_Duplicate", "option_entry_cycler", 
+	{ labels = "option_val_on", values = "on",
+	  baselabel = "option_val_off", baseval = "off", default = "off" })
+
+	OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects", 
+	"option_Temp_Is_Damage", "option_entry_cycler", 
+	{ labels = "option_val_on", values = "on",
+		baselabel = "option_val_off", baseval = "off", default = "off" })  
+	
+	OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects", 
+	"option_Concentrate_Restrict", "option_entry_cycler", 
+	{ labels = "option_val_on", values = "on",
+		baselabel = "option_val_off", baseval = "off", default = "off" })  
+
+	-- save off the originals so we play nice with others
+	onDamage = ActionDamage.onDamage
+	addEffect = EffectManager.addEffect
+
+	ActionDamage.onDamage = customOnDamage
+	EffectManager.addEffect = customAddEffect
+
+	if User.getRulesetName() == "5E" then
+		rest = CombatManager2.rest
+		CombatManager2.rest = customRest
+		EffectManager.setCustomOnEffectAddStart(onCustomEffectAddStart)
+	end
+
+	ActionsManager.registerResultHandler("damage", customOnDamage)
+	ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
+	ActionsManager.registerResultHandler("savebce", onEffectRollHandler)
+	ActionsManager.registerModHandler("savebce", onModSaveHandler)
+
+	CombatManager.setCustomTurnStart(customTurnStart)
+	CombatManager.setCustomTurnEnd(customTurnEnd)
+	CombatManager.setCustomRoundStart(customRoundStart)
+	
+	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEACTIVATE, handleActivateEffect)
+	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect)
+	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect)
+	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect)
+end
+
+function onClose()
+	ActionDamage.onDamage = onDamage
+	EffectManager.addEffect = addEffect
+	if User.getRulesetName() == "5E" then
+		CombatManager2.rest = rest
+	end
+
+	ActionsManager.unregisterResultHandler("damage")
+	ActionsManager.unregisterResultHandler("effectbce")
+	ActionsManager.unregisterResultHandler("savebce")
+	ActionsManager.unregisterModHandler("savebce")
 end
