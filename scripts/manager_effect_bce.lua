@@ -8,6 +8,8 @@ OOB_MSGTYPE_BCEDEACTIVATE = "deactivateeffect"
 OOB_MSGTYPE_BCEREMOVE = "removeeffect"
 OOB_MSGTYPE_BCEUPDATE = "updateeffect"
 
+local bMadNomadCharSheetEffectDisplay
+
 function customRoundStart()
 	--Readjust init for effects if we are re-rolling inititive each round
 	if Session.IsHost and (User.getRulesetName() == "5E") and OptionsManager.isOption("HRIR", "on") then
@@ -427,17 +429,17 @@ function replaceAbilityScores(rNewEffect, rActor)
 			local rEffectComp = EffectManager5E.parseEffectComp(sEffectComp)
 			local nAbility = 0
 
-			if rEffectComp.type == "STR" then			
+			if rEffectComp.type == "STR" or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "STRMNM") then			
 				nAbility = ActorManager5E.getAbilityScore(rActor, "strength")
-			elseif rEffectComp.type  == "DEX" then
+			elseif rEffectComp.type  == "DEX"  or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "DEXMNM") then
 				nAbility = ActorManager5E.getAbilityScore(rActor, "dexterity")
-			elseif rEffectComp.type  == "CON" then
+			elseif rEffectComp.type  == "CON" or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "CONMNM") then
 				nAbility = ActorManager5E.getAbilityScore(rActor, "constitution")
-			elseif rEffectComp.type  == "INT" then
+			elseif rEffectComp.type  == "INT" or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "INTMNM") then
 				nAbility = ActorManager5E.getAbilityScore(rActor, "intelligence")
-			elseif rEffectComp.type  == "WIS" then
+			elseif rEffectComp.type  == "WIS" or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "WISMNM") then
 				nAbility = ActorManager5E.getAbilityScore(rActor, "wisdom")
-			elseif rEffectComp.type  == "CHA" then
+			elseif rEffectComp.type  == "CHA" or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "CHAMNM") then
 				nAbility = ActorManager5E.getAbilityScore(rActor, "charisma")
 			end
 
@@ -450,7 +452,9 @@ function replaceAbilityScores(rNewEffect, rActor)
 					else
 						nAbility = 0
 					end
-					local sReplace = rEffectComp.type ..": " .. tostring(nAbility)
+					
+					--Exception for Mad Nomads effects display extension
+					local sReplace = rEffectComp.type .. ":" ..tostring(nAbility)
 					local sMatch =  rEffectComp.type ..":%s-%d+%-X"
 					rNewEffect.sName = rNewEffect.sName:gsub(sMatch, sReplace)
 				end
@@ -545,7 +549,10 @@ end
 
 function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this effect is on, BCE String
 	local sEffect = DB.getValue(nodeEffect, "label", "")
-	
+	if (DB.getValue(nodeEffect, "isactive", 0) ~= 1 ) then
+		return
+	end
+
 	local aEffectComps = EffectManager.parseEffect(sEffect)
 	local sLabel = ""
 	for _,sEffectComp in ipairs(aEffectComps) do
@@ -895,6 +902,15 @@ function onInit()
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect)
+
+	aExtensions = Extension.getExtensions()
+	for _,sExtension in ipairs(aExtensions) do
+		tExtension = Extension.getExtensionInfo(sExtension)
+		if (tExtension.name == "MNM Charsheet Effects Display") then
+			bMadNomadCharSheetEffectDisplay = true
+		end
+	end
+
 end
 
 function onClose()
