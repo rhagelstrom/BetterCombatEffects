@@ -9,6 +9,7 @@ OOB_MSGTYPE_BCEREMOVE = "removeeffect"
 OOB_MSGTYPE_BCEUPDATE = "updateeffect"
 
 local bMadNomadCharSheetEffectDisplay
+local RulesetEffectManager
 
 function customRoundStart()
 	--Readjust init for effects if we are re-rolling inititive each round
@@ -30,44 +31,49 @@ function customRoundStart()
 	end
 end
 
+
 --5E only. Deletes effets on long/short rest with tags to do so
+function exhaustionRest(nodeEffect)
+	local bDelete = true
+	if User.getRulesetName() == "5E" then
+		local sEffect = DB.getValue(nodeEffect, "label", "")
+		local aEffectComps = EffectManager.parseEffect(sEffect)
+		for i,sEffectComp in ipairs(aEffectComps) do
+			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+			if rEffectComp.type == "EXHAUSTION" and processEffect(rSource,nodeEffect,"EXHAUSTION") then
+				if rEffectComp.mod == nil then
+					break
+				end
+				local exhaustionLevel = tonumber(rEffectComp.mod)	
+				if  exhaustionLevel > 1 then
+					rEffectComp.mod =  exhaustionLevel - 1
+					--rebuild the comp
+					aEffectComps[i] = rEffectComp.type .. ": " .. tostring(rEffectComp.mod)							
+					bDelete = false;
+					sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
+					local sActor = nodeEffect.getParent().getParent().getPath() -- Node this effect is on
+					local rActor = ActorManager.resolveActor(DB.findNode(sActor))
+					local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor);					
+					sEffect = exhaustionText(sEffect, nodeActor, rEffectComp.mod)
+					modifyEffect(nodeEffect, "Update", sEffect)
+				end
+			end
+		end
+	end
+	return bDelete
+end
+
 function customRest(bLong)
 	for _,nodeActor in pairs(CombatManager.getCombatantNodes()) do
+		local rSource = ActorManager.resolveActor(nodeActor)
 		for _,nodeEffect in pairs(DB.getChildren(nodeActor, "effects")) do
 			sEffect = DB.getValue(nodeEffect, "label", "")
 			if sEffect:match("RESTL") or sEffect:match("RESTS") then
-				if bLong == false and sEffect:match("RESTS") then
+				if bLong == false and processEffect(rSource,nodeEffect,"RESTS") then
 					modifyEffect(nodeEffect, "Remove", sEffect)
 				end
-				if bLong == true then
-					local bDelete = true;
-					if User.getRulesetName() == "5E" then
-						local aEffectComps = EffectManager.parseEffect(sEffect)
-						for i,sEffectComp in ipairs(aEffectComps) do
-							local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-							if rEffectComp.type == "EXHAUSTION" then
-								if rEffectComp.mod == nil then
-									break
-								end
-								local exhaustionLevel = tonumber(rEffectComp.mod)	
-								if  exhaustionLevel > 1 then
-									rEffectComp.mod =  exhaustionLevel - 1
-									--rebuild the comp
-									aEffectComps[i] = rEffectComp.type .. ": " .. tostring(rEffectComp.mod)							
-									bDelete = false;
-									sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
-									local sActor = nodeEffect.getParent().getParent().getPath() -- Node this effect is on
-									local rActor = ActorManager.resolveActor(DB.findNode(sActor))
-									local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor);					
-									sEffect = exhaustionText(sEffect, nodeActor, rEffectComp.mod)
-									modifyEffect(nodeEffect, "Update", sEffect)
-								end
-							end
-						end
-					end
-					if bDelete == true then
-						modifyEffect(nodeEffect, "Remove", sEffect)
-					end
+				if bLong == true and (processEffect(rSource,nodeEffect,"RESTS") or processEffect(rSource,nodeEffect,"RESTL") and exhaustionRest(nodeEffect)) then
+					modifyEffect(nodeEffect, "Remove", sEffect)
 				end
 			end
 		end
@@ -121,9 +127,16 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
 		if nResult >= tonumber(rRoll.nTarget) then
 			if rRoll.sSaveType == "Save" then
-				modifyEffect(nodeEffect, "Remove")
+				if rRoll.bDisableOnSave then
+					modifyEffect(nodeEffect, "Deactivate")
+				else
+					modifyEffect(nodeEffect, "Remove")
+				end
 			elseif rRoll.sSaveType == "SaveOngoing" and rRoll.sDesc:match( " %[HALF ON SAVE%]") then
 				applyOngoingDamage(rSource, rTarget, nodeEffect)
+				if rRoll.bDisableOnSave then
+					modifyEffect(nodeEffect, "Deactivate")
+				end
 			end
 		elseif rRoll.sSaveType == "SaveOngoing" then
 			applyOngoingDamage(rSource, rTarget, nodeEffect)
@@ -138,8 +151,8 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect)
 	rAction.label =  ""
 	rAction.clauses = {};
 	for _,sEffectComp in ipairs(aEffectComps) do 
-		local rEffectComp = EffectManager5E.parseEffectComp(sEffectComp)
-		if rEffectComp.type == "SAVEDMG" then	
+		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
+		if RulesetEffectManager.hasEffect(rActor, "SAVEDMG", rTarget)  then	
 			local aClause = {};
 			aClause.dice = rEffectComp.dice;	
 			aClause.modifier = rEffectComp.mod;
@@ -158,32 +171,60 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect)
 	end	
 end
 
+--Do sanity checks to see if we should process this effect any further
+function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
+	local sEffect = DB.getValue(nodeEffect, "label", "")
+	if sEffect:match(sBCETag) == nil  then -- Does it contain BCE Tag
+		return false
+	end
+	--is it active
+	if ((DB.getValue(nodeEffect, "isactive", 0) == 0) and (bIgnoreDeactive == nil)) then
+		return false
+	end
+	-- is there a conditional that prevents us from processing
+	local aEffectComps = EffectManager.parseEffect(sEffect)
+	for _,sEffectComp in ipairs(aEffectComps) do -- Check conditionals
+		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+		if rEffectComp.type == "IF" then
+			if not RulesetEffectManager.checkConditional(rSource, nodeEffect, rEffectComp.remainder) then
+				return false
+			end
+		elseif rEffectComp.type == "IFT" then
+			if not RulesetEffectManager.checkConditional(rSource, nodeEffect, rEffectComp.remainder, rTarget) then
+				return false
+			end
+		end
+	end	
+	return true -- Everything looks good to continue processing
+end
+
 function customTurnStart(sourceNodeCT)
 	if not sourceNodeCT then
 		return
 	end
 	local sSourceName = sourceNodeCT.getNodeName()
+	local rSource = ActorManager.resolveActor(sourceNodeCT)
 	local ctEntries = CombatManager.getCombatantNodes()
 	for _, nodeCT in pairs(ctEntries) do
 		for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
 			local sEffect = DB.getValue(nodeEffect, "label", "")
 			local sAction = nil
-			if nodeCT == sourceNodeCT then		
-				if sEffect:match("TURNAS") then
+			if nodeCT == sourceNodeCT then
+				 if processEffect(rSource,nodeEffect,"TURNAS", nil, true) then
 					sAction = "Activate"
-				elseif sEffect:match("TURNDS") then
+				elseif processEffect(rSource,nodeEffect,"TURNDS") then
 					sAction = "Deactivate"
-				elseif sEffect:match("TURNRS") and not sEffect:match("STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
+				elseif processEffect(rSource,nodeEffect,"TURNRS") and not sEffect:match("STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 					sAction = "Remove"
-				elseif sEffect:match("SAVES") then -- Check if something might be interesting
+				elseif processEffect(rSource,nodeEffect,"SAVES") then -- Check if something might be interesting
 					saveEffect(nodeEffect, sourceNodeCT, "Save")
-				elseif sEffect:match("SAVEOS") then -- Check if something might be interesting
+				elseif processEffect(rSource,nodeEffect,"SAVEOS") then -- Check if something might be interesting
 					saveEffect(nodeEffect, sourceNodeCT, "SaveOngoing")
 				end
 			else
 				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 				if sEffectSource ~= nil  and sSourceName == sEffectSource then
-					if sEffect:match("STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
+					if processEffect(rSource,nodeEffect,"STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 						sAction = "Remove"
 					end
 				end
@@ -199,6 +240,7 @@ function customTurnEnd(sourceNodeCT)
 	if not sourceNodeCT then
 		return
 	end
+	local rSource = ActorManager.resolveActor(sourceNodeCT)
 	local sSourceName = sourceNodeCT.getNodeName()
 	local ctEntries = CombatManager.getCombatantNodes()
 	for _, nodeCT in pairs(ctEntries) do
@@ -206,21 +248,21 @@ function customTurnEnd(sourceNodeCT)
 			local sEffect = DB.getValue(nodeEffect, "label", "")
 			local sAction = nil
 			if nodeCT == sourceNodeCT then
-				if sEffect:match("TURNAE") then
+				if processEffect(rSource,nodeEffect,"TURNAE", nil, true) then
 					sAction = "Activate"
-				elseif sEffect:match("TURNDE") then
+				elseif processEffect(rSource,nodeEffect,"TURNDE") then
 					sAction = "Deactivate"
-				elseif sEffect:match(" TURNRE") and not sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then	
+				elseif processEffect(rSource,nodeEffect,"TURNRE") and not sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then	
 					sAction = "Remove"
-				elseif sEffect:match("SAVEE") then -- Check if something might be interesting
+				elseif processEffect(rSource,nodeEffect,"SAVEE") then -- Check if something might be interesting
 					saveEffect(nodeEffect, sourceNodeCT, "Save")
-				elseif sEffect:match("SAVEOE") then -- Check if something might be interesting
+				elseif processEffect(rSource,nodeEffect,"SAVEOE") then -- Check if something might be interesting
 					saveEffect(nodeEffect, sourceNodeCT, "SaveOngoing")
 				end
 			else
 				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 				if sEffectSource ~= nil  and sSourceName == sEffectSource then
-					if sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then
+					if processEffect(rSource,nodeEffect,"STURNRE")  and (DB.getValue(nodeEffect, "duration", "") == 1) then
 						sAction = "Remove"
 					end
 				end
@@ -259,18 +301,18 @@ function customOnDamage(rSource, rTarget, rRoll)
 				return
 		end
 	end
-
 	-- Loop through effects on the target of the damage
 	for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
 		local sEffect = DB.getValue(nodeEffect, "label", "")
 		local sAction = nil
+	
 		-- TODO --
 		-- Add support for only trigger on specific damage types.
-		if sEffect:match("DMGAT") then
+		if processEffect(rTarget,nodeEffect,"DMGAT", rSource, true) then
 			sAction = "Activate"
-		elseif sEffect:match("DMGDT") then
+		elseif processEffect(rTarget,nodeEffect,"DMGDT", rSource) then
 			sAction = "Deactivate"
-		elseif sEffect:match("DMGRT") then	
+		elseif processEffect(rTarget,nodeEffect,"DMGRT", rSource) then	
 			sAction = "Remove"
 		end
 
@@ -279,11 +321,10 @@ function customOnDamage(rSource, rTarget, rRoll)
 			if rEffect.sName ~= nil then
 				-- Set the node that applied the effect
 				rEffect.sSource = ActorManager.getCTNodeName(rTarget)
-				nodeTarget = ActorManager.getCTNode(rTarget)
 				rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
-				if sEffect:match("TDMGADDT") then
+				if processEffect(rSource,nodeEffect,"TDMGADDT", rTarget) then
 					EffectManager.addEffect("", "", ActorManager.getCTNode(rTarget), rEffect, true)
-				elseif sEffect:match("TDMGADDS") then
+				elseif processEffect(rSource,nodeEffect,"TDMGADDS", rTarget) then
 					EffectManager.addEffect("", "", ActorManager.getCTNode(rSource), rEffect, true)
 				end
 			end
@@ -299,11 +340,10 @@ function customOnDamage(rSource, rTarget, rRoll)
 			local rEffect = matchEffect(sEffect)
 			if rEffect.sName ~= nil then
 				rEffect.sSource = ActorManager.getCTNodeName(sSource)
-				nodeSource = ActorManager.getCTNode(rSource)
 				rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
-				if sEffect:match("SDMGADDT") then
+				if processEffect(rTarget,nodeEffect,"SDMGADDT", rSource) then
 					EffectManager.addEffect("", "", ActorManager.getCTNode(rTarget), rEffect, true)
-				elseif sEffect:match("SDMGADDS") then
+				elseif processEffect(rTarget,nodeEffect,"SDMGADDS", rSource) then
 					EffectManager.addEffect("", "", ActorManager.getCTNode(rSource), rEffect, true)
 				end
 			end
@@ -312,7 +352,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 end
 
 function onCustomEffectAddStart(rEffect)
-	EffectManager5E.onEffectAddStart(rEffect)
+	RulesetEffectManager.onEffectAddStart(rEffect)
 	if rEffect.sName:match("TURNRS") and rEffect.nDuration > 0 then
 		rEffect.nDuration =  rEffect.nDuration + 1
 	end
@@ -349,7 +389,7 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
 			dropConcentration(rNewEffect, nDuration)
 		end
-		if sumExhaustion(rNewEffect, nodeEffectsList) == 1 then
+		if sumExhaustion(rNewEffect, nodeEffectsList) then
 			return
 		end
 	end
@@ -392,8 +432,10 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		end
 		performRoll(nil, rActor, rRoll)
 	end
+
 	-- Play nice with others
 	addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+
 end
 
 function replaceSaveDC(rNewEffect, rActor)
@@ -426,7 +468,7 @@ function replaceAbilityScores(rNewEffect, rActor)
 	if rNewEffect.sName:match("%-X") then
 		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
 		for _,sEffectComp in ipairs(aEffectComps) do
-			local rEffectComp = EffectManager5E.parseEffectComp(sEffectComp)
+			local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
 			local nAbility = 0
 
 			if rEffectComp.type == "STR" or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "STRMNM") then			
@@ -481,7 +523,7 @@ end
 
 --5E Only -Check if added effect is EXHAUSTION and sums the exhaustion level with existing exhaustion
 function sumExhaustion(rNewEffect, nodeEffectsList)
-	nSummed = 0
+	local bSummed = nil
 	if(rNewEffect.sName:match("EXHAUSTION")) then
 		local exhaustionLevel = 0;
 		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
@@ -503,17 +545,17 @@ function sumExhaustion(rNewEffect, nodeEffectsList)
 				if sEffect:match("EXHAUSTION") then
 					local aEffectComps = EffectManager.parseEffect(sEffect)
 					for i,sEffectComp in ipairs(aEffectComps) do
+						local sActor = nodeEffect.getParent().getParent().getPath() -- Node this effect is on
+						local rActor = ActorManager.resolveActor(DB.findNode(sActor))
 						local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-						if rEffectComp.type == "EXHAUSTION" and rEffectComp.mod ~= nil then
+						if rEffectComp.type == "EXHAUSTION" and rEffectComp.mod ~= nil and processEffect(rActor,nodeEffect,"EXHAUSTION") then
 							rEffectComp.mod = tonumber(rEffectComp.mod) + exhaustionLevel
 							aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
 							sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
-							local sActor = nodeEffect.getParent().getParent().getPath() -- Node this effect is on
-							local rActor = ActorManager.resolveActor(DB.findNode(sActor))
 							local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
 							sEffect = exhaustionText(sEffect, nodeActor, rEffectComp.mod)
 							modifyEffect(nodeEffect, "Update", sEffect)
-							nSummed = 1
+							bSummed = true
 							break
 						end
 					end					
@@ -521,9 +563,8 @@ function sumExhaustion(rNewEffect, nodeEffectsList)
 			end	
 		end
 	end
-	return nSummed
+	return bSummed
 end
-
 
 --Add extra text and also comptibility with Mad Nomads Character Sheet Effects Display
 function exhaustionText(sEffect, nodeActor,  nLevel)
@@ -572,12 +613,18 @@ function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this
 				if sEffectComp:match("%(H%)") then
 					rAction.onmissdamage =  "half"
 				end
+				if sEffectComp:match("%(D%)") then
+					rAction.onmissdamage =  "half"
+				end
 				rAction.magic =  sEffectComp:match("%(M%)")
 				local rSaveVsRoll = ActionPower.getSaveVsRoll(nodeTarget, rAction)
 				rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc;
 				rSaveVsRoll.sDesc =  "[SAVE] " .. sAbility .. rSaveVsRoll.sDesc:gsub("%[SAVE VS%]", "") 
 				if EffectManager.isGMEffect(sourceNodeCT, nodeEffect) or CombatManager.isCTHidden(sourceNodeCT) then
 					rSaveVsRoll.bSecret = true
+				end
+				if sEffectComp:match("%(D%)") then
+					rSaveVsRoll.bDisableOnSave = true
 				end
 				rSaveVsRoll.sType = "savebce"
 				rSaveVsRoll.sSaveType = sSaveBCE
@@ -883,7 +930,16 @@ function onInit()
 	ActionDamage.onDamage = customOnDamage
 	EffectManager.addEffect = customAddEffect
 
-	if User.getRulesetName() == "5E" then
+
+	if EffectManager5E then
+		RulesetEffectManager = EffectManager5E
+	elseif EffectManager4E then
+		RulesetEffectManager = EffectManager4E
+	elseif EffectManager35E then
+		RulesetEffectManager = EffectManager35E
+	end
+
+	if User.getRulesetName() == "5E" or User.getRulesetName() == "4E" or User.getRulesetName() == "3.5E"then
 		rest = CombatManager2.rest
 		CombatManager2.rest = customRest
 		EffectManager.setCustomOnEffectAddStart(onCustomEffectAddStart)
