@@ -90,9 +90,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		ChatManager.SystemMessage(Interface.getString("ct_error_effectclient"))
 		return
 	end
-	local nodeSource = ActorManager.getCTNode(rSource)
-	local nResult = tonumber(ActionsManager.total(rRoll))
-
+	local nodeSource = ActorManager.getCTNode(rSource)	
 	if rRoll.sType == "effectbce" then
 		local sEffect = ""
 		local sEffectOriginal = ""
@@ -100,6 +98,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 			sEffect = DB.getValue(nodeEffect, "label", "")
 			if sEffect == rRoll.sEffect then
 				sEffectOriginal = sEffect
+				local nResult = tonumber(ActionsManager.total(rRoll))
 				local sResult = tostring(nResult)
 				local sValue = rRoll.sValue
 				local sReverseValue = string.reverse(sValue)
@@ -125,6 +124,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		end
 		local sName = ActorManager.getDisplayName(nodeSource);		
 		ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
+		local nResult = ActionsManager.total(rRoll);
 		if nResult >= tonumber(rRoll.nTarget) then
 			if rRoll.sSaveType == "Save" then
 				if rRoll.bDisableOnSave then
@@ -147,17 +147,18 @@ end
 function applyOngoingDamage(rSource, rTarget, nodeEffect)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
 	local aEffectComps = EffectManager.parseEffect(sEffect)
-	local rAction = {};
+	local rAction = {}
 	rAction.label =  ""
 	rAction.clauses = {};
 	for _,sEffectComp in ipairs(aEffectComps) do 
 		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-		if RulesetEffectManager.hasEffect(rActor, "SAVEDMG", rTarget)  then	
-			local aClause = {};
-			aClause.dice = rEffectComp.dice;	
-			aClause.modifier = rEffectComp.mod;
-			aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ","))
-			table.insert(rAction.clauses, aClause);
+		if rEffectComp.type == "SAVEDMG" then	
+			local aClause = {}
+			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
+			aClause.dice = rDmgInfo.dice;
+			aClause.modifier = rDmgInfo.mod
+			aClause.dmgtype = string.lower(table.concat(rDmgInfo.remainder, ","))
+			table.insert(rAction.clauses, aClause)
 		elseif rEffectComp.type == "" and rAction.label == "" then
 			rAction.label = sEffectComp
 		end
@@ -177,8 +178,13 @@ function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 	if sEffect:match(sBCETag) == nil  then -- Does it contain BCE Tag
 		return false
 	end
+
+	local nActive = DB.getValue(nodeEffect, "isactive", 0)
 	--is it active
-	if ((DB.getValue(nodeEffect, "isactive", 0) == 0) and (bIgnoreDeactive == nil)) then
+	if  ((nActive == 0 and bIgnoreDeactive == nil) or nActive == 2) then
+		if nActive == 2 and Session.IsHost then -- Don't think we need to check if is host 
+			DB.setValue(nodeEffect, "isactive", "number", 1);
+		end
 		return false
 	end
 	-- is there a conditional that prevents us from processing
