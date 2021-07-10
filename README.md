@@ -1,7 +1,7 @@
 # BetterCombatEffects
 FantasyGrounds 5E extension
 
-5E Better Combat Effects extension allows for fine tuning of when effects are enabled, disabled, removed, and added.
+Better Combat Effects extension allows for fine tuning of when effects are enabled, disabled, removed, and added. Supports 5E/3.5E and Pathfinder 1E
 
 ## Installation
 Download [BetterCombatEffects.zip](https://github.com/rhagelstrom/BetterCombatEffects/raw/main/BetterCombatEffects.zip) Unzip and place the .ext in the extensions subfolder of the Fantasy Grounds data folder and the .mod in the modules subfolder.
@@ -13,7 +13,7 @@ Download [BetterCombatEffects.zip](https://github.com/rhagelstrom/BetterCombatEf
 * True Seeing; VISION: 120 truesight; RESTS
 * Mage Armor; AC: 3; RESTL
 
-## Exhaustion Automation
+## Exhaustion Automation (5E only)
 The exhaustion stack is automated if the RESTL tag is used. 
 Exhaustion; EXHAUSTION: 3; RESTL will be reapplied as Exhaustion; EXHAUSTION: 2; RESTL on a long rest. If EXHAUSTION is 1, the effect will be removed on long rest.
 
@@ -38,7 +38,7 @@ Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be
 
 * Strength Drain; STR: -1d4; STACK; RESTL
 
-## Concentration
+## Concentration (5E Only)
 Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
 
 ## Roll Initiative Each Round
@@ -112,24 +112,22 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 * **SDMGADDS** the SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done.
 
 ## Ongoing Save Modifiers
-* **SAVES: [ability] [SDC]** Roll save at the start of turn. End on success
+* **SAVES: [ability] [SDC]** Roll save at the start of turn.
 
   * Web; Restrained; SAVES: DEX [SDC] (C)
 
-* **SAVEE: [ability] [SDC]** Roll save at the end of turn. End on success 
+* **SAVEE: [ability] [SDC]** Roll save at the end of turn.  
 
-  * Frightful Presence; Frightened; SAVEE: WIS 16
+  * Frightful Presence; Frightened; SAVEE: WIS 16 (R)
+  * Wall of Thorns; SAVEE: DEX [SDC] (H)(C); SAVEDMG: 7d8 slashing
 
-* **SAVEOS: [ability] [SDC]**  Roll save at start of turn. On failure do SAVEDMG. On success do nothing or half damage if the (H) tag is used. Intended  to be used in conjunction with SAVEDMG.
-
-  * Moonbeam; SAVEOS: CON [SDC] (H)(M)(C); SAVEDMG: 2d10 radiant
-
-* **SAVEOE: [ability] [SDC]** Roll save at end of turn. On failure do SAVEDMG. On success do nothing or half damage if the (H) tag is used. Intended  to be used in conjunction with SAVEDMG. 
-
-  * Wall of Thorns; SAVEOE: DEX [SDC] (H)(C); SAVEDMG: 7d8 slashing
+* **SAVEA: [ability] [SDC]** Automaticlly roll save when the effect is added
 
 * **SAVEDMG: (N) [damage type]** Damage done on a failed ongoing save. (N) can be number or dice string.
 
-* **[SDC]** When an effect with [SDC] is applied from a PC, [SDC] will be replaced with the PCs spell save DC based off of its spellcasting ability. Future updates will automate this from NPCs as well.
+* **[SDC]** When an effect with [SDC] is applied from a PC, [SDC] will be replaced with the PCs spell save DC based off of its spellcasting ability. 
 
-* **(H) (M)** (H) will deal half damage on a successful ongoiong save. (M) will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.
+* **(R)** (R) will remove the save effect on a successful save.
+* **(D)** (D) will disable the save effect on a successful save.
+* **(H)** (H) will deal half damage on a successful ongoiong save.
+* **(M)** (M) will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.
