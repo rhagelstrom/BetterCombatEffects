@@ -65,7 +65,7 @@ end
 
 function customRest(bLong, bMilestone)
 	local bRestLong = bLong
-	if User.getRulesetName() == "35E" or User.getRulesetName() == "PFRPG" then
+	if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
 		bRestLong = not bLong -- Of course 3.5E has this true for short rest, and 4E and 5E  true for long rest
 	end
 	for _,nodeActor in pairs(CombatManager.getCombatantNodes()) do
@@ -974,7 +974,7 @@ function onInit()
 		RulesetActorManager = ActorManager4E
 		RulesetEffectManager = EffectManager4E
 	end
-	if User.getRulesetName() == "35E" or User.getRulesetName() == "PFRPG" then
+	if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
 		RulesetActorManager = ActorManager35E
 		RulesetEffectManager = EffectManager35E
 	end
@@ -989,7 +989,7 @@ function onInit()
 	ActionDamage.onDamage = customOnDamage
 	EffectManager.addEffect = customAddEffect
 
-	if User.getRulesetName() == "35E" or User.getRulesetName() == "PFRPG" then
+	if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck);
 	end
 
