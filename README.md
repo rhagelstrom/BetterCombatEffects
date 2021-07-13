@@ -111,6 +111,13 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SDMGADDS** the SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done.
 
+## Ongoing Damage Modifiers
+* **DMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn. (N) can be number or dice string
+
+* **SDMGOS (N) [damage type]** Apply ongoing damage at the start of the actors turn who applied the effect. (N) can be number or dice string
+
+* **SDMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn who applied the effect. (N) can be number or dice string
+
 ## Ongoing Save Modifiers
 * **SAVES: [ability] [SDC]** Roll save at the start of turn.
 

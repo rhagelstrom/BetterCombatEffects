@@ -152,7 +152,7 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect)
 	rAction.clauses = {}
 	for _,sEffectComp in ipairs(aEffectComps) do 
 		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-		if rEffectComp.type == "SAVEDMG" then	
+		if rEffectComp.type == "SAVEDMG" or rEffectComp.type == "DMGOE" or rEffectComp.type == "SDMGOE" or rEffectComp.type == "SDMGOS" then	
 			local aClause = {}
 			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
 			aClause.dice = rDmgInfo.dice;
@@ -214,6 +214,11 @@ function customTurnStart(sourceNodeCT)
 	for _, nodeCT in pairs(ctEntries) do
 		for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
 			local sEffect = DB.getValue(nodeEffect, "label", "")
+			local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
+			local rSourceEffect = ActorManager.resolveActor(sEffectSource)
+			if rSourceEffect == nil then
+				rSourceEffect = rSource
+			end
 			if nodeCT == sourceNodeCT then
 				 if processEffect(rSource,nodeEffect,"TURNAS", nil, true) then
 					modifyEffect(nodeEffect, "Activate")
@@ -231,6 +236,10 @@ function customTurnStart(sourceNodeCT)
 			else
 				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 				if sEffectSource ~= nil  and sSourceName == sEffectSource then
+					if processEffect(rSource,nodeEffect,"SDMGOS") then
+						local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
+						applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect)
+					end   
 					if processEffect(rSource,nodeEffect,"STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 						modifyEffect(nodeEffect, "Remove")
 					end
@@ -250,13 +259,20 @@ function customTurnEnd(sourceNodeCT)
 	for _, nodeCT in pairs(ctEntries) do
 		for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
 			local sEffect = DB.getValue(nodeEffect, "label", "")
-			local sAction = nil
+			local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
+			local rSourceEffect = ActorManager.resolveActor(sEffectSource)
+			if rSourceEffect == nil then
+				rSourceEffect = rSource
+			end
 			if nodeCT == sourceNodeCT then
+				if processEffect(rSource,nodeEffect,"DMGOE") and not sEffect:match("SDMGOE") then
+					 applyOngoingDamage(rSourceEffect, rSource, nodeEffect)
+				end
 				if processEffect(rSource,nodeEffect,"TURNAE", nil, true) then
 					modifyEffect(nodeEffect, "Activate")
 				end
 				if processEffect(rSource,nodeEffect,"TURNDE") then
-					sAction = "Deactivate"
+					modifyEffect(nodeEffect, "Deactivate")
 				end
 				if processEffect(rSource,nodeEffect,"SAVEE") then -- Check if something might be interesting
 					saveEffect(nodeEffect, sourceNodeCT, "Save")
@@ -265,9 +281,12 @@ function customTurnEnd(sourceNodeCT)
 					modifyEffect(nodeEffect, "Remove")
 				end
 			else
-				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 				if sEffectSource ~= nil  and sSourceName == sEffectSource then
-					if processEffect(rSource,nodeEffect,"STURNRE")  and (DB.getValue(nodeEffect, "duration", "") == 1) then
+					if processEffect(rSource,nodeEffect,"SDMGOE") then
+						local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
+						applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect)
+					end   
+					if processEffect(rSource,nodeEffect,"STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 						modifyEffect(nodeEffect, "Remove")
 					end
 				end
