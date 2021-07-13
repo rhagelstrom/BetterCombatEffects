@@ -32,36 +32,6 @@ function customRoundStart()
 	end
 end
 
---5E only. Deletes effets on long/short rest with tags to do so
-function exhaustionRest(nodeEffect)
-	local bDelete = true
-	if User.getRulesetName() == "5E" then
-		local sEffect = DB.getValue(nodeEffect, "label", "")
-		local aEffectComps = EffectManager.parseEffect(sEffect)
-		for i,sEffectComp in ipairs(aEffectComps) do
-			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-			if rEffectComp.type == "EXHAUSTION" and processEffect(rSource,nodeEffect,"EXHAUSTION") then
-				if rEffectComp.mod == nil then
-					break
-				end
-				local exhaustionLevel = tonumber(rEffectComp.mod)	
-				if  exhaustionLevel > 1 then
-					rEffectComp.mod =  exhaustionLevel - 1
-					--rebuild the comp
-					aEffectComps[i] = rEffectComp.type .. ": " .. tostring(rEffectComp.mod)							
-					bDelete = false;
-					sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
-					local sActor = nodeEffect.getParent().getParent().getPath() -- Node this effect is on
-					local rActor = ActorManager.resolveActor(DB.findNode(sActor))
-					local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor);					
-					sEffect = exhaustionText(sEffect, nodeActor, rEffectComp.mod)
-					modifyEffect(nodeEffect, "Update", sEffect)
-				end
-			end
-		end
-	end
-	return bDelete
-end
 
 function customRest(bLong, bMilestone)
 	local bRestLong = bLong
@@ -74,9 +44,6 @@ function customRest(bLong, bMilestone)
 			sEffect = DB.getValue(nodeEffect, "label", "")
 			if sEffect:match("RESTL") or sEffect:match("RESTS") then
 				if bRestLong == false and processEffect(rSource,nodeEffect,"RESTS") then
-					modifyEffect(nodeEffect, "Remove", sEffect)
-				end
-				if bRestLong == true and (processEffect(rSource,nodeEffect,"RESTS") or processEffect(rSource,nodeEffect,"RESTL")) and exhaustionRest(nodeEffect) then
 					modifyEffect(nodeEffect, "Remove", sEffect)
 				end
 			end
@@ -402,9 +369,6 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
 		dropConcentration(rNewEffect, nDuration)
 	end
-	if User.getRulesetName() == "5E" and sumExhaustion(rNewEffect, nodeEffectsList) then
-		return
-	end
 
 	-- The custom effects handlers are dangerous because they set the function to the last extension/ruleset that calls it
 	-- and therefore there is not really a good way to play nice with other extensions.
@@ -565,73 +529,6 @@ function replaceAbilityModifier(rNewEffect, rActor)
 		rNewEffect.sName = rNewEffect.sName:gsub("%[CHA]", tostring(RulesetActorManager.getAbilityBonus(rActor, "charisma")))
 	end
 end
-
---5E Only -Check if added effect is EXHAUSTION and sums the exhaustion level with existing exhaustion
-function sumExhaustion(rNewEffect, nodeEffectsList)
-	local bSummed = nil
-	if(rNewEffect.sName:match("EXHAUSTION")) then
-		local exhaustionLevel = 0;
-		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
-		for i,sEffectComp in ipairs(aEffectComps) do
-			if sEffectComp == "EXHAUSTION" then
-				sEffectComp = sEffectComp .. ": 1"
-				aEffectComps[i] = sEffectComp
-				rNewEffect.sName = EffectManager.rebuildParsedEffect(aEffectComps)
-			end
-			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-			if rEffectComp.type == "EXHAUSTION" then
-				exhaustionLevel = tonumber(rEffectComp.mod)
-			end
-		end
-		-- Adding exhaustion, do we have exhaustion to combine?
-		if exhaustionLevel >= 1 then
-			for k, nodeEffect in pairs(nodeEffectsList.getChildren()) do
-				local sEffect = DB.getValue(nodeEffect, "label", "");
-				if sEffect:match("EXHAUSTION") then
-					local aEffectComps = EffectManager.parseEffect(sEffect)
-					for i,sEffectComp in ipairs(aEffectComps) do
-						local sActor = nodeEffect.getParent().getParent().getPath() -- Node this effect is on
-						local rActor = ActorManager.resolveActor(DB.findNode(sActor))
-						local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-						if rEffectComp.type == "EXHAUSTION" and rEffectComp.mod ~= nil and processEffect(rActor,nodeEffect,"EXHAUSTION") then
-							rEffectComp.mod = tonumber(rEffectComp.mod) + exhaustionLevel
-							aEffectComps[i] = rEffectComp.type .. ": " .. rEffectComp.mod							
-							sEffect = EffectManager.rebuildParsedEffect(aEffectComps)
-							local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
-							sEffect = exhaustionText(sEffect, nodeActor, rEffectComp.mod)
-							modifyEffect(nodeEffect, "Update", sEffect)
-							bSummed = true
-							break
-						end
-					end					
-				end	
-			end	
-		end
-	end
-	return bSummed
-end
-
---Add extra text and also comptibility with Mad Nomads Character Sheet Effects Display
-function exhaustionText(sEffect, nodeActor,  nLevel)
-	local nSpeed = DB.getValue(nodeActor, "speed.base", 0)
-	local nHPMax = DB.getValue(nodeActor, "hp.base", 0)
-	local sSpeed = "; Speed-"
-	local sHPMax = "; MAXHP: -"
-	sEffect = sEffect:gsub(";%s?Speed%-?%+?%d+;?", "")
-	sEffect = sEffect:gsub(";%s?MAXHP%:%s?%-?%+?%d+;?", "")
-
-	if (nLevel == 2 or nLevel == 3) then
-		sEffect = sEffect .. sSpeed ..tostring(math.ceil(nSpeed / 2)) 
-	elseif (nLevel == 4) then
-		sEffect = sEffect .. sHPMax ..tostring(math.ceil(nHPMax / 2)) 
-		sEffect = sEffect .. sSpeed ..tostring(math.ceil(nSpeed / 2)) 
-	elseif (nLevel >= 5) then
-		sEffect = sEffect .. sHPMax ..tostring(math.ceil(nHPMax / 2))
-		sEffect = sEffect .. sSpeed .. tostring(nSpeed)
-	end
-	return sEffect
-end
-
 
 function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this effect is on, BCE String
 	local sEffect = DB.getValue(nodeEffect, "label", "")
