@@ -1,53 +1,19 @@
-# BetterCombatEffects
-FantasyGrounds 5E extension
+# Better Combat Effects
 
-Better Combat Effects extension allows for fine tuning of when effects are enabled, disabled, removed, and added. Supports 5E/3.5E and Pathfinder 1E
+FantasyGrounds CoreRPG extension
+
+Better Combat Effects extension allows for fine tuning of when effects are enabled, disabled, removed, and added.
 
 ## Installation
+
 Download [BetterCombatEffects.zip](https://github.com/rhagelstrom/BetterCombatEffects/raw/main/BetterCombatEffects.zip) Unzip and place the .ext in the extensions subfolder of the Fantasy Grounds data folder and the .mod in the modules subfolder.
 
-## Rest Tags
-**RESTL**, for long rest and **RESTS** for short rest. These tags will REMOVE an effect on short rest or long rest. Effects with RESTS will also be removed on long rest.
+## CoreRPG
 
-* Exhaustion; EXHAUSTION: 1; RESTL
-* True Seeing; VISION: 120 truesight; RESTS
-* Mage Armor; AC: 3; RESTL
+---
 
-## Exhaustion Automation (5E only)
-The exhaustion stack is automated if the RESTL tag is used. 
-Exhaustion; EXHAUSTION: 3; RESTL will be reapplied as Exhaustion; EXHAUSTION: 2; RESTL on a long rest. If EXHAUSTION is 1, the effect will be removed on long rest.
+### Turn Modifiers
 
-Also, Exhaustion will be automatically added if a character already has exhaustion. Example, if the character has EXHAUSTION: 1, Applying the effect EXHAUSTION: 3 to the character will show EXHAUSTION: 4 in the CT. 
-
-* Exhaustion; EXHAUSTION; RESTL
-
-The above effect applied to the character will result in Exhaustion; EXHAUSTION: 1; RESTL on the combat tracker. Applied again will result in Exhaustion; EXHAUSTION: 2; RESTL
-
-## Automatic Ability Score
-Items that adjust an ability score to a number. Item of Giant Strength, Headband of Intellect, are automatically calculated when added to the PC/NPC on the combat tracker if they use the **-X** format. The effect will need to be deleted the effect and re-added it on an ASI to have the value recalculated.
-
-* Belt of Frost Giant Strength; STR: 19-X;
-* Headband of Intellect; INT: 19-X;
-
-Additionally, effects that use ability score modifiers in the format [ ABILITYSCORE ] are handled automatically. The score between [ ] is replaced with the correct modifier
-
-* Lifedrinker;DMG:[CHA], melee
-
-## STACK
-Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be poisoned again. This however can be overridden with the STACK tag for effects that need to stack such as a shadow's Strength Drain. The ignore duplicates can be disabled in the options menu.
-
-* Strength Drain; STR: -1d4; STACK; RESTL
-
-## Concentration (5E Only)
-Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
-
-## Roll Initiative Each Round
-If the House Rule "Roll init each round" is enabled, the Initiative to adjust on values for effects will be adjusted accordingly 
-
-## Dice in Effect
-Adding effect with a dice string automatically rolls the dice when the effect is applied. The Shadow's Strength Drain can now be automated. Only die that modify ability scores (STR,DEX,CON,WIS,INT,CHA) will be rolled
-
-## Turn Modifiers
 * **TURNAS** will cause an effect to ACTIVIATE on the START of the PC/NPC turn. Using TURNAS along with DMGDT allows items such as the Cloak of Displacement or a Displacer Beast's Displacement to function properly.
 
   * Cloak of Displacement; GRANTDISATK; TURNAS; DMGDT
@@ -72,7 +38,41 @@ Adding effect with a dice string automatically rolls the dice when the effect is
 
   * Stunning Strike; Stunned; STURNRE
 
-## Damage Modifiers
+## 5E/4E/3.5E/Pathfinder 1E
+
+---
+
+### Rest Tags
+
+**RESTL**, for long rest and **RESTS** for short rest. These tags will REMOVE an effect on short rest or long rest. Effects with RESTS will also be removed on long rest.
+
+* Exhaustion; EXHAUSTION: 1; RESTL
+* True Seeing; VISION: 120 truesight; RESTS
+* Mage Armor; AC: 3; RESTL
+
+### Automatic Ability Score
+
+Items that adjust an ability score to a number. Item of Giant Strength, Headband of Intellect, are automatically calculated when added to the PC/NPC on the combat tracker if they use the **-X** format. The effect will need to be deleted the effect and re-added it on an ASI to have the value recalculated.
+
+* Belt of Frost Giant Strength; STR: 19-X;
+* Headband of Intellect; INT: 19-X;
+
+Additionally, effects that use ability score modifiers in the format [ ABILITYSCORE ] are handled automatically. The score between [ ] is replaced with the correct modifier
+
+* Lifedrinker;DMG:[CHA], melee
+
+### STACK
+
+Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be poisoned again. This however can be overridden with the STACK tag for effects that need to stack such as a shadow's Strength Drain. The ignore duplicates can be disabled in the options menu.
+
+* Strength Drain; STR: -1d4; STACK; RESTL
+
+### Dice in Effect
+
+Adding effect with a dice string automatically rolls the dice when the effect is applied. The Shadow's Strength Drain can now be automated. Only die that modify ability scores (STR,DEX,CON,WIS,INT,CHA) will be rolled
+
+### Damage Modifiers
+
 * **DMGAT** will cause an effect to ACTIVIATE when the PC/NPC takes damage.
 
 * **DMGDT** will cause an effect to DEACTIVIATE when the PC/NPC takes damage. Allows items like Cloak of Displacement to function properly.
@@ -84,7 +84,8 @@ Adding effect with a dice string automatically rolls the dice when the effect is
   * Turn Undead; Turned; DMGRT
   * Sleep; Unconscious; DMGRT
 
-## Add Effect on Damage Modifiers
+### Add Effect on Damage Modifiers
+
 Effects can be automatically added to the source or the target on the damage by either the source of the damage or the target of the damage. For this to work we need two different effects.  Example:
 
   * Shadow; SDMGADDT: Strength Drain
@@ -93,7 +94,8 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
   * Strength Drain; STR: -1d4; STACK; RESTL
 
-## Add Effect on Damage Modifiers
+### Add Effect on Damage Modifiers
+
 * **TDMGADDT** the TARGET of the attack will add an effect to the TARGET (itself) when damage is done. Consider we have the following magic item. The target of the damages puts the effect "Shield of the 300 Bonus" on itself whenever it takes damage.
 
   * Shield of the 300; TDMGADDT: Shield of the 300 Bonus
@@ -111,14 +113,20 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SDMGADDS** the SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done.
 
-## Ongoing Damage Modifiers
+### Ongoing Damage Modifiers
+
 * **DMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn. (N) can be number or dice string
 
 * **SDMGOS (N) [damage type]** Apply ongoing damage at the start of the actors turn who applied the effect. (N) can be number or dice string
 
 * **SDMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn who applied the effect. (N) can be number or dice string
 
-## Ongoing Save Modifiers
+## 5E/3.5E/Pathfinder 1E
+
+---
+
+### Ongoing Save Modifiers
+
 * **SAVES: [ability] [SDC]** Roll save at the start of turn.
 
   * Web; Restrained; SAVES: DEX [SDC] (C)
@@ -138,3 +146,11 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 * **(D)** (D) will disable the save effect on a successful save.
 * **(H)** (H) will deal half damage on a successful ongoiong save.
 * **(M)** (M) will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.
+
+## 5E
+
+---
+
+### Concentration
+
+Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
