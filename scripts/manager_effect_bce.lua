@@ -12,48 +12,51 @@ local bMadNomadCharSheetEffectDisplay
 local RulesetEffectManager
 local RulesetActorManager
 
-function customRoundStart()
-	--Readjust init for effects if we are re-rolling inititive each round
-	if Session.IsHost and OptionsManager.isOption("HRIR", "on")  then
-		local ctEntries = CombatManager.getSortedCombatantList()
-		for _, nodeCT in pairs(ctEntries) do
-			for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
-				if (DB.getValue(nodeEffect, "duration", "") ~= 0) then
-					sSource = DB.getValue(nodeEffect, "source_name", "")
-					if sSource == "" then
-						sSource	= ActorManager.getCTPathFromActorNode(nodeCT)
-					end
-					local nodeSource = ActorManager.getCTNode(sSource)
-					local nInit = DB.getValue(nodeSource, "initresult", 0)
-					DB.setValue(nodeEffect, "init", "number", nInit)
-				end
-			end
-		end
-	end
-end
-
-
-function customRest(bLong, bMilestone)
+function customRest(nodeActor, bLong, bMilestone)
 	local bRestLong = bLong
 	if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
 		bRestLong = not bLong -- Of course 3.5E has this true for short rest, and 4E and 5E  true for long rest
 	end
-	for _,nodeActor in pairs(CombatManager.getCombatantNodes()) do
+	if bRestLong then
+		local nodeCT = ActorManager.getCTNode(nodeActor)
 		local rSource = ActorManager.resolveActor(nodeActor)
-		for _,nodeEffect in pairs(DB.getChildren(nodeActor, "effects")) do
-			sEffect = DB.getValue(nodeEffect, "label", "")
+		for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
+			local sEffect = DB.getValue(nodeEffect, "label", "")
 			if sEffect:match("RESTL") or sEffect:match("RESTS") then
 				if bRestLong == false and processEffect(rSource,nodeEffect,"RESTS") then
 					modifyEffect(nodeEffect, "Remove", sEffect)
 				end
 			end
 		end
+	else
 	end
-	rest(bLong, bMilestone)
+	rest(nodeActor, bLong, bMilestone)
 end
 
 function performRoll(draginfo, rActor, rRoll)
 	ActionsManager.performAction(draginfo, rActor, rRoll)
+end
+
+onSaverRollHandler(rSource, rTarget, rRoll)
+	local nodeEffect = DB.findNode(rRoll.sEffectPath)
+	if not nodeEffect then
+		return
+	end
+	local sName = ActorManager.getDisplayName(nodeSource);		
+	ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
+	local nResult = ActionsManager.total(rRoll);
+	if nResult >= tonumber(rRoll.nTarget) then
+		if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
+			applyOngoingDamage(rSource, rTarget, nodeEffect)
+		end
+		if rRoll.bRemoveOnSave then
+			modifyEffect(nodeEffect, "Remove")
+		elseif rRoll.bDisableOnSave then
+			modifyEffect(nodeEffect, "Deactivate")
+		end
+	else
+		applyOngoingDamage(rSource, rTarget, nodeEffect)
+	end
 end
 
 function onEffectRollHandler(rSource, rTarget, rRoll)
@@ -62,51 +65,29 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		return
 	end
 	local nodeSource = ActorManager.getCTNode(rSource)	
-	if rRoll.sType == "effectbce" then
-		local sEffect = ""
-		local sEffectOriginal = ""
-		for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
-			sEffect = DB.getValue(nodeEffect, "label", "")
-			if sEffect == rRoll.sEffect then
-				sEffectOriginal = sEffect
-				local nResult = tonumber(ActionsManager.total(rRoll))
-				local sResult = tostring(nResult)
-				local sValue = rRoll.sValue
-				local sReverseValue = string.reverse(sValue)
-				---Needed to get creative with patern matching - to correctly process
-				-- if the negative is to total, or do we have a negative modifier
-				if sValue:match("%+%d+") then
-					sValue = sValue:gsub("%+%d+", "") .. "%+%d+"
-				elseif  (sReverseValue:match("%d+%-") and rRoll.nMod ~= 0) then
-					sReverseValue = sReverseValue:gsub("%d+%-", "", 1)
-					sValue = "%-?" .. string.reverse(sReverseValue) .. "%-*%d?"
-				elseif (sReverseValue:match("%d+%-") and rRoll.nMod == 0) then
-					sValue = "%-*" .. sValue:gsub("%-", "")
-				end
-				sEffect = sEffect:gsub(sValue, sResult)
-				DB.setValue(nodeEffect, "label", "string", sEffect)
-				break
+	local sEffect = ""
+	local sEffectOriginal = ""
+	for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
+		sEffect = DB.getValue(nodeEffect, "label", "")
+		if sEffect == rRoll.sEffect then
+			sEffectOriginal = sEffect
+			local nResult = tonumber(ActionsManager.total(rRoll))
+			local sResult = tostring(nResult)
+			local sValue = rRoll.sValue
+			local sReverseValue = string.reverse(sValue)
+			---Needed to get creative with patern matching - to correctly process
+			-- if the negative is to total, or do we have a negative modifier
+			if sValue:match("%+%d+") then
+				sValue = sValue:gsub("%+%d+", "") .. "%+%d+"
+			elseif  (sReverseValue:match("%d+%-") and rRoll.nMod ~= 0) then
+				sReverseValue = sReverseValue:gsub("%d+%-", "", 1)
+				sValue = "%-?" .. string.reverse(sReverseValue) .. "%-*%d?"
+			elseif (sReverseValue:match("%d+%-") and rRoll.nMod == 0) then
+				sValue = "%-*" .. sValue:gsub("%-", "")
 			end
-		end
-	elseif rRoll.sType == "savebce" then
-		local nodeEffect = DB.findNode(rRoll.sEffectPath)
-		if not nodeEffect then
-			return
-		end
-		local sName = ActorManager.getDisplayName(nodeSource);		
-		ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
-		local nResult = ActionsManager.total(rRoll);
-		if nResult >= tonumber(rRoll.nTarget) then
-			if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
-				applyOngoingDamage(rSource, rTarget, nodeEffect)
-			end
-			if rRoll.bRemoveOnSave then
-				modifyEffect(nodeEffect, "Remove")
-			elseif rRoll.bDisableOnSave then
-				modifyEffect(nodeEffect, "Deactivate")
-			end
-		else
-			applyOngoingDamage(rSource, rTarget, nodeEffect)
+			sEffect = sEffect:gsub(sValue, sResult)
+			DB.setValue(nodeEffect, "label", "string", sEffect)
+			break
 		end
 	end
 end
@@ -398,7 +379,7 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 			return
 		end
 	end
-	-- The following should be done with a customOnEffectAddStart if the handlers worked properly
+
 	local rRoll = {}
 	rRoll = isDie(rNewEffect.sName)
 	if next(rRoll) ~= nil then
@@ -895,8 +876,8 @@ function onInit()
 		RulesetEffectManager = EffectManager35E
 	end
 
-	rest = CombatManager2.rest
-	CombatManager2.rest = customRest
+	rest = CharManager.rest
+	CharManager.rest = customRest
 
 	-- save off the originals so we play nice with others
 	onDamage = ActionDamage.onDamage
@@ -911,12 +892,11 @@ function onInit()
 
 	ActionsManager.registerResultHandler("damage", customOnDamage)
 	ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
-	ActionsManager.registerResultHandler("savebce", onEffectRollHandler)
+	ActionsManager.registerResultHandler("savebce", onSaverRollHandler)
 	ActionsManager.registerModHandler("savebce", onModSaveHandler)
 
 	CombatManager.setCustomTurnStart(customTurnStart)
 	CombatManager.setCustomTurnEnd(customTurnEnd)
-	CombatManager.setCustomRoundStart(customRoundStart)
 	
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEACTIVATE, handleActivateEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect)
@@ -935,7 +915,7 @@ end
 function onClose()
 	ActionDamage.onDamage = onDamage
 	EffectManager.addEffect = addEffect
-	CombatManager2.rest = rest
+	CharManager.rest = rest
 
 	ActionsManager.unregisterResultHandler("damage")
 	ActionsManager.unregisterResultHandler("effectbce")
