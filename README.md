@@ -6,11 +6,15 @@ Better Combat Effects extension allows for fine tuning of when effects are enabl
 
 ## Installation
 
-Download [BetterCombatEffects.zip](https://github.com/rhagelstrom/BetterCombatEffects/raw/main/BetterCombatEffects.zip) Unzip and place the .ext in the extensions subfolder of the Fantasy Grounds data folder and the .mod in the modules subfolder.
+Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
+
+<a href="https://www.fantasygrounds.com/forums/showthread.php?68831-Better-Combat-Effects" target="_blank">Comments and Bug Reports</a>
 
 ## CoreRPG
 
 ---
+
+* **EXPIREADD**: [Effect] Add Effect from custom effects list when this effect expires
 
 ### Turn Modifiers
 
@@ -38,7 +42,7 @@ Download [BetterCombatEffects.zip](https://github.com/rhagelstrom/BetterCombatEf
 
   * Stunning Strike; Stunned; STURNRE
 
-## 5E/4E/3.5E/Pathfinder 1E
+## 5E/4E/3.5E/PFRPG
 
 ---
 
@@ -63,7 +67,9 @@ Additionally, effects that use ability score modifiers in the format [ ABILITYSC
 
 ### STACK
 
-Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be poisoned again. This however can be overridden with the STACK tag for effects that need to stack such as a shadow's Strength Drain. The ignore duplicates can be disabled in the options menu.
+**5E:** Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be poisoned again. This however can be overridden with the STACK tag for effects that need to stack such as a shadow's Strength Drain. The ignore duplicates can be disabled in the options menu.
+
+**Other Ruleset:s** Multiple of the same effect can be applied by using the STACK tag
 
 * Strength Drain; STR: -1d4; STACK; RESTL
 
@@ -116,16 +122,20 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 ### Ongoing Damage Modifiers
 
 * **DMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn. (N) can be number or dice string
+  * Vitriolic Sphere; DMGOE: 5d4 acid
 
 * **SDMGOS (N) [damage type]** Apply ongoing damage at the start of the actors turn who applied the effect. (N) can be number or dice string
 
+  * Water Elemental Whelm; grappled; restrained; SDMGOS: 2d8+4 bludgeoning
 * **SDMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn who applied the effect. (N) can be number or dice string
 
-## 5E/3.5E/Pathfinder 1E
+## 5E/3.5E/PFRPG
 
 ---
 
 ### Ongoing Save Modifiers
+
+* **Note:** [SDC] is currently 5E only.  PFRPG and 3.5E will have to replace [SDC] with the save DC
 
 * **SAVES: [ability] [SDC]** Roll save at the start of turn.
 
@@ -136,20 +146,25 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Frightful Presence; Frightened; SAVEE: WIS 16 (R)
   * Wall of Thorns; SAVEE: DEX [SDC] (H)(C); SAVEDMG: 7d8 slashing
 
-* **SAVEA: [ability] [SDC]** Automaticlly roll save when the effect is added
+* **SAVEA: [ability] [SDC]** Automaticlly roll save when the effect is added. Automate NPC debuff effects like Ghoul attack
+  * Ghoul Claws; SDMGADDT: GOTU
+  * GOTU; Paralyzed; SAVEA: CON 10 (R); SAVEE: CON 10 (R)
 
 * **SAVEDMG: (N) [damage type]** Damage done on a failed ongoing save. (N) can be number or dice string.
 
-* **[SDC]** When an effect with [SDC] is applied from a PC, [SDC] will be replaced with the PCs spell save DC based off of its spellcasting ability. 
 
-* **(R)** (R) will remove the save effect on a successful save.
-* **(D)** (D) will disable the save effect on a successful save.
-* **(H)** (H) will deal half damage on a successful ongoiong save.
-* **(M)** (M) will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.
+* **(R)** will remove the save effect on a successful save.
+* **(D)** will disable the save effect on a successful save.
+* **(H)** will deal half damage on a successful ongoiong save.
+* **(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.
+* **(F)** will invert the roll. SAVEDMG, (R), (D), (H) will be performed on a failed save rather than successful one.
 
 ## 5E
 
 ---
+
+* **[SDC]** When an effect with [SDC] is applied from a PC/NPC, [SDC] will be replaced with the PC/NPCs spell save DC based off of its spellcasting ability. 
+
 
 ### Concentration
 

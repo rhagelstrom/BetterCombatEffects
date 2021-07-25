@@ -63,8 +63,15 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
 	for _,sEffectComp in ipairs(aEffectComps) do
 		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
 		if  rEffectComp.type == "DMGOE" or rEffectComp.type == "SDMGOE" or rEffectComp.type == "SDMGOS" then
-			local nodeActor = ActorManager.getCTNode(rSource)		
-			EffectManager4E.applyOngoingDamageAdjustment(nodeActor, nodeEffect, rEffectComp);
+			local nodeActor = ActorManager.getCTNode(rTarget)
+			if EffectManager.isTargetedEffect(nodeEffect) then
+				local aTargets = EffectManager.getEffectTargets(nodeEffect)
+				for _,nodeTarget in ipairs(aTargets) do
+					EffectManager4E.applyOngoingDamageAdjustment(nodeTarget, nodeEffect, rEffectComp)
+				end
+			else
+				EffectManager4E.applyOngoingDamageAdjustment(nodeActor, nodeEffect, rEffectComp)
+			end
 		end
 	end
 end

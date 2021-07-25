@@ -9,10 +9,14 @@ OOB_MSGTYPE_BCEREMOVE = "removeeffect"
 OOB_MSGTYPE_BCEUPDATE = "updateeffect"
 
 local addEffect = nil
+local expireEffect = nil
 
 function onInit()
 	addEffect = EffectManager.addEffect
 	EffectManager.addEffect = customAddEffect
+
+	expireEffect = EffectManager.expireEffect	
+	EffectManager.expireEffect = customExpireEffect
 
 	ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
 
@@ -27,8 +31,24 @@ end
 
 function onClose()
 	EffectManager.addEffect = addEffect
-	ActionsManager.unregisterResultHandler("effectbce")
+	EffectManager.expireEffect = expireEffect
 
+	ActionsManager.unregisterResultHandler("effectbce")
+end
+
+function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
+	local sEffect = DB.getValue(nodeEffect, "label", "")
+	expireEffect(nodeActor, nodeEffect, nExpireComp)
+	if sEffect:match("EXPIREADD") then
+		local rEffect = EffectsManagerBCE.matchEffect(sEffect)
+		if rEffect.sName ~= nil then
+			local rSource = ActorManager.resolveActor(nodeActor)
+			local nodeSource = ActorManager.getCTNode(rSource)
+			rEffect.sSource = ActorManager.getCTNodeName(rSource)
+			rEffect.nInit  = DB.getValue(nodeActor, "initresult", 0)
+			EffectManager.addEffect("", "", nodeSource, rEffect, true)
+		end
+	end
 end
 
 function customTurnStart(sourceNodeCT)
@@ -172,7 +192,7 @@ function matchEffect(sEffect)
 		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
 
 		-- Parse out individual componets 
-		if rEffectComp.type == "TDMGADDT" or rEffectComp.type == "TDMGADDS" or rEffectComp.type == "SDMGADDT" or rEffectComp.type == "SDMGADDS" then	
+		if rEffectComp.type == "TDMGADDT" or rEffectComp.type == "TDMGADDS" or rEffectComp.type == "SDMGADDT" or rEffectComp.type == "SDMGADDS" or rEffectComp.type == "EXPIREADD" then	
 			local aEffectLookup = rEffectComp.remainder
 			sEffectLookup = EffectManager.rebuildParsedEffect(aEffectLookup)
 			sEffectLookup = sEffectLookup:gsub("%;", "")

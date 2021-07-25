@@ -3,7 +3,8 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
-local bMadNomadCharSheetEffectDisplay = nil
+local bMadNomadCharSheetEffectDisplay = false
+local bAutomaticSave = false
 local restChar = nil
 
 function onInit()
@@ -39,6 +40,10 @@ function onInit()
 			if (tExtension.name == "MNM Charsheet Effects Display") then
 				bMadNomadCharSheetEffectDisplay = true
 			end
+			if (tExtension.name == "5E - Automatic Save Advantage") then
+				bAutomaticSave = true
+			end
+			
 		end
 	end
 end
@@ -94,6 +99,7 @@ function processEffectTurnStart5E(sourceNodeCT, nodeCT, nodeEffect)
 	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVES") then
 		saveEffect(nodeEffect, sourceNodeCT, "Save")
 	end
+	return true
 end
 
 function processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
@@ -107,19 +113,21 @@ function processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
 	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVEE") then
 		saveEffect(nodeEffect, sourceNodeCT, "Save")
 	end
+	return true
 end
 
 function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
 	
 	if rNewEffect.sSource ~= nil  and rNewEffect.sSource ~= "" then
-		EffectsManagerBCEDND.replaceSaveDC(rNewEffect, ActorManager.resolveActor(rNewEffect.sSource))
+		replaceSaveDC(rNewEffect, ActorManager.resolveActor(rNewEffect.sSource))
 	else
-		EffectsManagerBCEDND.replaceSaveDC(rNewEffect, rActor)
+		replaceSaveDC(rNewEffect, rActor)
 	end
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
 		dropConcentration(rNewEffect, rNewEffect.nDuration)
 	end
+	return true
 end
 
 function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
@@ -140,7 +148,43 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 			end
 		end
 	end
+	return true
 end
+
+function replaceSaveDC(rNewEffect, rActor)
+	if rNewEffect.sName:match("%[SDC]") and  
+			(rNewEffect.sName:match("SAVEE") or 
+			rNewEffect.sName:match("SAVES") or 
+			rNewEffect.sName:match("SAVEA")) then
+		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
+		local nSpellcastingDC = 0
+		if sNodeType == "pc" then
+			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf");
+			for _,nodeFeature in pairs(DB.getChildren(nodeActor, "featurelist")) do
+				local sFeatureName = StringManager.trim(DB.getValue(nodeFeature, "name", ""):lower())
+				if sFeatureName == "spellcasting" then
+					local sDesc = DB.getValue(nodeFeature, "text", ""):lower();
+					local sStat = sDesc:match("(%w+) is your spellcasting ability") or ""
+					nSpellcastingDC = nSpellcastingDC + ActorManager5E.getAbilityBonus(rActor, sStat) 
+					break
+				end
+			end 	
+		elseif sNodeType == "ct" then
+			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf");
+			for _,nodeTrait in pairs(DB.getChildren(nodeActor, "traits")) do
+				local sTraitName = StringManager.trim(DB.getValue(nodeTrait, "name", ""):lower())
+				if sTraitName == "spellcasting" then
+					local sDesc = DB.getValue(nodeTrait, "desc", ""):lower();
+					local sStat = sDesc:match("its spellcasting ability is (%w+)") or ""
+					nSpellcastingDC = nSpellcastingDC + ActorManager5E.getAbilityBonus(rActor, sStat)
+					break
+				end
+			end
+		end
+		rNewEffect.sName = rNewEffect.sName:gsub("%[SDC]", tostring(nSpellcastingDC))
+	end
+end
+
 
 function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeEffect = DB.findNode(rRoll.sEffectPath)
@@ -150,7 +194,17 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local sName = ActorManager.getDisplayName(nodeSource)
 	ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
 	local nResult = ActionsManager.total(rRoll)
-	if nResult >= tonumber(rRoll.nTarget) then
+	local bAct = false
+	if rRoll.bActonFail then
+		if nResult < tonumber(rRoll.nTarget) then
+			bAct = true
+		end
+	else
+		if nResult >= tonumber(rRoll.nTarget) then
+			bAct = true
+		end
+	end
+	if bAct then
 		if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
 			EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, true)
 		end
@@ -163,7 +217,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 		EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false)
 	end
 end
-
 
 function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this effect is on, BCE String
 	local sEffect = DB.getValue(nodeEffect, "label", "")
@@ -211,6 +264,11 @@ function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this
 				if rEffectComp.original:match("%(R%)") then
 					rSaveVsRoll.bRemoveOnSave = true
 				end
+				if rEffectComp.original:match("%(F%)") then
+					rSaveVsRoll.bActonFail = true
+				end
+
+				rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. sEffect .. "]" 
 				local rRoll = {}
 				rRoll = ActionSave.getRoll(nodeTarget,sAbility) -- call to get the modifiers
 				rSaveVsRoll.nMod = rRoll.nMod -- Modfiers 
@@ -255,5 +313,9 @@ end
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
 function onModSaveHandler(rSource, rTarget, rRoll)
-	ActionSave.modSave(rTarget, rSource, rRoll);
+	if bAutomaticSave == true then
+		ActionSaveASA.customModSave(rTarget, rSource, rRoll)
+	else
+		ActionSave.modSave(rTarget, rSource, rRoll)
+	end
 end

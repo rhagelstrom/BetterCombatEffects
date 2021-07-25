@@ -54,6 +54,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 	end
 end
 
+
 function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
 	local aEffectComps = EffectManager.parseEffect(sEffect)
@@ -62,7 +63,7 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
 	rAction.clauses = {}
 	for _,sEffectComp in ipairs(aEffectComps) do
 		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-		if rEffectComp.type == "SAVEDMG" or rEffectComp.type == "DMGOE" or rEffectComp.type == "SDMGOE" or rEffectComp.type == "SDMGOS" then	
+		if rEffectComp.type == "SAVEDMG" or rEffectComp.type == "DMGOE" or rEffectComp.type == "SDMGOE" or rEffectComp.type == "SDMGOS"  then	
 			local aClause = {}
 			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
 			aClause.dice = rDmgInfo.dice;
@@ -81,7 +82,12 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
 		if bHalf == true then
 			rRoll.sDesc = rRoll.sDesc .. " [HALF]"
 		end
-		ActionsManager.actionRoll(rSource, {{rTarget}}, {rRoll})
+		if EffectManager.isTargetedEffect(nodeEffect) then
+			local aTargets = EffectManager.getEffectTargets(nodeEffect)
+			ActionsManager.actionRoll(rSource, {aTargets}, {rRoll})
+		else
+			ActionsManager.actionRoll(rSource, {{rTarget}}, {rRoll})
+		end
 	end	
 end
 
@@ -242,39 +248,6 @@ function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	return true
 end
 
-function replaceSaveDC(rNewEffect, rActor)
-	if rNewEffect.sName:match("%[SDC]") and  
-			(rNewEffect.sName:match("SAVEE") or 
-			rNewEffect.sName:match("SAVES") or 
-			rNewEffect.sName:match("SAVEA")) then
-		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
-		local nSpellcastingDC = 0
-		if sNodeType == "pc" then
-			nSpellcastingDC = 8 +  RulesetActorManager.getAbilityBonus(rActor, "prf");
-			for _,nodeFeature in pairs(DB.getChildren(nodeActor, "featurelist")) do
-				local sFeatureName = StringManager.trim(DB.getValue(nodeFeature, "name", ""):lower())
-				if sFeatureName == "spellcasting" then
-					local sDesc = DB.getValue(nodeFeature, "text", ""):lower();
-					local sStat = sDesc:match("(%w+) is your spellcasting ability") or ""
-					nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat) 
-					break
-				end
-			end 	
-		elseif sNodeType == "ct" then
-			nSpellcastingDC = 8 +  RulesetActorManager.getAbilityBonus(rActor, "prf");
-			for _,nodeTrait in pairs(DB.getChildren(nodeActor, "traits")) do
-				local sTraitName = StringManager.trim(DB.getValue(nodeTrait, "name", ""):lower())
-				if sTraitName == "spellcasting" then
-					local sDesc = DB.getValue(nodeTrait, "desc", ""):lower();
-					local sStat = sDesc:match("its spellcasting ability is (%w+)") or ""
-					nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat)
-					break
-				end
-			end
-		end
-		rNewEffect.sName = rNewEffect.sName:gsub("%[SDC]", tostring(nSpellcastingDC))
-	end
-end
 
 -- Any effect that modifies ability score and is coded with -X
 -- has the -X replaced with the targets ability score and then calculated

@@ -72,6 +72,9 @@ function customRest(bShort)
 	rest(bShort)
 end
 
+function replaceSaveDC(rNewEffect, rActor)
+	-- TODO
+end
 
 function processEffectTurnStart35E(sourceNodeCT, nodeCT, nodeEffect)
     return EffectsManagerBCE5E.processEffectTurnStart5E(sourceNodeCT, nodeCT, nodeEffect)
@@ -82,7 +85,14 @@ function processEffectTurnEnd35E(sourceNodeCT, nodeCT, nodeEffect)
 end
 
 function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
-	return EffectsManagerBCE5E.addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+	local rActor = ActorManager.resolveActor(nodeCT)
+	
+	if rNewEffect.sSource ~= nil  and rNewEffect.sSource ~= "" then
+		replaceSaveDC(rNewEffect, ActorManager.resolveActor(rNewEffect.sSource))
+	else
+		replaceSaveDC(rNewEffect, rActor)
+	end
+	return true
 end
 
 function addEffectPost35E(sUser, sIdentity, nodeCT, rNewEffect)
