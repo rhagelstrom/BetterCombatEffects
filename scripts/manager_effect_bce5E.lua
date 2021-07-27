@@ -28,6 +28,7 @@ function onInit()
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost5E)
+		EffectsManagerBCE.setCustomProcessEffect(processEffect)
 
 		ActionsManager.registerResultHandler("savebce", onSaveRollHandler5E)
 		ActionsManager.registerModHandler("savebce", onModSaveHandler)
@@ -57,6 +58,7 @@ function onClose()
 		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost5E)
+		EffectsManagerBCE.removeCustomProcessEffect(processEffect)
 
 	end
 end
@@ -87,6 +89,25 @@ function customRest(nodeActor, bLong, bMilestone)
 	rest(nodeActor, bLong)
 end
 
+--Do sanity checks to see if we should process this effect any further
+function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
+	local sEffect = DB.getValue(nodeEffect, "label", "")
+	-- is there a conditional that prevents us from processing
+	local aEffectComps = EffectManager.parseEffect(sEffect)
+	for _,sEffectComp in ipairs(aEffectComps) do -- Check conditionals
+		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+		if rEffectComp.type == "IF" then
+			if not EffectManager5E.checkConditional(rSource, nodeEffect, rEffectComp.remainder, rTarget) then
+				return false
+			end
+		elseif rEffectComp.type == "IFT" then
+			if not EffectManager5E.checkConditional(rSource, nodeEffect, rEffectComp.remainder, rTarget) then
+				return false
+			end
+		end
+	end	
+	return true -- Everything looks good to continue processing
+end
 
 function processEffectTurnStart5E(sourceNodeCT, nodeCT, nodeEffect)
 	local rSource = ActorManager.resolveActor(sourceNodeCT)
@@ -132,19 +153,19 @@ end
 
 function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 	local rActor = ActorManager.resolveActor(nodeCT)
-
 	for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
-		local sEffect = DB.getValue(nodeEffect, "label", "")
 		if (DB.getValue(nodeEffect, "label", "") == rNewEffect.sName) and
 			(DB.getValue(nodeEffect, "init", 0) == rNewEffect.nInit) and
 			(DB.getValue(nodeEffect, "duration", 0) == rNewEffect.nDuration) and
 			(DB.getValue(nodeEffect,"source_name", "") == rNewEffect.sSource) then
-
 			local nodeSource = DB.findNode(rNewEffect.sSource)
 			local rSource = ActorManager.resolveActor(nodeSource)
 			local rTarget = rActor
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "SAVEA", rTarget) then
 				saveEffect(nodeEffect, nodeCT, "Save")
+			end
+			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "REGENA", rTarget) then
+				EffectsManagerBCEDND.applyOngoingRegen(rSource, rTarget, nodeEffect, true)
 			end
 		end
 	end

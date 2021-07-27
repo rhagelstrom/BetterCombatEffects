@@ -63,7 +63,7 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
 	rAction.clauses = {}
 	for _,sEffectComp in ipairs(aEffectComps) do
 		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-		if rEffectComp.type == "SAVEDMG" or rEffectComp.type == "DMGOE" or rEffectComp.type == "SDMGOE" or rEffectComp.type == "SDMGOS"  then	
+		if rEffectComp.type == "SAVEDMG" or rEffectComp.type == "DMGOE" or rEffectComp.type == "SDMGOE" or rEffectComp.type == "SDMGOS" then	
 			local aClause = {}
 			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
 			aClause.dice = rDmgInfo.dice;
@@ -82,35 +82,44 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
 		if bHalf == true then
 			rRoll.sDesc = rRoll.sDesc .. " [HALF]"
 		end
-		if EffectManager.isTargetedEffect(nodeEffect) then
-			local aTargets = EffectManager.getEffectTargets(nodeEffect)
-			ActionsManager.actionRoll(rSource, {aTargets}, {rRoll})
-		else
-			ActionsManager.actionRoll(rSource, {{rTarget}}, {rRoll})
-		end
+		ActionsManager.actionDirect(rSource, "damage", {rRoll}, {{rTarget}})
+		--if EffectManager.isTargetedEffect(nodeEffect) then
+		--	local aTargets = EffectManager.getEffectTargets(nodeEffect)
+		--	ActionsManager.actionRoll(rSource, {aTargets}, {rRoll})
+		--else
+		--	ActionsManager.actionRoll(rSource, {{rTarget}}, {rRoll})
+		--end
 	end	
 end
 
-
---Do sanity checks to see if we should process this effect any further
-function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
+function applyOngoingRegen(rSource, rTarget, nodeEffect, bAdd)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
-	-- is there a conditional that prevents us from processing
 	local aEffectComps = EffectManager.parseEffect(sEffect)
-	for _,sEffectComp in ipairs(aEffectComps) do -- Check conditionals
-		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-		if rEffectComp.type == "IF" then
-			if not RulesetEffectManager.checkConditional(rSource, nodeEffect, rEffectComp.remainder) then
-				return false
-			end
-		elseif rEffectComp.type == "IFT" then
-			if not RulesetEffectManager.checkConditional(rSource, nodeEffect, rEffectComp.remainder, rTarget) then
-				return false
-			end
+	local rAction = {}
+	rAction.label =  ""
+	rAction.clauses = {}
+	for _,sEffectComp in ipairs(aEffectComps) do
+		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
+		if (rEffectComp.type == "REGENA" and bAdd == true) or ( bAdd == false and (rEffectComp.type == "REGENE" or rEffectComp.type == "SREGENS" or rEffectComp.type == "SREGENE")) then	
+			local aClause = {}
+			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
+			aClause.dice = rDmgInfo.dice;
+			aClause.modifier = rDmgInfo.mod
+			aClause.dmgtype = string.lower(table.concat(rDmgInfo.remainder, ","))
+			table.insert(rAction.clauses, aClause)
+		elseif rEffectComp.type == "" and rAction.label == "" then
+			rAction.label = sEffectComp
 		end
+	end
+	if rAction.label == "" then
+		rAction.label = "Ongoing Regeneration"
+	end
+	if next(rAction.clauses) ~= nil then
+		local rRoll = ActionHeal.getRoll(rTarget, rAction)
+		ActionsManager.actionDirect(rSource, "heal", {rRoll}, {{rTarget}})
 	end	
-	return true -- Everything looks good to continue processing
 end
+
 
 function processEffectTurnStartDND(sourceNodeCT, nodeCT, nodeEffect)
 	if nodeCT ~= sourceNodeCT then
@@ -123,7 +132,12 @@ function processEffectTurnStartDND(sourceNodeCT, nodeCT, nodeEffect)
 			if EffectsManagerBCE.processEffect(rSource,nodeEffect,"SDMGOS") then
 				local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
 				applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect, false)
+			end
+			if EffectsManagerBCE.processEffect(rSource,nodeEffect,"SREGENS") then
+				local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
+				applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, false)
 			end   
+   
 		end
 	end
 	return true
@@ -142,11 +156,19 @@ function processEffectTurnEndDND(sourceNodeCT, nodeCT, nodeEffect)
 		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"DMGOE") and not sEffect:match("SDMGOE") then
 				applyOngoingDamage(rSourceEffect, rSource, nodeEffect, false)
 		end
+		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"REGENE") and not sEffect:match("SREGENE") then
+			applyOngoingRegen(rSourceEffect, rSource, nodeEffect, false)
+	end
+
 	else		
 		if sEffectSource ~= nil  and sSourceName == sEffectSource then
 			if EffectsManagerBCE.processEffect(rSource,nodeEffect,"SDMGOE") then
 				local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
 				applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect, false)
+			end   
+			if EffectsManagerBCE.processEffect(rSource,nodeEffect,"SREGENE") then
+				local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
+				applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, false)
 			end   
 		end
 	end
@@ -233,7 +255,6 @@ function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 
 	replaceAbilityScores(rNewEffect, rActor)
 	replaceAbilityModifier(rNewEffect, rActor)
-
 	local rRoll = {}
 	rRoll = isDie(rNewEffect.sName)
 	if next(rRoll) ~= nil then
@@ -395,7 +416,6 @@ function onInit()
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStartDND)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEndDND)
-		EffectsManagerBCE.setCustomProcessEffect(processEffect)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectStart)
 		
 		-- save off the originals so we play nice with others
@@ -428,7 +448,7 @@ function onClose()
 
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartDND)
 		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEndDND)
-		EffectsManagerBCE.removeCustomProcessEffect(processEffect)
+
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectStart)
 	end
 end

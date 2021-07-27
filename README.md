@@ -1,11 +1,5 @@
 # Better Combat Effects
 
-FantasyGrounds CoreRPG extension
-
-Better Combat Effects extension allows for fine tuning of when effects are enabled, disabled, removed, and added.
-
-## Installation
-
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
 <a href="https://www.fantasygrounds.com/forums/showthread.php?68831-Better-Combat-Effects" target="_blank">Comments and Bug Reports</a>
@@ -129,6 +123,16 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Water Elemental Whelm; grappled; restrained; SDMGOS: 2d8+4 bludgeoning
 * **SDMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn who applied the effect. (N) can be number or dice string
 
+### Ongoing Regeneration Modifiers
+
+* **REGENA (N)** Apply one time regenration when the effect is added. (N) can be number or dice string
+
+* **REGENE (N)** Apply regeneration at the end of the actors turn. (N) can be number or dice string
+
+* **SREGENS (N)** Apply regneration at the start of the actors turn who applied the effect. (N) can be number or dice string
+
+* **SREGENE (N)** Apply regeneration at the end of the actors turn who applied the effect. (N) can be number or dice string
+
 ## 5E/3.5E/PFRPG
 
 ---
@@ -152,12 +156,17 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SAVEDMG: (N) [damage type]** Damage done on a failed ongoing save. (N) can be number or dice string.
 
-
 * **(R)** will remove the save effect on a successful save.
 * **(D)** will disable the save effect on a successful save.
 * **(H)** will deal half damage on a successful ongoiong save.
 * **(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.
 * **(F)** will invert the roll. SAVEDMG, (R), (D), (H) will be performed on a failed save rather than successful one.
+
+## 4E
+
+---
+
+* **ATKDS** Disable this effect if the source of the effect is attacked
 
 ## 5E
 
