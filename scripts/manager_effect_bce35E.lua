@@ -4,12 +4,15 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
 local rest = nil
+local charRest = nil
 
 function onInit()
 	if User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG" then 
 	
 		rest = CombatManager2.rest
 		CombatManager2.rest = customRest
+		charRest = CharManager.rest
+		CharManager.rest = customCharRest
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart35E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd35E)
@@ -28,6 +31,7 @@ end
 function onClose()
 	if User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG" then 
 		CombatManager2.rest = rest
+		CharManager.rest = charRest
 		ActionsManager.unregisterResultHandler("savebce")
 		ActionsManager.unregisterModHandler("savebce")
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart35E)
@@ -58,6 +62,12 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 		end
 	end
 	return sDuplicateMsg
+end
+
+function customCharRest(nodeChar)
+
+	EffectsManagerBCEDND.customRest(nodeChar, true, nil)
+	charRest(nodePC)
 end
 
 function customRest(bShort)

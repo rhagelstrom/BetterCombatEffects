@@ -55,7 +55,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 end
 
 
-function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
+function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf, bAdd)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
 	local aEffectComps = EffectManager.parseEffect(sEffect)
 	local rAction = {}
@@ -63,7 +63,7 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
 	rAction.clauses = {}
 	for _,sEffectComp in ipairs(aEffectComps) do
 		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-		if rEffectComp.type == "SAVEDMG" or rEffectComp.type == "DMGOE" or rEffectComp.type == "SDMGOE" or rEffectComp.type == "SDMGOS" then	
+		if (rEffectComp.type == "DMGA" and bAdd == true) or ( bAdd == false and (rEffectComp.type == "SAVEDMG" or rEffectComp.type == "DMGOE" or rEffectComp.type == "SDMGOE" or rEffectComp.type == "SDMGOS")) then	
 			local aClause = {}
 			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
 			aClause.dice = rDmgInfo.dice;
@@ -252,12 +252,11 @@ end
 
 function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
-
 	replaceAbilityScores(rNewEffect, rActor)
 	replaceAbilityModifier(rNewEffect, rActor)
 	local rRoll = {}
 	rRoll = isDie(rNewEffect.sName)
-	if next(rRoll) ~= nil then
+	if next(rRoll) ~= nil and next(rRoll.aDice) ~= nil then
 		rRoll.rActor = rActor
 		if rNewEffect.nGMOnly  then
 			rRoll.bSecret = true

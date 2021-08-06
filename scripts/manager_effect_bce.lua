@@ -137,7 +137,6 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if onCustomPreAddEffect(sUser, sIdentity, nodeCT, rNewEffect,bShowMsg) == false then
 		return
 	end
-
 	-- Play nice with others
 	addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 
@@ -167,21 +166,24 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 end
 
 function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	if sEffect:match(sBCETag) == nil  then -- Does it contain BCE Tag
-		return false
-	end
-	local nActive = DB.getValue(nodeEffect, "isactive", 0)
-	--is it active
-	if  ((nActive == 0 and bIgnoreDeactive == nil) or nActive == 2) then
-		if nActive == 2 and Session.IsHost then -- Don't think we need to check if is host 
-			DB.setValue(nodeEffect, "isactive", "number", 1)
+	if nodeEffect ~= nil then
+		local sEffect = DB.getValue(nodeEffect, "label", "")
+		if sEffect:match(sBCETag) == nil  then -- Does it contain BCE Tag
+			return false
 		end
-		return false
+		local nActive = DB.getValue(nodeEffect, "isactive", 0)
+		--is it active
+		if  ((nActive == 0 and bIgnoreDeactive == nil) or nActive == 2) then
+			if nActive == 2 and Session.IsHost then -- Don't think we need to check if is host 
+				DB.setValue(nodeEffect, "isactive", "number", 1)
+			end
+			return false
+		end
+			
+		return onCustomProcessEffect(rSource, nodeEffect)
+	else
+		return false -- Effect doesn't exist anymore
 	end
-	 
-	return onCustomProcessEffect(rSource, nodeEffect)
-	--return true -- Everything looks good to continue processing
 end
 
 function matchEffect(sEffect)

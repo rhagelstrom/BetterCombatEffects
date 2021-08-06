@@ -115,6 +115,9 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 ### Ongoing Damage Modifiers
 
+* **DMGA (N) [damage type]** Apply damage when the effect is added (N) can be number or dice string
+  * AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire
+
 * **DMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn. (N) can be number or dice string
   * Vitriolic Sphere; DMGOE: 5d4 acid
 
@@ -172,8 +175,9 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 ---
 
-* **[SDC]** When an effect with [SDC] is applied from a PC/NPC, [SDC] will be replaced with the PC/NPCs spell save DC based off of its spellcasting ability. 
+* **[SDC]** When an effect with [SDC] is applied from a PC/NPC, [SDC] will be replaced with the PC/NPCs spell save DC based off of its spellcasting ability.
 
+* **DC: (N)** If the actor has the effect DC, (N) will be added  to the [SDC] when [SDC] is automaticlly replaced. (N) can be any number
 
 ### Concentration
 

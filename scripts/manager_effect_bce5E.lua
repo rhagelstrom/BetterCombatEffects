@@ -139,7 +139,7 @@ end
 
 function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
-	
+
 	if rNewEffect.sSource ~= nil  and rNewEffect.sSource ~= "" then
 		replaceSaveDC(rNewEffect, ActorManager.resolveActor(rNewEffect.sSource))
 	else
@@ -148,6 +148,7 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
 		dropConcentration(rNewEffect, rNewEffect.nDuration)
 	end
+
 	return true
 end
 
@@ -163,13 +164,35 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 			local rTarget = rActor
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "SAVEA", rTarget) then
 				saveEffect(nodeEffect, nodeCT, "Save")
+				break
 			end
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "REGENA", rTarget) then
 				EffectsManagerBCEDND.applyOngoingRegen(rSource, rTarget, nodeEffect, true)
+				break
+			end
+			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "DMGA", rTarget) then
+				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false, true)
+				break
 			end
 		end
 	end
 	return true
+end
+
+function getDCEffectMod(nodeActor)
+	local nDC = 0
+	for _,nodeEffect in pairs(DB.getChildren(nodeActor, "effects")) do
+		local sEffect = DB.getValue(nodeEffect, "label", "")
+		local aEffectComps = EffectManager.parseEffect(sEffect)
+		for _,sEffectComp in ipairs(aEffectComps) do
+			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+			if rEffectComp.type == "DC" and (DB.getValue(nodeEffect, "isactive", 0) == 1) then
+				nDC = tonumber(rEffectComp.mod) or 0
+				break
+			end
+		end
+	end
+	return nDC
 end
 
 function replaceSaveDC(rNewEffect, rActor)
@@ -179,8 +202,9 @@ function replaceSaveDC(rNewEffect, rActor)
 			rNewEffect.sName:match("SAVEA")) then
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
 		local nSpellcastingDC = 0
+		local nDC = getDCEffectMod(ActorManager.getCTNode(rActor))
 		if sNodeType == "pc" then
-			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf");
+			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf") + nDC
 			for _,nodeFeature in pairs(DB.getChildren(nodeActor, "featurelist")) do
 				local sFeatureName = StringManager.trim(DB.getValue(nodeFeature, "name", ""):lower())
 				if sFeatureName == "spellcasting" then
@@ -191,7 +215,7 @@ function replaceSaveDC(rNewEffect, rActor)
 				end
 			end 	
 		elseif sNodeType == "ct" then
-			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf");
+			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf") + nDC
 			for _,nodeTrait in pairs(DB.getChildren(nodeActor, "traits")) do
 				local sTraitName = StringManager.trim(DB.getValue(nodeTrait, "name", ""):lower())
 				if sTraitName == "spellcasting" then
