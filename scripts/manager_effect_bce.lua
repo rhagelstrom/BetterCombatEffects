@@ -180,7 +180,7 @@ function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 			return false
 		end
 			
-		return onCustomProcessEffect(rSource, nodeEffect)
+		return onCustomProcessEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 	else
 		return false -- Effect doesn't exist anymore
 	end
@@ -433,7 +433,7 @@ end
 
 function onCustomProcessEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 	for _,fProcessEffect in ipairs(aCustomProcessEffectHandlers) do
-		if fProcessEffect(rSource, nodeEffect) == false then
+		if fProcessEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive) == false then
 			return false
 		end
 	end
