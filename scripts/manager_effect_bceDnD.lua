@@ -131,7 +131,7 @@ function processEffectTurnStartDND(sourceNodeCT, nodeCT, nodeEffect)
 		if sEffectSource ~= nil  and sSourceName == sEffectSource then
 			if EffectsManagerBCE.processEffect(rSource,nodeEffect,"SDMGOS") then
 				local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
-				applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect, false)
+				applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect, false,false)
 			end
 			if EffectsManagerBCE.processEffect(rSource,nodeEffect,"SREGENS") then
 				local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
@@ -154,7 +154,7 @@ function processEffectTurnEndDND(sourceNodeCT, nodeCT, nodeEffect)
 	end
 	if nodeCT == sourceNodeCT then
 		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"DMGOE") and not sEffect:match("SDMGOE") then
-				applyOngoingDamage(rSourceEffect, rSource, nodeEffect, false)
+				applyOngoingDamage(rSourceEffect, rSource, nodeEffect, false, false)
 		end
 		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"REGENE") and not sEffect:match("SREGENE") then
 			applyOngoingRegen(rSourceEffect, rSource, nodeEffect, false)
@@ -164,7 +164,7 @@ function processEffectTurnEndDND(sourceNodeCT, nodeCT, nodeEffect)
 		if sEffectSource ~= nil  and sSourceName == sEffectSource then
 			if EffectsManagerBCE.processEffect(rSource,nodeEffect,"SDMGOE") then
 				local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
-				applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect, false)
+				applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect, false, false)
 			end   
 			if EffectsManagerBCE.processEffect(rSource,nodeEffect,"SREGENE") then
 				local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())

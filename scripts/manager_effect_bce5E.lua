@@ -251,7 +251,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	end
 	if bAct then
 		if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
-			EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, true)
+			EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, true, false)
 		end
 		if rRoll.bRemoveOnSave then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
@@ -259,7 +259,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate")
 		end
 	else
-		EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false)
+		EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false, false)
 	end
 end
 
