@@ -69,7 +69,11 @@ function onAttack4E(rSource, rTarget, rRoll)
 			end
 		end
 	end
-	ActionAttack.onAttack(rSource, rTarget, rRoll)
+	if AmmunitionManager then
+		AmmunitionManager.onAttack_4e(rSource, rTarget, rRoll)
+	else
+		ActionAttack.onAttack(rSource, rTarget, rRoll)
+	end
 end
 -- 4E is different enough that we need need to handle ongoing damage here
 function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
@@ -157,9 +161,10 @@ function addEffectPost4E(sUser, sIdentity, nodeCT, rNewEffect)
 	local rActor = ActorManager.resolveActor(nodeCT)
 	for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
 		if (DB.getValue(nodeEffect, "label", "") == rNewEffect.sName) then
-		--	(DB.getValue(nodeEffect, "init", 0) == rNewEffect.nInit) and
-		--	(DB.getValue(nodeEffect,"source_name", "") == rNewEffect.sSource) then
-			local nodeSource = DB.findNode(rNewEffect.sSource)
+			local nodeSource = nodeCT
+			if rNewEffect.sSource ~= nil then
+				nodeSource = DB.findNode(rNewEffect.sSource)
+			end
 			local rSource = ActorManager.resolveActor(nodeSource)
 			local rTarget = rActor
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "REGENA", rTarget) then

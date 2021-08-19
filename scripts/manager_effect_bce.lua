@@ -67,6 +67,7 @@ function customTurnStart(sourceNodeCT)
 				if rSourceEffect == nil then
 					rSourceEffect = rSource
 				end
+				local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 				if nodeCT == sourceNodeCT then
 					if processEffect(rSource,nodeEffect,"TURNAS", nil, true) then
 						modifyEffect(nodeEffect, "Activate")
@@ -77,8 +78,10 @@ function customTurnStart(sourceNodeCT)
 					if processEffect(rSource,nodeEffect,"TURNRS") and not sEffect:match("STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 						modifyEffect(nodeEffect, "Remove")
 					end
+					if sEffectSource == "" and (DB.getValue(nodeEffect, "duration", "") == 1) and rocessEffect(rSource,nodeEffect,"STURNRS") then
+						modifyEffect(nodeEffect, "Remove")
+					end
 				else
-					local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 					if sEffectSource ~= nil  and sSourceName == sEffectSource then
 						if processEffect(rSource,nodeEffect,"STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 							modifyEffect(nodeEffect, "Remove")
@@ -114,6 +117,9 @@ function customTurnEnd(sourceNodeCT)
 						modifyEffect(nodeEffect, "Deactivate")
 					end
 					if processEffect(rSource,nodeEffect,"TURNRE") and not sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then	
+						modifyEffect(nodeEffect, "Remove")
+					end
+					if sEffectSource == "" and (DB.getValue(nodeEffect, "duration", "") == 1) and processEffect(rSource,nodeEffect,"STURNRE") then
 						modifyEffect(nodeEffect, "Remove")
 					end
 				else
@@ -184,6 +190,25 @@ function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 	else
 		return false -- Effect doesn't exist anymore
 	end
+end
+
+function checkApply()
+
+	if (nMatch > 0) and not tEffectCompParams.bIgnoreExpire then
+		if nActive == 2 then
+			DB.setValue(v, "isactive", "number", 1);
+		else
+			local sApply = DB.getValue(v, "apply", "");
+			if sApply == "action" then
+				EffectManager.notifyExpire(v, 0);
+			elseif sApply == "roll" then
+				EffectManager.notifyExpire(v, 0, true);
+			elseif sApply == "single" then
+				EffectManager.notifyExpire(v, nMatch, true);
+			end
+		end
+	end
+
 end
 
 function matchEffect(sEffect)
