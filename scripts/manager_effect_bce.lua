@@ -78,7 +78,7 @@ function customTurnStart(sourceNodeCT)
 					if processEffect(rSource,nodeEffect,"TURNRS") and not sEffect:match("STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 						modifyEffect(nodeEffect, "Remove")
 					end
-					if sEffectSource == "" and (DB.getValue(nodeEffect, "duration", "") == 1) and rocessEffect(rSource,nodeEffect,"STURNRS") then
+					if sEffectSource == "" and (DB.getValue(nodeEffect, "duration", "") == 1) and processEffect(rSource,nodeEffect,"STURNRS") then
 						modifyEffect(nodeEffect, "Remove")
 					end
 				else
@@ -116,10 +116,10 @@ function customTurnEnd(sourceNodeCT)
 					if processEffect(rSource,nodeEffect,"TURNDE") then
 						modifyEffect(nodeEffect, "Deactivate")
 					end
-					if processEffect(rSource,nodeEffect,"TURNRE") and not sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then	
+					if sEffectSource == "" and (DB.getValue(nodeEffect, "duration", "") == 1) and processEffect(rSource,nodeEffect,"STURNRE") then
 						modifyEffect(nodeEffect, "Remove")
 					end
-					if sEffectSource == "" and (DB.getValue(nodeEffect, "duration", "") == 1) and processEffect(rSource,nodeEffect,"STURNRE") then
+					if processEffect(rSource,nodeEffect,"TURNRE") and not sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then	
 						modifyEffect(nodeEffect, "Remove")
 					end
 				else
