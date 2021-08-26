@@ -69,11 +69,7 @@ function onAttack4E(rSource, rTarget, rRoll)
 			end
 		end
 	end
-	if AmmunitionManager then
-		AmmunitionManager.onAttack_4e(rSource, rTarget, rRoll)
-	else
-		ActionAttack.onAttack(rSource, rTarget, rRoll)
-	end
+	ActionAttack.onAttack(rSource, rTarget, rRoll)
 end
 -- 4E is different enough that we need need to handle ongoing damage here
 function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf)
