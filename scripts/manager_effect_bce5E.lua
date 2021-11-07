@@ -265,8 +265,8 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 		elseif rRoll.bDisableOnSave then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
 		end
-		if sEffect:match("SAVEADDF") then
-			local rEffect = EffectsManagerBCE.matchEffect(sEffect, {"SAVEADDF"});
+		if sEffect:match("SAVEADDP") then
+			local rEffect = EffectsManagerBCE.matchEffect(sEffect, {"SAVEADDP"});
 			if rEffect.sName ~= nil then
 				local nodeTarget = ActorManager.getCTNode(rTarget);
 				rEffect.sSource = ActorManager.getCTNodeName(rSource);
