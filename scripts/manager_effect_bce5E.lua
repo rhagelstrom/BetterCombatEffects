@@ -12,13 +12,18 @@ function onInit()
 		if Session.IsHost then
 			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects", 
 			"option_Allow_Duplicate", "option_entry_cycler", 
+			{ labels = "option_val_off", values = "off",
+				baselabel = "option_val_on", baseval = "on", default = "on" });
+
+			OptionsManager.registerOption2("CONSIDER_DUPLICATE_DURATION", false, "option_Better_Combat_Effects", 
+			"option_Consider_Duplicate_Duration", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
-				baselabel = "option_val_off", baseval = "off", default = "off" })
+				baselabel = "option_val_off", baseval = "off", default = "off" });
 
 			OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects", 
 			"option_Concentrate_Restrict", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
-				baselabel = "option_val_off", baseval = "off", default = "off" })  
+				baselabel = "option_val_off", baseval = "off", default = "off" });
 		end
 
 		rest = CharManager.rest
@@ -70,11 +75,12 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 	if not nodeEffectsList then
 		return sDuplicateMsg
 	end
+	local bIgnoreDuration = OptionsManager.isOption("CONSIDER_DUPLICATE_DURATION", "off");
 	if OptionsManager.isOption("ALLOW_DUPLICATE_EFFECT", "off")  and not rEffect.sName:match("STACK") then
 		for k, nodeEffect in pairs(nodeEffectsList.getChildren()) do
 			if (DB.getValue(nodeEffect, "label", "") == rEffect.sName) and
 					(DB.getValue(nodeEffect, "init", 0) == rEffect.nInit) and
-					(DB.getValue(nodeEffect, "duration", 0) == rEffect.nDuration) and
+					(bIgnoreDuration or (DB.getValue(nodeEffect, "duration", 0) == rEffect.nDuration)) and
 					(DB.getValue(nodeEffect,"source_name", "") == rEffect.sSource) then
 				sDuplicateMsg = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), rEffect.sName, Interface.getString("effect_status_exists"))
 				break
@@ -249,17 +255,36 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			bAct = true
 		end
 	end
+	local sEffect = DB.getValue(nodeEffect, "label", "");
 	if bAct then
 		if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
-			EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, true, false)
+			EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, true, false);
 		end
 		if rRoll.bRemoveOnSave then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
+			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove");
 		elseif rRoll.bDisableOnSave then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate")
+			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
+		end
+		if sEffect:match("SAVEADDF") then
+			local rEffect = EffectsManagerBCE.matchEffect(sEffect, {"SAVEADDF"});
+			if rEffect.sName ~= nil then
+				local nodeTarget = ActorManager.getCTNode(rTarget);
+				rEffect.sSource = ActorManager.getCTNodeName(rSource);
+				rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0);
+				EffectManager.addEffect("", "", nodeTarget, rEffect, true);
+			end
 		end
 	else
-		EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false, false)
+		EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false, false);
+		if sEffect:match("SAVEADD") then
+			local rEffect = EffectsManagerBCE.matchEffect(sEffect, {"SAVEADD"});
+			if rEffect.sName ~= nil then
+				local nodeTarget = ActorManager.getCTNode(rTarget);
+				rEffect.sSource = ActorManager.getCTNodeName(rSource);
+				rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0);
+				EffectManager.addEffect("", "", nodeTarget, rEffect, true);
+			end
+		end
 	end
 end
 

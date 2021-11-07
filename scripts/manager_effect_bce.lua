@@ -211,7 +211,17 @@ function checkApply()
 
 end
 
-function matchEffect(sEffect)
+function matchEffect(sEffect, aComps)
+	if not aComps then
+		aComps = {
+			"TDMGADDT",
+			"TDMGADDS",
+			"SDMGADDT",
+			"SDMGADDS",
+			"EXPIREADD"
+		};
+	end
+
 	local rEffect = {}
 	local sEffectLookup = ""
 	local aEffectComps = EffectManager.parseEffect(sEffect)
@@ -219,7 +229,7 @@ function matchEffect(sEffect)
 		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
 
 		-- Parse out individual componets 
-		if rEffectComp.type == "TDMGADDT" or rEffectComp.type == "TDMGADDS" or rEffectComp.type == "SDMGADDT" or rEffectComp.type == "SDMGADDS" or rEffectComp.type == "EXPIREADD" then	
+		if StringManager.contains(aComps, rEffectComp.type) then	
 			local aEffectLookup = rEffectComp.remainder
 			sEffectLookup = EffectManager.rebuildParsedEffect(aEffectLookup)
 			sEffectLookup = sEffectLookup:gsub("%;", "")

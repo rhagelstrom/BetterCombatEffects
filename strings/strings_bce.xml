@@ -10,6 +10,7 @@
 <root>
 	<string name="option_Better_Combat_Effects">Better Combat Effects (GM)</string>
 	<string name="option_Allow_Duplicate">Allow Duplicate Effects</string>
+	<string name="option_Consider_Duplicate_Duration">Consider Duplicate Duration</string>
 	<string name="option_Concentrate_Restrict">Restrict Concentration</string>
 	<string name="option_Temp_Is_Damage">TempHP Reduction is Damage</string>
 	<string name="effect_status_activated">ACTIVATED</string>
