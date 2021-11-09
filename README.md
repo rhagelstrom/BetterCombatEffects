@@ -159,6 +159,10 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SAVEDMG: (N) [damage type]** Damage done on a failed ongoing save. (N) can be number or dice string.
 
+* **SAVEADD: [effect]** Add Effect from custom effects list on a failed ongoing save.
+
+* **SAVEADDP: [effect]** Add Effect from custom effects list on a passed ongoing save.
+
 * **(R)** will remove the save effect on a successful save.
 * **(D)** will disable the save effect on a successful save.
 * **(H)** will deal half damage on a successful ongoiong save.
