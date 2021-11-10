@@ -152,7 +152,11 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		replaceSaveDC(rNewEffect, rActor)
 	end
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
-		dropConcentration(rNewEffect, rNewEffect.nDuration)
+		local nDuration = rNewEffect.nDuration
+		if rNewEffect.sUnits == "minute" then
+			nDuration = nDuration*10
+		end
+		dropConcentration(rNewEffect, nDuration)
 	end
 
 	return true
