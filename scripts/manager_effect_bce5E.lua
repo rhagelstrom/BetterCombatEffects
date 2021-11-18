@@ -291,7 +291,12 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 		end
 	end
 end
-
+function onDamage(rSource,rTarget, nodeEffect)
+	if EffectsManagerBCE.processEffect(rTarget, nodeEffect,"SAVEONDMG", rSource) then
+		local nodeTarget = ActorManager.getCTNode(rTarget)
+		saveEffect(nodeEffect, nodeTarget, "Save")
+	end
+end
 function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this effect is on, BCE String
 	local sEffect = DB.getValue(nodeEffect, "label", "")
 	if (DB.getValue(nodeEffect, "isactive", 0) ~= 1 ) then
@@ -301,7 +306,7 @@ function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this
 	local sLabel = ""
 	for _,sEffectComp in ipairs(aEffectComps) do
 		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-		if rEffectComp.type == "SAVEE" or rEffectComp.type == "SAVES" or rEffectComp.type == "SAVEA" then
+		if rEffectComp.type == "SAVEE" or rEffectComp.type == "SAVES" or rEffectComp.type == "SAVEA" or rEffectComp.type == "SAVEONDMG" then
 			local sAbility = rEffectComp.remainder[1]
 			if User.getRulesetName() == "5E" then
 				sAbility = DataCommon.ability_stol[sAbility]
@@ -367,6 +372,8 @@ function dropConcentration(rNewEffect, nDuration)
 		end
 		local sSource
 		local ctEntries = CombatManager.getSortedCombatantList()
+		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
+		local sNewEffectTag = aEffectComps[1]
 		for _, nodeCTConcentration in pairs(ctEntries) do
 			if nodeCT == nodeCTConcentration then
 				sSource = ""
@@ -375,9 +382,11 @@ function dropConcentration(rNewEffect, nDuration)
 			end
 			for _,nodeEffect in pairs(DB.getChildren(nodeCTConcentration, "effects")) do
 				local sEffect = DB.getValue(nodeEffect, "label", "")
+				aEffectComps = EffectManager.parseEffect(sEffect)
+				local sEffectTag = aEffectComps[1]
 				if (sEffect:match("%(C%)") and (DB.getValue(nodeEffect, "source_name", "") == sSource)) and 
-						((DB.getValue(nodeEffect, "label", "") ~= rNewEffect.sName) or
-						((DB.getValue(nodeEffect, "label", "") == rNewEffect.sName) and (DB.getValue(nodeEffect, "duration", 0) ~= nDuration))) then
+						(sEffectTag ~= sNewEffectTag) or
+						((sEffectTag == sNewEffectTag and (DB.getValue(nodeEffect, "duration", 0) ~= nDuration))) then
 							EffectsManagerBCE.modifyEffect(nodeEffect, "Remove", sEffect)
 				end
 			end

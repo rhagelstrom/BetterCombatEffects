@@ -6,6 +6,7 @@
 local RulesetEffectManager = nil
 local RulesetActorManager = nil
 local onDamage = nil
+local getDamageAdjust = nil
 local bMadNomadCharSheetEffectDisplay = false
 
 function customRest(nodeActor, bLong, bMilestone)
@@ -207,6 +208,9 @@ function customOnDamage(rSource, rTarget, rRoll)
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
 			break
 		end
+		if User.getRulesetName() == "5E"  then 
+			EffectsManagerBCE5E.onDamage(rSource,rTarget, nodeEffect)
+		end
 		if EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGAT", rSource, true) then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Activate")		
 		end
@@ -393,8 +397,8 @@ function onInit()
 		if Session.IsHost then
 			OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects", 
 			"option_Temp_Is_Damage", "option_entry_cycler", 
-			{ labels = "option_val_on", values = "on",
-				baselabel = "option_val_off", baseval = "off", default = "off" })  
+			{ labels = "option_val_off", values = "off",
+				baselabel = "option_val_on", baseval = "on", default = "on" })  
 		end
 
 		if User.getRulesetName() == "5E" then
@@ -417,7 +421,8 @@ function onInit()
 		-- save off the originals so we play nice with others
 		onDamage = ActionDamage.onDamage
 		ActionDamage.onDamage = customOnDamage
-
+		getDamageAdjust = ActionDamage.getDamageAdjust
+		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		ActionsManager.registerResultHandler("damage", customOnDamage)
 		ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
 
@@ -429,6 +434,36 @@ function onInit()
 			end
 		end
 	end
+end
+
+function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
+	local nDamageAdjust = 0
+	local nReduce = 0
+	local bVulnerable, bResist;
+	local aReduce = ActionDamage.getReductionType(rSource, rTarget, "DMGR");
+	for k, v in pairs(rDamageOutput.aDamageTypes) do
+		-- Get individual damage types for each damage clause
+		local aSrcDmgClauseTypes = {};
+		local aTemp = StringManager.split(k, ",", true);
+		for _,vType in ipairs(aTemp) do
+			if vType ~= "untyped" and vType ~= "" then
+				table.insert(aSrcDmgClauseTypes, vType);
+			end
+		end
+		local nLocalReduce = ActionDamage.checkNumericalReductionType(aReduce, aSrcDmgClauseTypes, v);
+		--We need to do this nonsense because we need to reduce damagee before resist calculation
+		if nLocalReduce > 0 then
+			rDamageOutput.aDamageTypes[k] = rDamageOutput.aDamageTypes[k] - nLocalReduce
+			nDamage = nDamage - nLocalReduce
+		end
+		nReduce = nReduce + nLocalReduce
+	end
+	if (nReduce > 0) then
+		table.insert(rDamageOutput.tNotifications, "[REDUCED]");
+	end
+	nDamageAdjust, bVulnerable, bResist = getDamageAdjust(rSource, rTarget, nVal, rDamageOutput)
+	nDamageAdjust = nDamageAdjust - nReduce
+	return nDamageAdjust, bVulnerable, bResist 
 end
 
 function onClose()

@@ -136,6 +136,10 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SREGENE (N)** Apply regeneration at the end of the actors turn who applied the effect. (N) can be number or dice string
 
+### Damage Reduction
+* **DMGR: (N) [damage type(s)]** Reduce the damage taken by the specified damage type(s) by (N).
+  * Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic
+
 ## 5E/3.5E/PFRPG
 
 ---
@@ -170,9 +174,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 * **(F)** will invert the roll. SAVEDMG, (R), (D), (H) will be performed on a failed save rather than successful one.
 
 ## 4E
-
 ---
-
 * **ATKDS** Disable this effect if the source of the effect is attacked
 
 ## 5E
@@ -181,8 +183,26 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **[SDC]** When an effect with [SDC] is applied from a PC/NPC, [SDC] will be replaced with the PC/NPCs spell save DC based off of its spellcasting ability.
 
-* **DC: (N)** If the actor has the effect DC, (N) will be added  to the [SDC] when [SDC] is automaticlly replaced. (N) can be any number
+* **DC: (N)** If the actor has the effect DC, (N) will be added  to the [SDC] when [SDC] is automatically replaced. (N) can be any number
+
+* **SAVEONDMG: [ability] [SDC]** Roll save when the actor takes damage
+  * Dominate Person; SAVEONDMG: WIS [SDC] (R); Charmed
 
 ### Concentration
 
 Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
+## Options Menu
+
+---
+* **Allow Duplicate Effects** 
+  * Default: on
+  * 5E - When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor.
+* **Consider Duplicate Duration** 
+  * Default: off
+  * 5E - When on, considers Concentration duration when determining if previous concentration effects should expire.
+* **Restrict Concentration**
+  * Default: off
+  * 5E - When on, expires any previous spells with concentration (C) when a new concentration spell is cast
+* **TempHP Reduction is Damage**
+  * Default: on
+  * For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage.
