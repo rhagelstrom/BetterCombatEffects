@@ -6,8 +6,12 @@
 local RulesetEffectManager = nil
 local RulesetActorManager = nil
 local onDamage = nil
-local getDamageAdjust = nil
+local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
+
+function setProcessEffectOnDamage(ProcessEffectOnDamage)
+	fProcessEffectOnDamage = ProcessEffectOnDamage
+end
 
 function customRest(nodeActor, bLong, bMilestone)
 	local nodeCT = ActorManager.getCTNode(nodeActor)
@@ -208,8 +212,10 @@ function customOnDamage(rSource, rTarget, rRoll)
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
 			break
 		end
-		if User.getRulesetName() == "5E"  then 
-			EffectsManagerBCE5E.onDamage(rSource,rTarget, nodeEffect)
+		if (fProcessEffectOnDamage ~= nil) then
+			fProcessEffectOnDamage(rSource,rTarget, nodeEffect)
+		else
+			Debug.chat("Noope")
 		end
 		if EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGAT", rSource, true) then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Activate")		
@@ -339,7 +345,7 @@ function isDie(sEffect)
 		if #aWords > 0 then
 			sType = aWords[1]:match("^([^:]+):")
 			-- Only roll dice for ability score mods
-			if sType and (sType == "STR" or sType == "DEX" or sType == "CON" or sType == "INT" or sType == "WIS" or sType == "CHA") then
+			if sType and (sType == "STR" or sType == "DEX" or sType == "CON" or sType == "INT" or sType == "WIS" or sType == "CHA" or sType == "DMGR") then
 				local nRemainderIndex = 2
 				local sValueCheck = ""
 				local sTypeRemainder = aWords[1]:sub(#sType + 2)
@@ -421,8 +427,6 @@ function onInit()
 		-- save off the originals so we play nice with others
 		onDamage = ActionDamage.onDamage
 		ActionDamage.onDamage = customOnDamage
-		getDamageAdjust = ActionDamage.getDamageAdjust
-		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		ActionsManager.registerResultHandler("damage", customOnDamage)
 		ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
 
@@ -436,35 +440,6 @@ function onInit()
 	end
 end
 
-function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
-	local nDamageAdjust = 0
-	local nReduce = 0
-	local bVulnerable, bResist;
-	local aReduce = ActionDamage.getReductionType(rSource, rTarget, "DMGR");
-	for k, v in pairs(rDamageOutput.aDamageTypes) do
-		-- Get individual damage types for each damage clause
-		local aSrcDmgClauseTypes = {};
-		local aTemp = StringManager.split(k, ",", true);
-		for _,vType in ipairs(aTemp) do
-			if vType ~= "untyped" and vType ~= "" then
-				table.insert(aSrcDmgClauseTypes, vType);
-			end
-		end
-		local nLocalReduce = ActionDamage.checkNumericalReductionType(aReduce, aSrcDmgClauseTypes, v);
-		--We need to do this nonsense because we need to reduce damagee before resist calculation
-		if nLocalReduce > 0 then
-			rDamageOutput.aDamageTypes[k] = rDamageOutput.aDamageTypes[k] - nLocalReduce
-			nDamage = nDamage - nLocalReduce
-		end
-		nReduce = nReduce + nLocalReduce
-	end
-	if (nReduce > 0) then
-		table.insert(rDamageOutput.tNotifications, "[REDUCED]");
-	end
-	nDamageAdjust, bVulnerable, bResist = getDamageAdjust(rSource, rTarget, nVal, rDamageOutput)
-	nDamageAdjust = nDamageAdjust - nReduce
-	return nDamageAdjust, bVulnerable, bResist 
-end
 
 function onClose()
 	if  User.getRulesetName() == "5E"  or 

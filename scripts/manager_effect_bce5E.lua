@@ -6,6 +6,7 @@
 local bMadNomadCharSheetEffectDisplay = false
 local bAutomaticSave = false
 local restChar = nil
+local getDamageAdjust = nil
 
 function onInit()
 	if User.getRulesetName() == "5E" then 
@@ -28,12 +29,16 @@ function onInit()
 
 		rest = CharManager.rest
 		CharManager.rest = customRest
+		getDamageAdjust = ActionDamage.getDamageAdjust
+		ActionDamage.getDamageAdjust = customGetDamageAdjust
+
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost5E)
 		EffectsManagerBCE.setCustomProcessEffect(processEffect)
+		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage)
 
 		ActionsManager.registerResultHandler("savebce", onSaveRollHandler5E)
 		ActionsManager.registerModHandler("savebce", onModSaveHandler)
@@ -209,7 +214,8 @@ function replaceSaveDC(rNewEffect, rActor)
 	if rNewEffect.sName:match("%[SDC]") and  
 			(rNewEffect.sName:match("SAVEE") or 
 			rNewEffect.sName:match("SAVES") or 
-			rNewEffect.sName:match("SAVEA")) then
+			rNewEffect.sName:match("SAVEA") or
+		    rNewEffect.sName:match("SAVEONDMG")) then
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
 		local nSpellcastingDC = 0
 		local nDC = getDCEffectMod(ActorManager.getCTNode(rActor))
@@ -360,6 +366,37 @@ function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this
 			sLabel = sEffectComp
 		end
 	end
+end
+
+
+function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
+	local nDamageAdjust = 0
+	local nReduce = 0
+	local bVulnerable, bResist;
+	local aReduce = ActionDamage.getReductionType(rSource, rTarget, "DMGR");
+	for k, v in pairs(rDamageOutput.aDamageTypes) do
+		-- Get individual damage types for each damage clause
+		local aSrcDmgClauseTypes = {};
+		local aTemp = StringManager.split(k, ",", true);
+		for _,vType in ipairs(aTemp) do
+			if vType ~= "untyped" and vType ~= "" then
+				table.insert(aSrcDmgClauseTypes, vType);
+			end
+		end
+		local nLocalReduce = ActionDamage.checkNumericalReductionType(aReduce, aSrcDmgClauseTypes, v);
+		--We need to do this nonsense because we need to reduce damagee before resist calculation
+		if nLocalReduce > 0 then
+			rDamageOutput.aDamageTypes[k] = rDamageOutput.aDamageTypes[k] - nLocalReduce
+			nDamage = nDamage - nLocalReduce
+		end
+		nReduce = nReduce + nLocalReduce
+	end
+	if (nReduce > 0) then
+		table.insert(rDamageOutput.tNotifications, "[REDUCED]");
+	end
+	nDamageAdjust, bVulnerable, bResist = getDamageAdjust(rSource, rTarget, nVal, rDamageOutput)
+	nDamageAdjust = nDamageAdjust - nReduce
+	return nDamageAdjust, bVulnerable, bResist 
 end
 
 --5E Only - Check if this effect has concentration and drop all previous effects of concentration from the source

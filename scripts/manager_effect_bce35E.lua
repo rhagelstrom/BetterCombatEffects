@@ -19,6 +19,7 @@ function onInit()
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre35E)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost35E)
 		EffectsManagerBCE.setCustomProcessEffect(processEffect)
+		EffectsManagerBCEDND.setProcessEffectOnDamage(EffectsManagerBCE5E.onDamage)
 
 		ActionsManager.registerResultHandler("savebce", onSaveRollHandler35E)
 		ActionsManager.registerModHandler("savebce", onModSaveHandler)
