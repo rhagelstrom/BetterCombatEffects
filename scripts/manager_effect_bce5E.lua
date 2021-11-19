@@ -368,22 +368,51 @@ function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this
 	end
 end
 
+function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
+	local aEffects = EffectManager5E.getEffectsByType(rTarget, sEffectType, rDamageOutput.aDamageFilter, rSource);
+	local aFinal = {};
+	for _,v in pairs(aEffects) do
+		local rReduction = {};
+		
+		rReduction.mod = v.mod;
+		rReduction.aNegatives = {};
+		for _,vType in pairs(v.remainder) do
+			if #vType > 1 and ((vType:sub(1,1) == "!") or (vType:sub(1,1) == "~")) then
+				if StringManager.contains(DataCommon.dmgtypes, vType:sub(2)) then
+					table.insert(rReduction.aNegatives, vType:sub(2));
+				end
+			end
+		end
+
+		for _,vType in pairs(v.remainder) do
+			if vType ~= "untyped" and vType ~= "" and vType:sub(1,1) ~= "!" and vType:sub(1,1) ~= "~" then
+				if StringManager.contains(DataCommon.dmgtypes, vType) or vType == "all" then
+					aFinal[vType] = rReduction;
+				end
+			end
+		end
+	end
+	
+	return aFinal;
+end
+
 
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
 	local nDamageAdjust = 0
 	local nReduce = 0
 	local bVulnerable, bResist;
-	local aReduce = ActionDamage.getReductionType(rSource, rTarget, "DMGR");
+	local aReduce = getReductionType(rSource, rTarget, "DMGR", rDamageOutput)
+
 	for k, v in pairs(rDamageOutput.aDamageTypes) do
 		-- Get individual damage types for each damage clause
-		local aSrcDmgClauseTypes = {};
-		local aTemp = StringManager.split(k, ",", true);
+		local aSrcDmgClauseTypes = {}
+		local aTemp = StringManager.split(k, ",", true)
 		for _,vType in ipairs(aTemp) do
 			if vType ~= "untyped" and vType ~= "" then
-				table.insert(aSrcDmgClauseTypes, vType);
+				table.insert(aSrcDmgClauseTypes, vType)
 			end
 		end
-		local nLocalReduce = ActionDamage.checkNumericalReductionType(aReduce, aSrcDmgClauseTypes, v);
+		local nLocalReduce = ActionDamage.checkNumericalReductionType(aReduce, aSrcDmgClauseTypes, v)
 		--We need to do this nonsense because we need to reduce damagee before resist calculation
 		if nLocalReduce > 0 then
 			rDamageOutput.aDamageTypes[k] = rDamageOutput.aDamageTypes[k] - nLocalReduce

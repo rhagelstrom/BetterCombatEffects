@@ -136,9 +136,6 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SREGENE (N)** Apply regeneration at the end of the actors turn who applied the effect. (N) can be number or dice string
 
-### Damage Reduction
-* **DMGR: (N) [damage type(s)]** Reduce the damage taken by the specified damage type(s) by (N).
-  * Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic
 
 ## 5E/3.5E/PFRPG
 
@@ -167,6 +164,9 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SAVEADDP: [effect]** Add Effect from custom effects list on a passed ongoing save.
 
+* **SAVEONDMG: [ability] [SDC]** Roll save when the actor takes damage
+  * Dominate Person; SAVEONDMG: WIS [SDC] (R)
+   
 * **(R)** will remove the save effect on a successful save.
 * **(D)** will disable the save effect on a successful save.
 * **(H)** will deal half damage on a successful ongoiong save.
@@ -185,12 +185,16 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **DC: (N)** If the actor has the effect DC, (N) will be added  to the [SDC] when [SDC] is automatically replaced. (N) can be any number
 
-* **SAVEONDMG: [ability] [SDC]** Roll save when the actor takes damage
-  * Dominate Person; SAVEONDMG: WIS [SDC] (R); Charmed
-
 ### Concentration
 
 Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
+
+### Damage Reduction
+* **DMGR: (N) [damage type(s)]** Reduce the damage taken by the specified damage type(s) by (N).
+  * Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic
+  * Interception Fighting Style; DMGR: 1d10+2 all
+  * Deflict Missles; DMGR: 1d10+5 ranged,bludgeoning,piercing
+
 ## Options Menu
 
 ---
