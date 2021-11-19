@@ -214,8 +214,6 @@ function customOnDamage(rSource, rTarget, rRoll)
 		end
 		if (fProcessEffectOnDamage ~= nil) then
 			fProcessEffectOnDamage(rSource,rTarget, nodeEffect)
-		else
-			Debug.chat("Noope")
 		end
 		if EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGAT", rSource, true) then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Activate")		
