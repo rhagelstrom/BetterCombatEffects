@@ -68,7 +68,7 @@ end
 function customCharRest(nodeChar)
 
 	EffectsManagerBCEDND.customRest(nodeChar, true, nil)
-	charRest(nodePC)
+	charRest(nodeChar)
 end
 
 function customRest(bShort)
