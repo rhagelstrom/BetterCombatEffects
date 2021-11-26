@@ -192,23 +192,20 @@ function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 	end
 end
 
-function checkApply()
-
-	if (nMatch > 0) and not tEffectCompParams.bIgnoreExpire then
-		if nActive == 2 then
-			DB.setValue(v, "isactive", "number", 1);
-		else
-			local sApply = DB.getValue(v, "apply", "");
-			if sApply == "action" then
-				EffectManager.notifyExpire(v, 0);
-			elseif sApply == "roll" then
-				EffectManager.notifyExpire(v, 0, true);
-			elseif sApply == "single" then
-				EffectManager.notifyExpire(v, nMatch, true);
-			end
+function checkApply(nodeEffect)
+	if nActive == 2 then
+		DB.setValue(nodeEffect, "isactive", "number", 1);
+	else
+		local sApply = DB.getValue(nodeEffect, "apply", "");
+		if sApply == "action" then
+			EffectManager.notifyExpire(nodeEffect, 0);
+		elseif sApply == "roll" then
+			EffectManager.notifyExpire(nodeEffect, 0, true);
+		elseif sApply == "single" then
+			EffectManager.notifyExpire(nodeEffect, nMatch, true);
 		end
 	end
-
+	return true
 end
 
 function matchEffect(sEffect, aComps)
@@ -489,8 +486,10 @@ function removeCustomPreAddEffect(f)
 end
 
 function onCustomPreAddEffect(sUser, sIdentity, nodeCT, rNewEffect,bShowMsg)
-	for _,fPreAddEffect in ipairs(aCustomPreAddEffectHandlers) do
-		if fPreAddEffect(sUser, sIdentity, nodeCT, rNewEffect,bShowMsg) == false then
+	-- do this backwards from order added. Need to account for string changes in the effect
+	-- from things like [STR] before we do any dice roll handlers
+	for i = #aCustomPreAddEffectHandlers, 1, -1 do
+		if aCustomPreAddEffectHandlers[i](sUser, sIdentity, nodeCT, rNewEffect,bShowMsg) == false then
 			return false
 		end
 	end

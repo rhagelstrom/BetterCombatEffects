@@ -32,7 +32,6 @@ function onInit()
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 
-
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre5E)
@@ -62,6 +61,7 @@ end
 function onClose()
 	if User.getRulesetName() == "5E" then 
 		CharManager.rest = rest
+		 ActionDamage.getDamageAdjust = getDamageAdjust
 		ActionsManager.unregisterResultHandler("savebce")
 		ActionsManager.unregisterModHandler("savebce")
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart5E)
@@ -121,28 +121,38 @@ function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 end
 
 function processEffectTurnStart5E(sourceNodeCT, nodeCT, nodeEffect)
-	local rSource = ActorManager.resolveActor(sourceNodeCT)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
 	local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
-	local rSourceEffect = ActorManager.resolveActor(sEffectSource)
+	local rTarget = ActorManager.resolveActor(nodeCT)
+	local rSource = nil
 	if rSourceEffect == nil then
-		rSourceEffect = rSource
+		rSource = rTarget
+	else
+		rSource = ActorManager.resolveActor(sEffectSource)
 	end
-	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVES") then
+	
+	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVES",rTarget) then
 		saveEffect(nodeEffect, sourceNodeCT, "Save")
 	end
 	return true
 end
 
+
+--function ManagerEffect5E.getEffectsByType(rActor, sEffectCompType, rFilterActor, bTargetedOnly)
+
 function processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
-	local rSource = ActorManager.resolveActor(sourceNodeCT)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
 	local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
-	local rSourceEffect = ActorManager.resolveActor(sEffectSource)
+	local rTarget = ActorManager.resolveActor(nodeCT)
+	local rSource = nil
 	if rSourceEffect == nil then
-		rSourceEffect = rSource
+		rSource = rTarget
+	else
+		rSource = ActorManager.resolveActor(sEffectSource)
 	end
-	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVEE") then
+	
+	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVEE", rTarget) then
+		EffectManager5E.getEffectsByType(rSource, "SAVEE", rTarget)
 		saveEffect(nodeEffect, sourceNodeCT, "Save")
 	end
 	return true
@@ -150,12 +160,17 @@ end
 
 function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
-
-	if rNewEffect.sSource ~= nil  and rNewEffect.sSource ~= "" then
-		replaceSaveDC(rNewEffect, ActorManager.resolveActor(rNewEffect.sSource))
+	local rSource = nil
+	if rNewEffect.sSource == nil or rNewEffect.sSource == "" then
+		rSource = rActor
 	else
-		replaceSaveDC(rNewEffect, rActor)
+		local nodeSource = DB.findNode(rNewEffect.sSource)
+		rSource = ActorManager.resolveActor(nodeSource)		
 	end
+
+	rNewEffect.sName = EffectManager5E.evalEffect(rSource, rNewEffect.sName)
+	replaceSaveDC(rNewEffect, rSource)
+
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
 		local nDuration = rNewEffect.nDuration
 		if rNewEffect.sUnits == "minute" then
@@ -359,6 +374,8 @@ function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this
 				rSaveVsRoll.nMod = rRoll.nMod -- Modfiers 
 				rSaveVsRoll.aDice = rRoll.aDice
 				rSaveVsRoll.sEffectPath = nodeEffect.getPath()
+				rSaveVsRoll.sApply = DB.getValue(nodeEffect, "apply", "");
+
 				ActionsManager.actionRoll(sNodeEffectSource,{{nodeTarget}}, {rSaveVsRoll})
 				break  
 			end
@@ -367,6 +384,7 @@ function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this
 		end
 	end
 end
+
 
 function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
 	local aEffects = EffectManager5E.getEffectsByType(rTarget, sEffectType, rDamageOutput.aDamageFilter, rSource);
@@ -400,7 +418,7 @@ end
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
 	local nDamageAdjust = 0
 	local nReduce = 0
-	local bVulnerable, bResist;
+	local bVulnerable, bResist
 	local aReduce = getReductionType(rSource, rTarget, "DMGR", rDamageOutput)
 
 	for k, v in pairs(rDamageOutput.aDamageTypes) do
@@ -459,6 +477,7 @@ function dropConcentration(rNewEffect, nDuration)
 		end
 	end
 end
+
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
 function onModSaveHandler(rSource, rTarget, rRoll)

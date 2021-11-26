@@ -258,7 +258,7 @@ end
 function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
 	replaceAbilityScores(rNewEffect, rActor)
-	replaceAbilityModifier(rNewEffect, rActor)
+--	replaceAbilityModifier(rNewEffect, rActor)
 	local rRoll = {}
 	rRoll = isDie(rNewEffect.sName)
 	if next(rRoll) ~= nil and next(rRoll.aDice) ~= nil then
@@ -314,22 +314,6 @@ function replaceAbilityScores(rNewEffect, rActor)
 				end
 			end
 		end
-	end
-end
-
-function replaceAbilityModifier(rNewEffect, rActor)
-	if rNewEffect.sName:match("%[STR]") then
-		rNewEffect.sName = rNewEffect.sName:gsub("%[STR]", tostring(RulesetActorManager.getAbilityBonus(rActor, "strength")))
-	elseif rNewEffect.sName:match("%[DEX]") then
-		rNewEffect.sName = rNewEffect.sName:gsub("%[DEX]", tostring(RulesetActorManager.getAbilityBonus(rActor, "dexterity")))
-	elseif rNewEffect.sName:match("%[CON]") then
-		rNewEffect.sName = rNewEffect.sName:gsub("%[CON]", tostring(RulesetActorManager.getAbilityBonus(rActor, "constitution")))
-	elseif rNewEffect.sName:match("%[WIS]") then
-		rNewEffect.sName = rNewEffect.sName:gsub("%[WIS]", tostring(RulesetActorManager.getAbilityBonus(rActor, "wisdom")))
-	elseif rNewEffect.sName:match("%[INT]") then
-		rNewEffect.sName = rNewEffect.sName:gsub("%[INT]", tostring(RulesetActorManager.getAbilityBonus(rActor, "intelligence")))
-	elseif rNewEffect.sName:match("%[CHA]") then
-		rNewEffect.sName = rNewEffect.sName:gsub("%[CHA]", tostring(RulesetActorManager.getAbilityBonus(rActor, "charisma")))
 	end
 end
 

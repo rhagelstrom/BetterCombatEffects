@@ -119,12 +119,15 @@ end
 
 function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
-	
-	if rNewEffect.sSource ~= nil  and rNewEffect.sSource ~= "" then
-		replaceSaveDC(rNewEffect, ActorManager.resolveActor(rNewEffect.sSource))
+	local rSource = nil
+	if rNewEffect.sSource ~= nil and rNewEffect.sSource ~= "" then
+		local nodeSource = DB.findNode(rNewEffect.sSource)
+		rSource = ActorManager.resolveActor(nodeSource)
 	else
-		replaceSaveDC(rNewEffect, rActor)
+		rSource = rActor
 	end
+	rNewEffect.sName = EffectManager35E.evalEffect(rSource, rNewEffect.sName)
+	EffectsManagerBCE5E.replaceSaveDC(rNewEffect, rSource)
 	return true
 end
 

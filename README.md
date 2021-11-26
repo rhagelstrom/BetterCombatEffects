@@ -1,5 +1,8 @@
 # Better Combat Effects
 
+ **Current Version:** 2.17
+**Updated::** 11/26/21
+
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
 <a href="https://www.fantasygrounds.com/forums/showthread.php?68831-Better-Combat-Effects" target="_blank">Comments and Bug Reports</a>
@@ -173,6 +176,13 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 * **(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.
 * **(F)** will invert the roll. SAVEDMG, (R), (D), (H) will be performed on a failed save rather than successful one.
 
+## 4E/5E
+---
+### Damage Reduction
+* **DMGR: (N) [damage type(s)]** Reduce the damage taken by the specified damage type(s) by (N).
+  * Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic
+  * Interception Fighting Style; DMGR: 1d10 [PRF],all
+  * Deflict Missles; DMGR: 1d10 [MONK],[DEX],ranged,bludgeoning,piercing
 ## 4E
 ---
 * **ATKDS** Disable this effect if the source of the effect is attacked
@@ -188,12 +198,6 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 ### Concentration
 
 Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
-
-### Damage Reduction
-* **DMGR: (N) [damage type(s)]** Reduce the damage taken by the specified damage type(s) by (N).
-  * Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic
-  * Interception Fighting Style; DMGR: 1d10+2 all
-  * Deflict Missles; DMGR: 1d10+5 ranged,bludgeoning,piercing
 
 ## Options Menu
 
