@@ -77,8 +77,7 @@ function customTurnStart(sourceNodeCT)
 					end
 					if processEffect(rSource,nodeEffect,"TURNRS") and not sEffect:match("STURNRS") and (DB.getValue(nodeEffect, "duration", "") == 1) then
 						modifyEffect(nodeEffect, "Remove")
-					end
-					if nodeEffect ~= nil and sEffectSource == "" and (DB.getValue(nodeEffect, "duration", "") == 1) and processEffect(rSource,nodeEffect,"STURNRS") then
+					elseif sEffectSource == "" and (DB.getValue(nodeEffect, "duration", "") == 1) and processEffect(rSource,nodeEffect,"STURNRS") then
 						modifyEffect(nodeEffect, "Remove")
 					end
 				else
@@ -118,8 +117,7 @@ function customTurnEnd(sourceNodeCT)
 					end
 					if sEffectSource == "" and (DB.getValue(nodeEffect, "duration", "") == 1) and processEffect(rSource,nodeEffect,"STURNRE") then
 						modifyEffect(nodeEffect, "Remove")
-					end
-					if  nodeEffect ~= nil and processEffect(rSource,nodeEffect,"TURNRE") and not sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then	
+					elseif  processEffect(rSource,nodeEffect,"TURNRE") and not sEffect:match("STURNRE") and (DB.getValue(nodeEffect, "duration", "") == 1) then	
 						modifyEffect(nodeEffect, "Remove")
 					end
 				else

@@ -32,8 +32,8 @@ function onInit()
 		CharManager.rest = customRest
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
-		parseEffects = PowerManager.parseEffects
-		PowerManager.parseEffects = customParseEffects
+		--parseEffects = PowerManager.parseEffects
+		--PowerManager.parseEffects = customParseEffects
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
@@ -64,8 +64,8 @@ end
 function onClose()
 	if User.getRulesetName() == "5E" then 
 		CharManager.rest = rest
-		 ActionDamage.getDamageAdjust = getDamageAdjust
-		 PowerManager.parseEffects = parseEffects
+		ActionDamage.getDamageAdjust = getDamageAdjust
+		--PowerManager.parseEffects = parseEffects
 		ActionsManager.unregisterResultHandler("savebce")
 		ActionsManager.unregisterModHandler("savebce")
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart5E)
@@ -499,7 +499,8 @@ function customParseEffects(sPowerName, aWords)
 	local i = 1;
 	local bStart = false
 	local bSource = false
-	Debug.chat(PowerManager.parseSaves(sPowerName, aWords, false, false))
+	local tSaves = PowerManager.parseSaves(sPowerName, aWords, false, false)
+	
 	while aWords[i] do
 		if StringManager.isWord(aWords[i], "damage") then
 			i, rCurrent = PowerManager.parseDamagePhrase(aWords, i);
