@@ -7,6 +7,7 @@ local bMadNomadCharSheetEffectDisplay = false
 local bAutomaticSave = false
 local restChar = nil
 local getDamageAdjust = nil
+local parseEffects = nil
 
 function onInit()
 	if User.getRulesetName() == "5E" then 
@@ -31,6 +32,8 @@ function onInit()
 		CharManager.rest = customRest
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
+		parseEffects = PowerManager.parseEffects
+		PowerManager.parseEffects = customParseEffects
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
@@ -62,6 +65,7 @@ function onClose()
 	if User.getRulesetName() == "5E" then 
 		CharManager.rest = rest
 		 ActionDamage.getDamageAdjust = getDamageAdjust
+		 PowerManager.parseEffects = parseEffects
 		ActionsManager.unregisterResultHandler("savebce")
 		ActionsManager.unregisterModHandler("savebce")
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart5E)
@@ -478,7 +482,6 @@ function dropConcentration(rNewEffect, nDuration)
 	end
 end
 
-
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
 function onModSaveHandler(rSource, rTarget, rRoll)
 	if bAutomaticSave == true then
@@ -486,4 +489,270 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	else
 		ActionSave.modSave(rTarget, rSource, rRoll)
 	end
+end
+
+function customParseEffects(sPowerName, aWords)
+	local effects = {};
+	
+	local rCurrent = nil;
+	
+	local i = 1;
+	local bStart = false
+	local bSource = false
+	Debug.chat(PowerManager.parseSaves(sPowerName, aWords, false, false))
+	while aWords[i] do
+		if StringManager.isWord(aWords[i], "damage") then
+			i, rCurrent = PowerManager.parseDamagePhrase(aWords, i);
+			if rCurrent then
+				if StringManager.isWord(aWords[i+1], "at") and 
+						StringManager.isWord(aWords[i+2], "the") and
+						StringManager.isWord(aWords[i+3], { "start", "end" }) and
+						StringManager.isWord(aWords[i+4], "of") then
+					if StringManager.isWord(aWords[i+3],  "start") then
+						bStart = true
+					end
+					local nTrigger = i + 4;
+					if StringManager.isWord(aWords[nTrigger+1], "each") and
+							StringManager.isWord(aWords[nTrigger+2], "of") then
+						if StringManager.isWord(aWords[nTrigger+3], "its") then
+							nTrigger = nTrigger + 3;
+						else
+							nTrigger = nTrigger + 4;
+							bSource = true
+						end
+					elseif StringManager.isWord(aWords[nTrigger+1], "its") then
+						nTrigger = i;
+					elseif StringManager.isWord(aWords[nTrigger+1], "your") then
+						nTrigger = nTrigger + 1;
+					end
+					if StringManager.isWord(aWords[nTrigger+1], { "turn", "turns" }) then
+						nTrigger = nTrigger + 1;
+					end
+					rCurrent.endindex = nTrigger;
+					
+					if StringManager.isWord(aWords[rCurrent.startindex - 1], "takes") and
+							StringManager.isWord(aWords[rCurrent.startindex - 2], "and") and
+							StringManager.isWord(aWords[rCurrent.startindex - 3], DataCommon.conditions) then
+						rCurrent.startindex = rCurrent.startindex - 2;
+					end
+					
+					local aName = {};
+					for _,v in ipairs(rCurrent.clauses) do
+						local sDmg = StringManager.convertDiceToString(v.dice, v.modifier);
+						if v.dmgtype and v.dmgtype ~= "" then
+							sDmg = sDmg .. " " .. v.dmgtype;
+						end
+						if bStart == true and bSource == false then
+							table.insert(aName, "DMGO: " .. sDmg)
+						elseif bStart ==false and bSource == false then
+							table.insert(aName, "DMGOE: " .. sDmg)
+						elseif bStart == true and bSource == true then
+							table.insert(aName, "SDMGOS: " .. sDmg)
+						elseif bStart == false and bSource == true then
+							table.insert(aName, "SDMGOE: " .. sDmg)
+						end
+					end
+					rCurrent.clauses = nil;
+					rCurrent.sName = table.concat(aName, "; ");
+				elseif StringManager.isWord(aWords[rCurrent.startindex - 1], "extra") then
+					rCurrent.startindex = rCurrent.startindex - 1;
+					rCurrent.sTargeting = "self";
+					rCurrent.sApply = "roll";
+					
+					local aName = {};
+					for _,v in ipairs(rCurrent.clauses) do
+						local sDmg = StringManager.convertDiceToString(v.dice, v.modifier);
+						if v.dmgtype and v.dmgtype ~= "" then
+							sDmg = sDmg .. " " .. v.dmgtype;
+						end
+						table.insert(aName, "DMG: " .. sDmg);
+					end
+					rCurrent.clauses = nil;
+					rCurrent.sName = table.concat(aName, "; ");
+				else
+					rCurrent = nil;
+				end
+			end
+
+		elseif (i > 1) and StringManager.isWord(aWords[i], DataCommon.conditions) then
+			local bValidCondition = false;
+			local nConditionStart = i;
+			local j = i - 1;
+			
+			while aWords[j] do
+				if StringManager.isWord(aWords[j], "be") then
+					if StringManager.isWord(aWords[j-1], "or") then
+						bValidCondition = true;
+						nConditionStart = j;
+						break;
+					end
+				
+				elseif StringManager.isWord(aWords[j], "being") and
+						StringManager.isWord(aWords[j-1], "against") then
+					bValidCondition = true;
+					nConditionStart = j;
+					break;
+				
+				elseif StringManager.isWord(aWords[j], { "also", "magically" }) then
+				
+				-- Special handling: Blindness/Deafness
+				elseif StringManager.isWord(aWords[j], "or") and StringManager.isWord(aWords[j-1], DataCommon.conditions) and 
+						StringManager.isWord(aWords[j-2], "either") and StringManager.isWord(aWords[j-3], "is") then
+					bValidCondition = true;
+					break;
+					
+				elseif StringManager.isWord(aWords[j], { "while", "when", "cannot", "not", "if", "be", "or" }) then
+					bValidCondition = false;
+					break;
+				
+				elseif StringManager.isWord(aWords[j], { "target", "creature", "it" }) then
+					if StringManager.isWord(aWords[j-1], "the") then
+						j = j - 1;
+					end
+					nConditionStart = j;
+					
+				elseif StringManager.isWord(aWords[j], "and") then
+					if #effects == 0 then
+						break;
+					elseif effects[#effects].endindex ~= j - 1 then
+						if not StringManager.isWord(aWords[i], "unconscious") and not StringManager.isWord(aWords[j-1], "minutes") then
+							break;
+						end
+					end
+					bValidCondition = true;
+					nConditionStart = j;
+					
+				elseif StringManager.isWord(aWords[j], "is") then
+					if bValidCondition or StringManager.isWord(aWords[i], "prone") or
+							(StringManager.isWord(aWords[i], "invisible") and StringManager.isWord(aWords[j-1], {"wearing", "wears", "carrying", "carries"})) then
+						break;
+					end
+					bValidCondition = true;
+					nConditionStart = j;
+				
+				elseif StringManager.isWord(aWords[j], DataCommon.conditions) then
+					break;
+
+				elseif StringManager.isWord(aWords[i], "poisoned") then
+					if (StringManager.isWord(aWords[j], "instead") and StringManager.isWord(aWords[j-1], "is")) then
+						bValidCondition = true;
+						nConditionStart = j - 1;
+						break;
+					elseif StringManager.isWord(aWords[j], "become") then
+						bValidCondition = true;
+						nConditionStart = j;
+						break;
+					end
+				
+				elseif StringManager.isWord(aWords[j], {"knock", "knocks", "knocked", "fall", "falls"}) and StringManager.isWord(aWords[i], "prone")  then
+					bValidCondition = true;
+					nConditionStart = j;
+					
+				elseif StringManager.isWord(aWords[j], {"knock", "knocks", "fall", "falls", "falling", "remain", "is"}) and StringManager.isWord(aWords[i], "unconscious") then
+					if StringManager.isWord(aWords[j], "falling") and StringManager.isWord(aWords[j-1], "of") and StringManager.isWord(aWords[j-2], "instead") then
+						break;
+					end
+					if StringManager.isWord(aWords[j], "fall") and StringManager.isWord(aWords[j-1], "you") and StringManager.isWord(aWords[j-1], "if") then
+						break;
+					end
+					if StringManager.isWord(aWords[j], "falls") and StringManager.isWord(aWords[j-1], "or") then
+						break;
+					end
+					bValidCondition = true;
+					nConditionStart = j;
+					if StringManager.isWord(aWords[j], "fall") and StringManager.isWord(aWords[j-1], "or") then
+						break;
+					end
+					
+				elseif StringManager.isWord(aWords[j], {"become", "becomes"}) and StringManager.isWord(aWords[i], "frightened")  then
+					bValidCondition = true;
+					nConditionStart = j;
+					break;
+					
+				elseif StringManager.isWord(aWords[j], {"turns", "become", "becomes"}) 
+						and StringManager.isWord(aWords[i], {"invisible"}) then
+					if StringManager.isWord(aWords[j-1], {"can't", "cannot"}) then
+						break;
+					end
+					bValidCondition = true;
+					nConditionStart = j;
+				
+				-- Special handling: Blindness/Deafness
+				elseif StringManager.isWord(aWords[j], "either") and StringManager.isWord(aWords[j-1], "is") then
+					bValidCondition = true;
+					break;
+				
+				else
+					break;
+				end
+
+				j = j - 1;
+			end
+			
+			if bValidCondition then
+				rCurrent = {};
+				rCurrent.sName = StringManager.capitalize(aWords[i]);
+				rCurrent.startindex = nConditionStart;
+				rCurrent.endindex = i;
+			end
+		end
+		
+		if rCurrent then
+			PowerManager.parseEffectsAdd(aWords, i, rCurrent, effects);
+			rCurrent = nil;
+		end
+		
+		i = i + 1;
+	end
+
+	if rCurrent then
+		PowerManager.parseEffectsAdd(aWords, i - 1, rCurrent, effects);
+	end
+	
+	-- Handle duration field in NPC spell translations
+	i = 1;
+	while aWords[i] do
+		if StringManager.isWord(aWords[i], "duration") and StringManager.isWord(aWords[i+1], ":") then
+			j = i + 2;
+			local bConc = false;
+			if StringManager.isWord(aWords[j], "concentration") and StringManager.isWord(aWords[j+1], "up") and StringManager.isWord(aWords[j+2], "to") then
+				bConc = true;
+				j = j + 3;
+			end
+			if StringManager.isNumberString(aWords[j]) and StringManager.isWord(aWords[j+1], {"round", "rounds", "minute", "minutes", "hour", "hours", "day", "days"}) then
+				local nDuration = tonumber(aWords[j]) or 0;
+				local sUnits = "";
+				if StringManager.isWord(aWords[j+1], {"minute", "minutes"}) then
+					sUnits = "minute";
+				elseif StringManager.isWord(aWords[j+1], {"hour", "hours"}) then
+					sUnits = "hour";
+				elseif StringManager.isWord(aWords[j+1], {"day", "days"}) then
+					sUnits = "day";
+				end
+
+				for _,vEffect in ipairs(effects) do
+					if not vEffect.nDuration and (vEffect.sName ~= "Prone") then
+						if bConc then
+							vEffect.sName = vEffect.sName .. "; (C)";
+						end
+						vEffect.nDuration = nDuration;
+						vEffect.sUnits = sUnits;
+					end
+				end
+
+				-- Add direct effect right from concentration text
+				if bConc then
+					local rConcentrate = {};
+					rConcentrate.sName = sPowerName .. "; (C)";
+					rConcentrate.startindex = i;
+					rConcentrate.endindex = j+1;
+
+					parseEffectsAdd(aWords, i, rConcentrate, effects);
+				end
+			end
+		end
+		i = i + 1;
+	end
+	
+	return effects;
 end
