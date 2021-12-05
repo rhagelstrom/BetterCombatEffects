@@ -1,7 +1,7 @@
 # Better Combat Effects
 
- **Current Version:** 2.17
-**Updated::** 11/26/21
+ **Current Version:** 2.20
+**Updated::** 12/04/21
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -199,6 +199,9 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
 
+### Powers Parsing (Experimental)
+Will automatically parse Powers (NPC sheets and spells) and automatically setup up some effects using BCE codings. This is defaulted to off in the options menu. Spells that have already been added to a PC must be deleted and re-added to take advantage of this feature.
+
 ## Options Menu
 
 ---
@@ -208,6 +211,18 @@ Default off: When on, adding an new spell effect that requires concentration wil
 * **Consider Duplicate Duration** 
   * Default: off
   * 5E - When on, considers Concentration duration when determining if previous concentration effects should expire.
+  * **Experimental: Autoparse NPC Powers** 
+  * Default: off
+  * 5E - When on, will autoparse powers and automatically create effects for:
+      * DMGOE
+      * SDMGOS
+      * SDMGOE
+      * TURNRS
+      * TURNRE
+      * STRUNRS
+      * STURNRE
+      * SAVES
+      * SAVEE
 * **Restrict Concentration**
   * Default: off
   * 5E - When on, expires any previous spells with concentration (C) when a new concentration spell is cast

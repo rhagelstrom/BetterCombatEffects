@@ -26,14 +26,18 @@ function onInit()
 			"option_Concentrate_Restrict", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
+			OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects", 
+			"option_Autoparse_Effects", "option_entry_cycler", 
+			{ labels = "option_val_on", values = "on",
+				baselabel = "option_val_off", baseval = "off", default = "off" });
 		end
 
 		rest = CharManager.rest
 		CharManager.rest = customRest
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
-		--parseEffects = PowerManager.parseEffects
-		--PowerManager.parseEffects = customParseEffects
+		parseEffects = PowerManager.parseEffects
+		PowerManager.parseEffects = customParseEffects
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
@@ -65,7 +69,7 @@ function onClose()
 	if User.getRulesetName() == "5E" then 
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
-		--PowerManager.parseEffects = parseEffects
+		PowerManager.parseEffects = parseEffects
 		ActionsManager.unregisterResultHandler("savebce")
 		ActionsManager.unregisterModHandler("savebce")
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart5E)
@@ -492,15 +496,15 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 end
 
 function customParseEffects(sPowerName, aWords)
+	if OptionsManager.isOption("AUTOPARSE_EFFECTS", "off") then
+		return parseEffects(sPowerName, aWords)
+	end
 	local effects = {};
-	
 	local rCurrent = nil;
-	
+	local rPrevious = nil;
 	local i = 1;
 	local bStart = false
 	local bSource = false
-	local tSaves = PowerManager.parseSaves(sPowerName, aWords, false, false)
-	
 	while aWords[i] do
 		if StringManager.isWord(aWords[i], "damage") then
 			i, rCurrent = PowerManager.parseDamagePhrase(aWords, i);
@@ -515,7 +519,7 @@ function customParseEffects(sPowerName, aWords)
 					local nTrigger = i + 4;
 					if StringManager.isWord(aWords[nTrigger+1], "each") and
 							StringManager.isWord(aWords[nTrigger+2], "of") then
-						if StringManager.isWord(aWords[nTrigger+3], "its") then
+						if StringManager.isWord(aWords[nTrigger+3], "its") then 
 							nTrigger = nTrigger + 3;
 						else
 							nTrigger = nTrigger + 4;
@@ -555,6 +559,7 @@ function customParseEffects(sPowerName, aWords)
 					end
 					rCurrent.clauses = nil;
 					rCurrent.sName = table.concat(aName, "; ");
+					rPrevious = rCurrent
 				elseif StringManager.isWord(aWords[rCurrent.startindex - 1], "extra") then
 					rCurrent.startindex = rCurrent.startindex - 1;
 					rCurrent.sTargeting = "self";
@@ -570,16 +575,61 @@ function customParseEffects(sPowerName, aWords)
 					end
 					rCurrent.clauses = nil;
 					rCurrent.sName = table.concat(aName, "; ");
+					rPrevious = rCurrent
 				else
 					rCurrent = nil;
 				end
 			end
+		-- Handle ongoing saves 
+		elseif  StringManager.isWord(aWords[i], "repeat") and StringManager.isWord(aWords[i+2], "saving") and 
+			StringManager.isWord(aWords[i +3], "throw") then
+				local tSaves = PowerManager.parseSaves(sPowerName, aWords, false, false)
+				local aSave = tSaves[#tSaves]
+				if aSave == nil then
+					break
+				end
+				local j = i+3
+				local bStartTurn = false
+				local bEndSuccess = false
+				local aName = {};
+				local sClause = nil;
+				
+				while aWords[j] do
+					if StringManager.isWord(aWords[j], "start") then
+						bStartTurn = true
+					end
+					if StringManager.isWord(aWords[j], "ending") then
+						bEndSuccess = true
+					end
+					j = j+1
+				end
+				if bStartTurn == true then
+					sClause = "SAVES:"
+				else
+					sClause = "SAVEE:"
+				end
+				
+				sClause  = sClause .. " " .. DataCommon.ability_ltos[aSave.save]
+				sClause  = sClause .. " " .. aSave.savemod
+				
+				if bEndSuccess == true then
+					sClause = sClause .. " (R)"
+				end
 
+				table.insert(aName, aSave.label);
+				if rPrevious ~= nil then
+					table.insert(aName, rPrevious.sName)
+				end
+				table.insert(aName, sClause);
+				rCurrent = {}
+				rCurrent.startindex = i
+				rCurrent.endindex = i+3
+				rCurrent.sName = table.concat(aName, "; ");
 		elseif (i > 1) and StringManager.isWord(aWords[i], DataCommon.conditions) then
 			local bValidCondition = false;
 			local nConditionStart = i;
 			local j = i - 1;
-			
+			local sTurnModifier = getTurnModifier(aWords, i)
 			while aWords[j] do
 				if StringManager.isWord(aWords[j], "be") then
 					if StringManager.isWord(aWords[j-1], "or") then
@@ -686,15 +736,18 @@ function customParseEffects(sPowerName, aWords)
 				else
 					break;
 				end
-
 				j = j - 1;
 			end
 			
 			if bValidCondition then
 				rCurrent = {};
-				rCurrent.sName = StringManager.capitalize(aWords[i]);
+				rCurrent.sName = sPowerName .. "; " .. StringManager.capitalize(aWords[i]);
 				rCurrent.startindex = nConditionStart;
 				rCurrent.endindex = i;
+				if sRemoveTurn ~= "" then
+					rCurrent.sName = rCurrent.sName .. "; " .. sTurnModifier
+				end
+				rPrevious = rCurrent
 			end
 		end
 		
@@ -748,7 +801,7 @@ function customParseEffects(sPowerName, aWords)
 					rConcentrate.startindex = i;
 					rConcentrate.endindex = j+1;
 
-					parseEffectsAdd(aWords, i, rConcentrate, effects);
+					PowerManager.parseEffectsAdd(aWords, i, rConcentrate, effects);
 				end
 			end
 		end
@@ -756,4 +809,30 @@ function customParseEffects(sPowerName, aWords)
 	end
 	
 	return effects;
+end
+
+function getTurnModifier(aWords, i)
+	local sRemoveTurn = ""
+	while aWords[i] do
+		if StringManager.isWord(aWords[i], "until") and
+			StringManager.isWord(aWords[i+1], "the") and
+			StringManager.isWord(aWords[i+2], {"start","end"}) and 
+			StringManager.isWord(aWords[i+3], "of") then 
+			if StringManager.isWord(aWords[i+4], "its") then
+				if StringManager.isWord(aWords[i+2], "start") then
+					sRemoveTurn = "TURNRS"
+				else
+					sRemoveTurn = "TURNRE"
+				end
+			else
+				if StringManager.isWord(aWords[i+2], "start") then
+					sRemoveTurn = "STURNRS"
+				else
+					sRemoveTurn = "STURNRE"
+				end
+			end
+		end
+		i = i +1
+	end
+	return sRemoveTurn
 end
