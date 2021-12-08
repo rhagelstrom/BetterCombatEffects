@@ -195,6 +195,8 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **DC: (N)** If the actor has the effect DC, (N) will be added  to the [SDC] when [SDC] is automatically replaced. (N) can be any number
 
+* **(E)** If the source of the effect drops to zero hit points, then this effect will be removed
+
 ### Concentration
 
 Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu

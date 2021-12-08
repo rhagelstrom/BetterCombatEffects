@@ -181,7 +181,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 	if not rTarget or not rSource or not rRoll  then
 		return onDamage(rSource, rTarget, rRoll)
 	end
-	
+	local bDead = false
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local nodeSource = ActorManager.getCTNode(rSource)	
 	-- save off temp hp and wounds before damage
@@ -190,6 +190,12 @@ function customOnDamage(rSource, rTarget, rRoll)
 	-- Play nice with others
 	-- Do damage first then modify any effects
 	onDamage(rSource, rTarget, rRoll)
+
+	nTotalHP = DB.getValue(nodeTarget, "hp.total", 0)
+	nWounds = DB.getValue(nodeTarget, "hp.wounds", 0)
+	if nTotalHP == nWounds then
+		bDead = true
+	end
 
 	-- get temp hp and wounds after damage
 	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
@@ -239,6 +245,8 @@ function customOnDamage(rSource, rTarget, rRoll)
 	-- Loop though the effects on the source of the damage
 	for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
 		local sEffect = DB.getValue(nodeEffect, "label", "")
+		local sSource = ActorManager.getCTNodeName(sSource)
+
 		if sEffect:match("SDMGADDT") or sEffect:match("SDMGADDS") then
 			local rEffect = EffectsManagerBCE.matchEffect(sEffect)
 			if rEffect ~= nil and rEffect.sName ~= nil then
@@ -252,6 +260,19 @@ function customOnDamage(rSource, rTarget, rRoll)
 				end
 			end
 		end
+	end
+	--if the target is dead, process all effects with (E)
+	if(bDead == true) then
+		local sTarget =ActorManager.getCTNodeName(rTarget)
+		CombatManager.callForEachCombatantEffect(EffectsManagerBCEDND.endEffectsOnDead, sTarget)
+	end
+end
+
+function endEffectsOnDead(nodeEffect, sTarget)
+	local sEffect = DB.getValue(nodeEffect, "label", "")
+
+	if (sEffect:match("%(E%)") and sTarget ==  DB.getValue(nodeEffect,"source_name", "")) then
+		EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
 	end
 end
 
