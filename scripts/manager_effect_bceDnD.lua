@@ -6,6 +6,7 @@
 local RulesetEffectManager = nil
 local RulesetActorManager = nil
 local onDamage = nil
+local messageDamage = nil
 local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
 
@@ -212,20 +213,9 @@ function customOnDamage(rSource, rTarget, rRoll)
 	end
 	-- Loop through effects on the target of the damage
 	for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
-		local sEffect = DB.getValue(nodeEffect, "label", "")
-	
-		if EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGRT", rSource) then	
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
-			break
-		end
+		local sEffect = DB.getValue(nodeEffect, "label", "")	
 		if (fProcessEffectOnDamage ~= nil) then
 			fProcessEffectOnDamage(rSource,rTarget, nodeEffect)
-		end
-		if EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGAT", rSource, true) then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Activate")		
-		end
-		if EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGDT", rSource) then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate")
 		end
 		if sEffect:match("TDMGADDT") or sEffect:match("TDMGADDS") then
 			local rEffect = EffectsManagerBCE.matchEffect(sEffect)
@@ -274,6 +264,110 @@ function endEffectsOnDead(nodeEffect, sTarget)
 	if (sEffect:match("%(E%)") and sTarget ==  DB.getValue(nodeEffect,"source_name", "")) then
 		EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
 	end
+end
+
+--scrape the message string for the damage. For multiple types of damage, FG is no help and we will
+-- just need to figure out the breakdown ourselves or live with it.
+function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
+	-- don't waste cycles if no damage
+	if (tonumber(sTotal) > 0) then
+		local aEffects = {}
+		local aDMGTypes = {}
+		local bMatch = false
+		local bRangeMatch = true
+
+		for _,sType in ipairs(DataCommon.dmgtypes) do
+			if sDamageDesc:match(sType) then
+				table.insert(aDMGTypes, sType)
+			end
+		end
+		local nodeTarget = ActorManager.getCTNode(rTarget)
+		for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
+			local sEffect = DB.getValue(nodeEffect, "label", "")
+		--	Debug.chat(sEffect)	
+			if (EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGDT", rSource) or				
+				EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGRT", rSource) or
+				EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGAT", rSource, true)) then
+				
+					Debug.chat(sEffect)
+				local aEffectComps = EffectManager.parseEffect(sEffect)
+				for _,sEffectComp in ipairs(aEffectComps) do
+					bMatch = false
+					bRangeMatch = true
+					local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+					for _,sDMGType in ipairs(rEffectComp.remainder) do
+						sDMGType = sDMGType:lower()
+						if (StringManager.contains(aDMGTypes, sDMGType) or sDMGType == "all") then
+							bMatch = true
+						end
+						--Debug.chat(sDMGType .. " " .. sDamageDesc)
+
+						if (sDMGType == "ranged" and sDamageDesc:match("%(M%)")) or
+							(sDMGType == "melee" and sDamageDesc:match("%(R%)")) then
+							bRangeMatch = false
+						end
+					end
+					if (bRangeMatch and bMatch) then
+						if (rEffectComp.type == "DMGDT") then
+							EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate")
+						elseif (rEffectComp.type == "DMGAT") then
+							EffectsManagerBCE.modifyEffect(nodeEffect, "Activate")
+						elseif (rEffectComp.type == "DMGRT") then
+							EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
+						end
+					end
+				end
+			end
+		end
+	end
+	return messageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
+end
+function deadcode()
+	if true then
+	--	Debug.chat(sDamageDesc)
+	--	Debug.chat(aDMGTypes)
+--		table.insert(rDMG, RulesetEffectManager.getEffectsByType(rTarget, "DMGRT", aDMGTypes))
+--		table.insert(rDMG, RulesetEffectManager.getEffectsByType(rTarget, "DMGDT", aDMGTypes))
+--		table.insert(rDMG, RulesetEffectManager.getEffectsByType(rTarget, "DMGAT", aDMGTypes))
+		--local rDamage = ActionDamage.decodeDamageText(tonumber(sTotal), sDamageDesc)
+		--	local sDisposeableDamgeDesc = sDamageDesc
+	--	Debug.chat(rDMG)
+		local bRange = false
+		if (sDamageType:match("%(R%)")) then
+			bRange = true
+		end
+		local bFoundRange = false
+
+		for _,nodeEffect in ipairs(aEffects) do
+			Debug.chat(aDMG)
+			local sEffect = DB.getValue(nodeEffect, "label", "")
+			if aDMG.type ~= nil   then
+				for _,sDMGType in ipairs(aDMG.remainder) do
+					if(StringManager.isWord(sDMGType, {"ranged","melee"})) then
+						bFoundRange = true
+					end
+					if( sDamageDesc:match(sDMGType) or sDMGType == "all") then
+						bMatch = true
+					end
+				end
+				--bMatch = false
+				Debug.chat(aDMG.type)
+				Debug.chat(EffectsManagerBCE.processEffect(rTarget,aDMG,"DMGDT", rSource))
+				if (aDMG[1].type == "DMGDT" and  bMatch and EffectsManagerBCE.processEffect(rTarget,aDMG,"DMGDT", rSource)) then
+					EffectsManagerBCE.modifyEffect(aDMG, "Remove")
+					break
+				elseif (aDMG.type == "DMGAT" and bMatch and EffectsManagerBCE.processEffect(rTarget,aDMG,"DMGAT", rSource)) then
+					EffectsManagerBCE.modifyEffect(aDMG, "Activate")
+					break		
+				elseif (aDMG.type == "DMGRT" and bMatch and EffectsManagerBCE.processEffect(rTarget,aDMG,"DMGRT", rSource)) then
+					EffectsManagerBCE.modifyEffect(aDMG, "Remove")
+					break	
+				end
+			end
+		end
+
+	end
+	return messageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
 end
 
 function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
@@ -428,6 +522,8 @@ function onInit()
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectStart)
 		
 		-- save off the originals so we play nice with others
+		messageDamage = ActionDamage.messageDamage
+		ActionDamage.messageDamage = customMessageDamage
 		onDamage = ActionDamage.onDamage
 		ActionDamage.onDamage = customOnDamage
 		ActionsManager.registerResultHandler("damage", customOnDamage)
@@ -450,7 +546,8 @@ function onClose()
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
-
+		
+		ActionDamage.messageDamage = messageDamage
 		ActionDamage.onDamage = onDamage
 		ActionsManager.unregisterResultHandler("damage")
 		ActionsManager.unregisterResultHandler("effectbce")

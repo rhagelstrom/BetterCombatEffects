@@ -17,7 +17,7 @@ Better Combat Effects is an extension that allows for fine tuning of when effect
 
 * **TURNAS** will cause an effect to ACTIVIATE on the START of the PC/NPC turn. Using TURNAS along with DMGDT allows items such as the Cloak of Displacement or a Displacer Beast's Displacement to function properly.
 
-  * Cloak of Displacement; GRANTDISATK; TURNAS; DMGDT
+  * Cloak of Displacement; GRANTDISATK; TURNAS; DMGDT: all
 
 * **TURNDS** will cause an effect to DEACTIVIATE on the START of the PC/NPC turn.
 
@@ -47,7 +47,6 @@ Better Combat Effects is an extension that allows for fine tuning of when effect
 
 **RESTL**, for long rest and **RESTS** for short rest. These tags will REMOVE an effect on short rest or long rest. Effects with RESTS will also be removed on long rest.
 
-* Exhaustion; EXHAUSTION: 1; RESTL
 * True Seeing; VISION: 120 truesight; RESTS
 * Mage Armor; AC: 3; RESTL
 
@@ -66,7 +65,7 @@ Additionally, effects that use ability score modifiers in the format [ ABILITYSC
 
 **5E:** Multiple identical effects are now ignored. If a PC/NPC is poisoned, it won't be poisoned again. This however can be overridden with the STACK tag for effects that need to stack such as a shadow's Strength Drain. The ignore duplicates can be disabled in the options menu.
 
-**Other Ruleset:s** Multiple of the same effect can be applied by using the STACK tag
+**Other Rulesets** Multiple of the same effect can be applied by using the STACK tag
 
 * Strength Drain; STR: -1d4; STACK; RESTL
 
@@ -76,16 +75,16 @@ Adding effect with a dice string automatically rolls the dice when the effect is
 
 ### Damage Modifiers
 
-* **DMGAT** will cause an effect to ACTIVIATE when the PC/NPC takes damage.
+* **DMGAT (N) [damage type(s)][Range]** will cause an effect to ACTIVIATE when the PC/NPC takes damage.
 
-* **DMGDT** will cause an effect to DEACTIVIATE when the PC/NPC takes damage. Allows items like Cloak of Displacement to function properly.
+* **DMGDT (N) [damage type(s)][Range]** will cause an effect to DEACTIVIATE when the PC/NPC takes damage. Allows items like Cloak of Displacement to function properly.
 
-  * Cloak of Displacement; GRANTDISATK; TURNAS; DMGDT
+  * Cloak of Displacement; GRANTDISATK; TURNAS; DMGDT: all
 
-* **DMGRT** The effect will be REMOVED from the PC/NPC if they take damage. This is useful for turn undead or sleep
+* **DMGRT (N) [damage type(s)][Range]** The effect will be REMOVED from the PC/NPC if they take damage. This is useful for turn undead or sleep
 
-  * Turn Undead; Turned; DMGRT
-  * Sleep; Unconscious; DMGRT
+  * Turn Undead; Turned; DMGRT: all
+  * Sleep; Unconscious; DMGRT: all
 
 ### Add Effect on Damage Modifiers
 
@@ -104,12 +103,12 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Shield of the 300; TDMGADDT: Shield of the 300 Bonus
   * Shield of the 300 Bonus; AC: 1; TURNRS; STACK
 
-* **TDMGADDS** the TARGET of the attack will add an effect to the SOURCE when damage is done. This is useful for de-buffing the attacker on successful hit. Example would be like a rust monster
+* **TDMGADDS**  the TARGET of the attack will add an effect to the SOURCE when damage is done. This is useful for de-buffing the attacker on successful hit. Example would be like a rust monster
 
   * Rust Monster; TDMGADDS: Rust Metal
   * Rust Metal; DMG: -1; STACK;
 
-* **SDMGADDT** the SOURCE of the attack will add an effect to the TARGET when damage is done. The shadow is an example.
+* **SDMGADD**  the SOURCE of the attack will add an effect to the TARGET when damage is done. The shadow is an example.
 
   * Strength Drain; STR: -1d4; STACK; RESTL
   * Shadow; SDMGADDT: Strength Drain
@@ -179,7 +178,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 ## 4E/5E
 ---
 ### Damage Reduction
-* **DMGR: (N) [damage type(s)]** Reduce the damage taken by the specified damage type(s) by (N).
+* **DMGR: (N) [damage type(s)][Range]** Reduce the damage taken by the specified damage type(s) by (N).
   * Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic
   * Interception Fighting Style; DMGR: 1d10 [PRF],all
   * Deflict Missles; DMGR: 1d10 [MONK],[DEX],ranged,bludgeoning,piercing
