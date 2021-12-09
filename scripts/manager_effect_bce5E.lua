@@ -234,7 +234,7 @@ function getDCEffectMod(nodeActor)
 end
 
 function replaceSaveDC(rNewEffect, rActor)
-	if rNewEffect.sName:match("%[SDC]") and  
+	if (rNewEffect.sName:match("%[SDC]") or rNewEffect.sName:match("%(SDC%)")) and  
 			(rNewEffect.sName:match("SAVEE") or 
 			rNewEffect.sName:match("SAVES") or 
 			rNewEffect.sName:match("SAVEA") or
@@ -266,6 +266,7 @@ function replaceSaveDC(rNewEffect, rActor)
 			end
 		end
 		rNewEffect.sName = rNewEffect.sName:gsub("%[SDC]", tostring(nSpellcastingDC))
+		rNewEffect.sName = rNewEffect.sName:gsub("%(SDC%)", tostring(nSpellcastingDC))
 	end
 end
 
