@@ -284,12 +284,10 @@ function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc
 		local nodeTarget = ActorManager.getCTNode(rTarget)
 		for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
 			local sEffect = DB.getValue(nodeEffect, "label", "")
-		--	Debug.chat(sEffect)	
 			if (EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGDT", rSource) or				
 				EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGRT", rSource) or
 				EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGAT", rSource, true)) then
 				
-					Debug.chat(sEffect)
 				local aEffectComps = EffectManager.parseEffect(sEffect)
 				for _,sEffectComp in ipairs(aEffectComps) do
 					bMatch = false
@@ -300,8 +298,6 @@ function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc
 						if (StringManager.contains(aDMGTypes, sDMGType) or sDMGType == "all") then
 							bMatch = true
 						end
-						--Debug.chat(sDMGType .. " " .. sDamageDesc)
-
 						if (sDMGType == "ranged" and sDamageDesc:match("%(M%)")) or
 							(sDMGType == "melee" and sDamageDesc:match("%(R%)")) then
 							bRangeMatch = false
@@ -319,53 +315,6 @@ function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc
 				end
 			end
 		end
-	end
-	return messageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
-end
-function deadcode()
-	if true then
-	--	Debug.chat(sDamageDesc)
-	--	Debug.chat(aDMGTypes)
---		table.insert(rDMG, RulesetEffectManager.getEffectsByType(rTarget, "DMGRT", aDMGTypes))
---		table.insert(rDMG, RulesetEffectManager.getEffectsByType(rTarget, "DMGDT", aDMGTypes))
---		table.insert(rDMG, RulesetEffectManager.getEffectsByType(rTarget, "DMGAT", aDMGTypes))
-		--local rDamage = ActionDamage.decodeDamageText(tonumber(sTotal), sDamageDesc)
-		--	local sDisposeableDamgeDesc = sDamageDesc
-	--	Debug.chat(rDMG)
-		local bRange = false
-		if (sDamageType:match("%(R%)")) then
-			bRange = true
-		end
-		local bFoundRange = false
-
-		for _,nodeEffect in ipairs(aEffects) do
-			Debug.chat(aDMG)
-			local sEffect = DB.getValue(nodeEffect, "label", "")
-			if aDMG.type ~= nil   then
-				for _,sDMGType in ipairs(aDMG.remainder) do
-					if(StringManager.isWord(sDMGType, {"ranged","melee"})) then
-						bFoundRange = true
-					end
-					if( sDamageDesc:match(sDMGType) or sDMGType == "all") then
-						bMatch = true
-					end
-				end
-				--bMatch = false
-				Debug.chat(aDMG.type)
-				Debug.chat(EffectsManagerBCE.processEffect(rTarget,aDMG,"DMGDT", rSource))
-				if (aDMG[1].type == "DMGDT" and  bMatch and EffectsManagerBCE.processEffect(rTarget,aDMG,"DMGDT", rSource)) then
-					EffectsManagerBCE.modifyEffect(aDMG, "Remove")
-					break
-				elseif (aDMG.type == "DMGAT" and bMatch and EffectsManagerBCE.processEffect(rTarget,aDMG,"DMGAT", rSource)) then
-					EffectsManagerBCE.modifyEffect(aDMG, "Activate")
-					break		
-				elseif (aDMG.type == "DMGRT" and bMatch and EffectsManagerBCE.processEffect(rTarget,aDMG,"DMGRT", rSource)) then
-					EffectsManagerBCE.modifyEffect(aDMG, "Remove")
-					break	
-				end
-			end
-		end
-
 	end
 	return messageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
 end
