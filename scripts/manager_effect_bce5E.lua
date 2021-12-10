@@ -237,7 +237,7 @@ function replaceSaveDC(rNewEffect, rActor)
 	if (rNewEffect.sName:match("%[SDC]") or rNewEffect.sName:match("%(SDC%)")) and  
 			(rNewEffect.sName:match("SAVEE") or 
 			rNewEffect.sName:match("SAVES") or 
-			rNewEffect.sName:match("SAVEA") or
+			rNewEffect.sName:match("SAVEA:") or
 		    rNewEffect.sName:match("SAVEONDMG")) then
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
 		local nSpellcastingDC = 0
