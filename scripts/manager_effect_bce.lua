@@ -219,8 +219,9 @@ function matchEffect(sEffect, aComps)
 			"EXPIREADD"
 		};
 	end
-
 	local rEffect = {}
+
+
 	local sEffectLookup = ""
 	local aEffectComps = EffectManager.parseEffect(sEffect)
 	for _,sEffectComp in ipairs(aEffectComps) do
@@ -233,6 +234,17 @@ function matchEffect(sEffect, aComps)
 			sEffectLookup = sEffectLookup:gsub("%;", "")
 		end	
 	end
+	--search conditions table first
+	if User.getRulesetName() == "5E" then 
+		if StringManager.contains(DataCommon.conditions, sEffectLookup:lower()) then
+			rEffect.sName = StringManager.capitalize(sEffectLookup)
+			rEffect.nDuration = 0
+			rEffect.sUnits = ""
+			rEffect.nGMOnly = 0
+
+			return rEffect
+		end
+	end
 	--Find the effect name in our custom effects list
 	for _,v in pairs(DB.getChildrenGlobal("effects")) do
 		rEffect = {}
@@ -241,6 +253,8 @@ function matchEffect(sEffect, aComps)
 			aEffectComps = EffectManager.parseEffect(sEffect)
 			-- Is this the effeect we are looking for?
 			-- Name is parsed to index 1 in the array
+			
+		
 			if aEffectComps[1]:lower() == sEffectLookup:lower() then
 				local nodeGMOnly = DB.getChild(v, "isgmonly")	
 				if nodeGMOnly then
