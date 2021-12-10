@@ -167,6 +167,24 @@ function processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
 end
 
 function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+	-- Repalace effects with () that fantasygrounds will autocalc with [ ]
+	local sSubMatch = rNewEffect.sName:match("%([%-H%d+]?%u+%)")
+	local aReplace = {"PRF", "LVL"}
+	for _,sClass in pairs(DataCommon.classes) do
+		table.insert(aReplace, sClass:upper())	
+	end
+	for _,sAbility in pairs(DataCommon.abilities) do
+		table.insert(aReplace, DataCommon.ability_ltos[sAbility]:upper())
+	end
+	for _,sTag in pairs(aReplace) do
+		if sSubMatch:match(sTag) then
+			sSubMatch = sSubMatch:gsub("%-", "%%%-")
+			sSubMatch = sSubMatch:gsub("%(", "%%%[")
+			sSubMatch = sSubMatch:gsub("%)", "]")
+			rNewEffect.sName = rNewEffect.sName:gsub("%([%-H%d+]?%u+%)", sSubMatch)
+			break
+		end
+	end
 	local rActor = ActorManager.resolveActor(nodeCT)
 	local rSource = nil
 	if rNewEffect.sSource == nil or rNewEffect.sSource == "" then
