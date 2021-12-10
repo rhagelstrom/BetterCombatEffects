@@ -39,6 +39,8 @@ Better Combat Effects is an extension that allows for fine tuning of when effect
 
   * Stunning Strike; Stunned; STURNRE
 
+* **(DE)** will cause the effect to be disabled when added to the CT 
+
 ## 5E/4E/3.5E/PFRPG
 
 ---

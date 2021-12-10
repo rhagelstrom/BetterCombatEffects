@@ -144,10 +144,6 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	-- Play nice with others
 	addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 
-	if onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect) == false then
-		return
-	end
-
 	local rActor = ActorManager.resolveActor(nodeCT)
 	for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
 		local sEffect = DB.getValue(nodeEffect, "label", "")
@@ -165,8 +161,15 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 					DB.setValue(nodeEffect, "duration", "number", nDuration + 1)
 				end
 			end
+			if sEffect:match("%(DE%)") then
+				modifyEffect(nodeEffect, "Deactivate")
+			end
 		end
 	end
+	if onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect) == false then
+		return
+	end
+
 end
 
 function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
