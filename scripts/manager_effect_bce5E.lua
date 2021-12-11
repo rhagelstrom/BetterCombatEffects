@@ -175,18 +175,15 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	for _,sAbility in pairs(DataCommon.abilities) do
 		table.insert(aReplace, DataCommon.ability_ltos[sAbility]:upper())
 	end
-	local sSubMatch = rNewEffect.sName:match("%([%-H%d+]?%u+%)")
-	while sSubMatch ~= nil do 
-		for _,sTag in pairs(aReplace) do
-			if sSubMatch:match(sTag) then
-				sSubMatch = sSubMatch:gsub("%-", "%%%-")
-				sSubMatch = sSubMatch:gsub("%(", "%%%[")
-				sSubMatch = sSubMatch:gsub("%)", "]")
-				rNewEffect.sName = rNewEffect.sName:gsub("%([%-H%d+]?%u+%)", sSubMatch, 1)
-				break
-			end
+	for _,sTag in pairs(aReplace) do
+		local sMatchString = "%([%-H%d+]?" .. sTag .. "%)"
+		local sSubMatch = rNewEffect.sName:match(sMatchString)
+		if sSubMatch ~= nil then
+			sSubMatch = sSubMatch:gsub("%-", "%%%-")
+			sSubMatch = sSubMatch:gsub("%(", "%%%[")
+			sSubMatch = sSubMatch:gsub("%)", "]")
+			rNewEffect.sName = rNewEffect.sName:gsub(sMatchString, sSubMatch)
 		end
-		sSubMatch = rNewEffect.sName:match("%([%-H%d+]?%u+%)")
 	end
 
 	if rNewEffect.sName:match("EFFINIT:%s*%-?%d+") then
@@ -204,6 +201,7 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 
 	rNewEffect.sName = EffectManager5E.evalEffect(rSource, rNewEffect.sName)
 	replaceSaveDC(rNewEffect, rSource)
+	abilityReplacement(rNewEffect,rSource)
 
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
 		local nDuration = rNewEffect.nDuration
@@ -259,12 +257,43 @@ function getDCEffectMod(nodeActor)
 	return nDC
 end
 
+--when effect has tags, [PRF],[LVL], in a remiander evalEffect evaluates and returns those as the mod and not part of the remainder. 
+--For our save DC to work correctly we need to massage that number a bit and move it to the correct place
+function abilityReplacement(rNewEffect, rActor)
+	local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
+	for i,sEffectComp in ipairs(aEffectComps) do
+		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+		if rEffectComp.mod ~= 0 and
+			rEffectComp.type == "SAVEE"  or 
+			rEffectComp.type == "SAVES" or
+			rEffectComp.type == "SAVEA" or
+			rEffectComp.type == "SAVEONDMG" then
+			for j,sRemainder in ipairs(rEffectComp.remainder) do
+				for _,sAbility in pairs(DataCommon.abilities) do
+					if sRemainder == DataCommon.ability_ltos[sAbility]:upper() then
+						nMod = tonumber(rEffectComp.remainder[j+1])
+						if (nMod ~= nil) then
+							rEffectComp.remainder[j+1] = tostring(nMod + rEffectComp.mod)
+						else
+							table.insert(rEffectComp.remainder, j+1, tostring(rEffectComp.mod))
+						end
+						rEffectComp.mod = 0
+						break
+					end
+				end
+			end
+			aEffectComps[i] =  EffectManager5E.rebuildParsedEffectComp(rEffectComp):gsub(",", " ")
+			rNewEffect.sName = EffectManager.rebuildParsedEffect(aEffectComps)
+		end
+	end
+end
+
 function replaceSaveDC(rNewEffect, rActor)
 	if (rNewEffect.sName:match("%[SDC]") or rNewEffect.sName:match("%(SDC%)")) and  
-			(rNewEffect.sName:match("SAVEE") or 
-			rNewEffect.sName:match("SAVES") or 
-			rNewEffect.sName:match("SAVEA:") or
-		    rNewEffect.sName:match("SAVEONDMG")) then
+			(rNewEffect.sName:match("SAVEE%s*:") or 
+			rNewEffect.sName:match("SAVES%s*:") or 
+			rNewEffect.sName:match("SAVEA%s*:") or
+		    rNewEffect.sName:match("SAVEONDMG%s*:")) then
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
 		local nSpellcastingDC = 0
 		local nDC = getDCEffectMod(ActorManager.getCTNode(rActor))
