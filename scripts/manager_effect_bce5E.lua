@@ -168,7 +168,6 @@ end
 
 function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	-- Repalace effects with () that fantasygrounds will autocalc with [ ]
-	local sSubMatch = rNewEffect.sName:match("%([%-H%d+]?%u+%)")
 	local aReplace = {"PRF", "LVL"}
 	for _,sClass in pairs(DataCommon.classes) do
 		table.insert(aReplace, sClass:upper())	
@@ -176,14 +175,18 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	for _,sAbility in pairs(DataCommon.abilities) do
 		table.insert(aReplace, DataCommon.ability_ltos[sAbility]:upper())
 	end
-	for _,sTag in pairs(aReplace) do
-		if sSubMatch:match(sTag) then
-			sSubMatch = sSubMatch:gsub("%-", "%%%-")
-			sSubMatch = sSubMatch:gsub("%(", "%%%[")
-			sSubMatch = sSubMatch:gsub("%)", "]")
-			rNewEffect.sName = rNewEffect.sName:gsub("%([%-H%d+]?%u+%)", sSubMatch)
-			break
+	local sSubMatch = rNewEffect.sName:match("%([%-H%d+]?%u+%)")
+	while sSubMatch ~= nil do 
+		for _,sTag in pairs(aReplace) do
+			if sSubMatch:match(sTag) then
+				sSubMatch = sSubMatch:gsub("%-", "%%%-")
+				sSubMatch = sSubMatch:gsub("%(", "%%%[")
+				sSubMatch = sSubMatch:gsub("%)", "]")
+				rNewEffect.sName = rNewEffect.sName:gsub("%([%-H%d+]?%u+%)", sSubMatch, 1)
+				break
+			end
 		end
+		sSubMatch = rNewEffect.sName:match("%([%-H%d+]?%u+%)")
 	end
 	local rActor = ActorManager.resolveActor(nodeCT)
 	local rSource = nil
