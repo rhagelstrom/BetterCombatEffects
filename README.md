@@ -191,6 +191,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 ## 5E
 
 ---
+* **EFFINIT: (N)** Add an effect with initiative number (N)
 
 * **[SDC]** When an effect with [SDC] is applied from a PC/NPC, [SDC] will be replaced with the PC/NPCs spell save DC based off of its spellcasting ability.
 

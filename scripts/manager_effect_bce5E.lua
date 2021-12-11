@@ -188,6 +188,11 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		end
 		sSubMatch = rNewEffect.sName:match("%([%-H%d+]?%u+%)")
 	end
+
+	if rNewEffect.sName:match("EFFINIT:%s*%-?%d+") then
+		local sInit = rNewEffect.sName:match("%d+")
+		rNewEffect.nInit = tonumber(sInit)
+	end
 	local rActor = ActorManager.resolveActor(nodeCT)
 	local rSource = nil
 	if rNewEffect.sSource == nil or rNewEffect.sSource == "" then
