@@ -110,7 +110,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Rust Monster; TDMGADDS: Rust Metal
   * Rust Metal; DMG: -1; STACK;
 
-* **SDMGADD**  the SOURCE of the attack will add an effect to the TARGET when damage is done. The shadow is an example.
+* **SDMGADDT**  the SOURCE of the attack will add an effect to the TARGET when damage is done. The shadow is an example.
 
   * Strength Drain; STR: -1d4; STACK; RESTL
   * Shadow; SDMGADDT: Strength Drain

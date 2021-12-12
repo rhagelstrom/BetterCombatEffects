@@ -182,6 +182,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 	if not rTarget or not rSource or not rRoll  then
 		return onDamage(rSource, rTarget, rRoll)
 	end
+
 	local bDead = false
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local nodeSource = ActorManager.getCTNode(rSource)	
@@ -191,6 +192,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 	-- Play nice with others
 	-- Do damage first then modify any effects
 	onDamage(rSource, rTarget, rRoll)
+	processAbsorb(rSource, rTarget, rRoll)
 
 	nTotalHP = DB.getValue(nodeTarget, "hp.total", 0)
 	nWounds = DB.getValue(nodeTarget, "hp.wounds", 0)
@@ -200,17 +202,16 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	-- get temp hp and wounds after damage
 	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
-	
+
 	if OptionsManager.isOption("TEMP_IS_DAMAGE", "on") then
 		-- If no damage was applied then return
 		if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP then
 			return
 		end
-		else
-			if nWoundsPrev >= nWounds then
-				return
-		end
+	elseif nWoundsPrev >= nWounds then
+		return
 	end
+
 	-- Loop through effects on the target of the damage
 	for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
 		local sEffect = DB.getValue(nodeEffect, "label", "")	
@@ -266,6 +267,47 @@ function endEffectsOnDead(nodeEffect, sTarget)
 	end
 end
 
+function processAbsorb(rSource, rTarget, rRoll)
+	local nodeTarget = ActorManager.getCTNode(rTarget)
+	for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
+		if EffectsManagerBCE.processEffect(rTarget, nodeEffect,"ABSORB", rSource) then
+			local aDamageTypes = {}
+			for _,aType in pairs(rRoll.clauses) do
+				table.insert(aDamageTypes, {aDMG = ActionDamage.getDamageTypesFromString(aType.dmgtype), nTotal = aType.nTotal})
+			end		
+			local sEffect = DB.getValue(nodeEffect, "label", "")
+			local aDMGTypes = {}
+			local bHalf = false
+			local nDMGAmount = 0
+			local sDMGType
+			local aEffectComps = EffectManager.parseEffect(sEffect)
+			for _,sEffectComp in ipairs(aEffectComps) do
+				local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+				if rEffectComp.type == "ABSORB" then
+					for _,sRemainder in ipairs(rEffectComp.remainder) do
+						if sRemainder == "(H)" then
+							bHalf = true
+						end
+						for _,aDMGClause in ipairs(aDamageTypes) do
+							if StringManager.contains(aDMGClause.aDMG, sRemainder) then
+								nDMGAmount = aDMGClause.nTotal
+								sDMGType = sRemainder
+							end
+						end
+					end
+				end
+			end		
+			if nDMGAmount > 0 then
+				local sLabel =  "[ABSORBED: " .. sDMGType .. "]"
+				if bHalf then
+					nDMGAmount= math.floor(nDMGAmount/2)
+				end
+				ActionDamage.applyDamage(rSource, rTarget, DB.getValue(nodeEffect, "isgmonly", ""), "[HEAL]" .. sLabel, nDMGAmount)
+			end
+		end
+	end
+end
+
 --scrape the message string for the damage. For multiple types of damage, FG is no help and we will
 -- just need to figure out the breakdown ourselves or live with it.
 function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
@@ -315,6 +357,10 @@ function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc
 				end
 			end
 		end
+	end
+	local sAbsorb = sDamageDesc:match("%[ABSORBED:%s*%l*]")
+	if sAbsorb ~= nil then
+		sExtraResult = sAbsorb .. sExtraResult
 	end
 	return messageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
 end
