@@ -11,7 +11,7 @@ Better Combat Effects is an extension that allows for fine tuning of when effect
 
 ---
 
-* **EXPIREADD**: [Effect] Add Effect from custom effects list when this effect expires
+* **EXPIREADD: [custom effect]**:  Add Effect from custom effects list when this effect expires
 
 ### Turn Modifiers
 
@@ -77,13 +77,13 @@ Adding effect with a dice string automatically rolls the dice when the effect is
 
 ### Damage Modifiers
 
-* **DMGAT (N) [damage type(s)][Range]** will cause an effect to ACTIVIATE when the PC/NPC takes damage.
+* **DMGAT: (N) [damage type(s)][Range]** will cause an effect to ACTIVIATE when the PC/NPC takes damage.
 
-* **DMGDT (N) [damage type(s)][Range]** will cause an effect to DEACTIVIATE when the PC/NPC takes damage. Allows items like Cloak of Displacement to function properly.
+* **DMGDT: (N) [damage type(s)][Range]** will cause an effect to DEACTIVIATE when the PC/NPC takes damage. Allows items like Cloak of Displacement to function properly.
 
   * Cloak of Displacement; GRANTDISATK; TURNAS; DMGDT: all
 
-* **DMGRT (N) [damage type(s)][Range]** The effect will be REMOVED from the PC/NPC if they take damage. This is useful for turn undead or sleep
+* **DMGRT: (N) [damage type(s)][Range]** The effect will be REMOVED from the PC/NPC if they take damage. This is useful for turn undead or sleep
 
   * Turn Undead; Turned; DMGRT: all
   * Sleep; Unconscious; DMGRT: all
@@ -100,46 +100,49 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 ### Add Effect on Damage Modifiers
 
-* **TDMGADDT** the TARGET of the attack will add an effect to the TARGET (itself) when damage is done. Consider we have the following magic item. The target of the damages puts the effect "Shield of the 300 Bonus" on itself whenever it takes damage.
+* **TDMGADDT: [custom effect]** the TARGET of the attack will add an effect to the TARGET (itself) when damage is done. Consider we have the following magic item. The target of the damages puts the effect "Shield of the 300 Bonus" on itself whenever it takes damage.
 
   * Shield of the 300; TDMGADDT: Shield of the 300 Bonus
   * Shield of the 300 Bonus; AC: 1; TURNRS; STACK
 
-* **TDMGADDS**  the TARGET of the attack will add an effect to the SOURCE when damage is done. This is useful for de-buffing the attacker on successful hit. Example would be like a rust monster
+* **TDMGADDS: [custom effect]**  the TARGET of the attack will add an effect to the SOURCE when damage is done. This is useful for de-buffing the attacker on successful hit. Example would be like a rust monster
 
   * Rust Monster; TDMGADDS: Rust Metal
   * Rust Metal; DMG: -1; STACK;
 
-* **SDMGADDT**  the SOURCE of the attack will add an effect to the TARGET when damage is done. The shadow is an example.
+* **SDMGADDT: [custom effect]**  the SOURCE of the attack will add an effect to the TARGET when damage is done. The shadow is an example.
 
   * Strength Drain; STR: -1d4; STACK; RESTL
   * Shadow; SDMGADDT: Strength Drain
 
-* **SDMGADDS** the SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done.
+* **SDMGADDS: [custom effect]** the SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done.
 
 ### Ongoing Damage Modifiers
 
-* **DMGA (N) [damage type]** Apply damage when the effect is added (N) can be number or dice string
+* **DMGA: (N) [damage type]** Apply damage when the effect is added (N) can be number or dice string
   * AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire
 
-* **DMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn. (N) can be number or dice string
+* **DMGOE: (N) [damage type]** Apply ongoing damage at the end of the actors turn. (N) can be number or dice string
   * Vitriolic Sphere; DMGOE: 5d4 acid
 
-* **SDMGOS (N) [damage type]** Apply ongoing damage at the start of the actors turn who applied the effect. (N) can be number or dice string
+* **SDMGOS: (N) [damage type]** Apply ongoing damage at the start of the actors turn who applied the effect. (N) can be number or dice string
 
   * Water Elemental Whelm; grappled; restrained; SDMGOS: 2d8+4 bludgeoning
-* **SDMGOE (N) [damage type]** Apply ongoing damage at the end of the actors turn who applied the effect. (N) can be number or dice string
+* **SDMGOE: (N) [damage type]** Apply ongoing damage at the end of the actors turn who applied the effect. (N) can be number or dice string
 
 ### Ongoing Regeneration Modifiers
 
-* **REGENA (N)** Apply one time regenration when the effect is added. (N) can be number or dice string
+* **REGENA: (N)** Apply one time regenration when the effect is added. (N) can be number or dice string
 
-* **REGENE (N)** Apply regeneration at the end of the actors turn. (N) can be number or dice string
+* **REGENE: (N)** Apply regeneration at the end of the actors turn. (N) can be number or dice string
 
-* **SREGENS (N)** Apply regneration at the start of the actors turn who applied the effect. (N) can be number or dice string
+* **SREGENS: (N)** Apply regneration at the start of the actors turn who applied the effect. (N) can be number or dice string
 
 * **SREGENE (N)** Apply regeneration at the end of the actors turn who applied the effect. (N) can be number or dice string
 
+### Absorption
+
+* **ABSORB: [damage type] (H)** The Actor will heal the amount of damage dealt of the specified damage type. (H) The Actor will heal half rounded down of the specified damage type. The Actor likely should also be immune, "IMMUNE: [damage type]" to the same damage type to produce the desired results.
 
 ## 5E/3.5E/PFRPG
 
