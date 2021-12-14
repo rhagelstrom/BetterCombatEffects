@@ -160,7 +160,7 @@ function processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
 	end
 	
 	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVEE", rTarget) then
-		EffectManager5E.getEffectsByType(rSource, "SAVEE", rTarget)
+		--EffectManager5E.getEffectsByType(rSource, "SAVEE", rTarget)
 		saveEffect(nodeEffect, sourceNodeCT, "Save")
 	end
 	return true
@@ -235,10 +235,10 @@ end
 
 function replaceSaveDC(rNewEffect, rActor)
 	if rNewEffect.sName:match("%[SDC]") and  
-			(rNewEffect.sName:match("SAVEE") or 
-			rNewEffect.sName:match("SAVES") or 
-			rNewEffect.sName:match("SAVEA") or
-		    rNewEffect.sName:match("SAVEONDMG")) then
+			(rNewEffect.sName:match("SAVEE%s*:") or 
+			rNewEffect.sName:match("SAVES%s*:") or 
+			rNewEffect.sName:match("SAVEA%s*:") or
+		    rNewEffect.sName:match("SAVEONDMG%s*:")) then
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
 		local nSpellcastingDC = 0
 		local nDC = getDCEffectMod(ActorManager.getCTNode(rActor))
