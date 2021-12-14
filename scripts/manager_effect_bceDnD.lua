@@ -199,10 +199,8 @@ function customOnDamage(rSource, rTarget, rRoll)
 		if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP then
 			return
 		end
-		else
-			if nWoundsPrev >= nWounds then
-				return
-		end
+	elseif nWoundsPrev >= nWounds then
+			return
 	end
 	-- Loop through effects on the target of the damage
 	for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
