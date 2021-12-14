@@ -226,15 +226,12 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 			local rTarget = rActor
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "SAVEA", rTarget) then
 				saveEffect(nodeEffect, nodeCT, "Save")
-				break
 			end
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "REGENA", rTarget) then
 				EffectsManagerBCEDND.applyOngoingRegen(rSource, rTarget, nodeEffect, true)
-				break
 			end
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "DMGA", rTarget) then
 				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false, true)
-				break
 			end
 		end
 	end
@@ -289,11 +286,7 @@ function abilityReplacement(rNewEffect, rActor)
 end
 
 function replaceSaveDC(rNewEffect, rActor)
-<<<<<<< HEAD
 	if (rNewEffect.sName:match("%[SDC]") or rNewEffect.sName:match("%(SDC%)")) and  
-=======
-	if rNewEffect.sName:match("%[SDC]") and  
->>>>>>> free
 			(rNewEffect.sName:match("SAVEE%s*:") or 
 			rNewEffect.sName:match("SAVES%s*:") or 
 			rNewEffect.sName:match("SAVEA%s*:") or
