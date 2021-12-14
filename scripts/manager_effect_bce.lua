@@ -175,7 +175,7 @@ end
 function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 	if nodeEffect ~= nil then
 		local sEffect = DB.getValue(nodeEffect, "label", "")
-		if sEffect:match(sBCETag) == nil  then -- Does it contain BCE Tag
+		if sEffect:match(sBCETag.."[%s*:*;*]") == nil  then -- Does it contain BCE Tag
 			return false
 		end
 		local nActive = DB.getValue(nodeEffect, "isactive", 0)

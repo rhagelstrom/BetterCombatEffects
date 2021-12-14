@@ -160,7 +160,7 @@ function processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
 	end
 	
 	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVEE", rTarget) then
-		EffectManager5E.getEffectsByType(rSource, "SAVEE", rTarget)
+		--EffectManager5E.getEffectsByType(rSource, "SAVEE", rTarget)
 		saveEffect(nodeEffect, sourceNodeCT, "Save")
 	end
 	return true
@@ -289,7 +289,11 @@ function abilityReplacement(rNewEffect, rActor)
 end
 
 function replaceSaveDC(rNewEffect, rActor)
+<<<<<<< HEAD
 	if (rNewEffect.sName:match("%[SDC]") or rNewEffect.sName:match("%(SDC%)")) and  
+=======
+	if rNewEffect.sName:match("%[SDC]") and  
+>>>>>>> free
 			(rNewEffect.sName:match("SAVEE%s*:") or 
 			rNewEffect.sName:match("SAVES%s*:") or 
 			rNewEffect.sName:match("SAVEA%s*:") or
