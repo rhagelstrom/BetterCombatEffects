@@ -103,26 +103,49 @@ function applyOngoingRegen(rSource, rTarget, nodeEffect, bAdd)
 	local rAction = {}
 	rAction.label =  ""
 	rAction.clauses = {}
+	local rTempAction = {}
+	rTempAction.label =  ""
+	rTempAction.clauses = {}
+	rTempAction.subtype = "temp"
 	for _,sEffectComp in ipairs(aEffectComps) do
 		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-		if (rEffectComp.type == "REGENA" and bAdd == true) or ( bAdd == false and (rEffectComp.type == "REGENE" or rEffectComp.type == "SREGENS" or rEffectComp.type == "SREGENE")) then	
+		local bMatch, bTemp;
+		if (rEffectComp.type == "REGENA" and bAdd == true) or ( bAdd == false and (rEffectComp.type == "REGENE" or rEffectComp.type == "SREGENS" or rEffectComp.type == "SREGENE")) then
+			bMatch = true;
+		elseif (rEffectComp.type == "TREGENA" and bAdd == true) or ( bAdd == false and (rEffectComp.type == "TREGENE" or rEffectComp.type == "STREGENS" or rEffectComp.type == "STREGENE")) then
+			bMatch = true;
+			bTemp = true;
+		end
+		if bMatch then
 			local aClause = {}
 			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
 			aClause.dice = rDmgInfo.dice;
 			aClause.modifier = rDmgInfo.mod
 			aClause.dmgtype = string.lower(table.concat(rDmgInfo.remainder, ","))
-			table.insert(rAction.clauses, aClause)
+			if bTemp then
+				table.insert(rTempAction.clauses, aClause)
+			else
+				table.insert(rAction.clauses, aClause)
+			end
 		elseif rEffectComp.type == "" and rAction.label == "" then
 			rAction.label = sEffectComp
+			rTempAction.label = sEffectComp
 		end
 	end
 	if rAction.label == "" then
 		rAction.label = "Ongoing Regeneration"
 	end
+	if rTempAction.label == "" then
+		rTempAction.label = "Ongoing Temporary Hitpoints"
+	end
 	if next(rAction.clauses) ~= nil then
 		local rRoll = ActionHeal.getRoll(rTarget, rAction)
 		ActionsManager.actionDirect(rSource, "heal", {rRoll}, {{rTarget}})
-	end	
+	end
+	if next(rTempAction.clauses) ~= nil then
+		local rRoll = ActionHeal.getRoll(rTarget, rTempAction)
+		ActionsManager.actionDirect(rSource, "heal", {rRoll}, {{rTarget}})
+	end
 end
 
 
