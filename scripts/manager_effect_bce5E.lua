@@ -206,6 +206,9 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "REGENA", rTarget) then
 				EffectsManagerBCEDND.applyOngoingRegen(rSource, rTarget, nodeEffect, true)
 			end
+			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "TREGENA", rTarget) then
+				EffectsManagerBCEDND.applyOngoingRegen(rSource, rTarget, nodeEffect, "TREGENA", true)
+			end
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "DMGA", rTarget) then
 				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false, true)
 			end

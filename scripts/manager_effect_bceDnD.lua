@@ -97,42 +97,65 @@ function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf, bAdd)
 	end	
 end
 
-function applyOngoingRegen(rSource, rTarget, nodeEffect, bAdd)
+function applyOngoingRegen(rSource, rTarget, nodeEffect, sType, bTemp)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
 	local aEffectComps = EffectManager.parseEffect(sEffect)
 	local rAction = {}
 	rAction.label =  ""
 	rAction.clauses = {}
+	local rTempAction = {}
+	rTempAction.label =  ""
+	rTempAction.clauses = {}
+	rTempAction.subtype = "temp"
 	for _,sEffectComp in ipairs(aEffectComps) do
 		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-		if (rEffectComp.type == "REGENA" and bAdd == true) or ( bAdd == false and (rEffectComp.type == "REGENE" or rEffectComp.type == "SREGENS" or rEffectComp.type == "SREGENE")) then	
+		if rEffectComp.type == sType then
 			local aClause = {}
 			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
 			aClause.dice = rDmgInfo.dice;
 			aClause.modifier = rDmgInfo.mod
 			aClause.dmgtype = string.lower(table.concat(rDmgInfo.remainder, ","))
-			table.insert(rAction.clauses, aClause)
+			if bTemp then
+				table.insert(rTempAction.clauses, aClause)
+			else
+				table.insert(rAction.clauses, aClause)
+			end
 		elseif rEffectComp.type == "" and rAction.label == "" then
 			rAction.label = sEffectComp
+			rTempAction.label = sEffectComp
 		end
 	end
 	if rAction.label == "" then
 		rAction.label = "Ongoing Regeneration"
 	end
+	if rTempAction.label == "" then
+		rTempAction.label = "Ongoing Temporary Hitpoints"
+	end
 	if next(rAction.clauses) ~= nil then
 		local rRoll = ActionHeal.getRoll(rTarget, rAction)
 		ActionsManager.actionDirect(rSource, "heal", {rRoll}, {{rTarget}})
-	end	
+	end
+	if next(rTempAction.clauses) ~= nil then
+		local rRoll = ActionHeal.getRoll(rTarget, rTempAction)
+		ActionsManager.actionDirect(rSource, "heal", {rRoll}, {{rTarget}})
+	end
 end
 
-
 function processEffectTurnStartDND(sourceNodeCT, nodeCT, nodeEffect)
+	local rSource = ActorManager.resolveActor(sourceNodeCT)
+	local sEffect = DB.getValue(nodeEffect, "label", "")
 	local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
 	local rSourceEffect = ActorManager.resolveActor(sEffectSource)
 	local sSourceName = sourceNodeCT.getNodeName()
 	if rSourceEffect == nil then
 		rSourceEffect = rSource
 	end
+	if nodeCT == sourceNodeCT then
+		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"TREGENS") and not sEffect:match("STREGENS") then
+			applyOngoingRegen(rSourceEffect, rSource, nodeEffect, "TREGENS", true)
+		end
+	end
+
 	if sEffectSource ~= nil  and (sSourceName == sEffectSource or (sEffectSource == "" and nodeCT == sourceNodeCT)) then
 		local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
 		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"SDMGOS", rSourceEffect) then
@@ -141,8 +164,12 @@ function processEffectTurnStartDND(sourceNodeCT, nodeCT, nodeEffect)
 		end
 		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"SREGENS", rSourceEffect) then
 			local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
-			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, false)
-		end    
+			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, "SREGENS")
+		end
+		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"STREGENS", rSourceEffect) then
+			local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
+			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, "STREGENS", true)
+		end
 	end
 	return true
 end
@@ -161,7 +188,10 @@ function processEffectTurnEndDND(sourceNodeCT, nodeCT, nodeEffect)
 				applyOngoingDamage(rSourceEffect, rSource, nodeEffect, false, false)
 		end
 		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"REGENE") and not sEffect:match("SREGENE") then
-			applyOngoingRegen(rSourceEffect, rSource, nodeEffect, false)
+			applyOngoingRegen(rSourceEffect, rSource, nodeEffect, "REGENE")
+		end
+		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"TREGENE") and not sEffect:match("STREGENE") then
+			applyOngoingRegen(rSourceEffect, rSource, nodeEffect, "TREGENE", true)
 		end
 	end
 
@@ -169,10 +199,13 @@ function processEffectTurnEndDND(sourceNodeCT, nodeCT, nodeEffect)
 		local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
 		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"SDMGOE", rSourceEffect) then
 			applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect, false, false)
-		end   
+		end
 		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"SREGENE", rSourceEffect) then
-			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, false)
-		end   
+			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, "SREGENE")
+		end
+		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"STREGENE", rSourceEffect) then
+			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, "STREGENE", true)
+		end
 	end
 	return true
 end
