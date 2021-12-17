@@ -10,6 +10,7 @@ OOB_MSGTYPE_BCEUPDATE = "updateeffect"
 
 local addEffect = nil
 local expireEffect = nil
+local bExpired = false
 
 function onInit()
 	addEffect = EffectManager.addEffect
@@ -36,19 +37,29 @@ function onClose()
 	ActionsManager.unregisterResultHandler("effectbce")
 end
 
+-- Expire effect is called twice. Once initially and then once for delayed remove
+-- to get the delay expire action options
 function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
-	expireEffect(nodeActor, nodeEffect, nExpireComp)
-	if sEffect:match("EXPIREADD") then
-		local rEffect = EffectsManagerBCE.matchEffect(sEffect)
-		if rEffect.sName ~= nil then
-			local rSource = ActorManager.resolveActor(nodeActor)
-			local nodeSource = ActorManager.getCTNode(rSource)
-			rEffect.sSource = ActorManager.getCTNodeName(rSource)
-			rEffect.nInit  = DB.getValue(nodeActor, "initresult", 0)
-			EffectManager.addEffect("", "", nodeSource, rEffect, true)
+	if expireEffect(nodeActor, nodeEffect, nExpireComp) then
+		if bExpired == false then
+			if sEffect:match("EXPIREADD") then
+				local rEffect = EffectsManagerBCE.matchEffect(sEffect)
+				if rEffect.sName ~= nil then
+					local rSource = ActorManager.resolveActor(nodeActor)
+					local nodeSource = ActorManager.getCTNode(rSource)
+					rEffect.sSource = ActorManager.getCTNodeName(rSource)
+					rEffect.nInit  = DB.getValue(nodeActor, "initresult", 0)
+					EffectManager.addEffect("", "", nodeSource, rEffect, true)
+				end
+			end
+			bExpired = true
+		else
+			bExpired = false
 		end
+		return true
 	end
+	return false
 end
 
 function customTurnStart(sourceNodeCT)
@@ -175,9 +186,20 @@ end
 function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 	if nodeEffect ~= nil then
 		local sEffect = DB.getValue(nodeEffect, "label", "")
-		if sEffect:match(sBCETag.."[%s*:*;*]") == nil  then -- Does it contain BCE Tag
+		local aEffectComps = EffectManager.parseEffect(sEffect)
+		local bMatch = false
+		for _,sEffectComp in ipairs(aEffectComps) do
+			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+			if rEffectComp.type == sBCETag or rEffectComp.remainder[1] == sBCETag then
+				bMatch = true
+				break
+			end
+		end
+		
+		if bMatch == false  then -- Does it contain BCE Tag
 			return false
 		end
+
 		local nActive = DB.getValue(nodeEffect, "isactive", 0)
 		--is it active
 		if  ((nActive == 0 and bIgnoreDeactive == nil) or nActive == 2) then
