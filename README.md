@@ -1,7 +1,7 @@
 # Better Combat Effects
 
- **Current Version:** 2.21
-**Updated::** 12/13/21
+ **Current Version:** 2.22
+**Updated::** 12/17/21
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -131,13 +131,24 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 ### Ongoing Regeneration Modifiers
 
-* **REGENA (N)** Apply one time regenration when the effect is added. (N) can be number or dice string
+* **REGENA (N)** Apply one time regeneration when the effect is added. (N) can be number or dice string
 
 * **REGENE (N)** Apply regeneration at the end of the actors turn. (N) can be number or dice string
 
-* **SREGENS (N)** Apply regneration at the start of the actors turn who applied the effect. (N) can be number or dice string
+* **SREGENS (N)** Apply regeneration at the start of the actors turn who applied the effect. (N) can be number or dice string
 
 * **SREGENE (N)** Apply regeneration at the end of the actors turn who applied the effect. (N) can be number or dice string
+
+
+* **TREGENA (N)** Apply one time regeneration to temporary HP when the effect is added. (N) can be number or dice string
+
+* **TREGENS (N)** Apply regeneration to temporary HP at the start of the actors turn. (N) can be number or dice string
+
+* **TREGENE (N)** Apply regeneration to temporary HP at the end of the actors turn. (N) can be number or dice string
+
+* **STREGENS (N)** Apply regeneration to temporary HP at the start of the actors turn who applied the effect. (N) can be number or dice string
+
+* **STREGENE (N)** Apply regeneration to temporary HP at the end of the actors turn who applied the effect. (N) can be number or dice string
 
 
 ## 5E/3.5E/PFRPG
@@ -157,7 +168,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Frightful Presence; Frightened; SAVEE: WIS 16 (R)
   * Wall of Thorns; SAVEE: DEX [SDC] (H)(C); SAVEDMG: 7d8 slashing
 
-* **SAVEA: [ability] [SDC]** Automaticlly roll save when the effect is added. Automate NPC debuff effects like Ghoul attack
+* **SAVEA: [ability] [SDC]** Automatically roll save when the effect is added. Automate NPC debuff effects like Ghoul attack
   * Ghoul Claws; SDMGADDT: GOTU
   * GOTU; Paralyzed; SAVEA: CON 10 (R); SAVEE: CON 10 (R)
 
@@ -172,7 +183,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
    
 * **(R)** will remove the save effect on a successful save.
 * **(D)** will disable the save effect on a successful save.
-* **(H)** will deal half damage on a successful ongoiong save.
+* **(H)** will deal half damage on a successful ongoing save.
 * **(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.
 * **(F)** will invert the roll. SAVEDMG, (R), (D), (H) will be performed on a failed save rather than successful one.
 
