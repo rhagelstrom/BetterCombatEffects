@@ -172,9 +172,20 @@ end
 function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
 	if nodeEffect ~= nil then
 		local sEffect = DB.getValue(nodeEffect, "label", "")
-		if sEffect:match(sBCETag.."[%s*:*;*]") == nil  then -- Does it contain BCE Tag
+		local aEffectComps = EffectManager.parseEffect(sEffect)
+		local bMatch = false
+		for _,sEffectComp in ipairs(aEffectComps) do
+			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+			if rEffectComp.type == sBCETag or rEffectComp.remainder[1] == sBCETag then
+				bMatch = true
+				break
+			end
+		end
+		
+		if bMatch == false  then -- Does it contain BCE Tag
 			return false
 		end
+
 		local nActive = DB.getValue(nodeEffect, "isactive", 0)
 		--is it active
 		if  ((nActive == 0 and bIgnoreDeactive == nil) or nActive == 2) then
