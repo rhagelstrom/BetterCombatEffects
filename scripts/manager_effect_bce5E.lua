@@ -212,6 +212,11 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "DMGA", rTarget) then
 				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false, true)
 			end
+			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "Unconscious", rTarget) then
+				local rProne = {sName = "Prone" , nInit = rNewEffect.nInit, nDuration = rNewEffect.nDuration, sSource = rNewEffect.sSource, nGMOnly = rNewEffect.nGMOnly}
+				EffectManager.addEffect("", "", nodeCT, rProne, true)
+			end
+
 		end
 	end
 	return true
@@ -250,10 +255,11 @@ function replaceSaveDC(rNewEffect, rActor)
 					local sDesc = DB.getValue(nodeFeature, "text", ""):lower();
 					local sStat = sDesc:match("(%w+) is your spellcasting ability") or ""
 					nSpellcastingDC = nSpellcastingDC + ActorManager5E.getAbilityBonus(rActor, sStat) 
+					--TODO savemod is the db tag in the power group to get the power modifier
 					break
 				end
 			end 	
-		elseif sNodeType == "ct" then
+		elseif sNodeType == "ct" or sNodeType == "npc" then
 			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf") + nDC
 			for _,nodeTrait in pairs(DB.getChildren(nodeActor, "traits")) do
 				local sTraitName = StringManager.trim(DB.getValue(nodeTrait, "name", ""):lower())
