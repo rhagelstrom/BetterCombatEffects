@@ -10,6 +10,7 @@ OOB_MSGTYPE_BCEUPDATE = "updateeffect"
 
 local addEffect = nil
 local expireEffect = nil
+local bExpired = false
 
 function onInit()
 	addEffect = EffectManager.addEffect
@@ -36,19 +37,29 @@ function onClose()
 	ActionsManager.unregisterResultHandler("effectbce")
 end
 
+-- Expire effect is called twice. Once initially and then once for delayed remove
+-- to get the delay expire action options
 function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
-	expireEffect(nodeActor, nodeEffect, nExpireComp)
-	if sEffect:match("EXPIREADD") then
-		local rEffect = EffectsManagerBCE.matchEffect(sEffect)
-		if rEffect.sName ~= nil then
-			local rSource = ActorManager.resolveActor(nodeActor)
-			local nodeSource = ActorManager.getCTNode(rSource)
-			rEffect.sSource = ActorManager.getCTNodeName(rSource)
-			rEffect.nInit  = DB.getValue(nodeActor, "initresult", 0)
-			EffectManager.addEffect("", "", nodeSource, rEffect, true)
+	if expireEffect(nodeActor, nodeEffect, nExpireComp) then
+		if bExpired == false then
+			if sEffect:match("EXPIREADD") then
+				local rEffect = EffectsManagerBCE.matchEffect(sEffect)
+				if rEffect.sName ~= nil then
+					local rSource = ActorManager.resolveActor(nodeActor)
+					local nodeSource = ActorManager.getCTNode(rSource)
+					rEffect.sSource = ActorManager.getCTNodeName(rSource)
+					rEffect.nInit  = DB.getValue(nodeActor, "initresult", 0)
+					EffectManager.addEffect("", "", nodeSource, rEffect, true)
+				end
+			end
+			bExpired = true
+		else
+			bExpired = false
 		end
+		return true
 	end
+	return false
 end
 
 function customTurnStart(sourceNodeCT)
