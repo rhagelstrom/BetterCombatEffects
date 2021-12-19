@@ -32,6 +32,20 @@ function onInit()
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 		end
 
+		--5E/3.5E BCE Tags
+		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptions)
+
+		EffectsManagerBCE.registerBCETag("SAVES", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEE", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEADD", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptions)
+
+		--4E/5E
+		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
+
+
 		rest = CharManager.rest
 		CharManager.rest = customRest
 		getDamageAdjust = ActionDamage.getDamageAdjust
@@ -43,7 +57,6 @@ function onInit()
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost5E)
-		EffectsManagerBCE.setCustomProcessEffect(processEffect)
 		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage)
 
 		ActionsManager.registerResultHandler("savebce", onSaveRollHandler5E)
@@ -76,7 +89,6 @@ function onClose()
 		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost5E)
-		EffectsManagerBCE.removeCustomProcessEffect(processEffect)
 
 	end
 end
@@ -108,60 +120,41 @@ function customRest(nodeActor, bLong, bMilestone)
 	rest(nodeActor, bLong)
 end
 
---Do sanity checks to see if we should process this effect any further
-function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	-- is there a conditional that prevents us from processing
-	local aEffectComps = EffectManager.parseEffect(sEffect)
-	for _,sEffectComp in ipairs(aEffectComps) do -- Check conditionals
-		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-		if rEffectComp.type == "IF" then
-			if not EffectManager5E.checkConditional(rSource, nodeEffect, rEffectComp.remainder, rTarget) then
-				return false
-			end
-		elseif rEffectComp.type == "IFT" then
-			if not EffectManager5E.checkConditional(rSource, nodeEffect, rEffectComp.remainder, rTarget) then
-				return false
-			end
-		end
-	end	
-	return true -- Everything looks good to continue processing
-end
 
-function processEffectTurnStart5E(sourceNodeCT, nodeCT, nodeEffect)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
-	local rTarget = ActorManager.resolveActor(nodeCT)
-	local rSource = nil
-	if rSourceEffect == nil then
-		rSource = rTarget
-	else
-		rSource = ActorManager.resolveActor(sEffectSource)
-	end
-	
-	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVES",rTarget) then
-		saveEffect(nodeEffect, sourceNodeCT, "Save")
+function processEffectTurnStart5E(rSource)
+	local tMatch = {}
+	local aTags = {"SAVES"}
+	local rEffectSource = {}
+
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	for _,tEffect in pairs(tMatch) do
+		if(tEffect.sSource == "") then
+			rEffectSource = rSource
+		else
+			rEffectSource = ActorManager.resolveActor(tEffect.sSource)
+		end
+		if tEffect.sTag == "SAVES" then
+			saveEffect(rEffectSource, rSource, tEffect)
+		end
 	end
 	return true
 end
 
+function processEffectTurnEnd5E(rSource)
+	local tMatch = {}
+	local aTags = {"SAVEE"}
+	local rEffectSource = {}
 
---function ManagerEffect5E.getEffectsByType(rActor, sEffectCompType, rFilterActor, bTargetedOnly)
-
-function processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
-	local rTarget = ActorManager.resolveActor(nodeCT)
-	local rSource = nil
-	if rSourceEffect == nil then
-		rSource = rTarget
-	else
-		rSource = ActorManager.resolveActor(sEffectSource)
-	end
-	
-	if sourceNodeCT == nodeCT and EffectsManagerBCE.processEffect(rSource,nodeEffect,"SAVEE", rTarget) then
-		--EffectManager5E.getEffectsByType(rSource, "SAVEE", rTarget)
-		saveEffect(nodeEffect, sourceNodeCT, "Save")
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	for _,tEffect in pairs(tMatch) do
+		if(tEffect.sSource == "") then
+			rEffectSource = rSource
+		else
+			rEffectSource = ActorManager.resolveActor(tEffect.sSource)
+		end
+		if tEffect.sTag == "SAVEE" then
+			saveEffect(rEffectSource, rSource, tEffect)
+		end
 	end
 	return true
 end
@@ -191,34 +184,29 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 end
 
 function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
-	local rActor = ActorManager.resolveActor(nodeCT)
-	for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
-		if (DB.getValue(nodeEffect, "label", "") == rNewEffect.sName) and
-			(DB.getValue(nodeEffect, "init", 0) == rNewEffect.nInit) and
-			(DB.getValue(nodeEffect, "duration", 0) == rNewEffect.nDuration) and
-			(DB.getValue(nodeEffect,"source_name", "") == rNewEffect.sSource) then
-			local nodeSource = DB.findNode(rNewEffect.sSource)
-			local rSource = ActorManager.resolveActor(nodeSource)
-			local rTarget = rActor
-			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "SAVEA", rTarget) then
-				saveEffect(nodeEffect, nodeCT, "Save")
-			end
-			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "REGENA", rTarget) then
-				EffectsManagerBCEDND.applyOngoingRegen(rSource, rTarget, nodeEffect, true)
-			end
-			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "TREGENA", rTarget) then
-				EffectsManagerBCEDND.applyOngoingRegen(rSource, rTarget, nodeEffect, "TREGENA", true)
-			end
-			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "DMGA", rTarget) then
-				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false, true)
-			end
-			if EffectsManagerBCE.processEffect(rSource, nodeEffect, "Unconscious", rTarget) then
-				local rProne = {sName = "Prone" , nInit = rNewEffect.nInit, nDuration = rNewEffect.nDuration, sSource = rNewEffect.sSource, nGMOnly = rNewEffect.nGMOnly}
-				EffectManager.addEffect("", "", nodeCT, rProne, true)
-			end
+	local rTarget = ActorManager.resolveActor(nodeCT)
+	local rSource = {}
+	if rNewEffect.sSource == "" then
+		rSource = rTarget
+	else
+		rSource = ActorManager.resolveActor(rNewEffect.sSource)
+	end
 
+	local tMatch = {}
+	local aTags = {"SAVEA"}
+
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "SAVEA" then
+			saveEffect(rSource, rTarget, tEffect)
 		end
 	end
+
+	if rNewEffect.sName:lower():match("unconscious") and EffectManager5E.hasEffectCondition(nodeCT, "Unconscious") and not EffectManager5E.hasEffectCondition(nodeCT, "Prone") then
+		local rProne = {sName = "Prone" , nInit = rNewEffect.nInit, nDuration = rNewEffect.nDuration, sSource = rNewEffect.sSource, nGMOnly = rNewEffect.nGMOnly}
+		EffectManager.addEffect("", "", nodeCT, rProne, true)
+	end
+
 	return true
 end
 
@@ -226,8 +214,8 @@ function getDCEffectMod(nodeActor)
 	local nDC = 0
 	for _,nodeEffect in pairs(DB.getChildren(nodeActor, "effects")) do
 		local sEffect = DB.getValue(nodeEffect, "label", "")
-		local aEffectComps = EffectManager.parseEffect(sEffect)
-		for _,sEffectComp in ipairs(aEffectComps) do
+		local tEffectComps = EffectManager.parseEffect(sEffect)
+		for _,sEffectComp in ipairs(tEffectComps) do
 			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
 			if rEffectComp.type == "DC" and (DB.getValue(nodeEffect, "isactive", 0) == 1) then
 				nDC = tonumber(rEffectComp.mod) or 0
@@ -277,11 +265,16 @@ end
 
 
 function onSaveRollHandler5E(rSource, rTarget, rRoll)
-	local nodeEffect = DB.findNode(rRoll.sEffectPath)
-	if not nodeEffect then
-		return
+
+	local nodeEffect = nil 
+	if rRoll.sEffectPath ~= "" then
+		nodeEffect = DB.findNode(rRoll.sEffectPath)
 	end
-	local sName = ActorManager.getDisplayName(nodeSource)
+	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
+	local nodeTarget = ActorManager.getCTNode(rTarget)
+	local tMatch = {}
+	local aTags = {}
+
 	ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
 	local nResult = ActionsManager.total(rRoll)
 	local bAct = false
@@ -294,116 +287,135 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			bAct = true
 		end
 	end
-	local sEffect = DB.getValue(nodeEffect, "label", "");
-	if bAct then
+	local sEffect = DB.getValue(nodeEffect, "label", "")
+
+	--Need the original effect because we only want to do things that are in the same effect
+	--if we just pull all the tags on the Actor then we can't have multiple saves doing
+	--multiple different things. We have to be careful about the one shot options expireing
+	--our effect hence the check for nil
+
+	if bAct and nodeEffect ~= nil then	
+		aTags = {"SAVEADDP"}
 		if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
-			EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, true, false);
+			table.insert(aTags, "SAVEDMG")
 		end
-		if rRoll.bRemoveOnSave then
+		
+		if rRoll.bRemoveOnSave  then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove");
 		elseif rRoll.bDisableOnSave then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
 		end
-		if sEffect:match("SAVEADDP") then
-			local rEffect = EffectsManagerBCE.matchEffect(sEffect, {"SAVEADDP"});
-			if rEffect.sName ~= nil then
-				local nodeTarget = ActorManager.getCTNode(rTarget);
-				rEffect.sSource = ActorManager.getCTNodeName(rSource);
-				rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0);
-				EffectManager.addEffect("", "", nodeTarget, rEffect, true);
+
+		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
+		for _,tEffect in pairs(tMatch) do
+			if tEffect.sTag == "SAVEADDP" then
+				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+				if rEffect ~= {} then
+					rEffect.sSource = rRoll.sSourceCTNode 
+					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
+					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
+				end
+			elseif tEffect.sTag == "SAVEDMG" then
+				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true)
 			end
-		end
-	else
-		EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, nodeEffect, false, false);
-		if sEffect:match("SAVEADD") then
-			local rEffect = EffectsManagerBCE.matchEffect(sEffect, {"SAVEADD"});
-			if rEffect.sName ~= nil then
-				local nodeTarget = ActorManager.getCTNode(rTarget);
-				rEffect.sSource = ActorManager.getCTNodeName(rSource);
-				rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0);
-				EffectManager.addEffect("", "", nodeTarget, rEffect, true);
+			end
+	elseif nodeEffect ~= nil then
+		aTags = {"SAVEADD", "SAVEDMG"}
+		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+		for _,tEffect in pairs(tMatch) do
+			if tEffect.sTag == "SAVEADD" then
+				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1], nil, nodeEffect)
+				if rEffect ~= {} then
+					rEffect.sSource = rRoll.sSourceCTNode
+					rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
+					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
+				end
+			elseif tEffect.sTag == "SAVEDMG" then
+				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp)
 			end
 		end
 	end
 end
+
 function onDamage(rSource,rTarget, nodeEffect)
-	if EffectsManagerBCE.processEffect(rTarget, nodeEffect,"SAVEONDMG", rSource) then
-		local nodeTarget = ActorManager.getCTNode(rTarget)
-		saveEffect(nodeEffect, nodeTarget, "Save")
+	local tMatch = {}
+	local aTags = {"SAVEONDMG"}
+	local rEffectSource = {}
+
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	for _,tEffect in pairs(tMatch) do
+		if(tEffect.sSource == "") then
+			rEffectSource = rSource
+		else
+			rEffectSource = ActorManager.resolveActor(tEffect.sSource)
+		end
+		if tEffect.sTag == "SAVEONDMG" then
+			saveEffect(rEffectSource, rTarget, tEffect)
+		end
 	end
 end
-function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this effect is on, BCE String
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	if (DB.getValue(nodeEffect, "isactive", 0) ~= 1 ) then
-		return
+
+function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect is on, BCE String
+	local nodeSource = ActorManager.getCTNode(rSource)
+	local nodeTarget = ActorManager.getCTNode(rTarget)
+	local aParsedRemiander = StringManager.parseWords(tEffect.rEffectComp.remainder[1])
+	local sAbility = aParsedRemiander[1]
+	if User.getRulesetName() == "5E" then
+		sAbility = DataCommon.ability_stol[sAbility]
 	end
-	local aEffectComps = EffectManager.parseEffect(sEffect)
-	local sLabel = ""
-	for _,sEffectComp in ipairs(aEffectComps) do
-		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-		if rEffectComp.type == "SAVEE" or rEffectComp.type == "SAVES" or rEffectComp.type == "SAVEA" or rEffectComp.type == "SAVEONDMG" then
-			local sAbility = rEffectComp.remainder[1]
-			if User.getRulesetName() == "5E" then
-				sAbility = DataCommon.ability_stol[sAbility]
-			end
-			local nDC = tonumber(rEffectComp.remainder[2])
-			if  (nDC and sAbility) ~= nil then		
-				local sNodeEffectSource  = DB.getValue(nodeEffect, "source_name", "")
-				if sLabel == "" then
-					sLabel = "Ongoing Effect"
-				end
-				local rSaveVsRoll = {}
-				rSaveVsRoll.sType = "savebce"
-				rSaveVsRoll.aDice = {}
-				rSaveVsRoll.sSaveType = sSaveBCE
-				rSaveVsRoll.nTarget = nDC -- Save DC
-				rSaveVsRoll.sSource = sNodeEffectSource
-				rSaveVsRoll.sDesc = "[SAVE VS] " .. sLabel
-				if rSaveVsRoll then
-					rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [" .. sAbility .. " DC " .. rSaveVsRoll.nTarget .. "]";
-				end
-				if rEffectComp.original:match("%(M%)") then
-					rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [MAGIC]";
-				end
-				if rEffectComp.original:match("%(H%)") then
-					rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [HALF ON SAVE]";
-				end
-				rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc
-				if EffectManager.isGMEffect(sourceNodeCT, nodeEffect) or CombatManager.isCTHidden(sourceNodeCT) then
-					rSaveVsRoll.bSecret = true
-				end
-				if rEffectComp.original:match("%(D%)") then
-					rSaveVsRoll.bDisableOnSave = true
-				end
-				if rEffectComp.original:match("%(R%)") then
-					rSaveVsRoll.bRemoveOnSave = true
-				end
-				if rEffectComp.original:match("%(F%)") then
-					rSaveVsRoll.bActonFail = true
-				end
-
-				rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. sEffect .. "]" 
-				local rRoll = {}
-				rRoll = ActionSave.getRoll(nodeTarget,sAbility) -- call to get the modifiers
-				rSaveVsRoll.nMod = rRoll.nMod -- Modfiers 
-				rSaveVsRoll.aDice = rRoll.aDice
-				rSaveVsRoll.sEffectPath = nodeEffect.getPath()
-				rSaveVsRoll.sApply = DB.getValue(nodeEffect, "apply", "");
-
-				ActionsManager.actionRoll(sNodeEffectSource,{{nodeTarget}}, {rSaveVsRoll})
-				break  
-			end
-		elseif rEffectComp.type == "" and sLabel == "" then
-			sLabel = sEffectComp
+	local nDC = tonumber(aParsedRemiander[2])
+	if  (nDC and sAbility) ~= nil then
+		local rSaveVsRoll = {}
+		rSaveVsRoll.sType = "savebce"
+		rSaveVsRoll.aDice = {}
+		rSaveVsRoll.sSaveType = "Save"
+		rSaveVsRoll.nTarget = nDC -- Save DC
+		rSaveVsRoll.sSourceCTNode = rSource.sCTNode -- Node who applied
+		rSaveVsRoll.sDesc = "[SAVE VS] " .. tEffect.sLabel -- Effect Label
+		if rSaveVsRoll then
+			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [" .. sAbility .. " DC " .. rSaveVsRoll.nTarget .. "]";
 		end
+		if tEffect.rEffectComp.original:match("%(M%)") then
+			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [MAGIC]";
+		end
+		if tEffect.rEffectComp.original:match("%(H%)") then
+			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [HALF ON SAVE]";
+		end
+		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc
+		if tEffect.nGMOnly == 1 then
+			rSaveVsRoll.bSecret = true
+		end
+		if tEffect.rEffectComp.original:match("%(D%)") then
+			rSaveVsRoll.bDisableOnSave = true
+		end
+		if tEffect.rEffectComp.original:match("%(R%)") then
+			rSaveVsRoll.bRemoveOnSave = true
+		end
+		if tEffect.rEffectComp.original:match("%(F%)") then
+			rSaveVsRoll.bActonFail = true
+		end
+
+		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]" 
+		local rRoll = {}
+		rRoll = ActionSave.getRoll(nodeTarget,sAbility) -- call to get the modifiers
+		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers 
+		rSaveVsRoll.aDice = rRoll.aDice
+		-- Pass the effect node if it wasn't expired by a One Shot
+		if(type(tEffect.nodeCT) == "databasenode") then
+			rSaveVsRoll.sEffectPath = tEffect.nodeCT.getPath()
+		else
+			rSaveVsRoll.sEffectPath = ""
+		end
+
+		ActionsManager.actionRoll(rSource.sName,{{nodeTarget}}, {rSaveVsRoll})
 	end
 end
 
 
 function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
-	local aEffects = EffectManager5E.getEffectsByType(rTarget, sEffectType, rDamageOutput.aDamageFilter, rSource);
+	local tEffects = EffectManager5E.getEffectsByType(rTarget, sEffectType, rDamageOutput.aDamageFilter, rSource);
 	local aFinal = {};
-	for _,v in pairs(aEffects) do
+	for _,v in pairs(tEffects) do
 		local rReduction = {};
 		
 		rReduction.mod = v.mod;
@@ -470,8 +482,8 @@ function dropConcentration(rNewEffect, nDuration)
 		end
 		local sSource
 		local ctEntries = CombatManager.getSortedCombatantList()
-		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
-		local sNewEffectTag = aEffectComps[1]
+		local tEffectComps = EffectManager.parseEffect(rNewEffect.sName)
+		local sNewEffectTag = tEffectComps[1]
 		for _, nodeCTConcentration in pairs(ctEntries) do
 			if nodeCT == nodeCTConcentration then
 				sSource = ""
@@ -480,8 +492,8 @@ function dropConcentration(rNewEffect, nDuration)
 			end
 			for _,nodeEffect in pairs(DB.getChildren(nodeCTConcentration, "effects")) do
 				local sEffect = DB.getValue(nodeEffect, "label", "")
-				aEffectComps = EffectManager.parseEffect(sEffect)
-				local sEffectTag = aEffectComps[1]
+				tEffectComps = EffectManager.parseEffect(sEffect)
+				local sEffectTag = tEffectComps[1]
 				if (sEffect:match("%(C%)") and (DB.getValue(nodeEffect, "source_name", "") == sSource)) and 
 						(sEffectTag ~= sNewEffectTag) or
 						((sEffectTag == sNewEffectTag and (DB.getValue(nodeEffect, "duration", 0) ~= nDuration))) then
