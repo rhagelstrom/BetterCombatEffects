@@ -14,11 +14,20 @@ function onInit()
 		charRest = CharManager.rest
 		CharManager.rest = customCharRest
 
+		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptions)
+
+		EffectsManagerBCE.registerBCETag("SAVES", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEE", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEADD", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptions)
+
+
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart35E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd35E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre35E)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost35E)
-		EffectsManagerBCE.setCustomProcessEffect(processEffect)
 		EffectsManagerBCEDND.setProcessEffectOnDamage(EffectsManagerBCE5E.onDamage)
 
 		ActionsManager.registerResultHandler("savebce", onSaveRollHandler35E)
@@ -39,7 +48,6 @@ function onClose()
 		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd35E)
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre35E)
 		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost35E)
-		EffectsManagerBCE.removeCustomProcessEffect(processEffect)
 
 	end
 end
@@ -83,26 +91,6 @@ function customRest(bShort)
 		end
 	end
 	rest(bShort)
-end
-
---Do sanity checks to see if we should process this effect any further
-function processEffect(rSource, nodeEffect, sBCETag, rTarget, bIgnoreDeactive)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	-- is there a conditional that prevents us from processing
-	local aEffectComps = EffectManager.parseEffect(sEffect)
-	for _,sEffectComp in ipairs(aEffectComps) do -- Check conditionals
-		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-		if rEffectComp.type == "IF" then
-			if not EffectManager35E.checkConditional(rSource, nodeEffect, rEffectComp.remainder, rTarget) then
-				return false
-			end
-		elseif rEffectComp.type == "IFT" then
-			if not EffectManager35E.checkConditional(rSource, nodeEffect, rEffectComp.remainder, rTarget) then
-				return false
-			end
-		end
-	end	
-	return true -- Everything looks good to continue processing
 end
 
 function replaceSaveDC(rNewEffect, rActor)

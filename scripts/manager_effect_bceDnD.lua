@@ -15,12 +15,19 @@ function setProcessEffectOnDamage(ProcessEffectOnDamage)
 end
 
 function customRest(nodeActor, bLong, bMilestone)
-	local nodeCT = ActorManager.getCTNode(nodeActor)
+--	local nodeCT = ActorManager.getCTNode(nodeActor)
 	local rSource = ActorManager.resolveActor(nodeActor)
-	for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
-		local sEffect = DB.getValue(nodeEffect, "label", "")
-		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"RESTS") or (bLong == true and EffectsManagerBCE.processEffect(rSource,nodeEffect,"RESTL")) then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove", sEffect)
+	local tMatch = {}
+
+	local aTags = {"RESTS"}
+	if bLong == true then
+		table.insert(aTags, "RESTL")
+	end
+
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "RESTL" or tEffect.sTag == "RESTS" then
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
 		end
 	end
 end
@@ -60,152 +67,133 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 	end
 end
 
+function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect)
+	local rTarget = ActorManager.resolveActor(nodeCT)
+	local rSource = {}
+	if rNewEffect.sSource == "" then
+		rSource = rTarget
+	else
+		rSource = ActorManager.resolveActor(rNewEffect.sSource)
+	end
+	local tMatch = {}
+	local aTags = {"REGENA", "TREGENA", "DMGA"}
 
-function applyOngoingDamage(rSource, rTarget, nodeEffect, bHalf, bAdd)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	local aEffectComps = EffectManager.parseEffect(sEffect)
-	local rAction = {}
-	rAction.label =  ""
-	rAction.clauses = {}
-	for _,sEffectComp in ipairs(aEffectComps) do
-		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-		if (rEffectComp.type == "DMGA" and bAdd == true) or ( bAdd == false and (rEffectComp.type == "SAVEDMG" or rEffectComp.type == "DMGOE" or rEffectComp.type == "SDMGOE" or rEffectComp.type == "SDMGOS")) then	
-			local aClause = {}
-			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
-			aClause.dice = rDmgInfo.dice;
-			aClause.modifier = rDmgInfo.mod
-			aClause.dmgtype = string.lower(table.concat(rDmgInfo.remainder, ","))
-			table.insert(rAction.clauses, aClause)
-		elseif rEffectComp.type == "" and rAction.label == "" then
-			rAction.label = sEffectComp
-		end
-	end
-	if rAction.label == "" then
-		rAction.label = "Ongoing Effect"
-	end
-	if next(rAction.clauses) ~= nil then
-		local rRoll = ActionDamage.getRoll(rTarget, rAction)
-		if bHalf == true then
-			rRoll.sDesc = rRoll.sDesc .. " [HALF]"
-		end
-		ActionsManager.actionDirect(rSource, "damage", {rRoll}, {{rTarget}})
-		--if EffectManager.isTargetedEffect(nodeEffect) then
-		--	local aTargets = EffectManager.getEffectTargets(nodeEffect)
-		--	ActionsManager.actionRoll(rSource, {aTargets}, {rRoll})
-		--else
-		--	ActionsManager.actionRoll(rSource, {{rTarget}}, {rRoll})
-		--end
-	end	
-end
 
-function applyOngoingRegen(rSource, rTarget, nodeEffect, sType, bTemp)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	local aEffectComps = EffectManager.parseEffect(sEffect)
-	local rAction = {}
-	rAction.label =  ""
-	rAction.clauses = {}
-	local rTempAction = {}
-	rTempAction.label =  ""
-	rTempAction.clauses = {}
-	rTempAction.subtype = "temp"
-	for _,sEffectComp in ipairs(aEffectComps) do
-		local rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-		if rEffectComp.type == sType then
-			local aClause = {}
-			local rDmgInfo = RulesetEffectManager.parseEffectComp(rEffectComp.original)
-			aClause.dice = rDmgInfo.dice;
-			aClause.modifier = rDmgInfo.mod
-			aClause.dmgtype = string.lower(table.concat(rDmgInfo.remainder, ","))
-			if bTemp then
-				table.insert(rTempAction.clauses, aClause)
-			else
-				table.insert(rAction.clauses, aClause)
-			end
-		elseif rEffectComp.type == "" and rAction.label == "" then
-			rAction.label = sEffectComp
-			rTempAction.label = sEffectComp
-		end
-	end
-	if rAction.label == "" then
-		rAction.label = "Ongoing Regeneration"
-	end
-	if rTempAction.label == "" then
-		rTempAction.label = "Ongoing Temporary Hitpoints"
-	end
-	if next(rAction.clauses) ~= nil then
-		local rRoll = ActionHeal.getRoll(rTarget, rAction)
-		ActionsManager.actionDirect(rSource, "heal", {rRoll}, {{rTarget}})
-	end
-	if next(rTempAction.clauses) ~= nil then
-		local rRoll = ActionHeal.getRoll(rTarget, rTempAction)
-		ActionsManager.actionDirect(rSource, "heal", {rRoll}, {{rTarget}})
-	end
-end
-
-function processEffectTurnStartDND(sourceNodeCT, nodeCT, nodeEffect)
-	local rSource = ActorManager.resolveActor(sourceNodeCT)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
-	local rSourceEffect = ActorManager.resolveActor(sEffectSource)
-	local sSourceName = sourceNodeCT.getNodeName()
-	if rSourceEffect == nil then
-		rSourceEffect = rSource
-	end
-	if nodeCT == sourceNodeCT then
-		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"TREGENS") and not sEffect:match("STREGENS") then
-			applyOngoingRegen(rSourceEffect, rSource, nodeEffect, "TREGENS", true)
-		end
-	end
-
-	if sEffectSource ~= nil  and (sSourceName == sEffectSource or (sEffectSource == "" and nodeCT == sourceNodeCT)) then
-		local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
-		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"SDMGOS", rSourceEffect) then
-			local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
-			applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect, false,false)
-		end
-		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"SREGENS", rSourceEffect) then
-			local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
-			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, "SREGENS")
-		end
-		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"STREGENS", rSourceEffect) then
-			local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
-			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, "STREGENS", true)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "REGENA" then
+				applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, false)
+		elseif tEffect.sTag == "TREGENA" then
+			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, true)
+		elseif tEffect.sTag == "DMGA" then
+			applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp)
 		end
 	end
 	return true
 end
 
-function processEffectTurnEndDND(sourceNodeCT, nodeCT, nodeEffect)
-	local rSource = ActorManager.resolveActor(sourceNodeCT)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-	local sEffectSource = DB.getValue(nodeEffect, "source_name", "")
-	local sSourceName = sourceNodeCT.getNodeName()
-	local rSourceEffect = ActorManager.resolveActor(sEffectSource)
-	if rSourceEffect == nil then
-		rSourceEffect = rSource
+function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
+	local rAction = {}
+	local aClause = {}
+	rAction.clauses = {}
+	
+	aClause.dice  = rEffectComp.dice;
+	aClause.modifier = rEffectComp.mod
+	aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ","))
+	table.insert(rAction.clauses, aClause)
+
+	rAction.label = "Ongoing Effect"
+	
+	local rRoll = ActionDamage.getRoll(rTarget, rAction)
+	if  bHalf then
+		rRoll.sDesc = rRoll.sDesc .. " [HALF]"
 	end
-	if nodeCT == sourceNodeCT then
-		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"DMGOE") and not sEffect:match("SDMGOE") then
-				applyOngoingDamage(rSourceEffect, rSource, nodeEffect, false, false)
+	ActionsManager.actionDirect(rSource, "damage", {rRoll}, {{rTarget}})
+end
+
+function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp)
+	local rAction = {}
+	local aClause = {}
+	rAction.clauses = {}
+
+	aClause.dice  = rEffectComp.dice;
+	aClause.modifier = rEffectComp.mod
+	table.insert(rAction.clauses, aClause)
+
+	if bTemp == true then
+		rAction.label = "Ongoing Temporary Hitpoints"
+		rAction.subtype = "temp"
+	else
+		rAction.label = "Ongoing Regeneration"
+	end
+
+	local rRoll = ActionHeal.getRoll(rTarget, rAction)
+	ActionsManager.actionDirect(rSource, "heal", {rRoll}, {{rTarget}})
+end
+
+function processEffectTurnStartDND(rSource)
+	local tMatch = {}
+	local aTags = {"TREGENS"}
+
+	-- Only process these if on the source node
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, rSource)
+	for _,tEffect in pairs(tMatch) do
+		applyOngoingRegen(rSource, rSource, tEffect.rEffectComp, true)
+	end
+
+	local ctEntries = CombatManager.getCombatantNodes()
+	--Tags to be processed on other nodes in the CT
+	aTags = {"SDMGOS", "SREGENS", "STREGENS"}
+	for _, nodeCT in pairs(ctEntries) do
+		local rActor = ActorManager.resolveActor(nodeCT)
+		if rActor ~= rSource then
+			tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
+			for _,tEffect in pairs(tMatch) do
+				if tEffect.sTag == "SDMGOS" then
+					applyOngoingDamage(rSource, rActor, tEffect.rEffectComp)
+				elseif tEffect.sTag == "SREGENS" then
+					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, false)
+				elseif tEffect.sTag == "STREGENS" then
+					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, true)
+				end
+			end
 		end
-		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"REGENE") and not sEffect:match("SREGENE") then
-			applyOngoingRegen(rSourceEffect, rSource, nodeEffect, "REGENE")
-		end
-		if EffectsManagerBCE.processEffect(rSource,nodeEffect,"TREGENE") and not sEffect:match("STREGENE") then
-			applyOngoingRegen(rSourceEffect, rSource, nodeEffect, "TREGENE", true)
+	end
+	return true
+end
+
+function processEffectTurnEndDND(rSource)
+  	local tMatch = {}
+	local aTags = {"DMGOE", "REGENE", "TREGENE"}
+
+	-- Only process these if on the source node
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, rSource)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "DMGOE" then
+				applyOngoingDamage(rSource, rSource, tEffect.rEffectComp)
+		elseif tEffect.sTag == "REGENE" then
+			applyOngoingRegen(rSource, rSource, tEffect.rEffectComp, false)
+		elseif tEffect.sTag == "TREGENE" then
+			applyOngoingRegen(rSource, rSource, tEffect.rEffectComp, true)
 		end
 	end
 
-	if sEffectSource ~= nil   and (sSourceName == sEffectSource or (sEffectSource == "" and nodeCT == sourceNodeCT))  then
-		local rTargetEffect = ActorManager.resolveActor(nodeEffect.getParent().getParent().getPath())
-		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"SDMGOE", rSourceEffect) then
-			applyOngoingDamage(rSourceEffect, rTargetEffect, nodeEffect, false, false)
-		end
-		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"SREGENE", rSourceEffect) then
-			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, "SREGENE")
-		end
-		if EffectsManagerBCE.processEffect(rTargetEffect,nodeEffect,"STREGENE", rSourceEffect) then
-			applyOngoingRegen(rSourceEffect, rTargetEffect, nodeEffect, "STREGENE", true)
+	local ctEntries = CombatManager.getCombatantNodes()
+	--Tags to be processed on other nodes in the CT
+	aTags = {"SDMGOE", "SREGENE", "STREGENE"}
+	for _, nodeCT in pairs(ctEntries) do
+		local rActor = ActorManager.resolveActor(nodeCT)
+		if rActor ~= rSource then
+			tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource)
+			for _,tEffect in pairs(tMatch) do
+				if tEffect.sTag == "SDMGOE" then
+					applyOngoingDamage(rSource, rActor, tEffect.rEffectComp)
+				elseif tEffect.sTag == "SREGENE" then
+					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, false)
+				elseif tEffect.sTag == "STREGENE" then
+					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, true)
+				end
+			end
 		end
 	end
 	return true
@@ -218,7 +206,8 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	local bDead = false
 	local nodeTarget = ActorManager.getCTNode(rTarget)
-	local nodeSource = ActorManager.getCTNode(rSource)	
+	local nodeSource = ActorManager.getCTNode(rSource)
+
 	-- save off temp hp and wounds before damage
 	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
 
@@ -241,54 +230,70 @@ function customOnDamage(rSource, rTarget, rRoll)
 		if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP then
 			return
 		end
+	-- return if no damage was applied theen return
 	elseif nWoundsPrev >= nWounds then
 		return
 	end
-
-	-- Loop through effects on the target of the damage
-	for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
-		local sEffect = DB.getValue(nodeEffect, "label", "")	
-		if (fProcessEffectOnDamage ~= nil) then
-			fProcessEffectOnDamage(rSource,rTarget, nodeEffect)
-		end
-		if sEffect:match("TDMGADDT") or sEffect:match("TDMGADDS") then
-			local rEffect = EffectsManagerBCE.matchEffect(sEffect)
-			if rEffect.sName ~= nil then
-				-- Set the node that applied the effect
-				rEffect.sSource = ActorManager.getCTNodeName(rTarget)
-				rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
-				if EffectsManagerBCE.processEffect(rSource,nodeEffect,"TDMGADDT", rTarget) then
-					EffectManager.addEffect("", "", ActorManager.getCTNode(rTarget), rEffect, true)
-				end
-				if EffectsManagerBCE.processEffect(rSource,nodeEffect,"TDMGADDS", rTarget) then
-					EffectManager.addEffect("", "", ActorManager.getCTNode(rSource), rEffect, true)
-				end
-			end
-		end
-	end
-	-- Loop though the effects on the source of the damage
-	for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
-		local sEffect = DB.getValue(nodeEffect, "label", "")
-		local sSource = ActorManager.getCTNodeName(sSource)
-
-		if sEffect:match("SDMGADDT") or sEffect:match("SDMGADDS") then
-			local rEffect = EffectsManagerBCE.matchEffect(sEffect)
-			if rEffect ~= nil and rEffect.sName ~= nil then
-				rEffect.sSource = ActorManager.getCTNodeName(sSource)
-				rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
-				if EffectsManagerBCE.processEffect(rTarget,nodeEffect,"SDMGADDT", rSource) then
-					EffectManager.addEffect("", "", ActorManager.getCTNode(rTarget), rEffect, true)
-				end
-				if EffectsManagerBCE.processEffect(rTarget,nodeEffect,"SDMGADDS", rSource) then
-					EffectManager.addEffect("", "", ActorManager.getCTNode(rSource), rEffect, true)
-				end
-			end
-		end
-	end
-	--if the target is dead, process all effects with (E)
+	
+		--if the target is dead, process all effects with (E)
 	if(bDead == true) then
 		local sTarget =ActorManager.getCTNodeName(rTarget)
-		CombatManager.callForEachCombatantEffect(EffectsManagerBCEDND.endEffectsOnDead, sTarget)
+		CombatManager.callForEachCombatantEffect(endEffectsOnDead, sTarget)
+	end
+	
+	--local rSourceEffect = ActorManager.resolveActor(sEffectSource)
+	local tMatch = {}
+	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
+	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
+	-- of the tags to be applied as expected
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "DMGAT" then
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
+		elseif tEffect.sTag == "DMGDT" then
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Deactivate")
+		elseif tEffect.sTag == "DMGRT" then
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
+		end
+	end
+
+	if (fProcessEffectOnDamage ~= nil) then
+		fProcessEffectOnDamage(rSource,rTarget,rRoll)
+	end
+
+	aTags = {"TDMGADDT", "TDMGADDS"}
+	
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	for _,tEffect in pairs(tMatch) do
+		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+		if rEffect ~= {} then
+			rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
+			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
+			
+			if tEffect.sTag == "TDMGADDT" then
+				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
+			elseif tEffect.sTag == "TDMGADDS" then
+				EffectManager.addEffect("", "", nodeSource, rEffect, true)
+			end
+		end
+	end
+
+	aTags = {"SDMGADDT","SDMGADDS"}
+	
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	for _,tEffect in pairs(tMatch) do
+		--if type(tEffect.nodeCT) ~= "userdata" then
+		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+		if rEffect ~= {} then
+			rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
+			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
+			
+			if tEffect.sTag == "SDMGADDT" then
+				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
+			elseif tEffect.sTag == "SDMGADDS" then
+				EffectManager.addEffect("", "", nodeSource, rEffect, true)
+			end
+		end
 	end
 end
 
@@ -341,56 +346,9 @@ function processAbsorb(rSource, rTarget, rRoll)
 	end
 end
 
---scrape the message string for the damage. For multiple types of damage, FG is no help and we will
--- just need to figure out the breakdown ourselves or live with it.
-function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
-	-- don't waste cycles if no damage
-	if (tonumber(sTotal) > 0) then
-		local aEffects = {}
-		local aDMGTypes = {}
-		local bMatch = false
-		local bRangeMatch = true
 
-		for _,sType in ipairs(DataCommon.dmgtypes) do
-			if sDamageDesc:match(sType) then
-				table.insert(aDMGTypes, sType)
-			end
-		end
-		local nodeTarget = ActorManager.getCTNode(rTarget)
-		for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
-			local sEffect = DB.getValue(nodeEffect, "label", "")
-			if (EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGDT", rSource) or				
-				EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGRT", rSource) or
-				EffectsManagerBCE.processEffect(rTarget,nodeEffect,"DMGAT", rSource, true)) then
-				
-				local aEffectComps = EffectManager.parseEffect(sEffect)
-				for _,sEffectComp in ipairs(aEffectComps) do
-					bMatch = false
-					bRangeMatch = true
-					local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-					for _,sDMGType in ipairs(rEffectComp.remainder) do
-						sDMGType = sDMGType:lower()
-						if (StringManager.contains(aDMGTypes, sDMGType) or sDMGType == "all") then
-							bMatch = true
-						end
-						if (sDMGType == "ranged" and sDamageDesc:match("%(M%)")) or
-							(sDMGType == "melee" and sDamageDesc:match("%(R%)")) then
-							bRangeMatch = false
-						end
-					end
-					if (bRangeMatch and bMatch) then
-						if (rEffectComp.type == "DMGDT") then
-							EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate")
-						elseif (rEffectComp.type == "DMGAT") then
-							EffectsManagerBCE.modifyEffect(nodeEffect, "Activate")
-						elseif (rEffectComp.type == "DMGRT") then
-							EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
-						end
-					end
-				end
-			end
-		end
-	end
+function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
+
 	local sAbsorb = sDamageDesc:match("%[ABSORBED:%s*%l*]")
 	if sAbsorb ~= nil then
 		sExtraResult = sAbsorb .. sExtraResult
@@ -401,7 +359,6 @@ end
 function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
 	replaceAbilityScores(rNewEffect, rActor)
---	replaceAbilityModifier(rNewEffect, rActor)
 	local rRoll = {}
 	rRoll = isDie(rNewEffect.sName)
 	if next(rRoll) ~= nil and next(rRoll.aDice) ~= nil then
@@ -422,8 +379,8 @@ end
 function replaceAbilityScores(rNewEffect, rActor)
 	-- check contains -X to see if this is interesting enough to continue
 	if rNewEffect.sName:match("%-X") then
-		local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
-		for _,sEffectComp in ipairs(aEffectComps) do
+		local tEffectComps = EffectManager.parseEffect(rNewEffect.sName)
+		for _,sEffectComp in ipairs(tEffectComps) do
 			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
 			local nAbility = 0
 
@@ -462,9 +419,9 @@ end
 
 function isDie(sEffect)
 	local rRoll = {}
-	local aEffectComps = EffectManager.parseEffect(sEffect)
+	local tEffectComps = EffectManager.parseEffect(sEffect)
 	local nMatch = 0
-	for kEffectComp,sEffectComp in ipairs(aEffectComps) do
+	for kEffectComp,sEffectComp in ipairs(tEffectComps) do
 		local aWords = StringManager.parseWords(sEffectComp, "%.%[%]%(%):")
 		local bNegative = 0
 		if #aWords > 0 then
@@ -511,7 +468,7 @@ function getTempHPAndWounds(rTarget)
 	if sTargetNodeType == "pc" then
 		nTempHP = DB.getValue(nodeTarget, "hp.temporary", 0)
 		nWounds = DB.getValue(nodeTarget, "hp.wounds", 0)
-	elseif sTargetNodeType == "ct" then
+	elseif sTargetNodeType == "ct" or sTargetNodeType == "npc" then
 		nTempHP = DB.getValue(nodeTarget, "hptemp", 0)
 		nWounds = DB.getValue(nodeTarget, "wounds", 0)
 	end
@@ -545,9 +502,38 @@ function onInit()
 			RulesetEffectManager = EffectManager35E
 		end
 
+		-- BCE DND TAGS
+		EffectsManagerBCE.registerBCETag("DMGAT", EffectsManagerBCE.aBCEActivateOptions)
+			
+		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCERemoveOptions)
+
+		EffectsManagerBCE.registerBCETag("DMGDT", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("DMGOE", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("RESTL", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("RESTS", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("TDMGADDS", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("TDMGADDT", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("REGENE", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("TREGENS", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("TREGENE", EffectsManagerBCE.aBCEDefaultOptions)
+
+		EffectsManagerBCE.registerBCETag("REGENA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("TREGENA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("DMGA", EffectsManagerBCE.aBCEOneShotOptions)
+
+		EffectsManagerBCE.registerBCETag("STREGENS", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("STREGENE", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SREGENS", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SREGENE", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SDMGADDT", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SDMGADDS", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SDMGOS", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SDMGOE", EffectsManagerBCE.aBCESourceMattersOptions)
+	
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStartDND)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEndDND)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectStart)
+		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost)
 		
 		-- save off the originals so we play nice with others
 		messageDamage = ActionDamage.messageDamage
