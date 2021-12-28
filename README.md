@@ -140,10 +140,6 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SREGENE (N)** Apply regeneration at the end of the actors turn who applied the effect. (N) can be number or dice string
 
-### Absorption
-
-* **ABSORB: [damage type] (H)** The Actor will heal the amount of damage dealt of the specified damage type. (H) The Actor will heal half rounded down of the specified damage type. The Actor likely should also be immune, "IMMUNE: [damage type]" to the same damage type to produce the desired results.
-
 * **TREGENA (N)** Apply one time regeneration to temporary HP when the effect is added. (N) can be number or dice string
 
 * **TREGENS (N)** Apply regeneration to temporary HP at the start of the actors turn. (N) can be number or dice string
@@ -154,6 +150,9 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **STREGENE (N)** Apply regeneration to temporary HP at the end of the actors turn who applied the effect. (N) can be number or dice string
 
+### Absorption
+
+* **ABSORB: [damage type] (H)** The Actor will heal the amount of damage dealt of the specified damage type. (H) The Actor will heal half rounded down of the specified damage type. The Actor likely should also be immune, "IMMUNE: [damage type]" to the same damage type to produce the desired results.
 
 ## 5E/3.5E/PFRPG
 
@@ -184,6 +183,9 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SAVEONDMG: [ability] [SDC]** Roll save when the actor takes damage
   * Dominate Person; SAVEONDMG: WIS [SDC] (R)
+
+* **SAVERESTL: [ability] [SDC]** Roll save at on long rest
+
    
 * **(R)** will remove the save effect on a successful save.
 * **(D)** will disable the save effect on a successful save.

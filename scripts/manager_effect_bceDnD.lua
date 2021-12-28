@@ -22,12 +22,18 @@ function customRest(nodeActor, bLong, bMilestone)
 	local aTags = {"RESTS"}
 	if bLong == true then
 		table.insert(aTags, "RESTL")
+		if User.getRulesetName() == "5E" then
+			table.insert(aTags, "SAVERESTL")
+
+		end
 	end
 
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "RESTL" or tEffect.sTag == "RESTS" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
+		elseif tEffect.sTag == "SAVERESTL" then
+			EffectsManagerBCE5E.saveEffect(rSource, rSource, tEffect)
 		end
 	end
 end
@@ -221,6 +227,8 @@ function customOnDamage(rSource, rTarget, rRoll)
 		bDead = true
 	end
 
+	processAbsorb(rSource, rTarget, rRoll)
+
 	-- get temp hp and wounds after damage
 	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
 
@@ -234,7 +242,6 @@ function customOnDamage(rSource, rTarget, rRoll)
 		return
 	end
 
-	processAbsorb(rSource, rTarget, rRoll)
 	
 		--if the target is dead, process all effects with (E)
 	if(bDead == true) then
