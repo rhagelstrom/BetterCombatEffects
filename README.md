@@ -166,10 +166,14 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
   * Web; Restrained; SAVES: DEX [SDC] (C)
 
+* **SSAVES: [ability] [SDC]** Roll save at the start of the actors turn who applied this effect
+
 * **SAVEE: [ability] [SDC]** Roll save at the end of turn.  
 
   * Frightful Presence; Frightened; SAVEE: WIS 16 (R)
   * Wall of Thorns; SAVEE: DEX [SDC] (H)(C); SAVEDMG: 7d8 slashing
+
+* **SSAVEE: [ability] [SDC]** Roll save at the end of the actors turn who applied this effect
 
 * **SAVEA: [ability] [SDC]** Automatically roll save when the effect is added. Automate NPC debuff effects like Ghoul attack
   * Ghoul Claws; SDMGADDT: GOTU
@@ -184,7 +188,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 * **SAVEONDMG: [ability] [SDC]** Roll save when the actor takes damage
   * Dominate Person; SAVEONDMG: WIS [SDC] (R)
 
-* **SAVERESTL: [ability] [SDC]** Roll save at on long rest
+* **SAVERESTL: [ability] [SDC]** Roll save at on long rest (5E only)
 
    
 * **(R)** will remove the save effect on a successful save.

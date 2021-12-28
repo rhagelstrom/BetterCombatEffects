@@ -24,7 +24,6 @@ function customRest(nodeActor, bLong, bMilestone)
 		table.insert(aTags, "RESTL")
 		if User.getRulesetName() == "5E" then
 			table.insert(aTags, "SAVERESTL")
-
 		end
 	end
 

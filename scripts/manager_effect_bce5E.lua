@@ -43,8 +43,10 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SAVERESTL", EffectsManagerBCE.aBCEDefaultOptions)
 
-		--4E/5E
 		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
+
+		EffectsManagerBCE.registerBCETag("SSAVES", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SSAVEE", EffectsManagerBCE.aBCESourceMattersOptions)
 
 
 		rest = CharManager.rest
@@ -138,6 +140,18 @@ function processEffectTurnStart5E(rSource)
 			saveEffect(rEffectSource, rSource, tEffect)
 		end
 	end
+	local ctEntries = CombatManager.getCombatantNodes()
+	--Tags to be processed on other nodes in the CT
+	local aTags = {"SSAVES"}
+	for _, nodeCT in pairs(ctEntries) do
+		local rActor = ActorManager.resolveActor(nodeCT)
+		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
+		for _,tEffect in pairs(tMatch) do
+			if tEffect.sTag == "SSAVES" then
+				saveEffect(rSource, rActor, tEffect)
+			end
+		end
+	end
 	return true
 end
 
@@ -157,6 +171,21 @@ function processEffectTurnEnd5E(rSource)
 			saveEffect(rEffectSource, rSource, tEffect)
 		end
 	end
+
+	local ctEntries = CombatManager.getCombatantNodes()
+	--Tags to be processed on other nodes in the CT
+	local aTags = {"SSAVEE"}
+	for _, nodeCT in pairs(ctEntries) do
+		local rActor = ActorManager.resolveActor(nodeCT)
+		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
+		for _,tEffect in pairs(tMatch) do
+			if tEffect.sTag == "SSAVEE" then
+				saveEffect(rSource, rActor, tEffect)
+			end
+		end
+	end
+
+
 	return true
 end
 
