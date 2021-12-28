@@ -184,15 +184,30 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if not nodeCT or not rNewEffect or not rNewEffect.sName then
 		return addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
-
+	
 	if onCustomPreAddEffect(sUser, sIdentity, nodeCT, rNewEffect,bShowMsg) == false then
 		return
 	end
 	-- Play nice with others
 	addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+	local nodeDisableEffect = nil
+	local bDeactivate = false
+	
+	--Deactivate Check here. Deactivate at end
+	if rNewEffect.sName:match("%(DE%)") then
+		for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
+			if (DB.getValue(nodeEffect, "label", "") == rNewEffect.sName) and
+			(DB.getValue(nodeEffect, "init", 0) == rNewEffect.nInit) and
+			(DB.getValue(nodeEffect, "duration", 0) == rNewEffect.nDuration) and
+			(DB.getValue(nodeEffect,"source_name", "") == rNewEffect.sSource) then
+				nodeDisableEffect = nodeEffect
+				bDeactivate = true
+				break
+			end
+		end
+	end
 
 	local rActor = ActorManager.resolveActor(nodeCT)
-	
 	if Session.IsHost and rNewEffect.nDuration ~= 0 then
 		--Special Case. We want to get the effect with TURNRS but we aren't processing it
 		-- we are just reseting the duration so it processes correctly
@@ -206,24 +221,36 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 			(DB.getValue(tEffect.nodeCT, "init", 0) == rNewEffect.nInit) and
 			(DB.getValue(tEffect.nodeCT, "duration", 0) == rNewEffect.nDuration) and
 			(DB.getValue(tEffect.nodeCT,"source_name", "") == rNewEffect.sSource) then
-					DB.setValue(tEffect.nodeCT, "duration", "number", rNewEffect.nDuration + 1)
-				end
-			if sEffect:match("%(DE%)") then
-				modifyEffect(nodeEffect, "Deactivate")
+				DB.setValue(tEffect.nodeCT, "duration", "number", rNewEffect.nDuration + 1)
 			end
 		end
 		--reset the options to what they should be
 		registerBCETag("TURNRS",  aBCERemoveOptions)
 	end
+
+	if bDeactivate then
+		modifyEffect(nodeDisableEffect, "Deactivate")
+	end
+	
 	if onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect) == false then
 		return
 	end
 
 end
 
+--Helper function
+function getDamageTypes(rRoll)
+	local aDMGTypes = {}
+	aDMGTypes.sRange = rRoll.range
+	for _,aType in pairs(rRoll.clauses) do
+		table.insert(aDMGTypes, {aDMG = ActionDamage.getDamageTypesFromString(aType.dmgtype), nTotal = aType.nTotal})
+	end
+	return aDMGTypes
+end
+
 --This function gets called a ton and it seems expensive. Try to do as much optimization as possible
 -- by grouping tags called at the same point in the code
-function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect)
+function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes)
 	for v,sTag in pairs(aTags) do
 		-- make sure passed tag is a registered tag
 		if tBCETag[sTag] == nil then
@@ -290,9 +317,30 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect)
 						end
 
 						if ((aOptions.bOnlyDisabled and nActive == 0 ) or nActive ~= 0) then
+							-- Do damage and range filter
 							if aOptions.nDuration ~= 0 and aOptions.nDuration ~= nDuration then
 								break
 							else
+								if aDMGTypes then
+									local bDiscard = true
+									for _,sRemainder in ipairs(rEffectComp.remainder) do
+										if sRemainder == "all" then
+											bDiscard = false
+										else
+											for _,aDMGClause in ipairs(aDMGTypes) do
+												if StringManager.contains(aDMGClause.aDMG, sRemainder) then
+													bDiscard = false
+												end
+											end
+											if bDiscard == false then
+												break
+											end
+										end
+									end
+									if bDiscard then
+										break
+									end
+								end
 								if bTargeted and not aOptions.bIgnoreEffectTargets then
 									if EffectManager.isEffectTarget(v, rTarget) then
 										table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
@@ -344,9 +392,8 @@ function matchEffect(sEffect)
 			tEffectComps = EffectManager.parseEffect(sEffect)
 			-- Is this the effeect we are looking for?
 			-- Name is parsed to index 1 in the array
-			
 		
-			if aEffectComps[1]:lower() == sEffectLookup:lower() then
+			if tEffectComps[1]:lower() == sEffectLower then
 				local nodeGMOnly = DB.getChild(v, "isgmonly")	
 				if nodeGMOnly then
 					rEffect.nGMOnly = nodeGMOnly.getValue()

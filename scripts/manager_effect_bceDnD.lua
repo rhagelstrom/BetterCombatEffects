@@ -214,7 +214,6 @@ function customOnDamage(rSource, rTarget, rRoll)
 	-- Play nice with others
 	-- Do damage first then modify any effects
 	onDamage(rSource, rTarget, rRoll)
-	processAbsorb(rSource, rTarget, rRoll)
 
 	nTotalHP = DB.getValue(nodeTarget, "hp.total", 0)
 	nWounds = DB.getValue(nodeTarget, "hp.wounds", 0)
@@ -234,6 +233,8 @@ function customOnDamage(rSource, rTarget, rRoll)
 	elseif nWoundsPrev >= nWounds then
 		return
 	end
+
+	processAbsorb(rSource, rTarget, rRoll)
 	
 		--if the target is dead, process all effects with (E)
 	if(bDead == true) then
@@ -241,12 +242,13 @@ function customOnDamage(rSource, rTarget, rRoll)
 		CombatManager.callForEachCombatantEffect(endEffectsOnDead, sTarget)
 	end
 	
-	--local rSourceEffect = ActorManager.resolveActor(sEffectSource)
 	local tMatch = {}
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+
+	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
@@ -282,7 +284,6 @@ function customOnDamage(rSource, rTarget, rRoll)
 	
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
-		--if type(tEffect.nodeCT) ~= "userdata" then
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if rEffect ~= {} then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
@@ -305,47 +306,41 @@ function endEffectsOnDead(nodeEffect, sTarget)
 	end
 end
 
+
 function processAbsorb(rSource, rTarget, rRoll)
-	local nodeTarget = ActorManager.getCTNode(rTarget)
-	for _,nodeEffect in pairs(DB.getChildren(nodeTarget, "effects")) do
-		if EffectsManagerBCE.processEffect(rTarget, nodeEffect,"ABSORB", rSource) then
-			local aDamageTypes = {}
-			for _,aType in pairs(rRoll.clauses) do
-				table.insert(aDamageTypes, {aDMG = ActionDamage.getDamageTypesFromString(aType.dmgtype), nTotal = aType.nTotal})
-			end		
-			local sEffect = DB.getValue(nodeEffect, "label", "")
-			local aDMGTypes = {}
-			local bHalf = false
-			local nDMGAmount = 0
-			local sDMGType
-			local aEffectComps = EffectManager.parseEffect(sEffect)
-			for _,sEffectComp in ipairs(aEffectComps) do
-				local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-				if rEffectComp.type == "ABSORB" then
-					for _,sRemainder in ipairs(rEffectComp.remainder) do
-						if sRemainder == "(H)" then
-							bHalf = true
-						end
-						for _,aDMGClause in ipairs(aDamageTypes) do
-							if StringManager.contains(aDMGClause.aDMG, sRemainder) then
-								nDMGAmount = aDMGClause.nTotal
-								sDMGType = sRemainder
-							end
-						end
+	local tMatch = {}
+	local aTags = {"ABSORB"}
+	local bHalf = false
+	local nDMGAmount = 0
+	local sDMGType
+	
+	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
+
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "ABSORB" then
+			for _,sRemainder in ipairs(tEffect.rEffectComp.remainder) do
+				if sRemainder == "(H)" then
+					bHalf = true
+				end
+				-- If we match any of our damage types we absorb it
+				for _,aDMGClause in ipairs(aDMGTypes) do
+					if StringManager.contains(aDMGClause.aDMG, sRemainder) then
+						nDMGAmount = aDMGClause.nTotal
+						sDMGType = sRemainder
 					end
 				end
-			end		
+			end
 			if nDMGAmount > 0 then
 				local sLabel =  "[ABSORBED: " .. sDMGType .. "]"
 				if bHalf then
 					nDMGAmount= math.floor(nDMGAmount/2)
 				end
-				ActionDamage.applyDamage(rSource, rTarget, DB.getValue(nodeEffect, "isgmonly", ""), "[HEAL]" .. sLabel, nDMGAmount)
+				ActionDamage.applyDamage(rSource, rTarget, tEffect.nGMOnly, "[HEAL]" .. sLabel, nDMGAmount)
 			end
 		end
 	end
 end
-
 
 function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
 
@@ -372,7 +367,6 @@ function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
 	return true
 end
-
 
 -- Any effect that modifies ability score and is coded with -X
 -- has the -X replaced with the targets ability score and then calculated
@@ -518,6 +512,7 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("TREGENE", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SDMGADDT", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SDMGADDS", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("ABSORB", EffectsManagerBCE.aBCEDefaultOptions)
 
 		EffectsManagerBCE.registerBCETag("REGENA", EffectsManagerBCE.aBCEOneShotOptions)
 		EffectsManagerBCE.registerBCETag("TREGENA", EffectsManagerBCE.aBCEOneShotOptions)
