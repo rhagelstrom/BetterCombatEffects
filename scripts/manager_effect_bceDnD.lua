@@ -45,6 +45,18 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 	local nodeSource = ActorManager.getCTNode(rSource)	
 	local sEffect = ""
 	local sEffectOriginal = ""
+
+	if rRoll.subtype and rRoll.subtype == "DUR" and type(DB.findNode(rRoll.nodeEffectCT)) == "databasenode" then
+		local nResult = tonumber(ActionsManager.total(rRoll))
+		if rRoll.sUnits == "minute" then
+			nResult = nResult * 10
+		end
+		local nodeCT = DB.findNode(rRoll.nodeEffectCT)
+		DB.setValue(nodeCT, "duration", "number", nResult)
+		EffectsManagerBCE.updateEffect(nodeSource,nodeCT, rRoll.sEffect)
+		return
+	end
+
 	for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
 		sEffect = DB.getValue(nodeEffect, "label", "")
 		if sEffect == rRoll.sEffect then
@@ -81,8 +93,7 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect)
 		rSource = ActorManager.resolveActor(rNewEffect.sSource)
 	end
 	local tMatch = {}
-	local aTags = {"REGENA", "TREGENA", "DMGA"}
-
+	local aTags = {"REGENA", "TREGENA", "DMGA", "DUR"}
 
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
@@ -92,6 +103,25 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect)
 			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, true)
 		elseif tEffect.sTag == "DMGA" then
 			applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp)
+		elseif tEffect.sTag == "DUR" and type(tEffect.nodeCT) == "databasenode" then
+			local sLabel = DB.getValue(tEffect.nodeCT, "label", "")
+			local rRoll = {}
+			rRoll.sType = "effectbce"
+			rRoll.sDesc = "[EFFECT " .. sLabel .. "] "
+			rRoll.aDice = tEffect.rEffectComp.dice
+			rRoll.nMod = tonumber(tEffect.rEffectComp.mod)
+			rRoll.sEffect = sLabel
+			rRoll.subtype = "DUR"
+			rRoll.rActor = rTarget
+			rRoll.sUnits = rNewEffect.sUnits
+
+			rRoll.nodeEffectCT = tEffect.nodeCT.getPath()
+			if tEffect.nGMOnly == 1 then
+				rRoll.bSecret = true
+			else
+				rRoll.bSecret = false
+			end
+			ActionsManager.performAction(nil, rTarget, rRoll)		
 		end
 	end
 	return true
@@ -364,6 +394,7 @@ function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	rRoll = isDie(rNewEffect.sName)
 	if next(rRoll) ~= nil and next(rRoll.aDice) ~= nil then
 		rRoll.rActor = rActor
+		rRoll.subtype = "DUR"
 		if rNewEffect.nGMOnly  then
 			rRoll.bSecret = true
 		else
@@ -523,6 +554,7 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("REGENA", EffectsManagerBCE.aBCEOneShotOptions)
 		EffectsManagerBCE.registerBCETag("TREGENA", EffectsManagerBCE.aBCEOneShotOptions)
 		EffectsManagerBCE.registerBCETag("DMGA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("DUR", EffectsManagerBCE.aBCEOneShotOptions)
 
 		EffectsManagerBCE.registerBCETag("STREGENS", EffectsManagerBCE.aBCESourceMattersOptions)
 		EffectsManagerBCE.registerBCETag("STREGENE", EffectsManagerBCE.aBCESourceMattersOptions)

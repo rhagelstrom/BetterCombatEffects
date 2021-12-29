@@ -221,7 +221,6 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		local nodeSource = DB.findNode(rNewEffect.sSource)
 		rSource = ActorManager.resolveActor(nodeSource)		
 	end
-
 	rNewEffect.sName = EffectManager5E.evalEffect(rSource, rNewEffect.sName)
 	replaceSaveDC(rNewEffect, rSource)
 	abilityReplacement(rNewEffect,rSource)

@@ -51,7 +51,7 @@ function onInit()
 	EffectManager.addEffect = customAddEffect
 
 	expireEffect = EffectManager.expireEffect	
-	EffectManager.expireEffect = customExpireEffect
+	RulesetEffectManager.expireEffect = customExpireEffect
 
 	ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
 
@@ -65,8 +65,8 @@ function onInit()
 	
 end
 function onClose()
-	EffectManager.addEffect = addEffect
-	EffectManager.expireEffect = expireEffect
+	RulesetEffectManager.addEffect = addEffect
+	RulesetEffectManager.expireEffect = expireEffect
 
 	ActionsManager.unregisterResultHandler("effectbce")
 end
@@ -184,7 +184,8 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if not nodeCT or not rNewEffect or not rNewEffect.sName then
 		return addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
-	
+	local sUnits = rNewEffect.sUnits or ""
+
 	if onCustomPreAddEffect(sUser, sIdentity, nodeCT, rNewEffect,bShowMsg) == false then
 		return
 	end
@@ -231,7 +232,8 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if bDeactivate then
 		modifyEffect(nodeDisableEffect, "Deactivate")
 	end
-	
+	-- 5E scubs the sUnits so we add it back in
+	rNewEffect.sUnits = sUnits
 	if onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect) == false then
 		return
 	end

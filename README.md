@@ -88,6 +88,11 @@ Adding effect with a dice string automatically rolls the dice when the effect is
   * Turn Undead; Turned; DMGRT: all
   * Sleep; Unconscious; DMGRT: all
 
+
+### Dynamic Effect Duration
+
+* **DUR: (N)** Sets the duration of the effect when the effect is applied. (N) can be number or dice string
+
 ### Add Effect on Damage Modifiers
 
 Effects can be automatically added to the source or the target on the damage by either the source of the damage or the target of the damage. For this to work we need two different effects.  Example:
