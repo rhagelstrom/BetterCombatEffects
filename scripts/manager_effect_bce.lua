@@ -329,37 +329,35 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect)
 	return aMatch
 end
 
---TODO: Optimize search
-function matchEffect(sEffect)
-	--Find the effect name in our custom effects list
-	local sEffectLower = sEffect:lower() 
-	for _,v in pairs(DB.getChildrenGlobal("effects")) do
-		rEffect = {}
+function binarySearchEffects(aGlobalEffects, sSearchString, nLowValue, nHighValue)
+	if nHighValue < nLowValue then
+		return nil
+	end
 
-		local sEffect = DB.getValue(v, "label", "")
-		if sEffect ~= nil and sEffect ~= "" then
-			tEffectComps = EffectManager.parseEffect(sEffect)
-			-- Is this the effeect we are looking for?
-			-- Name is parsed to index 1 in the array
-			if tEffectComps[1]:lower() == sEffectLower then
-				local nodeGMOnly = DB.getChild(v, "isgmonly")	
-				if nodeGMOnly then
-					rEffect.nGMOnly = nodeGMOnly.getValue()
-				end
-				local nodeEffectDuration = DB.getChild(v, "duration")
-				if nodeEffectDuration then
-					rEffect.nDuration = nodeEffectDuration.getValue()
-				end
-				local nodeUnits = DB.getChild(v, "unit")
-				if nodeUnits then
-					rEffect.sUnits = nodeUnits.getValue()
-				end
-				rEffect.sName = sEffect
-				if onCustomMatchEffect(sEffect) then
-					break
-				end
-			end
-		end
+	local nMidValue = math.floor((nLowValue + nHighValue) /2)
+	local sEffect = DB.getValue(aGlobalEffects[nMidValue], "label", ""):lower()
+	local tEffectComps = EffectManager.parseEffect(sEffect)
+	sEffect = tEffectComps[1]:lower()
+
+	if sEffect > sSearchString then
+		return binarySearchEffects(aGlobalEffects, sSearchString, nLowValue, nMidValue -1)
+	elseif  sEffect < sSearchString then
+		return binarySearchEffects(aGlobalEffects, sSearchString, nMidValue +1 , nHighValue)
+	else
+		return aGlobalEffects[nMidValue]
+	end
+end
+
+function matchEffect(sEffect)
+	local aGlobalEffects = DB.getChildrenGlobal("effects")
+	local rEffect = {}
+	local nodeEffect = binarySearchEffects(aGlobalEffects, sEffect:lower(), 0, #aGlobalEffects-1 )
+
+	if nodeEffect then
+		rEffect.sName = DB.getValue(nodeEffect, "label", "")
+		rEffect.nGMOnly  = DB.getValue(nodeEffect, "isgmonly",0)
+		rEffect.nDuration =DB.getValue(nodeEffect, "duration",0)
+		rEffect.sUnits = DB.getValue(nodeEffect, "unit", "")
 	end
 	return rEffect
 end
