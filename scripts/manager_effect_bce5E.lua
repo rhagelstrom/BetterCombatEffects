@@ -62,8 +62,8 @@ function onInit()
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost5E)
 		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage)
 
-		ActionsManager.registerResultHandler("savebce", onSaveRollHandler5E)
-		ActionsManager.registerModHandler("savebce", onModSaveHandler)
+		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
+		ActionsManager.registerModHandler("save", onModSaveHandler)
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 	
@@ -86,8 +86,8 @@ function onClose()
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
-		ActionsManager.unregisterResultHandler("savebce")
-		ActionsManager.unregisterModHandler("savebce")
+		ActionsManager.unregisterResultHandler("save")
+		ActionsManager.unregisterModHandler("save")
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre5E)
@@ -350,7 +350,10 @@ end
 
 
 function onSaveRollHandler5E(rSource, rTarget, rRoll)
-
+	if rRoll.sSubtype ~= "bce" then
+		ActionSave.onSave(rSource, rTarget, rRoll) -- Reverse target/source because the target of the effect is making the save
+		return
+	end
 	local nodeEffect = nil 
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
@@ -451,7 +454,8 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 	local nDC = tonumber(aParsedRemiander[2])
 	if  (nDC and sAbility) ~= nil then
 		local rSaveVsRoll = {}
-		rSaveVsRoll.sType = "savebce"
+		rSaveVsRoll.sType = "save"
+		rSaveVsRoll.sSubtype = "bce"
 		rSaveVsRoll.aDice = {}
 		rSaveVsRoll.sSaveType = "Save"
 		rSaveVsRoll.nTarget = nDC -- Save DC
@@ -591,7 +595,9 @@ end
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
 function onModSaveHandler(rSource, rTarget, rRoll)
-	if bAutomaticSave == true then
+	if rRoll.sSubtype ~= "bce" then
+		ActionSave.modSave(rSource, rTarget, rRoll) -- Reverse target/source because the target of the effect is making the save
+	elseif bAutomaticSave == true then
 		ActionSaveASA.customModSave(rTarget, rSource, rRoll)
 	else
 		ActionSave.modSave(rTarget, rSource, rRoll)
