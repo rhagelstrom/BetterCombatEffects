@@ -230,7 +230,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
@@ -247,11 +247,11 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
 	
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if rEffect ~= {} then
-			rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
+			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rTarget.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 			
 			if tEffect.sTag == "TDMGADDT" then
@@ -264,14 +264,13 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	aTags = {"SDMGADDT","SDMGADDS"}
 	
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		--if type(tEffect.nodeCT) ~= "userdata" then
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if rEffect ~= {} then
-			rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
+			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
-			
 			if tEffect.sTag == "SDMGADDT" then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 			elseif tEffect.sTag == "SDMGADDS" then
@@ -433,7 +432,8 @@ function onInit()
 			
 		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCERemoveOptions)
 
-		EffectsManagerBCE.registerBCETag("DMGDT", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("DMGDT", EffectsManagerBCE.aBCEDeactivateOptions)
+		
 		EffectsManagerBCE.registerBCETag("DMGOE", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("RESTL", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("RESTS", EffectsManagerBCE.aBCEDefaultOptions)
