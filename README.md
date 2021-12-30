@@ -201,6 +201,8 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 * **(H)** will deal half damage on a successful ongoing save.
 * **(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save.
 * **(F)** will invert the roll. SAVEDMG, (R), (D), (H) will be performed on a failed save rather than successful one.
+* **(ADV)** will have advantage on this save.
+* **(DIS)** will have disadvantage on this save.
 
 ## 4E/5E
 ---

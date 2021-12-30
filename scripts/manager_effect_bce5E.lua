@@ -483,6 +483,12 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		if tEffect.rEffectComp.original:match("%(F%)") then
 			rSaveVsRoll.bActonFail = true
 		end
+		if tEffect.rEffectComp.original:match("%(ADV%)") then
+			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [ADV]";
+		end
+		if tEffect.rEffectComp.original:match("%(DIS%)") then
+			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [DIS]";
+		end
 
 		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]" 
 		local rRoll = {}
