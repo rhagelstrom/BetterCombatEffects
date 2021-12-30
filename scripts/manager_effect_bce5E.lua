@@ -394,7 +394,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
 		end
 
-		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
+		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADDP" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
@@ -409,7 +409,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			end
 	elseif nodeEffect ~= nil then
 		aTags = {"SAVEADD", "SAVEDMG"}
-		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADD" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1], nil, nodeEffect)
@@ -430,7 +430,7 @@ function onDamage(rSource,rTarget, nodeEffect)
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource

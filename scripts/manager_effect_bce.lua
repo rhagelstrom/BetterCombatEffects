@@ -14,12 +14,13 @@ local bExpired = false -- Expried is called twice to support one-shot effects bu
 local RulesetEffectManager =  nil 
 
 -- Predefined option arrays for getting effect tags
-aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
+aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
+aBCEDeactivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
 aBCEDefaultOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
-aBCERemoveOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false,nDuration = 1}
+aBCERemoveOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false,nDuration = 1}
 aBCEIgnoreOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = true, bOneShot = false, nDuration = 0}
 aBCESourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
-aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, nDuration = 0}
+aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, nDuration = 0}
 
 local tBCETag = {}
 
@@ -33,8 +34,8 @@ function onInit()
 	registerBCETag("TURNRE",  aBCERemoveOptions)
 	registerBCETag("STURNRE", aBCERemoveOptions)
 
-	registerBCETag("TURNDE", aBCEDefaultOptions)
-	registerBCETag("TURNDS", aBCEDefaultOptions)
+	registerBCETag("TURNDE", aBCEDeactivateOptions)
+	registerBCETag("TURNDS", aBCEDeactivateOptions)
 
 	registerBCETag("EXPIREADD", aBCEIgnoreOneShotOptions)
 
@@ -276,7 +277,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		local nDuration = tonumber(DB.getValue(v, "duration", ""))
 		local bTargeted = EffectManager.isTargetedEffect(v)
 		local tEffectComps = EffectManager.parseEffect(sLabel)
-		
+
 		-- We only want to process a specific effect. Used mostly
 		-- for something to happen after a save result
 		if nodeEffect == nil or nodeEffect == v then
