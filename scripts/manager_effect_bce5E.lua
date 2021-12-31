@@ -3,11 +3,29 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
+--require "ct/scripts/ct_power.lua"
+
 local bMadNomadCharSheetEffectDisplay = false
-local bAutomaticSave = false
 local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
+local actionRoll = nil 
+
+local decodeActors = nil 
+local performAction = nil
+local getPCPowerAction = nil
+local handleApplySaveVs = nil
+local notifyApplySaveVs = nil
+local performVsRoll = nil
+local performSaveVsRoll = nil
+
+local addCustomNPC = nil 
+local addCustomPC = nil 
+
+local tTraitsAdvantage = {}
+local tTraitsDisadvantage = {}
+
+OOB_MSGTYPE_APPLYSAVEVS = "applysavevs";
 
 function onInit()
 	if User.getRulesetName() == "5E" then 
@@ -51,6 +69,29 @@ function onInit()
 
 		rest = CharManager.rest
 		CharManager.rest = customRest
+		
+		--Save vs Condition
+		decodeActors  = ActionsManager.decodeActors 
+		performAction =PowerManager.performAction 
+		getPCPowerAction = PowerManager.getPCPowerAction
+		handleApplySaveVs = PowerManager.handleApplySaveVs
+		notifyApplySaveVs = ActionPower.notifyApplySaveVs
+		performVsRoll = ActionSave.performVsRoll
+		performSaveVsRoll = ActionPower.performSaveVsRoll
+		addCustomNPC = CombatManager.addNPC 
+		addCustomPC = CombatManager.addPC 
+
+		ActionsManager.decodeActors = customDecodeActors
+		PowerManager.performAction = customPerformAction
+		PowerManager.getPCPowerAction = customGetPCPowerAction
+		PowerManager.handleApplySaveVs = customHandleApplySaveVs
+		ActionPower.notifyApplySaveVs = customNotifyApplySaveVs
+		ActionSave.performVsRoll = customPerformVsRoll
+		ActionPower.performSaveVsRoll = customPerformSaveVsRoll
+		CombatManager.addNPC = addNPCtoCT
+		CombatManager.addPC = addPCtoCT
+		-- End Save vs Condiition
+
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		parseEffects = PowerManager.parseEffects
@@ -64,6 +105,8 @@ function onInit()
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		ActionsManager.registerModHandler("save", onModSaveHandler)
+	
+		OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_APPLYSAVEVS, customHandleApplySaveVs);
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 	
@@ -73,11 +116,13 @@ function onInit()
 			if (tExtension.name == "MNM Charsheet Effects Display") then
 				bMadNomadCharSheetEffectDisplay = true
 			end
-			if (tExtension.name == "5E - Automatic Save Advantage") then
-				bAutomaticSave = true
-			end
-			
 		end
+		for _,nodeCT in pairs(CombatManager.getCombatantNodes()) do
+			local rActor = ActorManager.resolveActor(nodeCT)
+			addTraitstoConditionsTables(rActor)
+		end
+
+	
 	end
 end
 
@@ -93,8 +138,342 @@ function onClose()
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost5E)
 
+		ActionsManager.decodeActors = decodeActors
+		PowerManager.performAction = performAction
+		PowerManager.getPCPowerAction = getPCPowerAction
+		PowerManager.handleApplySaveVs = handleApplySaveVs
+		ActionPower.notifyApplySaveVs = notifyApplySaveVs
+		ActionSave.performVsRoll = performVsRoll
+		ActionPower.performSaveVsRoll = performSaveVsRoll
 	end
 end
+
+---------------------Save Vs Condition ----------------------------
+
+function customPerformSaveVsRoll(draginfo, rActor, rAction)
+	local rRoll = ActionPower.getSaveVsRoll(rActor, rAction);
+	if rAction.sConditions == nil then
+		local sConditions = ""
+		if rAction.sType == "powersave" and rAction.label ~= nil then
+			rActor.sConditions = searchPowerGetConditions(rActor, rAction.label)
+		end
+	end
+	if (draginfo and rActor.sConditions and rActor.sConditions ~= "") then
+        draginfo.setMetaData("sConditions",rActor.sConditions)
+    end
+
+	ActionsManager.performAction(draginfo, rActor, rRoll);
+end
+
+-- WARNING: Conflict Potential
+--Need to set conditions in rRoll
+function customPerformVsRoll(draginfo, rActor, sSave, nTargetDC, bSecretRoll, rSource, bRemoveOnMiss, sSaveDesc, sConditions)
+	local rRoll = ActionSave.getRoll(rActor, sSave);	
+	if bSecretRoll then
+		rRoll.bSecret = true;
+	end
+	rRoll.nTarget = nTargetDC;
+	if bRemoveOnMiss then
+		rRoll.bRemoveOnMiss = "true";
+	end
+	if sSaveDesc then
+		rRoll.sSaveDesc = sSaveDesc;
+	end
+	if sConditions then
+		rRoll.sConditions = sConditions
+	end
+	ActionsManager.performAction(draginfo, rActor, rRoll);
+end
+
+-- WARNING: Conflict Potential
+-- Need to send our conditions in OOB messagee
+function customHandleApplySaveVs(msgOOB)
+	local sConditions = msgOOB.sConditions
+	local rSource = ActorManager.resolveActor(msgOOB.sSourceNode);
+	local rTarget = ActorManager.resolveActor(msgOOB.sTargetNode);
+	local sSaveShort, sSaveDC = string.match(msgOOB.sDesc, "%[(%w+) DC (%d+)%]")
+	if sSaveShort then
+		local sSave = DataCommon.ability_stol[sSaveShort];
+		if sSave then
+			customPerformVsRoll(nil, rTarget, sSave, msgOOB.nDC, (tonumber(msgOOB.nSecret) == 1), rSource, msgOOB.bRemoveOnMiss, msgOOB.sDesc, sConditions);
+		end
+	end
+end
+-- WARNING: Conflict Potential
+-- Need to get our conditions from OOB messagee
+function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveOnMiss)
+	if not rTarget then
+		return;
+	end
+	local msgOOB = {};
+	msgOOB.type = OOB_MSGTYPE_APPLYSAVEVS;
+	
+	if bSecret then
+		msgOOB.nSecret = 1;
+	else
+		msgOOB.nSecret = 0;
+	end
+	msgOOB.sDesc = sDesc;
+	msgOOB.nDC = nDC;
+
+	msgOOB.sSourceNode = ActorManager.getCreatureNodeName(rSource);
+	msgOOB.sTargetNode = ActorManager.getCreatureNodeName(rTarget);
+	msgOOB.sConditions = rSource.sConditions;
+	
+	if bRemoveOnMiss then
+		msgOOB.bRemoveOnMiss = 1;
+	end
+
+	local sTargetNodeType, nodeTarget = ActorManager.getTypeAndNode(rTarget);
+	if nodeTarget and (sTargetNodeType == "pc") then
+		if Session.IsHost then
+			local sOwner = DB.getOwner(nodeTarget);
+			if sOwner ~= "" then
+				for _,vUser in ipairs(User.getActiveUsers()) do
+					if vUser == sOwner then
+						for _,vIdentity in ipairs(User.getActiveIdentities(vUser)) do
+							if nodeTarget.getName() == vIdentity then
+								Comm.deliverOOBMessage(msgOOB, sOwner);
+								return;
+							end
+						end
+					end
+				end
+			end
+		else
+			if DB.isOwner(nodeTarget) then
+				handleApplySaveVs(msgOOB);
+				return;
+			end
+		end
+	end
+
+	Comm.deliverOOBMessage(msgOOB, "");
+end
+
+--Using the given node power, get the resulting conditions from the database
+-- for the PC and NPC
+function customPerformAction(draginfo, rActor, rAction, nodePower)	
+	if rAction.type == "powersave" then
+		local sNodeType, nodeCT = ActorManager.getTypeAndNode(rActor)
+		local sConditions = ""
+		if rActor.sType == "pc" then
+			for _,v in pairs(DB.getChildren(nodePower, "actions")) do
+				local sLabel = DB.getValue(v, "label", "")
+				local sType = DB.getValue(v, "type", "")
+				if sType == "effect" then
+					local sLabel = DB.getValue(v, "label", "")
+					local aEffectComps = EffectManager.parseEffect(sLabel)
+					for _,sEffectComp in ipairs(aEffectComps) do
+						sEffectComp = sEffectComp:lower()
+						if StringManager.contains(DataCommon.conditions, sEffectComp) then
+							sConditions = sConditions .. sEffectComp .. ","
+						end
+					end
+				end
+			end
+			if sConditions ~= "" then
+				sConditions = sConditions:sub(1, #sConditions -1 )
+			end
+		elseif rActor.sType == "npc" then
+			sConditions = getNPCPowerConditions(nodePower)
+		end
+		rActor.sConditions = sConditions
+	end 
+
+	if (draginfo and rActor.sConditions and rActor.sConditions ~= "") then
+        draginfo.setMetaData("sConditions",rActor.sConditions)
+    end
+
+	return performAction(draginfo, rActor, rAction, nodePower)
+end
+
+-- Needed for draged things
+function customDecodeActors(draginfo)
+	local rSource, aTargets = decodeActors(draginfo)
+	local sConditions = draginfo.getMetaData("sConditions");
+    if (rSource and sConditions and sConditions ~= "") then
+        rSource.sConditions = sConditions;
+    end
+	
+	return rSource, aTargets
+end
+
+-- setup up metadata for saves vs conditon when PC rolled from character sheet
+function customGetPCPowerAction(nodeAction, sSubRoll)
+	local sConditions = ""
+	local rAction, rActor = getPCPowerAction(nodeAction, sSubRoll)
+	if rAction.save then
+		for _,v in pairs(DB.getChildren(nodeAction.getParent(), "")) do
+			local sType = DB.getValue(v, "type", "")
+			if sType == "effect" then
+				local sLabel = DB.getValue(v, "label", "")
+				local aEffectComps = EffectManager.parseEffect(sLabel)
+				for _,sEffectComp in ipairs(aEffectComps) do
+					sEffectComp = sEffectComp:lower()
+					if StringManager.contains(DataCommon.conditions, sEffectComp) then
+						sConditions =  sEffectComp .. ","
+					end
+				end
+			end
+		end
+		if sConditions ~= "" then
+			sConditions =  sConditions:sub(1, #sConditions -1 )
+		end
+	end
+	rActor.sConditions = sConditions
+	return rAction, rActor
+end
+
+--Gets the conditions of effects to be applied for the power from the NPC database
+function getNPCPowerConditions(nodePower)
+	local sConditions = ""
+	local sValue = DB.getValue(nodePower, "value")
+	local rPower = CombatManager2.parseAttackLine(sValue)
+	for _,aAbility in ipairs(rPower.aAbilities) do
+		if aAbility.sType == "effect" then
+			local tEffectComps = EffectManager.parseEffect( aAbility.sName)
+			for _,sEffectComp in ipairs(tEffectComps) do
+				sEffectComp = sEffectComp:lower()
+				if StringManager.contains(DataCommon.conditions, sEffectComp) then
+					sConditions = sConditions .. sEffectComp .. ","
+				end
+			end
+		end
+	end
+	if sConditions ~= "" then
+		sConditions = sConditions:sub(1, #sConditions -1 )
+	end
+	return sConditions
+end
+
+--Searches the powers to find the power label. Best we can do when we don't have the link to the power
+function searchPowerGetConditions(rActor, sLabel)
+	local sConditions = ""
+	--Search these database nodes
+	local aSearchNodes= {"spells","innatespells","actions","lairactions","legendaryactions","reactions"}
+	sLabel = sLabel:lower()
+
+	local nodeActor = ActorManager.getCTNode(rActor)
+	for _,sSearch in pairs(aSearchNodes) do
+		for _,node in pairs(DB.getChildren(nodeActor, sSearch)) do
+			local sName = DB.getValue(node, "name", "")
+			if sName:lower() == sLabel then
+				return getNPCPowerConditions(node)
+			end
+		end
+	end
+	return sConditions
+end
+
+function getSaveConditions(sLabel)
+	local sRet = ""
+	local tEffectComps = EffectManager.parseEffect(sLabel)
+	for _,sEffectComp in ipairs(tEffectComps) do
+		rEffectComp =  EffectManager5E.parseEffectComp(sEffectComp)
+		if rEffectComp.type == "SAVEADD" or rEffectComp.type == "SAVEADDP" then
+			if  rEffectComp.remainder ~= {} and StringManager.contains(DataCommon.conditions, rEffectComp.remainder[1]:lower()) then
+				sRet = sRet .. rEffectComp.remainder[1]:lower() .. ","
+			end
+		end		
+	end
+	if rRet ~= "" then
+		sRet = sRet:sub(1, #sRet -1 )
+	end
+	return sRet
+end
+
+--Check to see if creature has a trait that gives them advantage against this save
+function hasAdvDisCondition(rActor, sConditions)
+	local aConditions = StringManager.split(sConditions, ",")
+	local tReturn = {}
+	if next(aConditions) then
+		local nodeActor = ActorManager.getCreatureNode(rActor)
+		local nodeTraits = nodeActor.getChild("traitlist")
+		if  nodeTraits == nil then
+			nodeTraits = nodeActor.getChild("traits")
+		end
+		if nodeTraits ~= nil then
+			local aTraits = nodeTraits.getChildren()
+			for _, nodeTrait in pairs(aTraits) do
+				local sName = DB.getValue(nodeTrait, "name", "")
+				local aTraitAdv =  tTraitsAdvantage[sName]
+				local aTraitDis =  tTraitsDisadvantage[sName]
+				if aTraitAdv ~= nil then
+					table.insert(tReturn, " ["..sName.."] [ADV]")
+				end
+				if aTraitDis ~= nil  then
+					table.insert(tReturn, " ["..sName.."] [DIS]")
+				end
+			end
+		end
+	end
+	return tReturn
+end
+
+function addPCtoCT(nodePC)
+	local rActor = ActorManager.resolveActor(nodePC)
+	addCustomPC(nodePC)
+	addTraitstoConditionsTables(rActor)
+end
+
+function addNPCtoCT(sClass, nodeNPC, sName)
+	local rActor = ActorManager.resolveActor(nodeNPC)
+	local nodeCTEntry  = addCustomNPC(sClass, nodeNPC, sName)
+	addTraitstoConditionsTables(rActor)
+	return nodeCTEntry
+end
+
+function addTraitstoConditionsTables(rActor)
+	local bAdvantage = false
+	local nodeActor = ActorManager.getCreatureNode(rActor)
+	local nodeTraits = nodeActor.getChild("traitlist") or nodeActor.getChild("traits")
+	if nodeTraits ~= nil then
+		local aTraits = nodeTraits.getChildren()
+		for _, nodeTrait in pairs(aTraits) do
+			local sName = DB.getValue(nodeTrait, "name", "")
+			local sText = DB.getValue(nodeTrait, "text") or DB.getValue(nodeTrait, "desc", "")
+			--Parse Text
+			local i = 1
+			aWords = StringManager.parseWords(sText:lower(),  "%.:;\n")
+			while aWords[i] do
+				if StringManager.isWord(aWords[i], {"advantage", "disadvantage"}) then
+					if StringManager.isWord(aWords[i], "advantage") then
+						bAdvantage = true
+					else
+						bAdvantage = false
+					end
+					local j = i
+					while aWords[j] do
+						if StringManager.isWord(aWords[j], "saves") or (StringManager.isWord(aWords[j], "saving") and StringManager.isWord(aWords[j+1], "throws")) then
+							local k = j
+							local sConditions = ""
+							while aWords[k] do
+								if StringManager.isWord(aWords[k], DataCommon.conditions) then
+									sConditions = sConditions .. aWords[k] .. ","
+								end
+								k=k+1
+								j=k
+							end
+							if sConditions ~= "" then
+								sConditions =  sConditions:sub(1, #sConditions -1 )
+								if bAdvantage then
+									tTraitsAdvantage[sName] = sConditions
+								else
+									tTraitsDisadvantage[sName] = sConditions
+								end
+							end
+						end
+						j=j+1
+						i=j
+					end
+				end
+				i=i+1
+			end	
+		end
+	end
+end
+---------------------End Save Vs Condition -------------------------
 
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 	local sDuplicateMsg = nil; 
@@ -351,7 +730,7 @@ end
 
 function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	if rRoll.sSubtype ~= "bce" then
-		ActionSave.onSave(rSource, rTarget, rRoll) -- Reverse target/source because the target of the effect is making the save
+		ActionSave.onSave(rSource, rTarget, rRoll) 
 		return
 	end
 	local nodeEffect = nil 
@@ -443,6 +822,7 @@ function onDamage(rSource,rTarget, nodeEffect)
 	end
 end
 
+
 function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect is on, BCE String
 	local nodeSource = ActorManager.getCTNode(rSource)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
@@ -451,6 +831,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 	if User.getRulesetName() == "5E" then
 		sAbility = DataCommon.ability_stol[sAbility]
 	end
+
 	local nDC = tonumber(aParsedRemiander[2])
 	if  (nDC and sAbility) ~= nil then
 		local rSaveVsRoll = {}
@@ -460,6 +841,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		rSaveVsRoll.sSaveType = "Save"
 		rSaveVsRoll.nTarget = nDC -- Save DC
 		rSaveVsRoll.sSourceCTNode = rSource.sCTNode -- Node who applied
+		rSaveVsRoll.sConditions = getSaveConditions(tEffect.sLabel)
 		rSaveVsRoll.sDesc = "[SAVE VS] " .. tEffect.sLabel -- Effect Label
 		if rSaveVsRoll then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [" .. sAbility .. " DC " .. rSaveVsRoll.nTarget .. "]";
@@ -484,10 +866,10 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 			rSaveVsRoll.bActonFail = true
 		end
 		if tEffect.rEffectComp.original:match("%(ADV%)") then
-			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [ADV]";
+			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [ADV]"
 		end
 		if tEffect.rEffectComp.original:match("%(DIS%)") then
-			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [DIS]";
+			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [DIS]"
 		end
 
 		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]" 
@@ -502,7 +884,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 			rSaveVsRoll.sEffectPath = ""
 		end
 
-		ActionsManager.actionRoll(rSource.sName,{{nodeTarget}}, {rSaveVsRoll})
+		ActionsManager.actionRoll(rSource,{{rTarget}}, {rSaveVsRoll})
 	end
 end
 
@@ -601,15 +983,30 @@ end
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
 function onModSaveHandler(rSource, rTarget, rRoll)
-	if rRoll.sSubtype ~= "bce" then
-		ActionSave.modSave(rSource, rTarget, rRoll) -- Reverse target/source because the target of the effect is making the save
-	elseif bAutomaticSave == true then
-		ActionSaveASA.customModSave(rTarget, rSource, rRoll)
+	local tTraits = {}
+	--Determine if we have a trait gives adv or disadv
+	if rRoll.sConditions ~= "" and rRoll.sSubType == "bce" then
+		tTraits = hasAdvDisCondition(rTarget, rRoll.sConditions)
+		--rRoll.sDesc = rRoll.sDesc .. " [ADV]"
+	elseif rRoll.sConditions ~= "" then
+		tTraits = hasAdvDisCondition(rSource, rRoll.sConditions) 
+		--rRoll.sDesc = rRoll.sDesc .. " [DIS]"
+	end
+	for _, sDesc in pairs(tTraits) do
+		if  sDesc:match("%[ADV]") and not rRoll.sDesc:match("%[ADV]") then
+			rRoll.sDesc = rRoll.sDesc .. sDesc
+		elseif sDesc:match("%[DIS]") and not rRoll.sDesc:match("%[DIS]")  then
+			rRoll.sDesc = rRoll.sDesc .. sDesc
+		end
+	end
+
+	if rRoll.sSubtype == "bce" then
+		ActionSave.modSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
 	else
-		ActionSave.modSave(rTarget, rSource, rRoll)
+		ActionSave.modSave(rSource, rTarget, rRoll)
 	end
 end
-
+	
 function customParseEffects(sPowerName, aWords)
 	if OptionsManager.isOption("AUTOPARSE_EFFECTS", "off") then
 		return parseEffects(sPowerName, aWords)
@@ -951,3 +1348,6 @@ function getTurnModifier(aWords, i)
 	end
 	return sRemoveTurn
 end
+
+
+
