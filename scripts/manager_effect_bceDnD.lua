@@ -166,7 +166,7 @@ function processEffectTurnEndDND(rSource)
 	local aTags = {"DMGOE", "REGENE", "TREGENE"}
 
 	-- Only process these if on the source node
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGOE" then
 				applyOngoingDamage(rSource, rSource, tEffect.rEffectComp)
@@ -183,7 +183,7 @@ function processEffectTurnEndDND(rSource)
 	for _, nodeCT in pairs(ctEntries) do
 		local rActor = ActorManager.resolveActor(nodeCT)
 		if rActor ~= rSource then
-			tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource)
+			tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
 			for _,tEffect in pairs(tMatch) do
 				if tEffect.sTag == "SDMGOE" then
 					applyOngoingDamage(rSource, rActor, tEffect.rEffectComp)
@@ -264,7 +264,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	aTags = {"SDMGADDT","SDMGADDS"}
 	
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget)
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget, rSource)
 	for _,tEffect in pairs(tMatch) do
 		--if type(tEffect.nodeCT) ~= "userdata" then
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])

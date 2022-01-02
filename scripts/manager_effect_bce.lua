@@ -171,7 +171,7 @@ function customTurnEnd(sourceNodeCT)
 		for _, nodeCT in pairs(ctEntries) do
 			local rActor = ActorManager.resolveActor(nodeCT)
 			if rActor ~= rSource then
-				tMatch = getEffects(rActor, aTags, rSource, rSource)
+				tMatch = getEffects(rActor, aTags, rActor, rSource)
 				for _,tEffect in pairs(tMatch) do
 					if tEffect.sTag == "STURNRE" then
 						modifyEffect(tEffect.nodeCT, "Remove")

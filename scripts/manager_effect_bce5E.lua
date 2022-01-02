@@ -266,8 +266,7 @@ end
 
 function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	if rRoll.sSubtype ~= "bce" then
-		ActionSave.onSave(rSource, rTarget, rRoll) -- Reverse target/source because the target of the effect is making the save
-		return
+		return ActionSave.onSave(rSource, rTarget, rRoll)
 	end
 	local nodeEffect = nil 
 	if rRoll.sEffectPath ~= "" then
@@ -277,7 +276,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local tMatch = {}
 	local aTags = {}
-
 	ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
 	local nResult = ActionsManager.total(rRoll)
 	local bAct = false
@@ -359,8 +357,6 @@ function onDamage(rSource,rTarget, nodeEffect)
 end
 
 function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect is on, BCE String
-	local nodeSource = ActorManager.getCTNode(rSource)
-	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local aParsedRemiander = StringManager.parseWords(tEffect.rEffectComp.remainder[1])
 	local sAbility = aParsedRemiander[1]
 	if User.getRulesetName() == "5E" then
@@ -411,7 +407,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 			rSaveVsRoll.sEffectPath = ""
 		end
 
-		ActionsManager.actionRoll(rSource.sName,{{nodeTarget}}, {rSaveVsRoll})
+		ActionsManager.actionRoll(rSource,{{rTarget}}, {rSaveVsRoll})
 	end
 end
 
@@ -510,13 +506,9 @@ end
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
 function onModSaveHandler(rSource, rTarget, rRoll)
-	if rRoll.sSubtype ~= "bce" then
-		ActionSave.modSave(rSource, rTarget, rRoll) -- Reverse target/source because the target of the effect is making the save
-	elseif bAutomaticSave == true then
-		ActionSaveASA.customModSave(rTarget, rSource, rRoll)
-	else
-		ActionSave.modSave(rTarget, rSource, rRoll)
-	end
+	--if rRoll.sSubtype == "bce" then
+	--	ActionSave.modSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
+	--end
 end
 
 function customParseEffects(sPowerName, aWords)
