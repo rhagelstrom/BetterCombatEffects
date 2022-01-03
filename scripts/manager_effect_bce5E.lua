@@ -4,7 +4,6 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
 local bMadNomadCharSheetEffectDisplay = false
-local bAutomaticSave = false
 local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
@@ -69,11 +68,7 @@ function onInit()
 			tExtension = Extension.getExtensionInfo(sExtension)
 			if (tExtension.name == "MNM Charsheet Effects Display") then
 				bMadNomadCharSheetEffectDisplay = true
-			end
-			if (tExtension.name == "5E - Automatic Save Advantage") then
-				bAutomaticSave = true
-			end
-			
+			end			
 		end
 	end
 end
