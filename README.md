@@ -1,7 +1,7 @@
 # Better Combat Effects
 
- **Current Version:** 2.22
-**Updated::** 12/17/21
+ **Current Version:** 2.25
+**Updated::** 01/02/21
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -15,19 +15,19 @@ Better Combat Effects is an extension that allows for fine tuning of when effect
 
 ### Turn Modifiers
 
-* **TURNAS** will cause an effect to ACTIVIATE on the START of the PC/NPC turn. Using TURNAS along with DMGDT allows items such as the Cloak of Displacement or a Displacer Beast's Displacement to function properly.
+* **TURNAS** will cause an effect to ACTIVATE on the START of the PC/NPC turn. Using TURNAS along with DMGDT allows items such as the Cloak of Displacement or a Displacer Beast's Displacement to function properly.
 
   * Cloak of Displacement; GRANTDISATK; TURNAS; DMGDT: all
 
-* **TURNDS** will cause an effect to DEACTIVIATE on the START of the PC/NPC turn.
+* **TURNDS** will cause an effect to DEACTIVATE on the START of the PC/NPC turn.
 
 * **TURNRS** will cause the effect to be REMOVED on the START of the PC/NPC turn if current duration is 1. 
 
   * Dodge; TURNRS
 
-* **TURNAE** will cause an effect to ACTIVIATE on the END of the PC/NPC turn.
+* **TURNAE** will cause an effect to ACTIVATE on the END of the PC/NPC turn.
 
-* **TURNDE** will cause an effect to DEACTIVIATE on the END of the PC/NPC turn.
+* **TURNDE** will cause an effect to DEACTIVATE on the END of the PC/NPC turn.
 
 * **TURNRE** will cause the effect to be REMOVED at the END of the PC/NPC turn if current duration is 1. This is useful for conditions like poison to be removed but do not require a saving throw.
 
@@ -77,9 +77,9 @@ Adding effect with a dice string automatically rolls the dice when the effect is
 
 ### Damage Modifiers
 
-* **DMGAT: (N) [damage type(s)][Range]** will cause an effect to ACTIVIATE when the PC/NPC takes damage.
+* **DMGAT: (N) [damage type(s)][Range]** will cause an effect to ACTIVATE when the PC/NPC takes damage.
 
-* **DMGDT: (N) [damage type(s)][Range]** will cause an effect to DEACTIVIATE when the PC/NPC takes damage. Allows items like Cloak of Displacement to function properly.
+* **DMGDT: (N) [damage type(s)][Range]** will cause an effect to DEACTIVATE when the PC/NPC takes damage. Allows items like Cloak of Displacement to function properly.
 
   * Cloak of Displacement; GRANTDISATK; TURNAS; DMGDT: all
 

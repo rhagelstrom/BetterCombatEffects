@@ -18,6 +18,7 @@ aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnly
 aBCEDeactivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
 aBCEDefaultOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
 aBCERemoveOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false,nDuration = 1}
+aBCERemoveSourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false,nDuration = 1}
 aBCEIgnoreOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = true, bOneShot = false, nDuration = 0}
 aBCESourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
 aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, nDuration = 0}
@@ -30,9 +31,9 @@ function onInit()
 	registerBCETag("TURNAE", aBCEActivateOptions)
 
 	registerBCETag("TURNRS",  aBCERemoveOptions)
-	registerBCETag("STURNRS", aBCERemoveOptions)
+	registerBCETag("STURNRS", aBCERemoveSourceMattersOptions)
 	registerBCETag("TURNRE",  aBCERemoveOptions)
-	registerBCETag("STURNRE", aBCERemoveOptions)
+	registerBCETag("STURNRE", aBCERemoveSourceMattersOptions)
 
 	registerBCETag("TURNDE", aBCEDeactivateOptions)
 	registerBCETag("TURNDS", aBCEDeactivateOptions)
@@ -119,14 +120,14 @@ function customTurnStart(sourceNodeCT)
 	local ctEntries = CombatManager.getCombatantNodes()
 
 	if onCustomProcessTurnStart(rSource) then
-		local aTags = {"TURNAS", "TURNDS", "TURNRS", "STURNRS"}
+		local aTags = {"TURNAS", "TURNDS", "TURNRS"}
 		local tMatch = getEffects(rSource, aTags, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "TURNAS" then
 				modifyEffect(tEffect.nodeCT, "Activate")
 			elseif tEffect.sTag == "TURNDS" then
 				modifyEffect(tEffect.nodeCT, "Deactivate")
-			elseif  tEffect.sTag  == "TURNRS" or tEffect.sTag == "STURNRS" then
+			elseif  tEffect.sTag  == "TURNRS" then
 				modifyEffect(tEffect.nodeCT, "Remove")
 			end
 		end
@@ -135,7 +136,7 @@ function customTurnStart(sourceNodeCT)
 		for _, nodeCT in pairs(ctEntries) do
 			local rActor = ActorManager.resolveActor(nodeCT)
 			if rActor ~= rSource then
-				tMatch = getEffects(rActor, aTags, rSource)
+				tMatch = getEffects(rActor, aTags, rSource, rSource)
 				for _,tEffect in pairs(tMatch) do
 					if tEffect.sTag == "STURNRS" then
 						modifyEffect(tEffect.nodeCT, "Remove")
@@ -154,14 +155,14 @@ function customTurnEnd(sourceNodeCT)
 	local ctEntries = CombatManager.getCombatantNodes()
 	
 	if onCustomProcessTurnEnd(rSource) then
-		local aTags = {"TURNAE", "TURNDE", "TURNRE", "STURNRE"}
+		local aTags = {"TURNAE", "TURNDE", "TURNRE"}
 		local tMatch = getEffects(rSource, aTags, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "TURNAE" then
 				modifyEffect(tEffect.nodeCT, "Activate")
 			elseif tEffect.sTag == "TURNDE" then
 				modifyEffect(tEffect.nodeCT, "Deactivate")
-			elseif  tEffect.sTag == "TURNRE" or tEffect.sTag == "STURNRE" then
+			elseif  tEffect.sTag == "TURNRE" then
 				modifyEffect(tEffect.nodeCT, "Remove")
 			end
 		end
@@ -170,7 +171,7 @@ function customTurnEnd(sourceNodeCT)
 		for _, nodeCT in pairs(ctEntries) do
 			local rActor = ActorManager.resolveActor(nodeCT)
 			if rActor ~= rSource then
-				tMatch = getEffects(rActor, aTags, rSource)
+				tMatch = getEffects(rActor, aTags, rActor, rSource)
 				for _,tEffect in pairs(tMatch) do
 					if tEffect.sTag == "STURNRE" then
 						modifyEffect(tEffect.nodeCT, "Remove")
