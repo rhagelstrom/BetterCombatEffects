@@ -397,13 +397,23 @@ function hasAdvDisCondition(rActor, sConditions)
 			local aTraits = nodeTraits.getChildren()
 			for _, nodeTrait in pairs(aTraits) do
 				local sName = DB.getValue(nodeTrait, "name", "")
-				local aTraitAdv =  tTraitsAdvantage[sName]
-				local aTraitDis =  tTraitsDisadvantage[sName]
-				if aTraitAdv ~= nil then
-					table.insert(tReturn, " ["..sName.."] [ADV]")
+				local sTraitAdv =  tTraitsAdvantage[sName]
+				local sTraitDis =  tTraitsDisadvantage[sName]
+				if sTraitAdv ~= nil then
+					for _,cond in pairs(aConditions) do
+						if sTraitAdv:match(cond) then
+							table.insert(tReturn, " ["..sName.."] [ADV]")
+							break
+						end
+					end
 				end
-				if aTraitDis ~= nil  then
-					table.insert(tReturn, " ["..sName.."] [DIS]")
+				if sTraitDis ~= nil  then
+					for _,cond in pairs(aConditions) do
+						if sTraitDis:match(cond) then
+							table.insert(tReturn, " ["..sName.."] [DIS]")
+							break
+						end
+					end
 				end
 			end
 		end
@@ -435,7 +445,8 @@ function addTraitstoConditionsTables(rActor)
 			local sText = DB.getValue(nodeTrait, "text") or DB.getValue(nodeTrait, "desc", "")
 			--Parse Text
 			local i = 1
-			aWords = StringManager.parseWords(sText:lower(),  "%.:;\n")
+--			aWords = StringManager.parseWords(sText:lower(),  "%.:;\n")
+			aWords = StringManager.parseWords(sText:lower())
 			while aWords[i] do
 				if StringManager.isWord(aWords[i], {"advantage", "disadvantage"}) then
 					if StringManager.isWord(aWords[i], "advantage") then
@@ -840,7 +851,9 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		rSaveVsRoll.aDice = {}
 		rSaveVsRoll.sSaveType = "Save"
 		rSaveVsRoll.nTarget = nDC -- Save DC
-		rSaveVsRoll.sSourceCTNode = rSource.sCTNode -- Node who applied
+		if rSource ~= nil then
+			rSaveVsRoll.sSourceCTNode = rSource.sCTNode -- Node who applied
+		end
 		rSaveVsRoll.sConditions = getSaveConditions(tEffect.sLabel)
 		rSaveVsRoll.sDesc = "[SAVE VS] " .. tEffect.sLabel -- Effect Label
 		if rSaveVsRoll then
