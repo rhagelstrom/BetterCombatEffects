@@ -155,10 +155,6 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **STREGENE (N)** Apply regeneration to temporary HP at the end of the actors turn who applied the effect. (N) can be number or dice string
 
-### Absorption
-
-* **ABSORB: [damage type] (H)** The Actor will heal the amount of damage dealt of the specified damage type. (H) The Actor will heal half rounded down of the specified damage type. The Actor likely should also be immune, "IMMUNE: [damage type]" to the same damage type to produce the desired results.
-
 ## 5E/3.5E/PFRPG
 
 ---
@@ -195,7 +191,6 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SAVERESTL: [ability] [SDC]** Roll save at on long rest (5E only)
 
-   
 * **(R)** will remove the save effect on a successful save.
 * **(D)** will disable the save effect on a successful save.
 * **(H)** will deal half damage on a successful ongoing save.
@@ -226,11 +221,16 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **(E)** If the source of the effect drops to zero hit points, then this effect will be removed
 
+### Save vs Condition
+
+Saves against conditions will automatically be granted adv/dis based on the traits of the actor making the saving throw. The parser will match traits with the following verbiage: words ... {advantage,disadvantage} ... words ... {saves,saving throw} ... words ... {condition(s)} ... words
+
 ### Concentration
 
 Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
 
 ### Powers Parsing (Experimental)
+
 Will automatically parse Powers (NPC sheets and spells) and automatically setup up some effects using BCE codings. This is defaulted to off in the options menu. Spells that have already been added to a PC must be deleted and re-added to take advantage of this feature.
 
 ## Options Menu
@@ -260,3 +260,17 @@ Will automatically parse Powers (NPC sheets and spells) and automatically setup 
 * **TempHP Reduction is Damage**
   * Default: on
   * For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage.
+
+###Changelog BCE Gold
+  * Save vs Condition - Saves against conditions will automatically be granted adv/dis based on the traits of the actor making the saving throw.
+  * Ongiong Saves (ADV) (DIS) - (ADV)(DIS) can be added to BCE ongoing saves to grant advantage or disadvantage
+  * DUR: (N) - Dynamically set the duration of the effect at time of add
+  * SAVERESTL - Perform ongoing save on long rest
+  * SSAVES, SAVEEE - Perform ongoing save on the source of the effects turn.
+  * EEFFINIT: (N) - Set the inititive of the effect on add
+  * Replace FGU [] Tags - Tags like [PRF][LVL][CLASS] can now be defined in the NPC sheet effect list as (PRF)(LVL)(CLASS) to process as expected
+  * (DE) - Will disable the effect on use
+  * SDC - Can be written as [SDC] or (SDC)
+  * DMGRR,DMGAT,DMGDT now accept damage and range types as filters
+  * (E) - Will remove the effect when the source of the effect drops to 0 HP
+

@@ -256,7 +256,9 @@ function customOnDamage(rSource, rTarget, rRoll)
 		bDead = true
 	end
 
-	processAbsorb(rSource, rTarget, rRoll)
+	--Dropping this because Blistful Ignorance does this better
+	--and there is less risk of conflict if this isn't a thing in BCE
+	--processAbsorb(rSource, rTarget, rRoll)
 
 	-- get temp hp and wounds after damage
 	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
@@ -341,7 +343,8 @@ function endEffectsOnDead(nodeEffect, sTarget)
 	end
 end
 
-
+-- This function is disabled but left here incase someone wants it for
+--another ruleset
 function processAbsorb(rSource, rTarget, rRoll)
 	local tMatch = {}
 	local aTags = {"ABSORB"}
