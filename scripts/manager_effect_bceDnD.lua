@@ -27,12 +27,12 @@ function customRest(nodeActor, bLong, bMilestone)
 		end
 	end
 
-	tMatch = EffectsManagerBCEG.getEffects(rSource, aTags, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "RESTL" or tEffect.sTag == "RESTS" then
-			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Remove")
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
 		elseif tEffect.sTag == "SAVERESTL" then
-			EffectsManagerBCEG5E.saveEffect(rSource, rSource, tEffect)
+			EffectsManagerBCE5E.saveEffect(rSource, rSource, tEffect)
 		end
 	end
 end
@@ -58,7 +58,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		
 		local nodeCT = DB.findNode(rRoll.nodeEffectCT)
 		DB.setValue(nodeCT, "duration", "number", nResult)
-		EffectsManagerBCEG.updateEffect(nodeSource,nodeCT, rRoll.sEffect)
+		EffectsManagerBCE.updateEffect(nodeSource,nodeCT, rRoll.sEffect)
 		return
 	end
 
@@ -100,7 +100,7 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect)
 	local tMatch = {}
 	local aTags = {"REGENA", "TREGENA", "DMGA", "DUR"}
 
-	tMatch = EffectsManagerBCEG.getEffects(rTarget, aTags, rTarget)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "REGENA" then
 				applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, false)
@@ -176,7 +176,7 @@ function processEffectTurnStartDND(rSource)
 	local aTags = {"TREGENS"}
 
 	-- Only process these if on the source node
-	tMatch = EffectsManagerBCEG.getEffects(rSource, aTags, rSource, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, rSource)
 	for _,tEffect in pairs(tMatch) do
 		applyOngoingRegen(rSource, rSource, tEffect.rEffectComp, true)
 	end
@@ -187,7 +187,7 @@ function processEffectTurnStartDND(rSource)
 	for _, nodeCT in pairs(ctEntries) do
 		local rActor = ActorManager.resolveActor(nodeCT)
 		if rActor ~= rSource then
-			tMatch = EffectsManagerBCEG.getEffects(rActor, aTags, rSource, rSource)
+			tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
 			for _,tEffect in pairs(tMatch) do
 				if tEffect.sTag == "SDMGOS" then
 					applyOngoingDamage(rSource, rActor, tEffect.rEffectComp)
@@ -207,7 +207,7 @@ function processEffectTurnEndDND(rSource)
 	local aTags = {"DMGOE", "REGENE", "TREGENE"}
 
 	-- Only process these if on the source node
-	tMatch = EffectsManagerBCEG.getEffects(rSource, aTags, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGOE" then
 				applyOngoingDamage(rSource, rSource, tEffect.rEffectComp)
@@ -224,7 +224,7 @@ function processEffectTurnEndDND(rSource)
 	for _, nodeCT in pairs(ctEntries) do
 		local rActor = ActorManager.resolveActor(nodeCT)
 		if rActor ~= rSource then
-			tMatch = EffectsManagerBCEG.getEffects(rActor, aTags, rSource, rSource)
+			tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
 			for _,tEffect in pairs(tMatch) do
 				if tEffect.sTag == "SDMGOE" then
 					applyOngoingDamage(rSource, rActor, tEffect.rEffectComp)
@@ -297,15 +297,15 @@ function customOnDamage(rSource, rTarget, rRoll)
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
 
-	local aDMGTypes = EffectsManagerBCEG.getDamageTypes(rRoll)
-	tMatch = EffectsManagerBCEG.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
+	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
-			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Activate")
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
 		elseif tEffect.sTag == "DMGDT" then
-			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Deactivate")
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Deactivate")
 		elseif tEffect.sTag == "DMGRT" then
-			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Remove")
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
 		end
 	end
 
@@ -315,9 +315,9 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
 	
-	tMatch = EffectsManagerBCEG.getEffects(rTarget, aTags, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
-		rEffect = EffectsManagerBCEG.matchEffect(tEffect.rEffectComp.remainder[1])
+		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if rEffect ~= {} then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rTarget.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
@@ -332,9 +332,9 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	aTags = {"SDMGADDT","SDMGADDS"}
 	
-	tMatch = EffectsManagerBCEG.getEffects(rSource, aTags, rTarget, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget, rSource)
 	for _,tEffect in pairs(tMatch) do
-		rEffect = EffectsManagerBCEG.matchEffect(tEffect.rEffectComp.remainder[1])
+		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if rEffect ~= {} then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
@@ -351,7 +351,7 @@ function endEffectsOnDead(nodeEffect, sTarget)
 	local sEffect = DB.getValue(nodeEffect, "label", "")
 
 	if (sEffect:match("%(E%)") and sTarget ==  DB.getValue(nodeEffect,"source_name", "")) then
-		EffectsManagerBCEG.modifyEffect(nodeEffect, "Remove")
+		EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
 	end
 end
 
@@ -364,9 +364,9 @@ function processAbsorb(rSource, rTarget, rRoll)
 	local nDMGAmount = 0
 	local sDMGType
 	
-	local aDMGTypes = EffectsManagerBCEG.getDamageTypes(rRoll)
+	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
 
-	tMatch = EffectsManagerBCEG.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "ABSORB" then
 			for _,sRemainder in ipairs(tEffect.rEffectComp.remainder) do
@@ -548,40 +548,40 @@ function onInit()
 		end
 
 		-- BCE DND TAGS
-		EffectsManagerBCEG.registerBCETag("DMGAT", EffectsManagerBCEG.aBCEActivateOptions)
+		EffectsManagerBCE.registerBCETag("DMGAT", EffectsManagerBCE.aBCEActivateOptions)
 			
-		EffectsManagerBCEG.registerBCETag("DMGRT", EffectsManagerBCEG.aBCERemoveOptions)
+		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCERemoveOptions)
 
-		EffectsManagerBCEG.registerBCETag("DMGDT", EffectsManagerBCEG.aBCEDeactivateOptions)
+		EffectsManagerBCE.registerBCETag("DMGDT", EffectsManagerBCE.aBCEDeactivateOptions)
 		
-		EffectsManagerBCEG.registerBCETag("DMGOE", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("RESTL", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("RESTS", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("TDMGADDS", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("TDMGADDT", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("REGENE", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("TREGENS", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("TREGENE", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("SDMGADDT", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("SDMGADDS", EffectsManagerBCEG.aBCEDefaultOptions)
-		EffectsManagerBCEG.registerBCETag("ABSORB", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("DMGOE", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("RESTL", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("RESTS", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("TDMGADDS", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("TDMGADDT", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("REGENE", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("TREGENS", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("TREGENE", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SDMGADDT", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SDMGADDS", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("ABSORB", EffectsManagerBCE.aBCEDefaultOptions)
 
-		EffectsManagerBCEG.registerBCETag("REGENA", EffectsManagerBCEG.aBCEOneShotOptions)
-		EffectsManagerBCEG.registerBCETag("TREGENA", EffectsManagerBCEG.aBCEOneShotOptions)
-		EffectsManagerBCEG.registerBCETag("DMGA", EffectsManagerBCEG.aBCEOneShotOptions)
-		EffectsManagerBCEG.registerBCETag("DUR", EffectsManagerBCEG.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("REGENA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("TREGENA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("DMGA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("DUR", EffectsManagerBCE.aBCEOneShotOptions)
 
-		EffectsManagerBCEG.registerBCETag("STREGENS", EffectsManagerBCEG.aBCESourceMattersOptions)
-		EffectsManagerBCEG.registerBCETag("STREGENE", EffectsManagerBCEG.aBCESourceMattersOptions)
-		EffectsManagerBCEG.registerBCETag("SREGENS", EffectsManagerBCEG.aBCESourceMattersOptions)
-		EffectsManagerBCEG.registerBCETag("SREGENE", EffectsManagerBCEG.aBCESourceMattersOptions)
-		EffectsManagerBCEG.registerBCETag("SDMGOS", EffectsManagerBCEG.aBCESourceMattersOptions)
-		EffectsManagerBCEG.registerBCETag("SDMGOE", EffectsManagerBCEG.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("STREGENS", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("STREGENE", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SREGENS", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SREGENE", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SDMGOS", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCE.registerBCETag("SDMGOE", EffectsManagerBCE.aBCESourceMattersOptions)
 	
-		EffectsManagerBCEG.setCustomProcessTurnStart(processEffectTurnStartDND)
-		EffectsManagerBCEG.setCustomProcessTurnEnd(processEffectTurnEndDND)
-		EffectsManagerBCEG.setCustomPreAddEffect(addEffectStart)
-		EffectsManagerBCEG.setCustomPostAddEffect(addEffectPost)
+		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStartDND)
+		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEndDND)
+		EffectsManagerBCE.setCustomPreAddEffect(addEffectStart)
+		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost)
 		
 		-- save off the originals so we play nice with others
 		messageDamage = ActionDamage.messageDamage
@@ -614,9 +614,9 @@ function onClose()
 		ActionsManager.unregisterResultHandler("damage")
 		ActionsManager.unregisterResultHandler("effectbce")
 
-		EffectsManagerBCEG.removeCustomProcessTurnStart(processEffectTurnStartDND)
-		EffectsManagerBCEG.removeCustomProcessTurnEnd(processEffectTurnEndDND)
+		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartDND)
+		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEndDND)
 
-		EffectsManagerBCEG.removeCustomPreAddEffect(addEffectStart)
+		EffectsManagerBCE.removeCustomPreAddEffect(addEffectStart)
 	end
 end

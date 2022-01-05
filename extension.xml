@@ -14,10 +14,10 @@
 	<base>
     	<icon name="BetterCombatEffectsGold" file="graphics/icons/bceg.png"></icon>
     	<includefile source="strings/strings_bceg.xml" />
-    	<script name="EffectsManagerBCEG" file="scripts/manager_effect_bce.lua" />
-    	<script name="EffectsManagerBCEGDND" file="scripts/manager_effect_bceDND.lua" />
-    	<script name="EffectsManagerBCEG5E" file="scripts/manager_effect_bce5E.lua" />
-    	<script name="EffectsManagerBCEG4E" file="scripts/manager_effect_bce4E.lua" />
-    	<script name="EffectsManagerBCEG35E" file="scripts/manager_effect_bce35E.lua" />
+    	<script name="EffectsManagerBCE" file="scripts/manager_effect_bce.lua" />
+    	<script name="EffectsManagerBCEDND" file="scripts/manager_effect_bceDND.lua" />
+    	<script name="EffectsManagerBCE5E" file="scripts/manager_effect_bce5E.lua" />
+    	<script name="EffectsManagerBCE4E" file="scripts/manager_effect_bce4E.lua" />
+    	<script name="EffectsManagerBCE35E" file="scripts/manager_effect_bce35E.lua" />
   	</base>
 </root>

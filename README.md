@@ -238,6 +238,9 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 Saves against conditions will automatically be granted adv/dis based on the traits of the actor making the saving throw. The parser will match traits with the following verbiage: words ... {advantage,disadvantage} ... words ... {saves,saving throw} ... words ... {condition(s)} ... words
 
+* **ADVCOND: [condition] or [all] *** Grant advantage on a save by this actor against the defined condition
+* **DISCOND: [condition] or [all] *** Grant disadvantage on a save by this actor against the defined condition
+
 ### Concentration
 
 Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu

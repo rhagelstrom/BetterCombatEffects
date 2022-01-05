@@ -91,7 +91,7 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 		local tMatch = getEffects(rSource, aTags, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.nodeCT == nodeEffect and tEffect.sTag == "EXPIREADD" then
-				rEffect = EffectsManagerBCEG.matchEffect(tEffect.rEffectComp.remainder[1])
+				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if rEffect ~= {} then
 					rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
 					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
@@ -254,7 +254,7 @@ end
 
 --This function gets called a ton and it seems expensive. Try to do as much optimization as possible
 -- by grouping tags called at the same point in the code
-function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes)
+function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes, aConditions)
 	for v,sTag in pairs(aTags) do
 		-- make sure passed tag is a registered tag
 		if tBCETag[sTag] == nil then
@@ -345,6 +345,23 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 										break
 									end
 								end
+								if aConditions then
+									local bDiscard = true
+									for _,sRemainder in ipairs(rEffectComp.remainder) do
+										sRemainder = sRemainder:lower()
+										if sRemainder == "all" then
+											bDiscard = false
+										elseif StringManager.contains(aConditions, sRemainder) then
+											bDiscard = false
+										end
+										if bDiscard == false then
+											break
+										end
+									end
+									if bDiscard then
+										break
+									end
+								end
 								if bTargeted and not aOptions.bIgnoreEffectTargets then
 									if EffectManager.isEffectTarget(v, rTarget) then
 										table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
@@ -403,19 +420,57 @@ function binarySearchEffects(aGlobalEffects, sSearchString, nLowValue, nHighValu
 	end
 end
 
-function matchEffect(sEffect)
-	local aGlobalEffects = DB.getChildrenGlobal("effects")
+-- Wee are looking for the label which is the first tag followed by ; if not the end
+function matchEffect(sEffect, aComps)
 	local rEffect = {}
-	local nodeEffect = binarySearchEffects(aGlobalEffects, sEffect:lower(), 0, #aGlobalEffects-1 )
+	local sEffectLookup = sEffect:lower()
 
-	if nodeEffect then
-		rEffect.sName = DB.getValue(nodeEffect, "label", "")
-		rEffect.nGMOnly  = DB.getValue(nodeEffect, "isgmonly",0)
-		rEffect.nDuration =DB.getValue(nodeEffect, "duration",0)
-		rEffect.sUnits = DB.getValue(nodeEffect, "unit", "")
+	--search conditions table first
+	if User.getRulesetName() == "5E" then 
+		if StringManager.contains(DataCommon.conditions, sEffectLookup:lower()) then
+			rEffect.sName = StringManager.capitalize(sEffectLookup)
+			rEffect.nDuration = 0
+			rEffect.sUnits = ""
+			rEffect.nGMOnly = 0
+
+			return rEffect
+		end
+	end
+	--Find the effect name in our custom effects list
+	for _,v in pairs(DB.getChildrenGlobal("effects")) do
+		rEffect = {}
+		local sEffect = DB.getValue(v, "label", "")
+		if sEffect ~= nil and sEffect ~= "" then
+			aEffectComps = EffectManager.parseEffect(sEffect)
+			-- Is this the effeect we are looking for?
+			-- Name is parsed to index 1 in the array
+			
+		
+			if aEffectComps[1]:lower() == sEffectLookup:lower() then
+				local nodeGMOnly = DB.getChild(v, "isgmonly")	
+				if nodeGMOnly then
+					rEffect.nGMOnly = nodeGMOnly.getValue()
+				end
+
+				local nodeEffectDuration = DB.getChild(v, "duration")
+				if nodeEffectDuration then
+					rEffect.nDuration = nodeEffectDuration.getValue()
+				end
+				local nodeUnits = DB.getChild(v, "unit")
+				if nodeUnits then
+					rEffect.sUnits = nodeUnits.getValue()
+				end
+				rEffect.sName = sEffect
+				if onCustomMatchEffect(sEffect) then
+					break
+				end
+			end
+		end
 	end
 	return rEffect
 end
+
+
 
 function modifyEffect(nodeEffect, sAction, sEffect)
 	-- Must be database node, if not it is probably marked for deletion from one-shot
