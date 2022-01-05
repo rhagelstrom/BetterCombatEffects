@@ -14,21 +14,21 @@ function onInit()
 		charRest = CharManager.rest
 		CharManager.rest = customCharRest
 
-		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEA", EffectsManagerBCEG.aBCEOneShotOptions)
 
-		EffectsManagerBCE.registerBCETag("SAVES", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEE", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEADD", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVES", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEE", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEADD", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEADDP", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEDMG", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEONDMG", EffectsManagerBCEG.aBCEDefaultOptions)
 
 
-		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart35E)
-		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd35E)
-		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre35E)
-		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost35E)
-		EffectsManagerBCEDND.setProcessEffectOnDamage(EffectsManagerBCE5E.onDamage)
+		EffectsManagerBCEG.setCustomProcessTurnStart(processEffectTurnStart35E)
+		EffectsManagerBCEG.setCustomProcessTurnEnd(processEffectTurnEnd35E)
+		EffectsManagerBCEG.setCustomPreAddEffect(addEffectPre35E)
+		EffectsManagerBCEG.setCustomPostAddEffect(addEffectPost35E)
+		EffectsManagerBCEGDND.setProcessEffectOnDamage(EffectsManagerBCEG5E.onDamage)
 
 		ActionsManager.registerResultHandler("savebce", onSaveRollHandler35E)
 		ActionsManager.registerModHandler("savebce", onModSaveHandler)
@@ -44,10 +44,10 @@ function onClose()
 		CharManager.rest = charRest
 		ActionsManager.unregisterResultHandler("savebce")
 		ActionsManager.unregisterModHandler("savebce")
-		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart35E)
-		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd35E)
-		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre35E)
-		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost35E)
+		EffectsManagerBCEG.removeCustomProcessTurnStart(processEffectTurnStart35E)
+		EffectsManagerBCEG.removeCustomProcessTurnEnd(processEffectTurnEnd35E)
+		EffectsManagerBCEG.removeCustomPreAddEffect(addEffectPre35E)
+		EffectsManagerBCEG.removeCustomPostAddEffect(addEffectPost35E)
 
 	end
 end
@@ -75,7 +75,7 @@ end
 
 function customCharRest(nodeChar)
 
-	EffectsManagerBCEDND.customRest(nodeChar, true, nil)
+	EffectsManagerBCEGDND.customRest(nodeChar, true, nil)
 	charRest(nodeChar)
 end
 
@@ -86,7 +86,7 @@ function customRest(bShort)
 		if sClass == "charsheet" and sRecord ~= "" then
 			local nodePC = DB.findNode(sRecord);
 			if nodePC then
-				EffectsManagerBCEDND.customRest(nodePC, bLong, nil)
+				EffectsManagerBCEGDND.customRest(nodePC, bLong, nil)
 			end
 		end
 	end
@@ -98,11 +98,11 @@ function replaceSaveDC(rNewEffect, rActor)
 end
 
 function processEffectTurnStart35E(sourceNodeCT, nodeCT, nodeEffect)
-    return EffectsManagerBCE5E.processEffectTurnStart5E(sourceNodeCT, nodeCT, nodeEffect)
+    return EffectsManagerBCEG5E.processEffectTurnStart5E(sourceNodeCT, nodeCT, nodeEffect)
 end
 
 function processEffectTurnEnd35E(sourceNodeCT, nodeCT, nodeEffect)
-    return EffectsManagerBCE5E.processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
+    return EffectsManagerBCEG5E.processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
 end
 
 function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
@@ -115,20 +115,20 @@ function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		rSource = rActor
 	end
 	rNewEffect.sName = EffectManager35E.evalEffect(rSource, rNewEffect.sName)
-	EffectsManagerBCE5E.replaceSaveDC(rNewEffect, rSource)
+	EffectsManagerBCEG5E.replaceSaveDC(rNewEffect, rSource)
 	return true
 end
 
 function addEffectPost35E(sUser, sIdentity, nodeCT, rNewEffect)
-    return EffectsManagerBCE5E.addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
+    return EffectsManagerBCEG5E.addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 end
 
 function onSaveRollHandler35E(rSource, rTarget, rRoll)
-	return EffectsManagerBCE5E.onSaveRollHandler5E(rSource, rTarget, rRoll)
+	return EffectsManagerBCEG5E.onSaveRollHandler5E(rSource, rTarget, rRoll)
 end
 
 function saveEffect(nodeEffect, nodeTarget, sSaveBCE) -- Effect, Node which this effect is on, BCE String
-    return EffectsManagerBCE5E.saveEffect(nodeEffect, nodeTarget, sSaveBCE)
+    return EffectsManagerBCEG5E.saveEffect(nodeEffect, nodeTarget, sSaveBCE)
 end
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods

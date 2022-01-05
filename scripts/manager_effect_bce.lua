@@ -91,7 +91,7 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 		local tMatch = getEffects(rSource, aTags, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.nodeCT == nodeEffect and tEffect.sTag == "EXPIREADD" then
-				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+				rEffect = EffectsManagerBCEG.matchEffect(tEffect.rEffectComp.remainder[1])
 				if rEffect ~= {} then
 					rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
 					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)

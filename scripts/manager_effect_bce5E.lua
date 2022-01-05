@@ -51,20 +51,20 @@ function onInit()
 		end
 
 		--5E/3.5E BCE Tags
-		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEA", EffectsManagerBCEG.aBCEOneShotOptions)
 
-		EffectsManagerBCE.registerBCETag("SAVES", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEE", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEADD", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVERESTL", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVES", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEE", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEADD", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEADDP", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEDMG", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVEONDMG", EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("SAVERESTL", EffectsManagerBCEG.aBCEDefaultOptions)
 
-		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("DMGR",EffectsManagerBCEG.aBCEDefaultOptions)
 
-		EffectsManagerBCE.registerBCETag("SSAVES", EffectsManagerBCE.aBCESourceMattersOptions)
-		EffectsManagerBCE.registerBCETag("SSAVEE", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCEG.registerBCETag("SSAVES", EffectsManagerBCEG.aBCESourceMattersOptions)
+		EffectsManagerBCEG.registerBCETag("SSAVEE", EffectsManagerBCEG.aBCESourceMattersOptions)
 
 
 		rest = CharManager.rest
@@ -97,11 +97,11 @@ function onInit()
 		parseEffects = PowerManager.parseEffects
 		PowerManager.parseEffects = customParseEffects
 
-		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
-		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
-		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre5E)
-		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost5E)
-		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage)
+		EffectsManagerBCEG.setCustomProcessTurnStart(processEffectTurnStart5E)
+		EffectsManagerBCEG.setCustomProcessTurnEnd(processEffectTurnEnd5E)
+		EffectsManagerBCEG.setCustomPreAddEffect(addEffectPre5E)
+		EffectsManagerBCEG.setCustomPostAddEffect(addEffectPost5E)
+		EffectsManagerBCEGDND.setProcessEffectOnDamage(onDamage)
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		ActionsManager.registerModHandler("save", onModSaveHandler)
@@ -133,10 +133,10 @@ function onClose()
 		PowerManager.parseEffects = parseEffects
 		ActionsManager.unregisterResultHandler("save")
 		ActionsManager.unregisterModHandler("save")
-		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart5E)
-		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd5E)
-		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre5E)
-		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost5E)
+		EffectsManagerBCEG.removeCustomProcessTurnStart(processEffectTurnStart5E)
+		EffectsManagerBCEG.removeCustomProcessTurnEnd(processEffectTurnEnd5E)
+		EffectsManagerBCEG.removeCustomPreAddEffect(addEffectPre5E)
+		EffectsManagerBCEG.removeCustomPostAddEffect(addEffectPost5E)
 
 		ActionsManager.decodeActors = decodeActors
 		PowerManager.performAction = performAction
@@ -509,7 +509,7 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 end
 
 function customRest(nodeActor, bLong, bMilestone)
-	EffectsManagerBCEDND.customRest(nodeActor, bLong, nil)
+	EffectsManagerBCEGDND.customRest(nodeActor, bLong, nil)
 	rest(nodeActor, bLong)
 end
 
@@ -519,7 +519,7 @@ function processEffectTurnStart5E(rSource)
 	local aTags = {"SAVES"}
 	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	tMatch = EffectsManagerBCEG.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -535,7 +535,7 @@ function processEffectTurnStart5E(rSource)
 	local aTags = {"SSAVES"}
 	for _, nodeCT in pairs(ctEntries) do
 		local rActor = ActorManager.resolveActor(nodeCT)
-		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
+		tMatch = EffectsManagerBCEG.getEffects(rActor, aTags, rSource, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SSAVES" then
 				saveEffect(rSource, rActor, tEffect)
@@ -550,7 +550,7 @@ function processEffectTurnEnd5E(rSource)
 	local aTags = {"SAVEE"}
 	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	tMatch = EffectsManagerBCEG.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -567,7 +567,7 @@ function processEffectTurnEnd5E(rSource)
 	local aTags = {"SSAVEE"}
 	for _, nodeCT in pairs(ctEntries) do
 		local rActor = ActorManager.resolveActor(nodeCT)
-		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
+		tMatch = EffectsManagerBCEG.getEffects(rActor, aTags, rSource, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SSAVEE" then
 				saveEffect(rSource, rActor, tEffect)
@@ -638,7 +638,7 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 	local tMatch = {}
 	local aTags = {"SAVEA"}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	tMatch = EffectsManagerBCEG.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "SAVEA" then
 			saveEffect(rSource, rTarget, tEffect)
@@ -777,37 +777,37 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 		end
 		
 		if rRoll.bRemoveOnSave  then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove");
+			EffectsManagerBCEG.modifyEffect(nodeEffect, "Remove");
 		elseif rRoll.bDisableOnSave then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
+			EffectsManagerBCEG.modifyEffect(nodeEffect, "Deactivate");
 		end
 
-		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nodeEffect)
+		tMatch = EffectsManagerBCEG.getEffects(rTarget, aTags, rSource, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADDP" then
-				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+				rEffect = EffectsManagerBCEG.matchEffect(tEffect.rEffectComp.remainder[1])
 				if rEffect ~= {} then
 					rEffect.sSource = rRoll.sSourceCTNode 
 					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
-				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true)
+				EffectsManagerBCEGDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true)
 			end
 			end
 	elseif nodeEffect ~= nil then
 		aTags = {"SAVEADD", "SAVEDMG"}
-		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
+		tMatch = EffectsManagerBCEG.getEffects(rTarget, aTags, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADD" then
-				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1], nil, nodeEffect)
+				rEffect = EffectsManagerBCEG.matchEffect(tEffect.rEffectComp.remainder[1], nil, nodeEffect)
 				if rEffect ~= {} then
 					rEffect.sSource = rRoll.sSourceCTNode
 					rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
-				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp)
+				EffectsManagerBCEGDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp)
 			end
 		end
 	end
@@ -818,7 +818,7 @@ function onDamage(rSource,rTarget, nodeEffect)
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
+	tMatch = EffectsManagerBCEG.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -983,7 +983,7 @@ function dropConcentration(rNewEffect, nDuration)
 				if (sEffect:match("%(C%)") and (DB.getValue(nodeEffect, "source_name", "") == sSource)) and 
 						(sEffectTag ~= sNewEffectTag) or
 						((sEffectTag == sNewEffectTag and (DB.getValue(nodeEffect, "duration", 0) ~= nDuration))) then
-							EffectsManagerBCE.modifyEffect(nodeEffect, "Remove", sEffect)
+							EffectsManagerBCEG.modifyEffect(nodeEffect, "Remove", sEffect)
 				end
 			end
 		end

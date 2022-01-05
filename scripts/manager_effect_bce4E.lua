@@ -11,22 +11,22 @@ function onInit()
 		rest = CharManager.rest
 		CharManager.rest = customRest
 
-		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("ATKDS", EffectsManagerBCE.aBCESourceMattersOptions)
+		EffectsManagerBCEG.registerBCETag("DMGR",EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("ATKDS", EffectsManagerBCEG.aBCESourceMattersOptions)
 
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 
-		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart4E)
-		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd4E)
-		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre4E)
+		EffectsManagerBCEG.setCustomProcessTurnStart(processEffectTurnStart4E)
+		EffectsManagerBCEG.setCustomProcessTurnEnd(processEffectTurnEnd4E)
+		EffectsManagerBCEG.setCustomPreAddEffect(addEffectPre4E)
 		ActionsManager.registerResultHandler("attack", onAttack4E)
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
-		applyOngoingDamageBCE = EffectsManagerBCEDND.applyOngoingDamage
-		EffectsManagerBCEDND.applyOngoingDamage = applyOngoingDamage
-		applyOngoingRegenBCE = EffectsManagerBCEDND.applyOngoingRegen
-		EffectsManagerBCEDND.applyOngoingRegen = applyOngoingRegen
+		applyOngoingDamageBCE = EffectsManagerBCEGDND.applyOngoingDamage
+		EffectsManagerBCEGDND.applyOngoingDamage = applyOngoingDamage
+		applyOngoingRegenBCE = EffectsManagerBCEGDND.applyOngoingRegen
+		EffectsManagerBCEGDND.applyOngoingRegen = applyOngoingRegen
         --No save support yet for 4E or is it really not that useful?
 --		ActionsManager.registerResultHandler("savebce", onSaveRollHandler35E)
 --		ActionsManager.registerModHandler("savebce", onModSaveHandler)
@@ -40,16 +40,16 @@ function onClose()
 		ActionDamage.getDamageAdjust = getDamageAdjust
 --		ActionsManager.unregisterResultHandler("savebce")
 --		ActionsManager.unregisterModHandler("savebce")
-		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart4E)
-		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd4E)
-		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre4E)
-		EffectsManagerBCEDND.applyOngoingDamage = applyOngoingDamageBCE
-		EffectsManagerBCEDND.applyOngoingRegen = applyOngoingRegenBCE
+		EffectsManagerBCEG.removeCustomProcessTurnStart(processEffectTurnStart4E)
+		EffectsManagerBCEG.removeCustomProcessTurnEnd(processEffectTurnEnd4E)
+		EffectsManagerBCEG.removeCustomPreAddEffect(addEffectPre4E)
+		EffectsManagerBCEGDND.applyOngoingDamage = applyOngoingDamageBCE
+		EffectsManagerBCEGDND.applyOngoingRegen = applyOngoingRegenBCE
 	end
 end
 
 function customRest(nodeActor, bLong, bMilestone)
-	EffectsManagerBCEDND.customRest(nodeActor,  bLong, nil)
+	EffectsManagerBCEGDND.customRest(nodeActor,  bLong, nil)
 	rest(nodeActor, bLong, bMilestone)
 end
 
@@ -180,9 +180,9 @@ function onAttack4E(rSource, rTarget, rRoll)
 	local aTags = {"ATKDS"}
 
 	-- Only process these if on the source node
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, rTarget)
+	tMatch = EffectsManagerBCEG.getEffects(rSource, aTags, rSource, rTarget)
 	for _,tEffect in pairs(tMatch) do
-		EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Deactivate")
+		EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Deactivate")
 	end
 	ActionAttack.onAttack(rSource, rTarget, rRoll)
 end
