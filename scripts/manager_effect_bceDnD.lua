@@ -8,6 +8,7 @@ local RulesetActorManager = nil
 local onDamage = nil
 local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
+local bBCEGold = false
 
 function setProcessEffectOnDamage(ProcessEffectOnDamage)
 	fProcessEffectOnDamage = ProcessEffectOnDamage
@@ -401,6 +402,18 @@ function getTempHPAndWounds(rTarget)
 end
 
 function onInit()
+	local aExtensions = Extension.getExtensions()
+	for _,sExtension in ipairs(aExtensions) do
+		local tExtension = Extension.getExtensionInfo(sExtension)
+		if (tExtension.name == "Feature: Better Combat Effects Gold") then
+			bBCEGold = bTrue
+			return
+		end
+		if (tExtension.name == "MNM Charsheet Effects Display") then
+			bMadNomadCharSheetEffectDisplay = true
+		end			
+	end
+
 	if  User.getRulesetName() == "5E"  or 
 		User.getRulesetName() == "4E"  or
 		User.getRulesetName() == "3.5E"  or
@@ -466,24 +479,18 @@ function onInit()
 		ActionDamage.onDamage = customOnDamage
 		ActionsManager.registerResultHandler("damage", customOnDamage)
 		ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
-
-		aExtensions = Extension.getExtensions()
-		for _,sExtension in ipairs(aExtensions) do
-			tExtension = Extension.getExtensionInfo(sExtension)
-			if (tExtension.name == "MNM Charsheet Effects Display") then
-				bMadNomadCharSheetEffectDisplay = true
-			end
-		end
 	end
 end
 
 
 function onClose()
-	if  User.getRulesetName() == "5E"  or 
+
+	if  bBCEGold == false and 
+		(User.getRulesetName() == "5E"  or 
 		User.getRulesetName() == "4E"  or
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or
-		User.getRulesetName() == "PFRPG" then
+		User.getRulesetName() == "PFRPG") then
 
 		ActionDamage.onDamage = onDamage
 		ActionsManager.unregisterResultHandler("damage")

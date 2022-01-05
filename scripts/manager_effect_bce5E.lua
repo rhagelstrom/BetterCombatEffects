@@ -7,8 +7,21 @@ local bMadNomadCharSheetEffectDisplay = false
 local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
+local bBCEGold = false
 
 function onInit()
+	local aExtensions = Extension.getExtensions()
+	for _,sExtension in ipairs(aExtensions) do
+		local tExtension = Extension.getExtensionInfo(sExtension)
+		if (tExtension.name == "MNM Charsheet Effects Display") then
+			bMadNomadCharSheetEffectDisplay = true
+		end
+		if (tExtension.name == "Feature: Better Combat Effects Gold") then
+			bBCEGold = true
+			return
+		end			
+	end
+
 	if User.getRulesetName() == "5E" then 
 		if Session.IsHost then
 			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects", 
@@ -61,20 +74,12 @@ function onInit()
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		ActionsManager.registerModHandler("save", onModSaveHandler)
 
-		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
-	
-		aExtensions = Extension.getExtensions()
-		for _,sExtension in ipairs(aExtensions) do
-			tExtension = Extension.getExtensionInfo(sExtension)
-			if (tExtension.name == "MNM Charsheet Effects Display") then
-				bMadNomadCharSheetEffectDisplay = true
-			end			
-		end
+		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)	
 	end
 end
 
 function onClose()
-	if User.getRulesetName() == "5E" then 
+	if bBCEGold == false and User.getRulesetName() == "5E" then 
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects

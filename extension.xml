@@ -2,7 +2,7 @@
 <root release="3.0" version="3">
 	<announcement text="Better Combat Effects v2.25\rby Ryan Hagelstrom\rContribution MeAndUnique 2021-2022" font="emotefont" icon="BetterCombatEffects"/>
 	<properties>
-    	<loadorder>120</loadorder>
+    	<loadorder>121</loadorder>
 		<name>Feature: Better Combat Effects</name>
 		<version>2.25</version>
 		<author>Ryan Hagelstrom Contribution: MeAndUnique</author>
