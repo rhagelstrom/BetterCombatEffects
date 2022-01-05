@@ -200,19 +200,26 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 * **(DIS)** will have disadvantage on this save.
 
 ## 4E/5E
+
 ---
+
 ### Damage Reduction
+
 * **DMGR: (N) [damage type(s)][Range]** Reduce the damage taken by the specified damage type(s) by (N).
   * Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic
   * Interception Fighting Style; DMGR: 1d10 [PRF],all
   * Deflict Missles; DMGR: 1d10 [MONK],[DEX],ranged,bludgeoning,piercing
+
 ## 4E
+
 ---
+
 * **ATKDS** Disable this effect if the source of the effect is attacked
 
 ## 5E
 
 ---
+
 * **EFFINIT: (N)** Add an effect with initiative number (N)
 
 * **[SDC]** When an effect with [SDC] is applied from a PC/NPC, [SDC] will be replaced with the PC/NPCs spell save DC based off of its spellcasting ability.
@@ -220,6 +227,12 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 * **DC: (N)** If the actor has the effect DC, (N) will be added  to the [SDC] when [SDC] is automatically replaced. (N) can be any number
 
 * **(E)** If the source of the effect drops to zero hit points, then this effect will be removed
+
+### On Attack
+
+* **ATKD** Disable this effect when the actor takes the attack action.
+* **ATKA** Enable this effect when the actor takes the attack action.
+* **ATKR** Remove this effect when the actor takes the attack action.
 
 ### Save vs Condition
 

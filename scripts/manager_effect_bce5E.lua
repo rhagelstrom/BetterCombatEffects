@@ -10,6 +10,7 @@ local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
 local actionRoll = nil 
+local onAttack = nil
 
 local decodeActors = nil 
 local performAction = nil
@@ -66,6 +67,9 @@ function onInit()
 		EffectsManagerBCEG.registerBCETag("SSAVES", EffectsManagerBCEG.aBCESourceMattersOptions)
 		EffectsManagerBCEG.registerBCETag("SSAVEE", EffectsManagerBCEG.aBCESourceMattersOptions)
 
+		EffectsManagerBCEG.registerBCETag("ATKR",  EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("ATKD",  EffectsManagerBCEG.aBCEDefaultOptions)
+		EffectsManagerBCEG.registerBCETag("ATKA",  EffectsManagerBCEG.aBCEActivateOptions)
 
 		rest = CharManager.rest
 		CharManager.rest = customRest
@@ -97,6 +101,9 @@ function onInit()
 		parseEffects = PowerManager.parseEffects
 		PowerManager.parseEffects = customParseEffects
 
+		onAttack = ActionAttack.onAttack 
+		ActionAttack.onAttack = customOnAttack
+
 		EffectsManagerBCEG.setCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCEG.setCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCEG.setCustomPreAddEffect(addEffectPre5E)
@@ -105,6 +112,7 @@ function onInit()
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		ActionsManager.registerModHandler("save", onModSaveHandler)
+		ActionsManager.registerResultHandler("attack", customOnAttack)
 	
 		OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_APPLYSAVEVS, customHandleApplySaveVs);
 
@@ -513,6 +521,25 @@ function customRest(nodeActor, bLong, bMilestone)
 	rest(nodeActor, bLong)
 end
 
+function customOnAttack(rSource, rTarget, rRoll)
+	local tMatch = {}
+	local aTags = {"ATKD","ATKA","ATKR"}
+	local rEffectSource = {}
+
+	tMatch = EffectsManagerBCEG.getEffects(rSource, aTags, rSource)
+	Debug.chat(tMatch)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "ATKA" then
+			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Activate")
+		elseif tEffect.sTag == "ATKD" then
+			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Deactivate")
+		elseif  tEffect.sTag  == "ATKR" then
+			Debug.chat(tEffect)
+			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Remove")
+		end
+	end
+	return onAttack(rSource, rTarget, rRoll)
+end
 
 function processEffectTurnStart5E(rSource)
 	local tMatch = {}
