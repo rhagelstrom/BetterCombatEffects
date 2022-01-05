@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <root release="3.0" version="3">
-	<announcement text="Better Combat Effects Gold v3.0-rc1\rby Ryan Hagelstrom\rContribution MeAndUnique 2021-2022" font="emotefont" icon="BetterCombatEffects"/>
+	<announcement text="Better Combat Effects Gold v3.0-rc1\rby Ryan Hagelstrom\rContribution MeAndUnique 2021-2022" font="emotefont" icon="BetterCombatEffectsGold"/>
 	<properties>
     	<loadorder>120</loadorder>
 		<name>Feature: Better Combat Effects Gold</name>
@@ -12,7 +12,7 @@
 		</ruleset>
 	</properties>
 	<base>
-    	<icon name="BetterCombatEffects" file="graphics/icons/bce.png"></icon>
+    	<icon name="BetterCombatEffectsGold" file="graphics/icons/bce.png"></icon>
     	<includefile source="strings/strings_bce.xml" />
     	<script name="EffectsManagerBCEG" file="scripts/manager_effect_bce.lua" />
     	<script name="EffectsManagerBCEGDND" file="scripts/manager_effect_bceDND.lua" />

@@ -30,21 +30,21 @@ OOB_MSGTYPE_APPLYSAVEVS = "applysavevs";
 function onInit()
 	if User.getRulesetName() == "5E" then 
 		if Session.IsHost then
-			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects", 
+			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects_Gold", 
 			"option_Allow_Duplicate", "option_entry_cycler", 
 			{ labels = "option_val_off", values = "off",
 				baselabel = "option_val_on", baseval = "on", default = "on" });
 
-			OptionsManager.registerOption2("CONSIDER_DUPLICATE_DURATION", false, "option_Better_Combat_Effects", 
+			OptionsManager.registerOption2("CONSIDER_DUPLICATE_DURATION", false, "option_Better_Combat_Effects_Gold", 
 			"option_Consider_Duplicate_Duration", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 
-			OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects", 
+			OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects_Gold", 
 			"option_Concentrate_Restrict", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
-			OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects", 
+			OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects_Gold", 
 			"option_Autoparse_Effects", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });

@@ -240,8 +240,8 @@ function customOnDamage(rSource, rTarget, rRoll)
 	end
 
 	local bDead = false
-	local nodeTarget = ActorManager.getCTNode(rTarget)
-	local nodeSource = ActorManager.getCTNode(rSource)
+	local nodeTarget = ActorManager.getCTNode(rTarget.sCreatureNode)
+	local nodeSource = ActorManager.getCTNode(rSource.sCreatureNode)
 
 	-- save off temp hp and wounds before damage
 	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
@@ -250,12 +250,19 @@ function customOnDamage(rSource, rTarget, rRoll)
 	-- Do damage first then modify any effects
 	onDamage(rSource, rTarget, rRoll)
 
-	nTotalHP = DB.getValue(nodeTarget, "hp.total", 0)
-	nWounds = DB.getValue(nodeTarget, "hp.wounds", 0)
+	local sTargetNodeType, targetNode = ActorManager.getTypeAndNode(rTarget)
+	local nTotalHP, nWounds
+	if sTargetNodeType == "pc" then
+		nTotalHP = DB.getValue(targetNode, "hp.total", 0)
+		nWounds = DB.getValue(targetNode, "hp.wounds", 0)
+	else
+		nTotalHP = DB.getValue(targetNode, "hptotal", 0)
+		nWounds = DB.getValue(targetNode, "wounds", 0)
+	end
 	if nTotalHP == nWounds then
 		bDead = true
 	end
-
+	
 	--Dropping this because Blistful Ignorance does this better
 	--and there is less risk of conflict if this isn't a thing in BCE
 	--processAbsorb(rSource, rTarget, rRoll)
@@ -516,7 +523,7 @@ function onInit()
 		User.getRulesetName() == "PFRPG" then
 
 		if Session.IsHost then
-			OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects", 
+			OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects_Gold", 
 			"option_Temp_Is_Damage", "option_entry_cycler", 
 			{ labels = "option_val_off", values = "off",
 				baselabel = "option_val_on", baseval = "on", default = "on" })  
