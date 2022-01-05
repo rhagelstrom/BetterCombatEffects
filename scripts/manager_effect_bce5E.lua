@@ -527,14 +527,12 @@ function customOnAttack(rSource, rTarget, rRoll)
 	local rEffectSource = {}
 
 	tMatch = EffectsManagerBCEG.getEffects(rSource, aTags, rSource)
-	Debug.chat(tMatch)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "ATKA" then
 			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Activate")
 		elseif tEffect.sTag == "ATKD" then
 			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Deactivate")
 		elseif  tEffect.sTag  == "ATKR" then
-			Debug.chat(tEffect)
 			EffectsManagerBCEG.modifyEffect(tEffect.nodeCT, "Remove")
 		end
 	end

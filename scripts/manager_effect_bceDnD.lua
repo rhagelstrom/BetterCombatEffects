@@ -50,7 +50,12 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		local nResult = tonumber(ActionsManager.total(rRoll))
 		if rRoll.sUnits == "minute" then
 			nResult = nResult * 10
+		elseif rRoll.sUnits == "hour" then
+			nResult = nResult * 10 * 60
+		elseif rRoll.sUnits == "day" then
+			nResult = nResult * 10 * 60 * 24
 		end
+		
 		local nodeCT = DB.findNode(rRoll.nodeEffectCT)
 		DB.setValue(nodeCT, "duration", "number", nResult)
 		EffectsManagerBCEG.updateEffect(nodeSource,nodeCT, rRoll.sEffect)
