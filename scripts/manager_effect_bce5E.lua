@@ -73,7 +73,7 @@ function onInit()
 
 		EffectsManagerBCE.registerBCETag("ADVCOND",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("DISCOND",  EffectsManagerBCE.aBCEDefaultOptions)
-		
+
 		EffectsManagerBCE.registerBCETag("NOREST",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("NORESTL",  EffectsManagerBCE.aBCEDefaultOptions)
 	
@@ -805,6 +805,8 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local aTags = {}
 	ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
 	local nResult = ActionsManager.total(rRoll)
+	rTarget.nResult = nResult
+	rTarget.nDC = tonumber(rRoll.nTarget)
 	local bAct = false
 	if rRoll.bActonFail then
 		if nResult < tonumber(rRoll.nTarget) then
@@ -852,6 +854,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADD" then
+				Debug.chat(tEffect)
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1], nil, nodeEffect)
 				if rEffect ~= {} then
 					rEffect.sSource = rRoll.sSourceCTNode
@@ -863,6 +866,8 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			end
 		end
 	end
+	rTarget.nDC = nil
+	rTarget.nResult = nil
 end
 
 function onDamage(rSource,rTarget, nodeEffect)

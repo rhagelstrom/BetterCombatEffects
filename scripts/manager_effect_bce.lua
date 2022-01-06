@@ -362,6 +362,38 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 										break
 									end
 								end
+								-- Check to see if we have a hard fail save
+								if sTag == "SAVEADD" then
+									Debug.chat(rActor)
+									Debug.chat(sLabel)
+									local bDiscard = false
+									local tSaveEffectComps = EffectManager.parseEffect(sLabel)
+									for kSaveEffectComp,sSaveEffectComp in ipairs(tSaveEffectComps) do
+										if RulesetEffectManager.parseEffectComp then
+											rSaveEffectComp = RulesetEffectManager.parseEffectComp(sSaveEffectComp)
+										else
+											rSaveEffectComp = RulesetEffectManager.parseEffectCompSimple(sSaveEffectComp)
+										end
+										if rSaveEffectComp.type == "SAVEADD" then
+											if tonumber(rSaveEffectComp.mod) >= 0 then
+												-- Failed by more than mod on the save
+												if tonumber(rSaveEffectComp.mod) + rActor.nResult >= rActor.nDC then
+													bDiscard = true
+													break
+												end
+											else
+												-- Failed with result of mod or less
+												if rActor.nResult > math.abs(tonumber(rSaveEffectComp.mod)) then
+													bDiscard = true
+													break
+												end
+											end
+										end
+									end
+									if bDiscard == true  then
+										break
+									end
+								end
 								if bTargeted and not aOptions.bIgnoreEffectTargets then
 									if EffectManager.isEffectTarget(v, rTarget) then
 										table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
