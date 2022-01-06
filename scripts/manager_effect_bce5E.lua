@@ -73,6 +73,9 @@ function onInit()
 
 		EffectsManagerBCE.registerBCETag("ADVCOND",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("DISCOND",  EffectsManagerBCE.aBCEDefaultOptions)
+		
+		EffectsManagerBCE.registerBCETag("NOREST",  EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("NORESTL",  EffectsManagerBCE.aBCEDefaultOptions)
 	
 		rest = CharManager.rest
 		CharManager.rest = customRest
@@ -519,9 +522,30 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 	return sDuplicateMsg
 end
 
+function noRest(nodeActor, bLong, bMilestone)
+	local rSource = ActorManager.resolveActor(nodeActor)
+	local tMatch = {}
+	local aTags = {"NOREST"}
+	if bLong then
+		table.insert(aTags, "NORESTL")
+	end
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	return tMatch
+end
+
 function customRest(nodeActor, bLong, bMilestone)
+	local bRest = true
 	EffectsManagerBCEDND.customRest(nodeActor, bLong, nil)
-	rest(nodeActor, bLong)
+	local tMatch = {}
+	tMatch = noRest(nodeActor, bLong, bMilestone)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "NORESTL" or tEffect.sTag == "NOREST" then
+			bRest = false
+		end
+	end
+	if bRest then
+		rest(nodeActor, bLong)
+	end
 end
 
 function customOnAttack(rSource, rTarget, rRoll)

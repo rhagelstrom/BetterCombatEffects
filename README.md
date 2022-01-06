@@ -241,6 +241,11 @@ Saves against conditions will automatically be granted adv/dis based on the trai
 * **ADVCOND: [condition] or [all] *** Grant advantage on a save by this actor against the defined condition
 * **DISCOND: [condition] or [all] *** Grant disadvantage on a save by this actor against the defined condition
 
+### No Rest for the Weary
+
+* **NOREST** Actor will not gain the benefit of a short or long rest. Note: Will not prevent the actor from rolling Hit Dice
+* **NORESTL** Actor will not gain the benefit of a long rest Note: Will not prevent the actor from rolling Hit Dice
+
 ### Concentration
 
 Default off: When on, adding an new spell effect that requires concentration will automatically remove the previous concentration effects if any exist. This can be toggled on/off in the options menu
