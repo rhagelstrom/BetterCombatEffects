@@ -9,7 +9,7 @@ local onDamage = nil
 local messageDamage = nil
 local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
-local bBCEGold = false
+local bBCEFree = true
 
 function setProcessEffectOnDamage(ProcessEffectOnDamage)
 	fProcessEffectOnDamage = ProcessEffectOnDamage
@@ -526,7 +526,7 @@ function onInit()
 	for _,sExtension in ipairs(aExtensions) do
 		local tExtension = Extension.getExtensionInfo(sExtension)
 		if (tExtension.name == "Feature: Better Combat Effects Gold") then
-			bBCEGold = bTrue
+			bBCEFree = false
 			return
 		end
 		if (tExtension.name == "MNM Charsheet Effects Display") then
@@ -608,7 +608,8 @@ end
 
 function onClose()
 
-	if (User.getRulesetName() == "5E"  or 
+	if  bBCEFree == true and 
+		(User.getRulesetName() == "5E"  or 
 		User.getRulesetName() == "4E"  or
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or

@@ -5,14 +5,14 @@
 local applyOngoingDamageBCE = nil
 local applyOngoingRegenBCE = nil
 local getDamageAdjust = nil
-local bBCEGold = false
+local bBCEFree = true
 
 function onInit()
 	local aExtensions = Extension.getExtensions()
 	for _,sExtension in ipairs(aExtensions) do
 		local tExtension = Extension.getExtensionInfo(sExtension)
 		if (tExtension.name == "Feature: Better Combat Effects Gold") then
-			bBCEGold = true
+			bBCEFree = false
 			return
 		end			
 	end
@@ -45,7 +45,7 @@ function onInit()
 end
 
 function onClose()
-	if bBCEGold == false and User.getRulesetName() == "4E" then 
+	if bBCEFree == true and User.getRulesetName() == "4E" then 
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 --		ActionsManager.unregisterResultHandler("savebce")

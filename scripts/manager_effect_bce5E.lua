@@ -36,7 +36,7 @@ function onInit()
 			bMadNomadCharSheetEffectDisplay = true
 		end
 		if (tExtension.name == "Feature: Better Combat Effects Gold") then
-			bBCEGold = true
+			bBCEFree = false
 			return
 		end			
 	end
@@ -153,7 +153,7 @@ function onInit()
 end
 
 function onClose()
-	if bBCEGold == false and User.getRulesetName() == "5E" then 
+	if bBCEFree == true and User.getRulesetName() == "5E" then 
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
