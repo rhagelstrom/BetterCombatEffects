@@ -7,7 +7,7 @@ local bMadNomadCharSheetEffectDisplay = false
 local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
-local bBCEGold = false
+
 
 function onInit()
 	local aExtensions = Extension.getExtensions()
@@ -16,10 +16,6 @@ function onInit()
 		if (tExtension.name == "MNM Charsheet Effects Display") then
 			bMadNomadCharSheetEffectDisplay = true
 		end
-		if (tExtension.name == "Feature: Better Combat Effects Gold") then
-			bBCEGold = true
-			return
-		end			
 	end
 
 	if User.getRulesetName() == "5E" then 
@@ -79,7 +75,7 @@ function onInit()
 end
 
 function onClose()
-	if bBCEGold == false and User.getRulesetName() == "5E" then 
+	if User.getRulesetName() == "5E" then 
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
@@ -272,7 +268,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
 	end
-	Debug.chat("onSaveRollHandler5E")
 	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local tMatch = {}
@@ -363,7 +358,6 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 	if User.getRulesetName() == "5E" then
 		sAbility = DataCommon.ability_stol[sAbility]
 	end
-	Debug.chat("saveEffect")
 	local nDC = tonumber(aParsedRemiander[2])
 	if  (nDC and sAbility) ~= nil then
 		local rSaveVsRoll = {}

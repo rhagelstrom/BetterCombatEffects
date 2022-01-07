@@ -5,18 +5,8 @@
 
 local rest = nil
 local charRest = nil
-local bBCEGold = false
 
 function onInit()
-	local aExtensions = Extension.getExtensions()
-	for _,sExtension in ipairs(aExtensions) do
-		local tExtension = Extension.getExtensionInfo(sExtension)
-		if (tExtension.name == "Feature: Better Combat Effects Gold") then
-			bBCEGold = true
-			return
-		end			
-	end
-
 	if User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG" then 
 	
 		rest = CombatManager2.rest
@@ -49,7 +39,7 @@ function onInit()
 end
 
 function onClose()
-	if bBCEGold == false and (User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG") then 
+	if User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG" then 
 		CombatManager2.rest = rest
 		CharManager.rest = charRest
 		ActionsManager.unregisterResultHandler("savebce")
