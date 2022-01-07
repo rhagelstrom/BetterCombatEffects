@@ -231,7 +231,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
@@ -248,7 +248,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
 	
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if rEffect ~= {} then
@@ -443,8 +443,7 @@ function onInit()
 		-- BCE DND TAGS
 		EffectsManagerBCE.registerBCETag("DMGAT", EffectsManagerBCE.aBCEActivateOptions)
 			
-		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCERemoveOptions)
-
+		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCEDeactivateOptions)
 		EffectsManagerBCE.registerBCETag("DMGDT", EffectsManagerBCE.aBCEDeactivateOptions)
 		
 		EffectsManagerBCE.registerBCETag("DMGOE", EffectsManagerBCE.aBCEDefaultOptions)
