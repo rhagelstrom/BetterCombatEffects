@@ -12,7 +12,7 @@ local addEffect = nil
 local expireEffect = nil
 local bExpired = false -- Expried is called twice to support one-shot effects but we only want to do our processing once.
 local RulesetEffectManager =  nil 
-local bBCEGold = false
+local bBCEFree = false
 
 -- Predefined option arrays for getting effect tags
 aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
@@ -31,7 +31,7 @@ function onInit()
 	for _,sExtension in ipairs(aExtensions) do
 		local tExtension = Extension.getExtensionInfo(sExtension)
 		if (tExtension.name == "Feature: Better Combat Effects Gold") then
-			bBCEGold = true
+			bBCEFree = true
 			return
 		end			
 	end
@@ -76,7 +76,7 @@ function onInit()
 	
 end
 function onClose()
-	if bBCEGold == false then
+	if bBCEFree == false then
 		EffectManager.addEffect = addEffect
 		EffectManager.expireEffect = expireEffect
 
