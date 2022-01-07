@@ -364,8 +364,6 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 								end
 								-- Check to see if we have a hard fail save
 								if sTag == "SAVEADD" then
-									Debug.chat(rActor)
-									Debug.chat(sLabel)
 									local bDiscard = false
 									local tSaveEffectComps = EffectManager.parseEffect(sLabel)
 									for kSaveEffectComp,sSaveEffectComp in ipairs(tSaveEffectComps) do
@@ -375,7 +373,9 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 											rSaveEffectComp = RulesetEffectManager.parseEffectCompSimple(sSaveEffectComp)
 										end
 										if rSaveEffectComp.type == "SAVEADD" then
-											if tonumber(rSaveEffectComp.mod) >= 0 then
+											if tonumber(rSaveEffectComp.mod) == 0 then
+												break -- no mod so proceed
+											elseif tonumber(rSaveEffectComp.mod) > 0 then
 												-- Failed by more than mod on the save
 												if tonumber(rSaveEffectComp.mod) + rActor.nResult >= rActor.nDC then
 													bDiscard = true

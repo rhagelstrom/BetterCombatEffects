@@ -854,7 +854,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADD" then
-				Debug.chat(tEffect)
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1], nil, nodeEffect)
 				if rEffect ~= {} then
 					rEffect.sSource = rRoll.sSourceCTNode
