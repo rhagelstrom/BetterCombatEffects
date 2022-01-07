@@ -5,18 +5,8 @@
 local applyOngoingDamageBCE = nil
 local applyOngoingRegenBCE = nil
 local getDamageAdjust = nil
-local bBCEFree = true
 
 function onInit()
-	local aExtensions = Extension.getExtensions()
-	for _,sExtension in ipairs(aExtensions) do
-		local tExtension = Extension.getExtensionInfo(sExtension)
-		if (tExtension.name == "Feature: Better Combat Effects Gold") then
-			bBCEFree = false
-			return
-		end			
-	end
-
 	if User.getRulesetName() == "4E" then 
 		rest = CharManager.rest
 		CharManager.rest = customRest
@@ -45,17 +35,16 @@ function onInit()
 end
 
 function onClose()
-	if bBCEFree == true and User.getRulesetName() == "4E" then 
-		CharManager.rest = rest
-		ActionDamage.getDamageAdjust = getDamageAdjust
+	CharManager.rest = rest
+	ActionDamage.getDamageAdjust = getDamageAdjust
 --		ActionsManager.unregisterResultHandler("savebce")
 --		ActionsManager.unregisterModHandler("savebce")
-		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart4E)
-		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd4E)
-		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre4E)
-		EffectsManagerBCEDND.applyOngoingDamage = applyOngoingDamageBCE
-		EffectsManagerBCEDND.applyOngoingRegen = applyOngoingRegenBCE
-	end
+	EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart4E)
+	EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd4E)
+	EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre4E)
+	EffectsManagerBCEDND.applyOngoingDamage = applyOngoingDamageBCE
+	EffectsManagerBCEDND.applyOngoingRegen = applyOngoingRegenBCE
+
 end
 
 function customRest(nodeActor, bLong, bMilestone)

@@ -12,7 +12,6 @@ local addEffect = nil
 local expireEffect = nil
 local bExpired = false -- Expried is called twice to support one-shot effects but we only want to do our processing once.
 local RulesetEffectManager =  nil 
-local bBCEFree = false
 
 -- Predefined option arrays for getting effect tags
 aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
@@ -27,15 +26,6 @@ aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyD
 local tBCETag = {}
 
 function onInit()
-	local aExtensions = Extension.getExtensions()
-	for _,sExtension in ipairs(aExtensions) do
-		local tExtension = Extension.getExtensionInfo(sExtension)
-		if (tExtension.name == "Feature: Better Combat Effects Gold") then
-			bBCEFree = true
-			return
-		end			
-	end
-
 	registerBCETag("TURNAS", aBCEActivateOptions)
 	registerBCETag("TURNAE", aBCEActivateOptions)
 
@@ -76,12 +66,10 @@ function onInit()
 	
 end
 function onClose()
-	if bBCEFree == false then
-		EffectManager.addEffect = addEffect
-		EffectManager.expireEffect = expireEffect
+	EffectManager.addEffect = addEffect
+	EffectManager.expireEffect = expireEffect
 
-		ActionsManager.unregisterResultHandler("effectbce")
-	end
+	ActionsManager.unregisterResultHandler("effectbce")
 end
 
 function registerBCETag(sTag, aOptions)

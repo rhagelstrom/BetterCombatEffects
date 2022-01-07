@@ -9,24 +9,6 @@ local bMadNomadCharSheetEffectDisplay = false
 local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
-local actionRoll = nil 
-local onAttack = nil
-
-local decodeActors = nil 
-local performAction = nil
-local getPCPowerAction = nil
-local handleApplySaveVs = nil
-local notifyApplySaveVs = nil
-local performVsRoll = nil
-local performSaveVsRoll = nil
-
-local addCustomNPC = nil 
-local addCustomPC = nil 
-
-local tTraitsAdvantage = {}
-local tTraitsDisadvantage = {}
-
-OOB_MSGTYPE_APPLYSAVEVS = "applysavevs";
 
 function onInit()
 	local aExtensions = Extension.getExtensions()
@@ -35,10 +17,6 @@ function onInit()
 		if (tExtension.name == "MNM Charsheet Effects Display") then
 			bMadNomadCharSheetEffectDisplay = true
 		end
-		if (tExtension.name == "Feature: Better Combat Effects Gold") then
-			bBCEFree = false
-			return
-		end			
 	end
 
 	if User.getRulesetName() == "5E" then 
@@ -153,7 +131,7 @@ function onInit()
 end
 
 function onClose()
-	if bBCEFree == true and User.getRulesetName() == "5E" then 
+	if User.getRulesetName() == "5E" then 
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
@@ -811,7 +789,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
 	end
-	Debug.chat("onSaveRollHandler5E")
 	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local tMatch = {}
