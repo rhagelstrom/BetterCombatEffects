@@ -312,13 +312,13 @@ end
                                 if aOptions.nDuration ~= 0 and aOptions.nDuration ~= nDuration then
                                     break
                                 else
-                                --	if nodeEffect == nil and (sTag == "SAVES" or sTag == "SSAVES" or 
-                                --	sTag == "SAVEE" or sTag "SSAVEE" or sTag == "SAVEA" or sTag == "SAVEONDMG" or sTag == "SAVERESTL") then
-                                --		bSaveAdd = false
-                                --	end
-                                --	if bSaveAdd == false and (sTag == "SAVEADD" or sTag == "SAVEADDP" or sTag =="SAVEDMG") then
-                                --		break
-                                --	end
+                                	if nodeEffect == nil and (sTag == "SAVES" or sTag == "SSAVES" or 
+                                	sTag == "SAVEE" or sTag == "SSAVEE" or sTag == "SAVEA" or sTag == "SAVEONDMG" or sTag == "SAVERESTL") then
+                                		bSaveAdd = false
+                                	end
+                                	if bSaveAdd == false and (sTag == "SAVEADD" or sTag == "SAVEADDP" or sTag =="SAVEDMG") then
+                                		break
+                                	end
                                     if aDMGTypes then
                                         local bDiscard = true
                                         for _,sRemainder in ipairs(rEffectComp.remainder) do
