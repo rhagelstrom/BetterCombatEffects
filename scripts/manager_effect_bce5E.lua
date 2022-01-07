@@ -29,6 +29,18 @@ local tTraitsDisadvantage = {}
 OOB_MSGTYPE_APPLYSAVEVS = "applysavevs";
 
 function onInit()
+	local aExtensions = Extension.getExtensions()
+	for _,sExtension in ipairs(aExtensions) do
+		local tExtension = Extension.getExtensionInfo(sExtension)
+		if (tExtension.name == "MNM Charsheet Effects Display") then
+			bMadNomadCharSheetEffectDisplay = true
+		end
+		if (tExtension.name == "Feature: Better Combat Effects Gold") then
+			bBCEGold = true
+			return
+		end			
+	end
+
 	if User.getRulesetName() == "5E" then 
 		if Session.IsHost then
 			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects_Gold", 
@@ -141,7 +153,7 @@ function onInit()
 end
 
 function onClose()
-	if User.getRulesetName() == "5E" then 
+	if bBCEGold == false and User.getRulesetName() == "5E" then 
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
@@ -799,6 +811,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
 	end
+	Debug.chat("onSaveRollHandler5E")
 	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local tMatch = {}
@@ -846,15 +859,15 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
-				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true)
+				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true) 
 			end
 			end
 	elseif nodeEffect ~= nil then
 		aTags = {"SAVEADD", "SAVEDMG"}
-		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
+		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADD" then
-				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1], nil, nodeEffect)
+				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if rEffect ~= {} then
 					rEffect.sSource = rRoll.sSourceCTNode
 					rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
@@ -874,7 +887,7 @@ function onDamage(rSource,rTarget, nodeEffect)
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nodeEffect)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -894,7 +907,6 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 	if User.getRulesetName() == "5E" then
 		sAbility = DataCommon.ability_stol[sAbility]
 	end
-
 	local nDC = tonumber(aParsedRemiander[2])
 	if  (nDC and sAbility) ~= nil then
 		local rSaveVsRoll = {}

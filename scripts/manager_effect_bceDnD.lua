@@ -9,6 +9,7 @@ local onDamage = nil
 local messageDamage = nil
 local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
+local bBCEGold = false
 
 function setProcessEffectOnDamage(ProcessEffectOnDamage)
 	fProcessEffectOnDamage = ProcessEffectOnDamage
@@ -315,7 +316,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
 	
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if rEffect ~= {} then
@@ -521,6 +522,18 @@ function getTempHPAndWounds(rTarget)
 end
 
 function onInit()
+	local aExtensions = Extension.getExtensions()
+	for _,sExtension in ipairs(aExtensions) do
+		local tExtension = Extension.getExtensionInfo(sExtension)
+		if (tExtension.name == "Feature: Better Combat Effects Gold") then
+			bBCEGold = bTrue
+			return
+		end
+		if (tExtension.name == "MNM Charsheet Effects Display") then
+			bMadNomadCharSheetEffectDisplay = true
+		end			
+	end
+
 	if  User.getRulesetName() == "5E"  or 
 		User.getRulesetName() == "4E"  or
 		User.getRulesetName() == "3.5E"  or
@@ -550,8 +563,7 @@ function onInit()
 		-- BCE DND TAGS
 		EffectsManagerBCE.registerBCETag("DMGAT", EffectsManagerBCE.aBCEActivateOptions)
 			
-		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCERemoveOptions)
-
+		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCEDeactivateOptions)
 		EffectsManagerBCE.registerBCETag("DMGDT", EffectsManagerBCE.aBCEDeactivateOptions)
 		
 		EffectsManagerBCE.registerBCETag("DMGOE", EffectsManagerBCE.aBCEDefaultOptions)
@@ -590,24 +602,17 @@ function onInit()
 		ActionDamage.onDamage = customOnDamage
 		ActionsManager.registerResultHandler("damage", customOnDamage)
 		ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
-
-		aExtensions = Extension.getExtensions()
-		for _,sExtension in ipairs(aExtensions) do
-			tExtension = Extension.getExtensionInfo(sExtension)
-			if (tExtension.name == "MNM Charsheet Effects Display") then
-				bMadNomadCharSheetEffectDisplay = true
-			end
-		end
 	end
 end
 
 
 function onClose()
-	if  User.getRulesetName() == "5E"  or 
+
+	if (User.getRulesetName() == "5E"  or 
 		User.getRulesetName() == "4E"  or
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or
-		User.getRulesetName() == "PFRPG" then
+		User.getRulesetName() == "PFRPG") then
 		
 		ActionDamage.messageDamage = messageDamage
 		ActionDamage.onDamage = onDamage
