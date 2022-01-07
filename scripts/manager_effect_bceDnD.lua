@@ -66,7 +66,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 	end
 end
 
-function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect)
+function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 	local rTarget = ActorManager.resolveActor(nodeCT)
 	local rSource = {}
 	if rNewEffect.sSource == "" then

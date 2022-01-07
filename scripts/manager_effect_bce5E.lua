@@ -178,7 +178,7 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	return true
 end
 
-function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
+function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	local rTarget = ActorManager.resolveActor(nodeCT)
 	local rSource = {}
 	if rNewEffect.sSource == "" then
@@ -189,8 +189,7 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 
 	local tMatch = {}
 	local aTags = {"SAVEA"}
-
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nodeEffect)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "SAVEA" then
 			saveEffect(rSource, rTarget, tEffect)
@@ -302,7 +301,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
 		end
 
-		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nodeEffect)
+		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADDP" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
@@ -312,15 +311,15 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
-				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true)
+				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true) 
 			end
-			end
+		end
 	elseif nodeEffect ~= nil then
 		aTags = {"SAVEADD", "SAVEDMG"}
-		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
+		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADD" then
-				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1], nil, nodeEffect)
+				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if rEffect ~= {} then
 					rEffect.sSource = rRoll.sSourceCTNode
 					rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
@@ -338,7 +337,7 @@ function onDamage(rSource,rTarget, nodeEffect)
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -500,12 +499,13 @@ function dropConcentration(rNewEffect, nDuration)
 end
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
-function onModSaveHandler(rSource, rTarget, rRoll)
-	--if rRoll.sSubtype == "bce" then
-	--	ActionSave.modSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
-	--end
+function onModSaveHandler(rSource, rTarget, rRoll)	
+	if rRoll.sSubtype == "bce" then
+		ActionSave.modSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
+	else
+		ActionSave.modSave(rSource, rTarget, rRoll)
+	end
 end
-
 function customParseEffects(sPowerName, aWords)
 	if OptionsManager.isOption("AUTOPARSE_EFFECTS", "off") then
 		return parseEffects(sPowerName, aWords)

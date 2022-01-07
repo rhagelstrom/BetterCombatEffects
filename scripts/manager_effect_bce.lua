@@ -192,8 +192,19 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
 	-- Play nice with others
 	addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
-
-	if onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect) == false then
+	
+	-- Get the new node
+	local nodeEffect = nil
+	for _,v in pairs(DB.getChildren(nodeCT, "effects")) do
+		if (DB.getValue(v, "label", "") == rNewEffect.sName) and
+		(DB.getValue(v, "init", 0) == rNewEffect.nInit) and
+		(DB.getValue(v, "duration", 0) == rNewEffect.nDuration) and
+		(DB.getValue(v,"source_name", "") == rNewEffect.sSource) then
+			nodeEffect = v
+		end
+	end
+	
+	if onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect) == false then
 		return
 	end
 
@@ -220,9 +231,10 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
 end
 
+
 --This function gets called a ton and it seems expensive. Try to do as much optimization as possible
--- by grouping tags called at the same point in the code
-function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect)
+	-- by grouping tags called at the same point in the code
+function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes, aConditions)
 	for v,sTag in pairs(aTags) do
 		-- make sure passed tag is a registered tag
 		if tBCETag[sTag] == nil then
@@ -236,6 +248,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect)
 
 	local rEffectComp
 	local aOptions
+
 	-- Iterate through each effect
 	local aMatch = {}
 	for _,v in pairs(DB.getChildren(ActorManager.getCTNode(rActor), "effects")) do
@@ -277,6 +290,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect)
 				-- Check for match
 				for _,sTag in pairs(aTags) do
 					if rEffectComp.original:upper() == sTag or rEffectComp.type:upper() == sTag  then
+						local bDiscard = false
 						-- Get the options
 						aOptions =  tBCETag[sTag]
 						
@@ -292,11 +306,50 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect)
 							if aOptions.nDuration ~= 0 and aOptions.nDuration ~= nDuration then
 								break
 							else
-								if bTargeted and not aOptions.bIgnoreEffectTargets then
+								-- Do damage and range filter
+								if aDMGTypes then
+									bDiscard = true
+									for _,sRemainder in ipairs(rEffectComp.remainder) do
+										if sRemainder == "all" then
+											bDiscard = false
+										else
+											for _,aDMGClause in ipairs(aDMGTypes) do
+												if StringManager.contains(aDMGClause.aDMG, sRemainder) then
+													bDiscard = false
+													break
+												end
+											end
+										end
+										if bDiscard == false then
+											break
+										end
+									end
+								end
+								if aConditions then
+									bDiscard = true
+									for _,sRemainder in ipairs(rEffectComp.remainder) do
+										sRemainder = sRemainder:lower()
+										if sRemainder == "all" or StringManager.contains(aConditions, sRemainder) then
+											bDiscard = false
+											break
+										end
+									end                                   
+								end
+								-- Check to see if we have a hard fail save
+								if rEffectComp.type == "SAVEADD" then
+									if tonumber(rEffectComp.mod) > 0 and (tonumber(rEffectComp.mod) + rActor.nResult >= rActor.nDC) then
+										-- Failed by more than mod on the save
+										bDiscard = true
+									elseif tonumber(rEffectComp.mod) < 0  and (rActor.nResult <= math.abs(tonumber(rEffectComp.mod))) then
+										bDiscard = true
+									end
+								end
+
+								if bTargeted and not aOptions.bIgnoreEffectTargets and bDiscard == false then
 									if EffectManager.isEffectTarget(v, rTarget) then
 										table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
 									end
-								elseif not aOptions.bTargetedOnly then
+								elseif not aOptions.bTargetedOnly and bDiscard == false then
 									table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
 								end
 							end
@@ -331,23 +384,35 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect)
 	return aMatch
 end
 
---TODO: Optimize search
-function matchEffect(sEffect)
+-- We are looking for the label which is the first tag followed by ; if not the end
+function matchEffect(sEffect, aComps)
+	local rEffect = {}
+	local sEffectLookup = sEffect:lower()
+
+	--search conditions table first
+	if DataCommon and DataCommon.conditions  then 
+		if StringManager.contains(DataCommon.conditions, sEffectLookup:lower()) then
+			rEffect.sName = StringManager.capitalize(sEffectLookup)
+			rEffect.nDuration = 0
+			rEffect.sUnits = ""
+			rEffect.nGMOnly = 0
+			return rEffect
+		end
+	end
 	--Find the effect name in our custom effects list
-	local sEffectLower = sEffect:lower() 
 	for _,v in pairs(DB.getChildrenGlobal("effects")) do
 		rEffect = {}
-
 		local sEffect = DB.getValue(v, "label", "")
 		if sEffect ~= nil and sEffect ~= "" then
-			tEffectComps = EffectManager.parseEffect(sEffect)
+			aEffectComps = EffectManager.parseEffect(sEffect)
 			-- Is this the effeect we are looking for?
 			-- Name is parsed to index 1 in the array
-			if tEffectComps[1]:lower() == sEffectLower then
+			if aEffectComps[1]:lower() == sEffectLookup:lower() then
 				local nodeGMOnly = DB.getChild(v, "isgmonly")	
 				if nodeGMOnly then
 					rEffect.nGMOnly = nodeGMOnly.getValue()
 				end
+
 				local nodeEffectDuration = DB.getChild(v, "duration")
 				if nodeEffectDuration then
 					rEffect.nDuration = nodeEffectDuration.getValue()
@@ -365,6 +430,7 @@ function matchEffect(sEffect)
 	end
 	return rEffect
 end
+
 
 function modifyEffect(nodeEffect, sAction, sEffect)
 	-- Must be database node, if not it is probably marked for deletion from one-shot
@@ -593,8 +659,8 @@ function removeCustomPostAddEffect(f)
 	return false
 end
 
-function onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect)
+function onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	for _,fPostAddEffect in ipairs(aCustomPostAddEffectHandlers) do
-		fPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect) 
+		fPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect) 
 	end
 end
