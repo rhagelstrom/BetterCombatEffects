@@ -1,7 +1,7 @@
 # Better Combat Effects
 
- **Current Version:** 2.25
-**Updated::** 01/02/21
+ **Current Version:** 2.26
+**Updated::** 01/07/21
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -11,7 +11,7 @@ Better Combat Effects is an extension that allows for fine tuning of when effect
 
 ---
 
-* **EXPIREADD: [custom effect]**:  Add Effect from custom effects list when this effect expires
+* **EXPIREADD**: [Effect] Add Effect from custom effects list or conditions table when this effect expires
 
 ### Turn Modifiers
 
@@ -99,7 +99,7 @@ Effects can be automatically added to the source or the target on the damage by 
 
   * Shadow; SDMGADDT: Strength Drain
 
-The Shadow has strength drain so we put the above effect on the shadow. When the shadow deals damage, it will apply the effect "Strength Drain" to the target of the damage. The effect "Strength Drain" needs to be an effect listed in our custom effects list. The effect looks like this:
+The Shadow has strength drain so we put the above effect on the shadow. When the shadow deals damage, it will apply the effect "Strength Drain" to the target of the damage. The effect "Strength Drain" needs to be an effect listed in our custom effects list or conditions table. The effect looks like this:
 
   * Strength Drain; STR: -1d4; STACK; RESTL
 
@@ -182,9 +182,9 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SAVEDMG: (N) [damage type]** Damage done on a failed ongoing save. (N) can be number or dice string.
 
-* **SAVEADD: [effect]** Add Effect from custom effects list on a failed ongoing save.
+* **SAVEADD: [effect]** Add Effect from custom effects list or conditions table on a failed ongoing save.
 
-* **SAVEADDP: [effect]** Add Effect from custom effects list on a passed ongoing save.
+* **SAVEADDP: [effect]** Add Effect from custom effects list or conditions table on a passed ongoing save.
 
 * **SAVEONDMG: [ability] [SDC]** Roll save when the actor takes damage
   * Dominate Person; SAVEONDMG: WIS [SDC] (R)

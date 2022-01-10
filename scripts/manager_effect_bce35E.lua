@@ -119,8 +119,8 @@ function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	return true
 end
 
-function addEffectPost35E(sUser, sIdentity, nodeCT, rNewEffect)
-    return EffectsManagerBCE5E.addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
+function addEffectPost35E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
+    return EffectsManagerBCE5E.addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 end
 
 function onSaveRollHandler35E(rSource, rTarget, rRoll)

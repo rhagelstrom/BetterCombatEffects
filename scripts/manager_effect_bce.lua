@@ -241,244 +241,170 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 
 end
 
---Helper function
-function getDamageTypes(rRoll)
-	local aDMGTypes = {}
-	aDMGTypes.sRange = rRoll.range
-	for _,aType in pairs(rRoll.clauses) do
-		table.insert(aDMGTypes, {aDMG = ActionDamage.getDamageTypesFromString(aType.dmgtype), nTotal = aType.nTotal})
-	end
-	return aDMGTypes
-end
-
 
 --This function gets called a ton and it seems expensive. Try to do as much optimization as possible
 	-- by grouping tags called at the same point in the code
-    function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes, aConditions)
-        for v,sTag in pairs(aTags) do
-            -- make sure passed tag is a registered tag
-            if tBCETag[sTag] == nil then
-                table.remove(aTags, v)
-            end
-        end
-        -- If we have no vaild tags to process or no rActor return empty
-        if aTags == {} or not rActor then
-            return {}
-        end	
-    
-        local rEffectComp
-        local aOptions
-    
-        -- Iterate through each effect
-        local aMatch = {}
-        for _,v in pairs(DB.getChildren(ActorManager.getCTNode(rActor), "effects")) do
-            local nActive = DB.getValue(v, "isactive", 0);
-            local sLabel = DB.getValue(v, "label", "")
-            local nGMOnly = DB.getValue(v, "isgmonly", "")
-            local sSourceEffect = DB.getValue(v, "source_name", "")
-            local nDuration = tonumber(DB.getValue(v, "duration", ""))
-            local bTargeted = EffectManager.isTargetedEffect(v)
-            local tEffectComps = EffectManager.parseEffect(sLabel)
-    
-            -- Flag for saveadd family. Only return saveadd as a match if:
-            -- * The saveadd family is preceeded by a tag that makes a saving throw, only return the following saveadd in this effect
-            -- * If not preceeded by a tag that makes a saving throw, then return all saveadds that are not preceeded by saving throw
-            -- * This can be determined if nodeEffect is nil or not
-            local bSaveAdd = true 
-    
-            -- We only want to process a specific effect. Used mostly
-            -- for something to happen after a save result
-            if nodeEffect == nil or nodeEffect == v then
-                -- Iterate through each effect component looking for a type match
-                local nMatch = 0;
-                for kEffectComp,sEffectComp in ipairs(tEffectComps) do
-                    local tMatch = {}
-                    if RulesetEffectManager.parseEffectComp then
-                        rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
-                    else
-                        rEffectComp = RulesetEffectManager.parseEffectCompSimple(sEffectComp)
-                    end
-                    
-                    -- Handle conditionals
-                    if rEffectComp.type == "IF" and RulesetEffectManager.checkConditional then
-                        if not RulesetEffectManager.checkConditional(rActor, v, rEffectComp.remainder) then
-                            break
-                        end
-                    elseif rEffectComp.type == "IFT" and RulesetEffectManager.checkConditional then
-                        if not rTarget then
-                            break
-                        end
-                        if not RulesetEffectManager.checkConditional(rTarget, v, rEffectComp.remainder, rActor) then
-                            break
-                        end
-                    end
-    
-                    -- Check for match
-                    for _,sTag in pairs(aTags) do
-                        if rEffectComp.original:upper() == sTag or rEffectComp.type:upper() == sTag  then
-                            -- Get the options
-                            aOptions =  tBCETag[sTag]
-                            
-                            -- If we have rSourceEffect, then only match effects where the source of the
-                            -- effect matches rSourceEffect
-                            if rSourceEffect ~= nil and 
-                            aOptions.bOnlySourceEffect == true and 
-                            rSourceEffect.sCTNode ~= DB.getValue(v, "source_name", "") then
-                                break
-                            end
-    
-                            if ((aOptions.bOnlyDisabled and nActive == 0 ) or nActive ~= 0) then
-                                -- Do damage and range filter
-                                if aOptions.nDuration ~= 0 and aOptions.nDuration ~= nDuration then
-                                    break
-                                else
-                                	if nodeEffect == nil and (sTag == "SAVES" or sTag == "SSAVES" or 
-                                	sTag == "SAVEE" or sTag == "SSAVEE" or sTag == "SAVEA" or sTag == "SAVEONDMG" or sTag == "SAVERESTL") then
-                                		bSaveAdd = false
-                                	end
-                                	if bSaveAdd == false and (sTag == "SAVEADD" or sTag == "SAVEADDP" or sTag =="SAVEDMG") then
-                                		break
-                                	end
-                                    if aDMGTypes then
-                                        local bDiscard = true
-                                        for _,sRemainder in ipairs(rEffectComp.remainder) do
-                                            if sRemainder == "all" then
-                                                bDiscard = false
-                                            else
-                                                for _,aDMGClause in ipairs(aDMGTypes) do
-                                                    if StringManager.contains(aDMGClause.aDMG, sRemainder) then
-                                                        bDiscard = false
-                                                    end
-                                                end
-                                                if bDiscard == false then
-                                                    break
-                                                end
-                                            end
-                                        end
-                                        if bDiscard then
-                                            break
-                                        end
-                                    end
-                                    if aConditions then
-                                        local bDiscard = true
-                                        for _,sRemainder in ipairs(rEffectComp.remainder) do
-                                            sRemainder = sRemainder:lower()
-                                            if sRemainder == "all" then
-                                                bDiscard = false
-                                            elseif StringManager.contains(aConditions, sRemainder) then
-                                                bDiscard = false
-                                            end
-                                            if bDiscard == false then
-                                                break
-                                            end
-                                        end
-                                        if bDiscard then
-                                            break
-                                        end
-                                    end
-                                    -- Check to see if we have a hard fail save
-                                    if sTag == "SAVEADD" then
-                                        local bDiscard = false
-                                        local tSaveEffectComps = EffectManager.parseEffect(sLabel)
-                                        for kSaveEffectComp,sSaveEffectComp in ipairs(tSaveEffectComps) do
-                                            if RulesetEffectManager.parseEffectComp then
-                                                rSaveEffectComp = RulesetEffectManager.parseEffectComp(sSaveEffectComp)
-                                            else
-                                                rSaveEffectComp = RulesetEffectManager.parseEffectCompSimple(sSaveEffectComp)
-                                            end
-                                            if rSaveEffectComp.type == "SAVEADD" then
-                                                if tonumber(rSaveEffectComp.mod) == 0 then
-                                                    break -- no mod so proceed
-                                                elseif tonumber(rSaveEffectComp.mod) > 0 then
-                                                    -- Failed by more than mod on the save
-                                                    if tonumber(rSaveEffectComp.mod) + rActor.nResult >= rActor.nDC then
-                                                        bDiscard = true
-                                                        break
-                                                    end
-                                                else
-                                                    -- Failed with result of mod or less
-                                                    if rActor.nResult > math.abs(tonumber(rSaveEffectComp.mod)) then
-                                                        bDiscard = true
-                                                        break
-                                                    end
-                                                end
-                                            end
-                                        end
-                                        if bDiscard == true  then
-                                            break
-                                        end
-                                    end
-                                    if bTargeted and not aOptions.bIgnoreEffectTargets then
-                                        if EffectManager.isEffectTarget(v, rTarget) then
-                                            table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
-                                        end
-                                    elseif not aOptions.bTargetedOnly then
-                                        table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
-                                    end
-                                end
-                            end
-                        end	
-                    end
-                    for _,aMatchComp in pairs(tMatch) do
-                        -- If matched, then remove one-off effects
-                        if type(v) == "databasenode" and aMatchComp.bIgnoreOneShot == false  then
-                            if nActive == 2 then
-                                DB.setValue(v, "isactive", "number", 1)
-                            else
-                                table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect, 
-                                sLabel = aMatchComp.sLabel, nGMOnly = aMatchComp.nGMOnly, rEffectComp = rEffectComp})
-                                local sApply = DB.getValue(v, "apply", "")
-                                if sApply == "action" then
-                                    EffectManager.notifyExpire(v, 0)
-                                elseif sApply == "roll" then
-                                    EffectManager.notifyExpire(v, 0, true)
-                                elseif sApply == "single" or aOptions.bOneShot == true then
-                                    EffectManager.notifyExpire(v, aMatchComp.nMatch, true)
-                                end
-                            end
-                        elseif type(v) == "databasenode" and aMatchComp.bIgnoreOneShot == true then
-                            table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect, 
-                            sLabel = aMatchComp.sLabel, nGMOnly = aMatchComp.nGMOnly, rEffectComp = rEffectComp})
-                        end
-                    end
-                end
-            end
-        end
-        return aMatch
-    end
-
-function binarySearchEffects(aGlobalEffects, sSearchString, nLowValue, nHighValue)
-	if nHighValue < nLowValue then
-		return nil
+function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes, aConditions)
+	for v,sTag in pairs(aTags) do
+		-- make sure passed tag is a registered tag
+		if tBCETag[sTag] == nil then
+			table.remove(aTags, v)
+		end
 	end
+	-- If we have no vaild tags to process or no rActor return empty
+	if aTags == {} or not rActor then
+		return {}
+	end	
 
-	local nMidValue = math.floor((nLowValue + nHighValue) /2)
-	local sEffect = DB.getValue(aGlobalEffects[nMidValue], "label", ""):lower()
-	local tEffectComps = EffectManager.parseEffect(sEffect)
-	sEffect = tEffectComps[1]:lower()
+	local rEffectComp
+	local aOptions
 
-	if sEffect > sSearchString then
-		return binarySearchEffects(aGlobalEffects, sSearchString, nLowValue, nMidValue -1)
-	elseif  sEffect < sSearchString then
-		return binarySearchEffects(aGlobalEffects, sSearchString, nMidValue +1 , nHighValue)
-	else
-		return aGlobalEffects[nMidValue]
+	-- Iterate through each effect
+	local aMatch = {}
+	for _,v in pairs(DB.getChildren(ActorManager.getCTNode(rActor), "effects")) do
+		local nActive = DB.getValue(v, "isactive", 0);
+		local sLabel = DB.getValue(v, "label", "")
+		local nGMOnly = DB.getValue(v, "isgmonly", "")
+		local sSourceEffect = DB.getValue(v, "source_name", "")
+		local nDuration = tonumber(DB.getValue(v, "duration", ""))
+		local bTargeted = EffectManager.isTargetedEffect(v)
+		local tEffectComps = EffectManager.parseEffect(sLabel)
+
+		-- We only want to process a specific effect. Used mostly
+		-- for something to happen after a save result
+		if nodeEffect == nil or nodeEffect == v then
+			-- Iterate through each effect component looking for a type match
+			local nMatch = 0;
+			for kEffectComp,sEffectComp in ipairs(tEffectComps) do
+				local tMatch = {}
+				if RulesetEffectManager.parseEffectComp then
+					rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
+				else
+					rEffectComp = RulesetEffectManager.parseEffectCompSimple(sEffectComp)
+				end
+				
+				-- Handle conditionals
+				if rEffectComp.type == "IF" and RulesetEffectManager.checkConditional then
+					if not RulesetEffectManager.checkConditional(rActor, v, rEffectComp.remainder) then
+						break
+					end
+				elseif rEffectComp.type == "IFT" and RulesetEffectManager.checkConditional then
+					if not rTarget then
+						break
+					end
+					if not RulesetEffectManager.checkConditional(rTarget, v, rEffectComp.remainder, rActor) then
+						break
+					end
+				end
+
+				-- Check for match
+				for _,sTag in pairs(aTags) do
+					if rEffectComp.original:upper() == sTag or rEffectComp.type:upper() == sTag  then
+						local bDiscard = false
+						-- Get the options
+						aOptions =  tBCETag[sTag]
+						
+						-- If we have rSourceEffect, then only match effects where the source of the
+						-- effect matches rSourceEffect
+						if rSourceEffect ~= nil and 
+						aOptions.bOnlySourceEffect == true and 
+						rSourceEffect.sCTNode ~= DB.getValue(v, "source_name", "") then
+							break
+						end
+
+						if ((aOptions.bOnlyDisabled and nActive == 0 ) or nActive ~= 0) then
+							if aOptions.nDuration ~= 0 and aOptions.nDuration ~= nDuration then
+								break
+							else
+								-- Do damage and range filter
+								if aDMGTypes then
+									bDiscard = true
+									for _,sRemainder in ipairs(rEffectComp.remainder) do
+										if sRemainder == "all" then
+											bDiscard = false
+										else
+											for _,aDMGClause in ipairs(aDMGTypes) do
+												if StringManager.contains(aDMGClause.aDMG, sRemainder) then
+													bDiscard = false
+													break
+												end
+											end
+										end
+										if bDiscard == false then
+											break
+										end
+									end
+								end
+								if aConditions then
+									bDiscard = true
+									for _,sRemainder in ipairs(rEffectComp.remainder) do
+										sRemainder = sRemainder:lower()
+										if sRemainder == "all" or StringManager.contains(aConditions, sRemainder) then
+											bDiscard = false
+											break
+										end
+									end                                   
+								end
+								-- Check to see if we have a hard fail save
+								if rEffectComp.type == "SAVEADD" then
+									if tonumber(rEffectComp.mod) > 0 and (tonumber(rEffectComp.mod) + rActor.nResult >= rActor.nDC) then
+										-- Failed by more than mod on the save
+										bDiscard = true
+									elseif tonumber(rEffectComp.mod) < 0  and (rActor.nResult <= math.abs(tonumber(rEffectComp.mod))) then
+										bDiscard = true
+									end
+								end
+
+								if bTargeted and not aOptions.bIgnoreEffectTargets and bDiscard == false then
+									if EffectManager.isEffectTarget(v, rTarget) then
+										table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
+									end
+								elseif not aOptions.bTargetedOnly and bDiscard == false then
+									table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
+								end
+							end
+						end
+					end	
+				end
+				for _,aMatchComp in pairs(tMatch) do
+					-- If matched, then remove one-off effects
+					if type(v) == "databasenode" and aMatchComp.bIgnoreOneShot == false  then
+						if nActive == 2 then
+							DB.setValue(v, "isactive", "number", 1)
+						else
+							table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect, 
+							sLabel = aMatchComp.sLabel, nGMOnly = aMatchComp.nGMOnly, rEffectComp = rEffectComp})
+							local sApply = DB.getValue(v, "apply", "")
+							if sApply == "action" then
+								EffectManager.notifyExpire(v, 0)
+							elseif sApply == "roll" then
+								EffectManager.notifyExpire(v, 0, true)
+							elseif sApply == "single" or aOptions.bOneShot == true then
+								EffectManager.notifyExpire(v, aMatchComp.nMatch, true)
+							end
+						end
+					elseif type(v) == "databasenode" and aMatchComp.bIgnoreOneShot == true then
+						table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect, 
+						sLabel = aMatchComp.sLabel, nGMOnly = aMatchComp.nGMOnly, rEffectComp = rEffectComp})
+					end
+				end
+			end
+		end
 	end
 end
 
--- Wee are looking for the label which is the first tag followed by ; if not the end
+-- We are looking for the label which is the first tag followed by ; if not the end
 function matchEffect(sEffect, aComps)
 	local rEffect = {}
 	local sEffectLookup = sEffect:lower()
 
 	--search conditions table first
-	if User.getRulesetName() == "5E" then 
+	if DataCommon and DataCommon.conditions  then 
 		if StringManager.contains(DataCommon.conditions, sEffectLookup:lower()) then
 			rEffect.sName = StringManager.capitalize(sEffectLookup)
 			rEffect.nDuration = 0
 			rEffect.sUnits = ""
 			rEffect.nGMOnly = 0
-
 			return rEffect
 		end
 	end
@@ -490,8 +416,6 @@ function matchEffect(sEffect, aComps)
 			aEffectComps = EffectManager.parseEffect(sEffect)
 			-- Is this the effeect we are looking for?
 			-- Name is parsed to index 1 in the array
-			
-		
 			if aEffectComps[1]:lower() == sEffectLookup:lower() then
 				local nodeGMOnly = DB.getChild(v, "isgmonly")	
 				if nodeGMOnly then
@@ -515,7 +439,6 @@ function matchEffect(sEffect, aComps)
 	end
 	return rEffect
 end
-
 
 
 function modifyEffect(nodeEffect, sAction, sEffect)
@@ -745,8 +668,8 @@ function removeCustomPostAddEffect(f)
 	return false
 end
 
-function onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect)
+function onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	for _,fPostAddEffect in ipairs(aCustomPostAddEffectHandlers) do
-		fPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect) 
+		fPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect) 
 	end
 end

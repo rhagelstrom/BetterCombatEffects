@@ -668,7 +668,7 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	return true
 end
 
-function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
+function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	local rTarget = ActorManager.resolveActor(nodeCT)
 	local rSource = {}
 	if rNewEffect.sSource == "" then
@@ -679,8 +679,7 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect)
 
 	local tMatch = {}
 	local aTags = {"SAVEA"}
-
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nodeEffect)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "SAVEA" then
 			saveEffect(rSource, rTarget, tEffect)
@@ -826,7 +825,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
 		end
 
-		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nodeEffect)
+		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADDP" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
@@ -838,10 +837,10 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			elseif tEffect.sTag == "SAVEDMG" then
 				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true) 
 			end
-			end
+		end
 	elseif nodeEffect ~= nil then
 		aTags = {"SAVEADD", "SAVEDMG"}
-		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nodeEffect)
+		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADD" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
@@ -864,7 +863,7 @@ function onDamage(rSource,rTarget, nodeEffect)
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nodeEffect)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -1092,7 +1091,7 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 		ActionSave.modSave(rSource, rTarget, rRoll)
 	end
 end
-	
+
 function customParseEffects(sPowerName, aWords)
 	if OptionsManager.isOption("AUTOPARSE_EFFECTS", "off") then
 		return parseEffects(sPowerName, aWords)
