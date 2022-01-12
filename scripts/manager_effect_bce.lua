@@ -241,6 +241,15 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 
 end
 
+--Helper function
+function getDamageTypes(rRoll)
+	local aDMGTypes = {}
+	aDMGTypes.sRange = rRoll.range
+	for _,aType in pairs(rRoll.clauses) do
+		table.insert(aDMGTypes, {aDMG = ActionDamage.getDamageTypesFromString(aType.dmgtype), nTotal = aType.nTotal})
+	end
+	return aDMGTypes
+end
 
 --This function gets called a ton and it seems expensive. Try to do as much optimization as possible
 	-- by grouping tags called at the same point in the code
