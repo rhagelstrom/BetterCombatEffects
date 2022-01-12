@@ -7,6 +7,7 @@ local bMadNomadCharSheetEffectDisplay = false
 local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
+local evalAction = nil
 
 function onInit()
 	if User.getRulesetName() == "5E" then 
@@ -51,6 +52,8 @@ function onInit()
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		parseEffects = PowerManager.parseEffects
 		PowerManager.parseEffects = customParseEffects
+		evalAction = PowerManager.evalAction 
+		PowerManager.evalAction = customEvalAction
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
@@ -218,6 +221,23 @@ function getDCEffectMod(nodeActor)
 		end
 	end
 	return nDC
+end
+
+-- Replace SDC when applied from a power
+function customEvalAction(rActor, nodePower, rAction)
+	evalAction(rActor, nodePower, rAction)
+
+	if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
+		local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
+		if aPowerGroup and aPowerGroup.sStat and DataCommon.ability_ltos[aPowerGroup.sStat] then
+			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sStat) 
+			if aPowerGroup.nSaveDCProf == 1 then
+				nDC = nDC + ActorManager5E.getAbilityBonus(rActor, "prf")
+			end
+			rAction.sName =  rAction.sName:gsub("%[SDC]", tostring(nDC))
+			rAction.sName =  rAction.sName:gsub("%(SDC%)", tostring(nDC))
+		end
+	end
 end
 
 function replaceSaveDC(rNewEffect, rActor)
