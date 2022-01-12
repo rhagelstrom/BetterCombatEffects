@@ -46,7 +46,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 	local sEffect = ""
 	local sEffectOriginal = ""
 
-	if rRoll.subtype and rRoll.subtype == "DUR" and type(DB.findNode(rRoll.nodeEffectCT)) == "databasenode" then
+	if rRoll.subtype and rRoll.subtype == "DUR" and rRoll.nodeEffectCT and type(DB.findNode(rRoll.nodeEffectCT)) == "databasenode" then
 		local nResult = tonumber(ActionsManager.total(rRoll))
 		if rRoll.sUnits == "minute" then
 			nResult = nResult * 10
