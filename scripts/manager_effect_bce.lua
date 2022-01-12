@@ -391,6 +391,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 			end
 		end
 	end
+	return aMatch
 end
 
 -- We are looking for the label which is the first tag followed by ; if not the end

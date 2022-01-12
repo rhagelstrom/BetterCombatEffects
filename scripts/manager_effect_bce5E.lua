@@ -3,12 +3,27 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
---require "ct/scripts/ct_power.lua"
-
 local bMadNomadCharSheetEffectDisplay = false
 local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
+
+-- Save vs condition
+local decodeActors = nil 
+local performAction = nil
+local getPCPowerAction = nil
+local handleApplySaveVs = nil
+local notifyApplySaveVs = nil
+local performVsRoll = nil
+local performSaveVsRoll = nil
+local addCustomNPC = nil 
+local addCustomPC = nil 
+-- end save vs condition
+
+local OOB_MSGTYPE_APPLYSAVEVS = "applysavevs";
+
+local tTraitsAdvantage = {}
+local tTraitsDisadvantage = {}
 
 function onInit()
 	local aExtensions = Extension.getExtensions()
