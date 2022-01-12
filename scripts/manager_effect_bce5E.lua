@@ -7,6 +7,7 @@ local bMadNomadCharSheetEffectDisplay = false
 local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
+local evalAction = nil
 
 -- Save vs condition
 local decodeActors = nil 
@@ -111,6 +112,8 @@ function onInit()
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		parseEffects = PowerManager.parseEffects
 		PowerManager.parseEffects = customParseEffects
+		evalAction = PowerManager.evalAction 
+		PowerManager.evalAction = customEvalAction
 
 		onAttack = ActionAttack.onAttack 
 		ActionAttack.onAttack = customOnAttack
@@ -725,7 +728,6 @@ function getDCEffectMod(nodeActor)
 	return nDC
 end
 
---when effect has tags, [PRF],[LVL], in a remiander evalEffect evaluates and returns those as the mod and not part of the remainder. 
 --For our save DC to work correctly we need to massage that number a bit and move it to the correct place
 function abilityReplacement(rNewEffect, rActor)
 	local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
@@ -752,6 +754,21 @@ function abilityReplacement(rNewEffect, rActor)
 			end
 			aEffectComps[i] =  EffectManager5E.rebuildParsedEffectComp(rEffectComp):gsub(",", " ")
 			rNewEffect.sName = EffectManager.rebuildParsedEffect(aEffectComps)
+		end
+	end
+end
+
+-- Replace SDC when applied from a power
+function customEvalAction(rActor, nodePower, rAction)
+	if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
+		local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
+		if aPowerGroup and aPowerGroup.sStat and DataCommon.ability_ltos[aPowerGroup.sStat] then
+			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sStat) 
+			if aPowerGroup.nSaveDCProf == 1 then
+				nDC = nDC + ActorManager5E.getAbilityBonus(rActor, "prf")
+			end
+			rAction.sName =  rAction.sName:gsub("%[SDC]", tostring(nDC))
+			rAction.sName =  rAction.sName:gsub("%(SDC%)", tostring(nDC))
 		end
 	end
 end
