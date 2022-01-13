@@ -9,6 +9,8 @@ local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
 
+--local parseNPCPower = nil
+
 -- Save vs condition
 local decodeActors = nil 
 local performAction = nil
@@ -108,6 +110,8 @@ function onInit()
 		CombatManager.addPC = addPCtoCT
 		-- End Save vs Condiition
 
+--		parseNPCPower = PowerManager.parseNPCPower
+--		PowerManager.parseNPCPower = customParseNPCPower
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		parseEffects = PowerManager.parseEffects
@@ -153,6 +157,7 @@ function onClose()
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
+	--	PowerManager.parseNPCPower = parseNPCPower
 		ActionsManager.unregisterResultHandler("save")
 		ActionsManager.unregisterModHandler("save")
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart5E)
@@ -275,7 +280,7 @@ end
 
 --Using the given node power, get the resulting conditions from the database
 -- for the PC and NPC
-function customPerformAction(draginfo, rActor, rAction, nodePower)	
+function customPerformAction(draginfo, rActor, rAction, nodePower)
 	if rAction.type == "powersave" then
 		local sNodeType, nodeCT = ActorManager.getTypeAndNode(rActor)
 		local sConditions = ""
@@ -467,7 +472,6 @@ function addTraitstoConditionsTables(rActor)
 			local sText = DB.getValue(nodeTrait, "text") or DB.getValue(nodeTrait, "desc", "")
 			--Parse Text
 			local i = 1
---			aWords = StringManager.parseWords(sText:lower(),  "%.:;\n")
 			aWords = StringManager.parseWords(sText:lower())
 			while aWords[i] do
 				if StringManager.isWord(aWords[i], {"advantage", "disadvantage"}) then
@@ -507,6 +511,15 @@ function addTraitstoConditionsTables(rActor)
 	end
 end
 ---------------------End Save Vs Condition -------------------------
+
+--function customParseNPCPower(nodePower, bAllowSpellDataOverride)
+	--Debug.chat(nodePower)
+--	local nodeCT = nodePower.getParent().getParent()
+--	local rActor = ActorManager.resolveActor(nodeCT)
+--	local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
+--	Debug.chat(aPowerGroup)
+--	return parseNPCPower(nodePower, bAllowSpellDataOverride)
+--end
 
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 	local sDuplicateMsg = nil; 
@@ -760,6 +773,7 @@ end
 
 -- Replace SDC when applied from a power
 function customEvalAction(rActor, nodePower, rAction)
+	local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
 	if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
 		local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
 		if aPowerGroup and aPowerGroup.sStat and DataCommon.ability_ltos[aPowerGroup.sStat] then
@@ -771,6 +785,7 @@ function customEvalAction(rActor, nodePower, rAction)
 			rAction.sName =  rAction.sName:gsub("%(SDC%)", tostring(nDC))
 		end
 	end
+	evalAction(rActor, nodePower, rAction)
 end
 
 function replaceSaveDC(rNewEffect, rActor)
