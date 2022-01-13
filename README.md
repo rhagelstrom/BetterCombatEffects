@@ -1,7 +1,7 @@
 # Better Combat Effects
 
- **Current Version:** 2.26
-**Updated::** 01/07/21
+ **Current Version:** 3.0-rc5
+**Updated::** 01/13/22
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -182,7 +182,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 * **SAVEDMG: (N) [damage type]** Damage done on a failed ongoing save. (N) can be number or dice string.
 
-* **SAVEADD: [effect]** Add Effect from custom effects list or conditions table on a failed ongoing save.
+* **SAVEADD: (N) [effect]** Add Effect from custom effects list or conditions table on a failed ongoing save. If (N), the save must fail by (N) or more to activate. If (-N) the result must be N or less to activate
 
 * **SAVEADDP: [effect]** Add Effect from custom effects list or conditions table on a passed ongoing save.
 
@@ -284,14 +284,17 @@ Will automatically parse Powers (NPC sheets and spells) and automatically setup 
 
 ###Changelog BCE Gold
   * Save vs Condition - Saves against conditions will automatically be granted adv/dis based on the traits of the actor making the saving throw.
+  * ADVCOND,DISCOND: [condition] - Explicit advantage/disadvantage when rolling a save vs condition
   * Ongiong Saves (ADV) (DIS) - (ADV)(DIS) can be added to BCE ongoing saves to grant advantage or disadvantage
-  * DUR: (N) - Dynamically set the duration of the effect at time of add
+  * DUR: (N) - Dynamically set the duration of the effect at time of add. (N) can be number or dice string
   * SAVERESTL - Perform ongoing save on long rest
   * SSAVES, SAVEEE - Perform ongoing save on the source of the effects turn.
-  * EEFFINIT: (N) - Set the inititive of the effect on add
+  * EFFINIT: (N) - Set the inititive of the effect on add
+  * NOREST, NORESTL - Actor gains no benifit from short rest/long rest
+  * DMGRR,DMGAT,DMGDT now accept damage and range types as filters
+  * ATKD,ATKA,ATKR - Activate,Deactivate,Remove effect when the attack action is taken
+  * SAVEADD: (N) (effect) - Will only activate when the save fails by (N). Think of this as a "Hard fail". If (-N) will fire when the result is N or less.
   * Replace FGU [] Tags - Tags like [PRF][LVL][CLASS] can now be defined in the NPC sheet effect list as (PRF)(LVL)(CLASS) to process as expected
   * (DE) - Will disable the effect on use
   * SDC - Can be written as [SDC] or (SDC)
-  * DMGRR,DMGAT,DMGDT now accept damage and range types as filters
   * (E) - Will remove the effect when the source of the effect drops to 0 HP
-
