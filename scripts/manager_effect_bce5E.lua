@@ -238,6 +238,7 @@ function customEvalAction(rActor, nodePower, rAction)
 			rAction.sName =  rAction.sName:gsub("%(SDC%)", tostring(nDC))
 		end
 	end
+	evalAction(rActor, nodePower, rAction)
 end
 
 function replaceSaveDC(rNewEffect, rActor)
