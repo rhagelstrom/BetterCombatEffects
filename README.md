@@ -1,7 +1,7 @@
 # Better Combat Effects
 
  **Current Version:** 3.0-rc5
-**Updated::** 01/13/22
+**Updated:** 01/13/22
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -238,8 +238,8 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 Saves against conditions will automatically be granted adv/dis based on the traits of the actor making the saving throw. The parser will match traits with the following verbiage: words ... {advantage,disadvantage} ... words ... {saves,saving throw} ... words ... {condition(s)} ... words
 
-* **ADVCOND: [condition] or [all] *** Grant advantage on a save by this actor against the defined condition
-* **DISCOND: [condition] or [all] *** Grant disadvantage on a save by this actor against the defined condition
+* **ADVCOND**: [condition] or [all] *** Grant advantage on a save by this actor against the defined condition
+* **DISCOND**: [condition] or [all] *** Grant disadvantage on a save by this actor against the defined condition
 
 ### No Rest for the Weary
 
@@ -282,10 +282,10 @@ Will automatically parse Powers (NPC sheets and spells) and automatically setup 
   * Default: on
   * For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage.
 
-###Changelog BCE Gold
+### Changelog BCE Gold
   * Save vs Condition - Saves against conditions will automatically be granted adv/dis based on the traits of the actor making the saving throw.
   * ADVCOND,DISCOND: [condition] - Explicit advantage/disadvantage when rolling a save vs condition
-  * Ongiong Saves (ADV) (DIS) - (ADV)(DIS) can be added to BCE ongoing saves to grant advantage or disadvantage
+  * Ongoing Saves (ADV) (DIS) - (ADV)(DIS) can be added to BCE ongoing saves to grant advantage or disadvantage
   * DUR: (N) - Dynamically set the duration of the effect at time of add. (N) can be number or dice string
   * SAVERESTL - Perform ongoing save on long rest
   * SSAVES, SAVEEE - Perform ongoing save on the source of the effects turn.
