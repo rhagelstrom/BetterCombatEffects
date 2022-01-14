@@ -559,26 +559,26 @@ function onInit()
 		end
 
 		-- BCE DND TAGS
-		EffectsManagerBCE.registerBCETag("DMGAT", EffectsManagerBCE.aBCEActivateOptions)
+		EffectsManagerBCE.registerBCETag("DMGAT", EffectsManagerBCE.aBCEActivateOptionsAE)
 			
-		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCEDeactivateOptions)
-		EffectsManagerBCE.registerBCETag("DMGDT", EffectsManagerBCE.aBCEDeactivateOptions)
+		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCEDeactivateOptionsAE)
+		EffectsManagerBCE.registerBCETag("DMGDT", EffectsManagerBCE.aBCEDeactivateOptionsAE)
 		
 		EffectsManagerBCE.registerBCETag("DMGOE", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("RESTL", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("RESTS", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("TDMGADDS", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("TDMGADDT", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("TDMGADDS", EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("TDMGADDT", EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("REGENE", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("TREGENS", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("TREGENE", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SDMGADDT", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SDMGADDS", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("ABSORB", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SDMGADDT", EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("SDMGADDS", EffectsManagerBCE.aBCEDefaultOptionsAE)
+		--EffectsManagerBCE.registerBCETag("ABSORB", EffectsManagerBCE.aBCEDefaultOptions)
 
 		EffectsManagerBCE.registerBCETag("REGENA", EffectsManagerBCE.aBCEOneShotOptions)
 		EffectsManagerBCE.registerBCETag("TREGENA", EffectsManagerBCE.aBCEOneShotOptions)
-		EffectsManagerBCE.registerBCETag("DMGA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("DMGA", EffectsManagerBCE.aBCEOneShotOptionsAE)
 		EffectsManagerBCE.registerBCETag("DUR", EffectsManagerBCE.aBCEOneShotOptions)
 
 		EffectsManagerBCE.registerBCETag("STREGENS", EffectsManagerBCE.aBCESourceMattersOptions)

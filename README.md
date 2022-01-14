@@ -208,8 +208,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 * **DMGR: (N) [damage type(s)][Range]** Reduce the damage taken by the specified damage type(s) by (N).
   * Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic
   * Interception Fighting Style; DMGR: 1d10 [PRF],all
-  * Deflict Missles; DMGR: 1d10 [MONK],[DEX],ranged,bludgeoning,piercing
-
+  * Deflect Missiles; DMGR: 1d10 [MONK],[DEX],ranged,bludgeoning,piercing
 ## 4E
 
 ---

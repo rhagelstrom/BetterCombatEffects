@@ -8,6 +8,10 @@ local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
+local performMultiAction = nil
+local bAdvanceEffects = nil 
+
+OOB_MSGTYPE_APPLYDMG = "applydmg";
 
 --local parseNPCPower = nil
 
@@ -60,14 +64,14 @@ function onInit()
 		end
 
 		--5E/3.5E BCE Tags
-		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptionsAE)
 
 		EffectsManagerBCE.registerBCETag("SAVES", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SAVEE", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEADD", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEADD", EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("SAVERESTL", EffectsManagerBCE.aBCEDefaultOptions)
 
 		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
@@ -75,9 +79,9 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SSAVES", EffectsManagerBCE.aBCESourceMattersOptions)
 		EffectsManagerBCE.registerBCETag("SSAVEE", EffectsManagerBCE.aBCESourceMattersOptions)
 
-		EffectsManagerBCE.registerBCETag("ATKR",  EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("ATKD",  EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("ATKA",  EffectsManagerBCE.aBCEActivateOptions)
+		EffectsManagerBCE.registerBCETag("ATKR",  EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKD",  EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKA",  EffectsManagerBCE.aBCEActivateOptionsAE)
 
 		EffectsManagerBCE.registerBCETag("ADVCOND",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("DISCOND",  EffectsManagerBCE.aBCEDefaultOptions)
@@ -142,13 +146,20 @@ function onInit()
 			if (tExtension.name == "MNM Charsheet Effects Display") then
 				bMadNomadCharSheetEffectDisplay = true
 			end
+			if (tExtension.name == "5E - Advanced Effects") then
+				bAdvanceEffects = true
+			end			
 		end
+
 		for _,nodeCT in pairs(CombatManager.getCombatantNodes()) do
 			local rActor = ActorManager.resolveActor(nodeCT)
 			addTraitstoConditionsTables(rActor)
 		end
-
-	
+		
+		if bAdvanceEffects then
+			performMultiAction = ActionsManager.performMultiAction
+			ActionsManager.performMultiAction = customPerformMultiAction
+		end
 	end
 end
 
@@ -508,6 +519,11 @@ function addTraitstoConditionsTables(rActor)
 				i=i+1
 			end	
 		end
+
+--		if bAdvanceEffects then
+--			ActionsManager.performMultiAction = performMultiAction
+--		end
+
 	end
 end
 ---------------------End Save Vs Condition -------------------------
@@ -520,6 +536,18 @@ end
 --	Debug.chat(aPowerGroup)
 --	return parseNPCPower(nodePower, bAllowSpellDataOverride)
 --end
+
+
+--Advanced Effects
+function customPerformMultiAction(draginfo, rActor, sType, rRolls)
+	rRolls[1].itemPath = rActor.itemPath
+	return performMultiAction(draginfo, rActor, sType, rRolls)
+end
+
+function hasAdvancedEffects()
+	return bAdvanceEffects
+end
+-- End Advanced Effects
 
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 	local sDuplicateMsg = nil; 

@@ -14,14 +14,20 @@ local bExpired = false -- Expried is called twice to support one-shot effects bu
 local RulesetEffectManager =  nil 
 
 -- Predefined option arrays for getting effect tags
-aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
-aBCEDeactivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
-aBCEDefaultOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
-aBCERemoveOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false,nDuration = 1}
-aBCERemoveSourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false,nDuration = 1}
-aBCEIgnoreOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = true, bOneShot = false, nDuration = 0}
-aBCESourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false, nDuration = 0}
-aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, nDuration = 0}
+aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
+aBCEDeactivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
+aBCEDefaultOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
+aBCERemoveOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 1}
+aBCERemoveSourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 1}
+aBCEIgnoreOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = true, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
+aBCESourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
+aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, bAdvancedEffects = false, nDuration = 0}
+
+--Options for tags that work for Advanced Effects
+aBCEActivateOptionsAE = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = true, nDuration = 0}
+aBCEDeactivateOptionsAE = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = true, nDuration = 0}
+aBCEDefaultOptionsAE = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = true, nDuration = 0}
+aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, bAdvancedEffects = true, nDuration = 0}
 
 local tBCETag = {}
 
@@ -278,6 +284,11 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		local nDuration = tonumber(DB.getValue(v, "duration", ""))
 		local bTargeted = EffectManager.isTargetedEffect(v)
 		local tEffectComps = EffectManager.parseEffect(sLabel)
+		local bAEValid = true
+
+		if User.getRulesetName() == "5E" and EffectsManagerBCE5E.hasAdvancedEffects() then
+			bAEValid = EffectManagerADND.isValidCheckEffect(rActor,v)
+		end
 
 		-- We only want to process a specific effect. Used mostly
 		-- for something to happen after a save result
@@ -362,6 +373,10 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 									elseif tonumber(rEffectComp.mod) < 0  and (rActor.nResult <= math.abs(tonumber(rEffectComp.mod))) then
 										bDiscard = true
 									end
+								end
+								-- Is this a vaild AE BCE tag and if so is the attached item being used?
+								if bAEValid == false and aOptions.bAdvancedEffects then
+									bDiscard = true
 								end
 
 								if bTargeted and not aOptions.bIgnoreEffectTargets and bDiscard == false then
