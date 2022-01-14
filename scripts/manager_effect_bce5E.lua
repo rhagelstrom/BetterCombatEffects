@@ -8,6 +8,10 @@ local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
+local performMultiAction = nil
+local bAdvanceEffects = nil 
+
+OOB_MSGTYPE_APPLYDMG = "applydmg";
 
 function onInit()
 	if User.getRulesetName() == "5E" then 
@@ -33,18 +37,19 @@ function onInit()
 		end
 
 		--5E/3.5E BCE Tags
-		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptionsAE)
 
 		EffectsManagerBCE.registerBCETag("SAVES", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SAVEE", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEADD", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEADD", EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
-		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptionsAE)
 
 		--4E/5E
 		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
-
+		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
+		ActionsManager.registerModHandler("save", onModSaveHandler)
 
 		rest = CharManager.rest
 		CharManager.rest = customRest
@@ -61,8 +66,6 @@ function onInit()
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost5E)
 		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage)
 
-		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
-		ActionsManager.registerModHandler("save", onModSaveHandler)
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 	
@@ -71,7 +74,15 @@ function onInit()
 			tExtension = Extension.getExtensionInfo(sExtension)
 			if (tExtension.name == "MNM Charsheet Effects Display") then
 				bMadNomadCharSheetEffectDisplay = true
+			end
+			if (tExtension.name == "5E - Advanced Effects") then
+				bAdvanceEffects = true
 			end			
+		end
+
+		if bAdvanceEffects then
+			performMultiAction = ActionsManager.performMultiAction
+			ActionsManager.performMultiAction = customPerformMultiAction
 		end
 	end
 end
@@ -88,8 +99,24 @@ function onClose()
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost5E)
 
+		if bAdvanceEffects then
+			ActionsManager.performMultiAction = performMultiAction
+		end
+
 	end
 end
+
+
+--Advanced Effects
+function customPerformMultiAction(draginfo, rActor, sType, rRolls)
+	rRolls[1].itemPath = rActor.itemPath
+	return performMultiAction(draginfo, rActor, sType, rRolls)
+end
+
+function hasAdvancedEffects()
+	return bAdvanceEffects
+end
+-- End Advanced Effects
 
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 	local sDuplicateMsg = nil; 
