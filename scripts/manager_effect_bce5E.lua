@@ -540,7 +540,9 @@ end
 
 --Advanced Effects
 function customPerformMultiAction(draginfo, rActor, sType, rRolls)
-	rRolls[1].itemPath = rActor.itemPath
+	if rActor ~= nil then
+		rRolls[1].itemPath = rActor.itemPath
+	end
 	return performMultiAction(draginfo, rActor, sType, rRolls)
 end
 
