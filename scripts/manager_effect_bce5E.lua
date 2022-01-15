@@ -935,12 +935,12 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	rTarget.nResult = nil
 end
 
-function onDamage(rSource,rTarget, nodeEffect)
+function onDamage(rSource,rTarget, rRoll)
 	local tMatch = {}
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -951,6 +951,7 @@ function onDamage(rSource,rTarget, nodeEffect)
 			saveEffect(rEffectSource, rTarget, tEffect)
 		end
 	end
+	return true
 end
 
 
