@@ -1,7 +1,7 @@
 # Better Combat Effects
 
- **Current Version:** 3.0-rc5
-**Updated:** 01/13/22
+ **Current Version:** 3.0-rc8
+**Updated:** 01/16/22
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -96,7 +96,6 @@ Adding effect with a dice string automatically rolls the dice when the effect is
 ### Add Effect on Damage Modifiers
 
 Effects can be automatically added to the source or the target on the damage by either the source of the damage or the target of the damage. For this to work we need two different effects.  Example:
-
   * Shadow; SDMGADDT: Strength Drain
 
 The Shadow has strength drain so we put the above effect on the shadow. When the shadow deals damage, it will apply the effect "Strength Drain" to the target of the damage. The effect "Strength Drain" needs to be an effect listed in our custom effects list or conditions table. The effect looks like this:

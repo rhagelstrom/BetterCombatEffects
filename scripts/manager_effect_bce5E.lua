@@ -64,7 +64,7 @@ function onInit()
 		end
 
 		--5E/3.5E BCE Tags
-		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptionsAE)
+		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptions)
 
 		EffectsManagerBCE.registerBCETag("SAVES", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SAVEE", EffectsManagerBCE.aBCEDefaultOptions)
@@ -1005,7 +1005,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 
 		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]" 
 		local rRoll = {}
-		rRoll = ActionSave.getRoll(nodeTarget,sAbility) -- call to get the modifiers
+		rRoll = ActionSave.getRoll(rTarget,sAbility) -- call to get the modifiers
 		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers 
 		rSaveVsRoll.aDice = rRoll.aDice
 		-- Pass the effect node if it wasn't expired by a One Shot
