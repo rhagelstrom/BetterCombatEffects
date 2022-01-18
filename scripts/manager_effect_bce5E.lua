@@ -341,7 +341,7 @@ end
 function customGetPCPowerAction(nodeAction, sSubRoll)
 	local sConditions = ""
 	local rAction, rActor = getPCPowerAction(nodeAction, sSubRoll)
-	if rAction.save then
+	if rActor ~= nil and rAction.save then
 		for _,v in pairs(DB.getChildren(nodeAction.getParent(), "")) do
 			local sType = DB.getValue(v, "type", "")
 			if sType == "effect" then
@@ -359,7 +359,9 @@ function customGetPCPowerAction(nodeAction, sSubRoll)
 			sConditions =  sConditions:sub(1, #sConditions -1 )
 		end
 	end
-	rActor.sConditions = sConditions
+	if rActor ~= nil then
+		rActor.sConditions = sConditions
+	end
 	return rAction, rActor
 end
 
