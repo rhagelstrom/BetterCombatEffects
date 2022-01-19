@@ -61,6 +61,10 @@ function onInit()
 			"option_Autoparse_Effects", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
+			if Session.IsHost then
+--				registerMenuItem(Interface.getString("Recalcuate Traits"), "shuffle", 6);
+		--		registerMenuItem("Recalcuate Traits", "shuffle", 6);
+			end
 		end
 
 		--5E/3.5E BCE Tags
@@ -151,10 +155,7 @@ function onInit()
 			end			
 		end
 
-		for _,nodeCT in pairs(CombatManager.getCombatantNodes()) do
-			local rActor = ActorManager.resolveActor(nodeCT)
-			addTraitstoConditionsTables(rActor)
-		end
+		initTraitTables()
 		
 		if bAdvanceEffects then
 			performMultiAction = ActionsManager.performMultiAction
@@ -183,6 +184,16 @@ function onClose()
 		ActionPower.notifyApplySaveVs = notifyApplySaveVs
 		ActionSave.performVsRoll = performVsRoll
 		ActionPower.performSaveVsRoll = performSaveVsRoll
+	end
+end
+
+function initTraitTables()
+	tTraitsAdvantage = {}
+	tTraitsDisadvantage = {}
+
+	for _,nodeCT in pairs(CombatManager.getCombatantNodes()) do
+		local rActor = ActorManager.resolveActor(nodeCT)
+		addTraitstoConditionsTables(rActor)
 	end
 end
 

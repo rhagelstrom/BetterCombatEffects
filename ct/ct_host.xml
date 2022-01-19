@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root>
+  <windowclass name="combattracker_host" merge="join">
+    <sheetdata>
+      <button_ct_menu>
+      	<bounds>120,-45,50,26</bounds>
+			  <tooltip textres="ct_tooltip_menu" />
+			  <static textres="ct_label_menu" />
+       	<script file="ct/scripts/ct_menu.lua" />
+      </button_ct_menu>
+    </sheetdata>
+  </windowclass>
+</root>
