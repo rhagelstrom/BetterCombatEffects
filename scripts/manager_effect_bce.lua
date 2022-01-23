@@ -203,11 +203,10 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	
 	--Deactivate Check here. Deactivate at end
 	if rNewEffect.sName:match("%(DE%)") then
+		Debug.chat(rNewEffect)
 		for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
 			if (DB.getValue(nodeEffect, "label", "") == rNewEffect.sName) and
-			(DB.getValue(nodeEffect, "init", 0) == rNewEffect.nInit) and
-			(DB.getValue(nodeEffect, "duration", 0) == rNewEffect.nDuration) and
-			(DB.getValue(nodeEffect,"source_name", "") == rNewEffect.sSource) then
+			(DB.getValue(nodeEffect, "duration", 0) == rNewEffect.nDuration) then
 				nodeDisableEffect = nodeEffect
 				bDeactivate = true
 				break

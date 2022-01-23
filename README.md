@@ -18,9 +18,9 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 |ATKD|(-)| | DEACTIVATE effect when the Actor takes the attack action|
 |ATKR|(-)| | REMOVE effect when the Actor takes the attack action|
 | **Damage** | | | |
-|DMGAT|(D)|[damage type]*,[Range]*| ACTIVATE effect when the Actor takes damage|
-|DMGDT|(D)|[damage type]*,[Range]*| DEACTIVATE effect when the Actor takes damage|
-|DMGRT|(D)|[damage type]*,[Range]*| REMOVE effect when the Actor takes damage|
+|DMGAT|(D)|[damage type]__*__,all,[Range]__*__| ACTIVATE effect when the Actor takes damage|
+|DMGDT|(D)|[damage type]__*__,all,[Range]__*__| DEACTIVATE effect when the Actor takes damage|
+|DMGRT|(D)|[damage type]__*__,all,[Range]__*__| REMOVE effect when the Actor takes damage|
 |TDMGADDT|(-)| [effect] |TARGET of the attack will add an effect to the TARGET (itself) when damage is done|
 |TDMGADDS|(-)| [effect] |TARGET of the attack will add an effect to the SOURCE of the attack when damage is done|
 |SDMGADDT|(-)| [effect] |SOURCE of the attack will add an effect to the TARGET when damage is done|
@@ -48,10 +48,10 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 | **Ongoing Save** | | | |
 |SAVES|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the START of the Actor's turn|
 |SAVEE|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the END of the Actor's turn|
-|SAVES|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the START of the Actor's turn who applied the effect|
-|SAVEE|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the END of the Actor's turn who applied the effect|
+|SSAVES|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the START of the Actor's turn who applied the effect|
+|SSAVEE|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the END of the Actor's turn who applied the effect|
 |SAVEDMG|(D)|[damage type]* |Damage done on failed ongoing save|
-|SAVEADD|(-)|[effect] or [condition] |Add effect or condition on a failed ongoing save|
+|SAVEADD|(N)|[effect] or [condition] |Add effect or condition on a failed ongoing save. If N, The save must fail by N or more to add. -N the result must be N or less to add.|
 |SAVEADDP|(-)|[effect] or [condition] |Add effect or condition on a successful ongoing save|
 | **Rest** | | | |
 |NOREST|(-)| |Actor will not gain the benefit of a short or long rest. Note: Will not prevent the actor from rolling Hit Dice|
@@ -87,7 +87,7 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 **[condition]** = Any condition as noted above except exhaustion. Note [condition] must be all lower case  
 **[SDC]** = (5E only) [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF],  
 **(ADV)** advantage on ongoing save  
-**(ADV)** disadvantage on ongoing save  
+**(DIS)** disadvantage on ongoing save  
 **(R)** will remove the save effect on a successful save  
 **(D)** will disable the save effect on a successful save  
 **(H)** will deal half damage on a successful ongoing save  
@@ -126,8 +126,8 @@ __*__ = Multiple entries of this descriptor type allowed
 | Web [Spell]| Web; Restrained; SAVES: DEX [SDC] (C) | | |
 
 ## Options
-| Name| Default | Options | Notes | Ruleset|
-|---|---|---|---|--|
+| Name| Default | Options | Notes |
+|---|---|---|---|
 |Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor| 
 |Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire| 
 |Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE| 
@@ -148,17 +148,17 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Strength Drain; STR: -1d4; STACK; RESTL
 
 ### Changelog BCE Gold vs BCE
-  * Save vs Condition - Saves against conditions will automatically be granted adv/dis based on the traits of the actor making the saving throw.
+  * Save vs Condition - Saves against conditions will automatically be granted adv/dis based on the traits of the actor making the saving throw
   * ADVCOND,DISCOND: [condition] - Explicit advantage/disadvantage when rolling a save vs condition
   * Ongoing Saves (ADV) (DIS) - (ADV)(DIS) can be added to BCE ongoing saves to grant advantage or disadvantage
   * DUR: (N) - Dynamically set the duration of the effect at time of add. (N) can be number or dice string
   * SAVERESTL - Perform ongoing save on long rest
-  * SSAVES, SAVEEE - Perform ongoing save on the source of the effects turn.
+  * SSAVES, SAVEEE - Perform ongoing save on the source of the effects turn
   * EFFINIT: (N) - Set the initiative of the effect on add
   * NOREST, NORESTL - Actor gains no benefit from short rest/long rest
   * DMGA,DMGD,DMGR now accept damage and range types as filters
   * ATKD,ATKA,ATKR - Activate,Deactivate,Remove effect when the attack action is taken
-  * SAVEADD: (N) (effect) - Will only activate when the save fails by (N). Think of this as a "Hard fail". If (-N) will fire when the result is N or less.
+  * SAVEADD: (N) (effect) - Will only activate when the save fails by (N). Think of this as a "Hard fail". If (-N) will fire when the result is N or less
   * Replace FGU [] Tags - Tags like [PRF][LVL][CLASS] can now be defined in the NPC sheet effect list as (PRF)(LVL)(CLASS) to process as expected
   * (DE) - Will disable the effect on use
   * SDC - Can be written as [SDC] or (SDC)
