@@ -196,7 +196,16 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		rSource = ActorManager.resolveActor(nodeSource)		
 	end
 
+	-- Save off original so we can match the name. Rebuilding a fully parsed effect
+	-- will nuke spaces after a , and thus EE extension will not match names correctly.
+	local aOriginalComps = EffectManager.parseEffect(rNewEffect.sName);
+	
 	rNewEffect.sName = EffectManager5E.evalEffect(rSource, rNewEffect.sName)
+	
+	local aNewComps = EffectManager.parseEffect(rNewEffect.sName);
+	aNewComps[1] = aOriginalComps[1]
+	rNewEffect.sName = EffectManager.rebuildParsedEffect(aNewComps);
+
 	replaceSaveDC(rNewEffect, rSource)
 
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
