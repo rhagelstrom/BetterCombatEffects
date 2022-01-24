@@ -267,8 +267,9 @@ function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveO
 
 	msgOOB.sSourceNode = ActorManager.getCreatureNodeName(rSource);
 	msgOOB.sTargetNode = ActorManager.getCreatureNodeName(rTarget);
-	msgOOB.sConditions = rSource.sConditions;
-	
+	if rSource ~= nil then
+		msgOOB.sConditions = rSource.sConditions;
+	end
 	if bRemoveOnMiss then
 		msgOOB.bRemoveOnMiss = 1;
 	end
