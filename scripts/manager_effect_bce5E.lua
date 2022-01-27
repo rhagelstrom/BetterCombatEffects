@@ -11,6 +11,7 @@ local evalAction = nil
 local performMultiAction = nil
 local bAdvanceEffects = nil 
 
+
 OOB_MSGTYPE_APPLYDMG = "applydmg";
 
 function onInit()
@@ -46,11 +47,10 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptionsAE)
 
+		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		--4E/5E
 		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
-		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
-		ActionsManager.registerModHandler("save", onModSaveHandler)
-
+		
 		rest = CharManager.rest
 		CharManager.rest = customRest
 		getDamageAdjust = ActionDamage.getDamageAdjust
@@ -327,7 +327,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local tMatch = {}
 	local aTags = {}
-	ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
+	ActionSave.onSave(rSource, rTarget, rRoll)
 	local nResult = ActionsManager.total(rRoll)
 	local bAct = false
 	if rRoll.bActonFail then
@@ -423,7 +423,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		rSaveVsRoll.sSaveType = "Save"
 		rSaveVsRoll.nTarget = nDC -- Save DC
 		rSaveVsRoll.sSourceCTNode = rSource.sCTNode -- Node who applied
-		rSaveVsRoll.sDesc = "[SAVE VS] " .. tEffect.sLabel -- Effect Label
+		rSaveVsRoll.sDesc = "[ONGOING SAVE] " .. tEffect.sLabel -- Effect Label
 		if rSaveVsRoll then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [" .. sAbility .. " DC " .. rSaveVsRoll.nTarget .. "]";
 		end
@@ -459,7 +459,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 			rSaveVsRoll.sEffectPath = ""
 		end
 
-		ActionsManager.actionRoll(rSource,{{rTarget}}, {rSaveVsRoll})
+		ActionsManager.actionRoll(rTarget,{{rTarget}}, {rSaveVsRoll})
 	end
 end
 
@@ -558,12 +558,9 @@ end
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
 function onModSaveHandler(rSource, rTarget, rRoll)	
-	if rRoll.sSubtype == "bce" then
-		ActionSave.modSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
-	else
 		ActionSave.modSave(rSource, rTarget, rRoll)
-	end
 end
+
 function customParseEffects(sPowerName, aWords)
 	if OptionsManager.isOption("AUTOPARSE_EFFECTS", "off") then
 		return parseEffects(sPowerName, aWords)
