@@ -9,7 +9,9 @@ local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
-local bAdvanceEffects = nil 
+local bAdvanceEffects = nil
+local bAutomaticShieldMaster = nil 
+local modSave = nil
 
 OOB_MSGTYPE_APPLYDMG = "applydmg";
 
@@ -33,13 +35,13 @@ local tTraitsAdvantage = {}
 local tTraitsDisadvantage = {}
 
 function onInit()
-	local aExtensions = Extension.getExtensions()
-	for _,sExtension in ipairs(aExtensions) do
-		local tExtension = Extension.getExtensionInfo(sExtension)
-		if (tExtension.name == "MNM Charsheet Effects Display") then
-			bMadNomadCharSheetEffectDisplay = true
-		end
-	end
+	--local aExtensions = Extension.getExtensions()
+	--for _,sExtension in ipairs(aExtensions) do
+	--	local tExtension = Extension.getExtensionInfo(sExtension)
+	--	if (tExtension.name == "MNM Charsheet Effects Display") then
+	--		bMadNomadCharSheetEffectDisplay = true
+	--	end
+	--end
 
 	if User.getRulesetName() == "5E" then 
 		if Session.IsHost then
@@ -61,10 +63,7 @@ function onInit()
 			"option_Autoparse_Effects", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
-			if Session.IsHost then
---				registerMenuItem(Interface.getString("Recalcuate Traits"), "shuffle", 6);
-		--		registerMenuItem("Recalcuate Traits", "shuffle", 6);
-			end
+
 		end
 
 		--5E/3.5E BCE Tags
@@ -93,6 +92,8 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("NOREST",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("NORESTL",  EffectsManagerBCE.aBCEDefaultOptions)
 	
+		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
+		
 		rest = CharManager.rest
 		CharManager.rest = customRest
 		
@@ -117,9 +118,9 @@ function onInit()
 		CombatManager.addNPC = addNPCtoCT
 		CombatManager.addPC = addPCtoCT
 		-- End Save vs Condiition
-
---		parseNPCPower = PowerManager.parseNPCPower
---		PowerManager.parseNPCPower = customParseNPCPower
+		
+		modSave = ActionSave.modSave
+		ActionSave.modSave = onModSaveHandler
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		parseEffects = PowerManager.parseEffects
@@ -137,8 +138,8 @@ function onInit()
 		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage)
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
-		ActionsManager.registerModHandler("save", onModSaveHandler)
 		ActionsManager.registerResultHandler("attack", customOnAttack)
+		ActionsManager.registerModHandler("save", onModSaveHandler)
 	
 		OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_APPLYSAVEVS, customHandleApplySaveVs);
 
@@ -149,9 +150,10 @@ function onInit()
 			tExtension = Extension.getExtensionInfo(sExtension)
 			if (tExtension.name == "MNM Charsheet Effects Display") then
 				bMadNomadCharSheetEffectDisplay = true
-			end
-			if (tExtension.name == "5E - Advanced Effects") then
+			elseif (tExtension.name == "5E - Advanced Effects") then
 				bAdvanceEffects = true
+			elseif (tExtension.name == "5E - Automatic Shield Master") then
+				bAutomaticShieldMaster = true
 			end			
 		end
 
@@ -169,7 +171,6 @@ function onClose()
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
-	--	PowerManager.parseNPCPower = parseNPCPower
 		ActionsManager.unregisterResultHandler("save")
 		ActionsManager.unregisterModHandler("save")
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart5E)
@@ -184,6 +185,7 @@ function onClose()
 		ActionPower.notifyApplySaveVs = notifyApplySaveVs
 		ActionSave.performVsRoll = performVsRoll
 		ActionPower.performSaveVsRoll = performSaveVsRoll
+		ActionSave.modSave = modSave
 	end
 end
 
@@ -542,16 +544,6 @@ function addTraitstoConditionsTables(rActor)
 end
 ---------------------End Save Vs Condition -------------------------
 
---function customParseNPCPower(nodePower, bAllowSpellDataOverride)
-	--Debug.chat(nodePower)
---	local nodeCT = nodePower.getParent().getParent()
---	local rActor = ActorManager.resolveActor(nodeCT)
---	local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
---	Debug.chat(aPowerGroup)
---	return parseNPCPower(nodePower, bAllowSpellDataOverride)
---end
-
-
 --Advanced Effects
 function customPerformMultiAction(draginfo, rActor, sType, rRolls)
 	if rActor ~= nil then
@@ -893,7 +885,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local tMatch = {}
 	local aTags = {}
-	ActionSave.onSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
+	ActionSave.onSave(rSource, rTarget, rRoll)
 	local nResult = ActionsManager.total(rRoll)
 	rTarget.nResult = nResult
 	rTarget.nDC = tonumber(rRoll.nTarget)
@@ -997,7 +989,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 			rSaveVsRoll.sSourceCTNode = rSource.sCTNode -- Node who applied
 		end
 		rSaveVsRoll.sConditions = getSaveConditions(tEffect.sLabel)
-		rSaveVsRoll.sDesc = "[SAVE VS] " .. tEffect.sLabel -- Effect Label
+		rSaveVsRoll.sDesc = "[ONGOING SAVE] " .. tEffect.sLabel -- Effect Label
 		if rSaveVsRoll then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [" .. sAbility .. " DC " .. rSaveVsRoll.nTarget .. "]";
 		end
@@ -1039,7 +1031,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 			rSaveVsRoll.sEffectPath = ""
 		end
 
-		ActionsManager.actionRoll(rSource,{{rTarget}}, {rSaveVsRoll})
+		ActionsManager.actionRoll(rTarget,{{rTarget}}, {rSaveVsRoll})
 	end
 end
 
@@ -1142,17 +1134,19 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	local tMatch = {}
 	local aTags = {}
 	local rEffectSource = {}
+	--Temp Solution.. Trait tables not init on clients
+	addTraitstoConditionsTables(rSource)
 	
 	--Determine if we have a trait gives adv or disadv
 	-- Do the Trait advantage first so we don't burn our effect if we don't need to
-	if rRoll.sConditions ~= "" and rRoll.sSubType == "bce" then
-		local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
-		tTraits = hasAdvDisCondition(rTarget, aConditions)
-	elseif rRoll.sConditions ~= "" then
+	if rRoll.sConditions ~= "" then
+	--and rRoll.sSubType == "bce" then
+	--	local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
+	--	tTraits = hasAdvDisCondition(rTarget, aConditions)
+	--elseif rRoll.sConditions ~= "" then
 		local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
 		tTraits = hasAdvDisCondition(rSource, aConditions) 
 	end
-
 	for _, sDesc in pairs(tTraits) do
 		if  sDesc:match("%[ADV]") and not rRoll.sDesc:match("%[ADV]") then
 			rRoll.sDesc = rRoll.sDesc .. sDesc
@@ -1172,11 +1166,11 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	-- Get tags if any
 	if rRoll.sConditions and aTags ~= {} then
 		local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
-		if rRoll.sSubType == "bce" then
-			tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil,nil,nil,aConditions)
-		else 
+--		if rRoll.sSubType == "bce" then
+--			tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil,nil,nil,aConditions)
+--		else 
 			tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, nil,nil,nil,aConditions)
-		end
+--		end
 	end
 
 	for _,tEffect in pairs(tMatch) do
@@ -1186,12 +1180,7 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 			rRoll.sDesc = rRoll.sDesc .. " [" .. tEffect.rEffectComp.original .. "] [DIS]"		
 		end
 	end
-
-	if rRoll.sSubtype == "bce" then
-		ActionSave.modSave(rTarget, rSource, rRoll) -- Reverse target/source because the target of the effect is making the save
-	else
-		ActionSave.modSave(rSource, rTarget, rRoll)
-	end
+	modSave(rSource, rTarget, rRoll)
 end
 
 function customParseEffects(sPowerName, aWords)
