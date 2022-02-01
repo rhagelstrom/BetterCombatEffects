@@ -69,7 +69,7 @@ function onInit()
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 	
-		aExtensions = Extension.getExtensions()
+		local aExtensions = Extension.getExtensions()
 		for _,sExtension in ipairs(aExtensions) do
 			tExtension = Extension.getExtensionInfo(sExtension)
 			if (tExtension.name == "MNM Charsheet Effects Display") then
