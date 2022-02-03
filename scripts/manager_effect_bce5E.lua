@@ -949,6 +949,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	end
 	rTarget.nDC = nil
 	rTarget.nResult = nil
+	return ActionSave.onSave(rSource, rTarget, rRoll)
 end
 
 function onDamage(rSource,rTarget, rRoll)
@@ -1140,10 +1141,6 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	--Determine if we have a trait gives adv or disadv
 	-- Do the Trait advantage first so we don't burn our effect if we don't need to
 	if rRoll.sConditions ~= "" then
-	--and rRoll.sSubType == "bce" then
-	--	local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
-	--	tTraits = hasAdvDisCondition(rTarget, aConditions)
-	--elseif rRoll.sConditions ~= "" then
 		local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
 		tTraits = hasAdvDisCondition(rSource, aConditions) 
 	end
@@ -1166,11 +1163,7 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	-- Get tags if any
 	if rRoll.sConditions and aTags ~= {} then
 		local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
---		if rRoll.sSubType == "bce" then
---			tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil,nil,nil,aConditions)
---		else 
 			tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, nil,nil,nil,aConditions)
---		end
 	end
 
 	for _,tEffect in pairs(tMatch) do
