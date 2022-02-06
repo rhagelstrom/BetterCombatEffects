@@ -13,7 +13,7 @@ local bAdvanceEffects = nil
 local bAutomaticShieldMaster = nil 
 local modSave = nil
 
-OOB_MSGTYPE_APPLYDMG = "applydmg";
+local OOB_MSGTYPE_APPLYDMG = "applydmg";
 
 --local parseNPCPower = nil
 
@@ -92,8 +92,6 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("NOREST",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("NORESTL",  EffectsManagerBCE.aBCEDefaultOptions)
 	
-		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
-		
 		rest = CharManager.rest
 		CharManager.rest = customRest
 		
@@ -198,7 +196,6 @@ function initTraitTables()
 		addTraitstoConditionsTables(rActor)
 	end
 end
-
 ---------------------Save Vs Condition ----------------------------
 
 function customPerformSaveVsRoll(draginfo, rActor, rAction)
@@ -230,6 +227,9 @@ function customPerformVsRoll(draginfo, rActor, sSave, nTargetDC, bSecretRoll, rS
 	if sSaveDesc then
 		rRoll.sSaveDesc = sSaveDesc;
 	end
+	if rSource then
+		rRoll.sSource = ActorManager.getCTNodeName(rSource);
+	end
 	if sConditions then
 		rRoll.sConditions = sConditions
 	end
@@ -251,7 +251,7 @@ function customHandleApplySaveVs(msgOOB)
 	end
 end
 -- WARNING: Conflict Potential
--- Need to get our conditions from OOB messagee
+-- Need to get our conditions from OOB message
 function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveOnMiss)
 	if not rTarget then
 		return;
@@ -1173,7 +1173,7 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 			rRoll.sDesc = rRoll.sDesc .. " [" .. tEffect.rEffectComp.original .. "] [DIS]"		
 		end
 	end
-	modSave(rSource, rTarget, rRoll)
+	return modSave(rSource, rTarget, rRoll)
 end
 
 function customParseEffects(sPowerName, aWords)

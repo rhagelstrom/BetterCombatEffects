@@ -395,6 +395,7 @@ function processAbsorb(rSource, rTarget, rRoll)
 	end
 end
 
+--Dead code. Here for Absorb if it is needed for some reason
 function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
 
 	local sAbsorb = sDamageDesc:match("%[ABSORBED:%s*%l*]")
@@ -594,8 +595,9 @@ function onInit()
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost)
 		
 		-- save off the originals so we play nice with others
-		messageDamage = ActionDamage.messageDamage
-		ActionDamage.messageDamage = customMessageDamage
+		--Comment out because only needed for absorb
+	--	messageDamage = ActionDamage.messageDamage
+	--	ActionDamage.messageDamage = customMessageDamage
 		onDamage = ActionDamage.onDamage
 		ActionDamage.onDamage = customOnDamage
 		ActionsManager.registerResultHandler("damage", customOnDamage)
