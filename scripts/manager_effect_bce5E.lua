@@ -27,11 +27,17 @@ function onInit()
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 
+			OptionsManager.registerOption2("ADD_PRONE", false, "option_Better_Combat_Effects", 
+			"option_Add_Prone", "option_entry_cycler", 
+			{ labels = "option_val_on", values = "on",
+				baselabel = "option_val_off", baseval = "off", default = "off" });
+	
 			OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects", 
 			"option_Concentrate_Restrict", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
-			OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects", 
+		
+				OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects", 
 			"option_Autoparse_Effects", "option_entry_cycler", 
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
@@ -237,7 +243,7 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 		end
 	end
 
-	if rNewEffect.sName:lower():match("unconscious") and EffectManager5E.hasEffectCondition(nodeCT, "Unconscious") and not EffectManager5E.hasEffectCondition(nodeCT, "Prone") then
+	if OptionsManager.isOption("ADD_PRONE", "on") and rNewEffect.sName:lower():match("unconscious") and EffectManager5E.hasEffectCondition(nodeCT, "Unconscious") and not EffectManager5E.hasEffectCondition(nodeCT, "Prone") then
 		local rProne = {sName = "Prone" , nInit = rNewEffect.nInit, nDuration = rNewEffect.nDuration, sSource = rNewEffect.sSource, nGMOnly = rNewEffect.nGMOnly}
 		EffectManager.addEffect("", "", nodeCT, rProne, true)
 	end

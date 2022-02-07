@@ -77,11 +77,10 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 	local tMatch = {}
 	local aTags = {"REGENA", "TREGENA", "DMGA"}
 
-
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "REGENA" then
-				applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, false)
+			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, false)
 		elseif tEffect.sTag == "TREGENA" then
 			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, true)
 		elseif tEffect.sTag == "DMGA" then
@@ -446,7 +445,7 @@ function onInit()
 
 		EffectsManagerBCE.registerBCETag("REGENA", EffectsManagerBCE.aBCEOneShotOptions)
 		EffectsManagerBCE.registerBCETag("TREGENA", EffectsManagerBCE.aBCEOneShotOptions)
-		EffectsManagerBCE.registerBCETag("DMGA", EffectsManagerBCE.aBCEOneShotOptionsAE)
+		EffectsManagerBCE.registerBCETag("DMGA", EffectsManagerBCE.aBCEOneShotOptions)
 
 		EffectsManagerBCE.registerBCETag("STREGENS", EffectsManagerBCE.aBCESourceMattersOptions)
 		EffectsManagerBCE.registerBCETag("STREGENE", EffectsManagerBCE.aBCESourceMattersOptions)
