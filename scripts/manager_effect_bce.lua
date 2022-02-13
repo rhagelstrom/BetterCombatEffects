@@ -14,27 +14,28 @@ local bExpired = false -- Expried is called twice to support one-shot effects bu
 local RulesetEffectManager =  nil 
 
 -- Predefined option arrays for getting effect tags
-aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
-aBCEDeactivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
-aBCEDefaultOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
-aBCERemoveOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 1}
-aBCERemoveSourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 1}
-aBCEIgnoreOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = true, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
-aBCESourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
-aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, bAdvancedEffects = false, nDuration = 0}
+aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = false, nDuration = 0}
+aBCEActivateNoDisableOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = true, nDuration = 0}
+aBCEDeactivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = false, nDuration = 0}
+aBCEDefaultOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = false, nDuration = 0}
+aBCERemoveOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = false, nDuration = 1}
+aBCERemoveSourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = false, nDuration = 1}
+aBCEIgnoreOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = true, bOneShot = false, bAdvancedEffects = false, bNoDisable = false, nDuration = 0}
+aBCESourceMattersOptions = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = true, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = false, nDuration = 0}
+aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, bAdvancedEffects = false, bNoDisable = false, nDuration = 0}
 
 --Options for tags that work for Advanced Effects
-aBCEActivateOptionsAE = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = true, nDuration = 0}
-aBCEDeactivateOptionsAE = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = true, nDuration = 0}
-aBCEDefaultOptionsAE = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = true, nDuration = 0}
-aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, bAdvancedEffects = true, nDuration = 0}
+aBCEActivateOptionsAE = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = true, bNoDisable = false, nDuration = 0}
+aBCEDeactivateOptionsAE = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = true, bNoDisable = false, nDuration = 0}
+aBCEDefaultOptionsAE = {bTargetedOnly = false, bIgnoreEffectTargets = false, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = true, bNoDisable = false, nDuration = 0}
+aBCEOneShotOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = true, bAdvancedEffects = true, bNoDisable = false, nDuration = 0}
 
 local tBCETag = {}
 
 function onInit()
 	registerBCETag("TURNAS", aBCEActivateOptions)
 	registerBCETag("TURNAE", aBCEActivateOptions)
-	registerBCETag("DISUSET", aBCEActivateOptions)
+	registerBCETag("ACTTURN", aBCEActivateNoDisableOptions)
 
 	registerBCETag("TURNRS",  aBCERemoveOptions)
 	registerBCETag("STURNRS", aBCERemoveSourceMattersOptions)
@@ -152,7 +153,7 @@ function customTurnStart(sourceNodeCT)
 			end
 		end
 
-		aTags = {"STURNRS","DISUSET"}
+		aTags = {"STURNRS","ACTTURN"}
 		for _, nodeCT in pairs(ctEntries) do
 			local rActor = ActorManager.resolveActor(nodeCT)
 			if rActor ~= rSource then
@@ -161,7 +162,7 @@ function customTurnStart(sourceNodeCT)
 					if tEffect.sTag == "STURNRS" then
 						modifyEffect(tEffect.nodeCT, "Remove")
 					end
-					if tEffect.sTag == "DISUSET" then
+					if tEffect.sTag == "ACTTURN" then
 						modifyEffect(tEffect.nodeCT, "Activate")
 					end
 
@@ -338,8 +339,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 					end
 				end
 
-				if rEffectComp.original:upper() == "DISUSE" or rEffectComp.type:upper() == "DISUSE" or 
-					rEffectComp.original:upper() == "DISUSET" or rEffectComp.type:upper() == "DISUSET" then					
+				if rEffectComp.original:upper() == "DISUSE" or rEffectComp.type:upper() == "DISUSE" then
 					bDisableUse = true
 				end
 				-- Check for match
@@ -348,7 +348,10 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 						local bDiscard = false
 						-- Get the options
 						aOptions =  tBCETag[sTag]
-						
+
+						if aOptions.bNoDisable then
+							bDisableUse = false
+						end
 						-- If we have rSourceEffect, then only match effects where the source of the
 						-- effect matches rSourceEffect
 						if rSourceEffect ~= nil and 
@@ -448,7 +451,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		end
 	end
 	for _,tEffect in ipairs(aMatch) do
-		if tEffect.bDisableUse then
+		if tEffect.bDisableUse and type(tEffect.nodeCT) == "databasenode" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Deactivate")
 		end
 	end

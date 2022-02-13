@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.5
-**Updated::** 02/06/22
+**Current Version:** 3.6
+**Updated::** 02/13/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -32,9 +32,9 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 | **Misc** | | | |
 |DC|(N)|  |(N) will be added  to the [SDC] when [SDC] is automatically replaced|
 |DISUSE|(-)|Disable effect when a tag is used (matched)|
-|DISUSET|(-)|Disable effect when a tag is used (matched). Enable on the following turn|
 |DUR|(D)|Sets the duration of the effect when the effect is applied|
 |EFFINIT|(D)|Add an effect with initiative number|
+|ACTTURN|(-)|Enable effect on the start of the following turn|
 | **Ongoing Damage** | | | |
 |DMGOE|(D)|[damage type]* |Apply ongoing damage at the END of the Actor's turn|
 |SDMGOS|(D)|[damage type]* |Apply ongoing damage at the START of the Actor's turn who applied the effect|
@@ -62,8 +62,8 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 |RESTL|(-)| |Remove effect when the Actor takes a short or long rest|
 |SAVERESTL|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save when the Actor takes a long rest|
 | **Save vs Condition**| | | |
-|ADVCOND|(-)|[condition] or [all] |Grant advantage on a save by this actor against the defined condition|
-|DISCOND|(-)|[condition] or [all] |Grant disadvantage on a save by this actor against the defined condition|
+|ADVCOND|(-)|[condition] or [damage type]or [all]  |Grant advantage on a save by this actor against the defined condition or damage type|
+|DISCOND|(-)|[condition] or [damage type] or [all] |Grant disadvantage on a save by this actor against the defined condition or damage type|
 | **Stack**| | | |
 |STACK|(-)| | Multiple of this effect is allow to be applied. The option "Allow Duplicate Effects" must be set to off|
 | **Turn** | | | |
@@ -151,8 +151,10 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Strength Drain; STR: -1d4; STACK; RESTL
 
 ### Changelog BCE Gold vs BCE
-  * Save vs Condition - Saves against conditions will automatically be granted adv/dis based on the traits of the actor making the saving throw
-  * ADVCOND,DISCOND: [condition] - Explicit advantage/disadvantage when rolling a save vs condition
+  * ACTTURN - Enable effect on the start of the next turn
+  * DISUSE - Disable effect if a tag in the effect is used
+  * Save vs Condition - Saves against conditions and damage types will automatically be granted adv/dis based on the traits of the actor making the saving throw
+  * ADVCOND,DISCOND: [condition] or [damage type]- Explicit advantage/disadvantage when rolling a save vs condition or damage type
   * Ongoing Saves (ADV) (DIS) - (ADV)(DIS) can be added to BCE ongoing saves to grant advantage or disadvantage
   * DUR: (N) - Dynamically set the duration of the effect at time of add. (N) can be number or dice string
   * SAVERESTL - Perform ongoing save on long rest
