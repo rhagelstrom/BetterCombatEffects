@@ -34,6 +34,7 @@ local tBCETag = {}
 function onInit()
 	registerBCETag("TURNAS", aBCEActivateOptions)
 	registerBCETag("TURNAE", aBCEActivateOptions)
+	registerBCETag("DISUSET", aBCEActivateOptions)
 
 	registerBCETag("TURNRS",  aBCERemoveOptions)
 	registerBCETag("STURNRS", aBCERemoveSourceMattersOptions)
@@ -78,8 +79,22 @@ function onClose()
 	ActionsManager.unregisterResultHandler("effectbce")
 end
 
-function registerBCETag(sTag, aOptions)
-	tBCETag[sTag] = aOptions
+function registerBCETag(sTag, aOptions, bNoUpdate)
+	local bUpdated = true
+
+	if bNoUpdate == nil then
+		tBCETag[sTag] = aOptions
+	elseif bNoUpdate and tBCETag[sTag] == nil then
+		tBCETag[sTag] = aOptions
+	else 
+		-- Not updated
+		bUpdated = false
+	end
+	return bUpdated
+end
+
+function unregisterBCETag(sTag)
+	tBCETag[sTag] = nil 
 end
 
 -- Expire effect is called twice. Once initially and then once for delayed remove
@@ -137,7 +152,7 @@ function customTurnStart(sourceNodeCT)
 			end
 		end
 
-		aTags = {"STURNRS"}
+		aTags = {"STURNRS","DISUSET"}
 		for _, nodeCT in pairs(ctEntries) do
 			local rActor = ActorManager.resolveActor(nodeCT)
 			if rActor ~= rSource then
@@ -146,6 +161,10 @@ function customTurnStart(sourceNodeCT)
 					if tEffect.sTag == "STURNRS" then
 						modifyEffect(tEffect.nodeCT, "Remove")
 					end
+					if tEffect.sTag == "DISUSET" then
+						modifyEffect(tEffect.nodeCT, "Activate")
+					end
+
 				end
 			end
 		end
@@ -256,6 +275,7 @@ function getDamageTypes(rRoll)
 	return aDMGTypes
 end
 
+
 --This function gets called a ton and it seems expensive. Try to do as much optimization as possible
 	-- by grouping tags called at the same point in the code
 function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes, aConditions)
@@ -275,6 +295,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 
 	-- Iterate through each effect
 	local aMatch = {}
+	local nMatch = 1
 	for _,v in pairs(DB.getChildren(ActorManager.getCTNode(rActor), "effects")) do
 		local nActive = DB.getValue(v, "isactive", 0);
 		local sLabel = DB.getValue(v, "label", "")
@@ -284,6 +305,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		local bTargeted = EffectManager.isTargetedEffect(v)
 		local tEffectComps = EffectManager.parseEffect(sLabel)
 		local bAEValid = true
+		local bDisableUse = false
 
 		if User.getRulesetName() == "5E" and EffectsManagerBCE5E.hasAdvancedEffects() then
 			bAEValid = EffectManagerADND.isValidCheckEffect(rActor,v)
@@ -293,9 +315,9 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		-- for something to happen after a save result
 		if nodeEffect == nil or nodeEffect == v then
 			-- Iterate through each effect component looking for a type match
-			local nMatch = 0;
+			bDisableUse = false
+			local tMatch = {}
 			for kEffectComp,sEffectComp in ipairs(tEffectComps) do
-				local tMatch = {}
 				if RulesetEffectManager.parseEffectComp then
 					rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
 				else
@@ -316,6 +338,10 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 					end
 				end
 
+				if rEffectComp.original:upper() == "DISUSE" or rEffectComp.type:upper() == "DISUSE" or 
+					rEffectComp.original:upper() == "DISUSET" or rEffectComp.type:upper() == "DISUSET" then					
+					bDisableUse = true
+				end
 				-- Check for match
 				for _,sTag in pairs(aTags) do
 					if rEffectComp.original:upper() == sTag or rEffectComp.type:upper() == sTag  then
@@ -412,6 +438,18 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 					end
 				end
 			end
+			-- Mark for disabled
+			if bDisableUse then
+				for i = nMatch, #aMatch, 1 do
+					aMatch[i].bDisableUse = bDisableUse
+				end
+			nMatch = #aMatch+1
+			end
+		end
+	end
+	for _,tEffect in ipairs(aMatch) do
+		if tEffect.bDisableUse then
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Deactivate")
 		end
 	end
 	return aMatch

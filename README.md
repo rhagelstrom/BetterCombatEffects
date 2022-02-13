@@ -31,6 +31,8 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 |EXPIREADD|(-)| [effect] or [condition] |Add effect or condition when this effect expires|
 | **Misc** | | | |
 |DC|(N)|  |(N) will be added  to the [SDC] when [SDC] is automatically replaced|
+|DISUSE|(-)|Disable effect when a tag is used (matched)|
+|DISUSET|(-)|Disable effect when a tag is used (matched). Enable on the following turn|
 |DUR|(D)|Sets the duration of the effect when the effect is applied|
 |EFFINIT|(D)|Add an effect with initiative number|
 | **Ongoing Damage** | | | |
@@ -128,6 +130,7 @@ __*__ = Multiple entries of this descriptor type allowed
 ## Options
 | Name| Default | Options | Notes |
 |---|---|---|---|
+|Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor| 
 |Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor| 
 |Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire| 
 |Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE| 

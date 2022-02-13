@@ -12,13 +12,14 @@ local performMultiAction = nil
 local bAdvanceEffects = nil
 local bAutomaticShieldMaster = nil 
 local modSave = nil
-
+local getEffectsByType = nil 
+local hasEffect = nil
 local OOB_MSGTYPE_APPLYDMG = "applydmg";
 
---local parseNPCPower = nil
 
 -- Save vs condition
-local decodeActors = nil 
+local decodeActors = nil
+local encodeActors = nil
 local performAction = nil
 local getPCPowerAction = nil
 local handleApplySaveVs = nil
@@ -35,13 +36,6 @@ local tTraitsAdvantage = {}
 local tTraitsDisadvantage = {}
 
 function onInit()
-	--local aExtensions = Extension.getExtensions()
-	--for _,sExtension in ipairs(aExtensions) do
-	--	local tExtension = Extension.getExtensionInfo(sExtension)
-	--	if (tExtension.name == "MNM Charsheet Effects Display") then
-	--		bMadNomadCharSheetEffectDisplay = true
-	--	end
-	--end
 
 	if User.getRulesetName() == "5E" then 
 		if Session.IsHost then
@@ -102,7 +96,10 @@ function onInit()
 		CharManager.rest = customRest
 		
 		--Save vs Condition
+		hasEffect = EffectManager5E.hasEffect
+		getEffectsByType = EffectManager5E.getEffectsByType
 		decodeActors  = ActionsManager.decodeActors 
+		encodeActors  = ActionsManager.encodeActors 
 		performAction =PowerManager.performAction 
 		getPCPowerAction = PowerManager.getPCPowerAction
 		handleApplySaveVs = PowerManager.handleApplySaveVs
@@ -112,7 +109,10 @@ function onInit()
 		addCustomNPC = CombatManager.addNPC 
 		addCustomPC = CombatManager.addPC 
 
+		EffectManager5E.hasEffect = customHasEffect
+		EffectManager5E.getEffectsByType = customGetEffectsByType
 		ActionsManager.decodeActors = customDecodeActors
+		ActionsManager.encodeActors = customEncodeActors
 		PowerManager.performAction = customPerformAction
 		PowerManager.getPCPowerAction = customGetPCPowerAction
 		PowerManager.handleApplySaveVs = customHandleApplySaveVs
@@ -182,6 +182,9 @@ function onClose()
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost5E)
 
+		EffectManager5E.hasEffect = hasEffect
+		EffectManager5E.getEffectsByType = getEffectsByType
+		ActionsManager.encodeActors = encodeActors 
 		ActionsManager.decodeActors = decodeActors
 		PowerManager.performAction = performAction
 		PowerManager.getPCPowerAction = getPCPowerAction
@@ -203,7 +206,6 @@ function initTraitTables()
 	end
 end
 ---------------------Save Vs Condition ----------------------------
-
 function customPerformSaveVsRoll(draginfo, rActor, rAction)
 	local rRoll = ActionPower.getSaveVsRoll(rActor, rAction);
 	if rAction.sConditions == nil then
@@ -215,7 +217,6 @@ function customPerformSaveVsRoll(draginfo, rActor, rAction)
 	if (draginfo and rActor.sConditions and rActor.sConditions ~= "") then
         draginfo.setMetaData("sConditions",rActor.sConditions)
     end
-
 	ActionsManager.performAction(draginfo, rActor, rRoll);
 end
 
@@ -312,12 +313,11 @@ end
 --Using the given node power, get the resulting conditions from the database
 -- for the PC and NPC
 function customPerformAction(draginfo, rActor, rAction, nodePower)
-	if rAction.type == "powersave" then
+	if rAction.type == "powersave" or rAction.type == "cast" then
 		local sNodeType, nodeCT = ActorManager.getTypeAndNode(rActor)
 		local sConditions = ""
-		if rActor.sType == "pc" then
+		if rActor.sType == "pc" or rActor.sType == "charsheet" then
 			for _,v in pairs(DB.getChildren(nodePower, "actions")) do
-				local sLabel = DB.getValue(v, "label", "")
 				local sType = DB.getValue(v, "type", "")
 				if sType == "effect" then
 					local sLabel = DB.getValue(v, "label", "")
@@ -326,6 +326,15 @@ function customPerformAction(draginfo, rActor, rAction, nodePower)
 						sEffectComp = sEffectComp:lower()
 						if StringManager.contains(DataCommon.conditions, sEffectComp) then
 							sConditions = sConditions .. sEffectComp .. ","
+						end
+					end
+				elseif sType == "damage" then
+					local nodeDmgList = v.getChild("damagelist")
+					if nodeDmgList ~= nil then
+						local aDmgList = nodeDmgList.getChildren()
+						for _, nodeDmg in pairs(aDmgList) do
+							local type = DB.getValue(nodeDmg, "type", "")
+							sConditions = sConditions .. type .. ","	
 						end
 					end
 				end
@@ -342,21 +351,29 @@ function customPerformAction(draginfo, rActor, rAction, nodePower)
 	if (draginfo and rActor.sConditions and rActor.sConditions ~= "") then
         draginfo.setMetaData("sConditions",rActor.sConditions)
     end
-
 	return performAction(draginfo, rActor, rAction, nodePower)
 end
 
 -- Needed for draged things
 function customDecodeActors(draginfo)
+	-- Reset the slot to 1. Needed when we drag a cast. It'll work the first roll but then will set the slot
+	-- to two and never reset it.
+	draginfo.setSlot(1)	
 	local rSource, aTargets = decodeActors(draginfo)
 	local sConditions = draginfo.getMetaData("sConditions");
     if (rSource and sConditions and sConditions ~= "") then
         rSource.sConditions = sConditions;
     end
-	
 	return rSource, aTargets
 end
 
+-- Needed for draged things
+function customEncodeActors(draginfo, rSource, aTargets)
+	if (draginfo and rSource and rSource.sConditions and rSource.sConditions ~= "") then
+        draginfo.setMetaData("sConditions",rSource.sConditions)
+    end
+	return	encodeActors(draginfo, rSource, aTargets)
+end
 -- setup up metadata for saves vs conditon when PC rolled from character sheet
 function customGetPCPowerAction(nodeAction, sSubRoll)
 	local sConditions = ""
@@ -364,13 +381,22 @@ function customGetPCPowerAction(nodeAction, sSubRoll)
 	if rActor ~= nil and rAction.save then
 		for _,v in pairs(DB.getChildren(nodeAction.getParent(), "")) do
 			local sType = DB.getValue(v, "type", "")
+			local sLabel = DB.getValue(v, "label", "")			
 			if sType == "effect" then
-				local sLabel = DB.getValue(v, "label", "")
 				local aEffectComps = EffectManager.parseEffect(sLabel)
 				for _,sEffectComp in ipairs(aEffectComps) do
 					sEffectComp = sEffectComp:lower()
 					if StringManager.contains(DataCommon.conditions, sEffectComp) then
-						sConditions =  sEffectComp .. ","
+						sConditions = sConditions .. sEffectComp .. ","
+					end
+				end
+			elseif sType == "damage" then
+				local nodeDmgList = v.getChild("damagelist")
+				if nodeDmgList ~= nil then
+					local aDmgList = nodeDmgList.getChildren()
+					for _, nodeDmg in pairs(aDmgList) do
+						local sType = DB.getValue(nodeDmg, "type", "")	
+						sConditions = sConditions .. sType:lower() .. ","
 					end
 				end
 			end
@@ -399,6 +425,10 @@ function getNPCPowerConditions(nodePower)
 					sConditions = sConditions .. sEffectComp .. ","
 				end
 			end
+		elseif aAbility.sType == "damage" then
+			for _,aClause in ipairs(aAbility.clauses) do
+				sConditions = sConditions .. aClause.dmgtype:lower() .. ","
+			end
 		end
 	end
 	if sConditions ~= "" then
@@ -413,11 +443,12 @@ function searchPowerGetConditions(rActor, sLabel)
 	--Search these database nodes
 	local aSearchNodes= {"spells","innatespells","actions","lairactions","legendaryactions","reactions"}
 	sLabel = sLabel:lower()
-
 	local nodeActor = ActorManager.getCTNode(rActor)
 	for _,sSearch in pairs(aSearchNodes) do
 		for _,node in pairs(DB.getChildren(nodeActor, sSearch)) do
 			local sName = DB.getValue(node, "name", "")
+			-- remove anything in () such as (Recharge x)
+			sName = sName:gsub("%s+%(.+%)", "")
 			if sName:lower() == sLabel then
 				return getNPCPowerConditions(node)
 			end
@@ -432,7 +463,8 @@ function getSaveConditions(sLabel)
 	for _,sEffectComp in ipairs(tEffectComps) do
 		rEffectComp =  EffectManager5E.parseEffectComp(sEffectComp)
 		if rEffectComp.type == "SAVEADD" or rEffectComp.type == "SAVEADDP" then
-			if  rEffectComp.remainder ~= {} and StringManager.contains(DataCommon.conditions, rEffectComp.remainder[1]:lower()) then
+			if  rEffectComp.remainder ~= {} and (StringManager.contains(DataCommon.conditions, rEffectComp.remainder[1]:lower()) or
+						StringManager.contains(DataCommon.dmgtypes, rEffectComp.remainder[1]:lower())) then
 				sRet = sRet .. rEffectComp.remainder[1]:lower() .. ","
 			end
 		end		
@@ -519,7 +551,8 @@ function addTraitstoConditionsTables(rActor)
 							local k = j
 							local sConditions = ""
 							while aWords[k] do
-								if StringManager.isWord(aWords[k], DataCommon.conditions) then
+								if StringManager.isWord(aWords[k], DataCommon.conditions) or 
+									StringManager.isWord(aWords[k], DataCommon.dmgtypes)then
 									sConditions = sConditions .. aWords[k] .. ","
 								end
 								k=k+1
@@ -955,7 +988,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	end
 	rTarget.nDC = nil
 	rTarget.nResult = nil
-	return ActionSave.onSave(rSource, rTarget, rRoll)
 end
 
 function onDamage(rSource,rTarget, rRoll)
@@ -1143,7 +1175,7 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	local rEffectSource = {}
 	--Temp Solution.. Trait tables not init on clients
 	addTraitstoConditionsTables(rSource)
-	
+
 	--Determine if we have a trait gives adv or disadv
 	-- Do the Trait advantage first so we don't burn our effect if we don't need to
 	if rRoll.sConditions ~= "" then
@@ -1180,6 +1212,43 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 		end
 	end
 	return modSave(rSource, rTarget, rRoll)
+end
+
+function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
+	local bRet = hasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
+	if bRet == true then
+		local tMatch = {}
+		local aTags = {}
+		local bUpdated = false
+		--- we don't want to update existing BCE tag properties by mistake
+		bUpdated = EffectsManagerBCE.registerBCETag(sEffect:upper(), EffectsManagerBCE.aBCEIgnoreOneShotOptions, true)
+		table.insert(aTags, sEffect:upper())
+		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rActor)
+		-- Remove the tag from BCE tags
+		if bUpdated then
+			EffectsManagerBCE.unregisterBCETag(sEffect:upper())
+		end
+	end
+	return bRet
+end
+
+function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
+	local results = getEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
+	-- This is probably super inefficient
+	if results ~= {} then
+		local tMatch = {}
+		local aTags = {}
+		local bUpdated = false
+		--- we don't want to update existing BCE tag properties by mistake
+		bUpdated = EffectsManagerBCE.registerBCETag(sEffectType:upper(), EffectsManagerBCE.aBCEIgnoreOneShotOptions, true)
+		table.insert(aTags, sEffectType:upper())
+		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rActor)
+		-- Remove the tag from BCE tags
+		if bUpdated then
+			EffectsManagerBCE.unregisterBCETag(sEffectType:upper())
+		end
+	end
+	return results
 end
 
 function customParseEffects(sPowerName, aWords)
