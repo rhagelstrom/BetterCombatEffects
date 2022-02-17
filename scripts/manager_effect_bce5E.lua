@@ -91,7 +91,9 @@ function onInit()
 
 		EffectsManagerBCE.registerBCETag("NOREST",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("NORESTL",  EffectsManagerBCE.aBCEDefaultOptions)
-	
+
+		EffectsManagerBCE.registerBCETag("IMMUNE",  EffectsManagerBCE.aBCEDefaultOptions)
+
 		rest = CharManager.rest
 		CharManager.rest = customRest
 		
@@ -733,6 +735,35 @@ function processEffectTurnEnd5E(rSource)
 end
 
 function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+	local rActor = ActorManager.resolveActor(nodeCT)
+	local rSource = nil
+	if rNewEffect.sSource == nil or rNewEffect.sSource == "" then
+		rSource = rActor
+	else
+		local nodeSource = DB.findNode(rNewEffect.sSource)
+		rSource = ActorManager.resolveActor(nodeSource)		
+	end
+
+	local aTags = {"IMMUNE"}
+	local aImmuneEffect = {};
+	local tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
+
+	for _,v in pairs(tMatch) do
+		for _,vType in pairs(v.rEffectComp.remainder) do
+			table.insert(aImmuneEffect, vType:lower():match("^custom%s*%(([^)]+)%)$"))
+		end
+	end
+
+	local aEffectComps = EffectManager.parseEffect(rNewEffect.sName);
+	for _,sEffectComp in ipairs(aEffectComps) do
+		-- should be our effect take that and match to our immune list. if match throw out
+		if StringManager.contains(aImmuneEffect, sEffectComp:lower()) then
+			local sMessage = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), rNewEffect.sName, Interface.getString("effect_status_targetimmune"));
+			EffectManager.message(sMessage, nodeCT, false, sUser);
+			return false
+		end
+	end
+
 	-- Repalace effects with () that fantasygrounds will autocalc with [ ]
 	local aReplace = {"PRF", "LVL"}
 	for _,sClass in pairs(DataCommon.classes) do
@@ -755,14 +786,6 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if rNewEffect.sName:match("EFFINIT:%s*%-?%d+") then
 		local sInit = rNewEffect.sName:match("%d+")
 		rNewEffect.nInit = tonumber(sInit)
-	end
-	local rActor = ActorManager.resolveActor(nodeCT)
-	local rSource = nil
-	if rNewEffect.sSource == nil or rNewEffect.sSource == "" then
-		rSource = rActor
-	else
-		local nodeSource = DB.findNode(rNewEffect.sSource)
-		rSource = ActorManager.resolveActor(nodeSource)		
 	end
 
 	-- Save off original so we can match the name. Rebuilding a fully parsed effect

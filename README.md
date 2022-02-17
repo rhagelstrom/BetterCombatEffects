@@ -30,11 +30,12 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 | **Expire Effect** | | | |
 |EXPIREADD|(-)| [effect] or [condition] |Add effect or condition when this effect expires|
 | **Misc** | | | |
+|ATURN|(-)||Enable effect on the start of the following turn|
 |DC|(N)|  |(N) will be added  to the [SDC] when [SDC] is automatically replaced|
-|DUSE|(-)|Disable effect when a tag is used (matched)|
-|DUR|(D)|Sets the duration of the effect when the effect is applied|
-|EFFINIT|(D)|Add an effect with initiative number|
-|ATURN|(-)|Enable effect on the start of the following turn|
+|DUSE|(-)||Disable effect when a tag is used (matched)|
+|DUR|(D)||Sets the duration of the effect when the effect is applied|
+|EFFINIT|(D)| |Add an effect with initiative number|
+|IMMUNE|-|CUSTOM([effect]) |Immune to an effect where [effect] is an effect in the custom effect window|
 | **Ongoing Damage** | | | |
 |DMGOE|(D)|[damage type]* |Apply ongoing damage at the END of the Actor's turn|
 |SDMGOS|(D)|[damage type]* |Apply ongoing damage at the START of the Actor's turn who applied the effect|
@@ -151,6 +152,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * Strength Drain; STR: -1d4; STACK; RESTL
 
 ### Changelog BCE Gold vs BCE
+  * IMMUNE: CUSTOM([effect]) Immune to an effect where [effect]is an effect in custom effects window
   * ATURN - Enable effect on the start of the next turn
   * DUSE - Disable effect if a tag in the effect is used
   * Save vs Condition - Saves against conditions and damage types will automatically be granted adv/dis based on the traits of the actor making the saving throw
