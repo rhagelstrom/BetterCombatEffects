@@ -459,6 +459,7 @@ end
 
 function getSaveConditions(sLabel)
 	local sRet = ""
+	local aHasCondition = {}
 	local tEffectComps = EffectManager.parseEffect(sLabel)
 	for _,sEffectComp in ipairs(tEffectComps) do
 		rEffectComp =  EffectManager5E.parseEffectComp(sEffectComp)
@@ -467,7 +468,11 @@ function getSaveConditions(sLabel)
 						StringManager.contains(DataCommon.dmgtypes, rEffectComp.remainder[1]:lower())) then
 				sRet = sRet .. rEffectComp.remainder[1]:lower() .. ","
 			end
-		end		
+		end
+		-- already has  a conditiion
+		if StringManager.contains(DataCommon.conditions, rEffectComp.original:lower())  then
+			sRet = sRet .. rEffectComp.original:lower() .. ","
+		end	
 	end
 	if rRet ~= "" then
 		sRet = sRet:sub(1, #sRet -1 )
@@ -1028,6 +1033,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 			rSaveVsRoll.sSourceCTNode = rSource.sCTNode -- Node who applied
 		end
 		rSaveVsRoll.sConditions = getSaveConditions(tEffect.sLabel)
+
 		rSaveVsRoll.sDesc = "[ONGOING SAVE] " .. tEffect.sLabel -- Effect Label
 		if rSaveVsRoll then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [" .. sAbility .. " DC " .. rSaveVsRoll.nTarget .. "]";
@@ -1057,7 +1063,6 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		if tEffect.rEffectComp.original:match("%(DIS%)") then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [DIS]"
 		end
-
 		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]" 
 		local rRoll = {}
 		rRoll = ActionSave.getRoll(rTarget,sAbility) -- call to get the modifiers

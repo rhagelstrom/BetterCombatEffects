@@ -35,7 +35,7 @@ local tBCETag = {}
 function onInit()
 	registerBCETag("TURNAS", aBCEActivateOptions)
 	registerBCETag("TURNAE", aBCEActivateOptions)
-	registerBCETag("ACTTURN", aBCEActivateNoDisableOptions)
+	registerBCETag("ATURN", aBCEActivateNoDisableOptions)
 
 	registerBCETag("TURNRS",  aBCERemoveOptions)
 	registerBCETag("STURNRS", aBCERemoveSourceMattersOptions)
@@ -153,7 +153,7 @@ function customTurnStart(sourceNodeCT)
 			end
 		end
 
-		aTags = {"STURNRS","ACTTURN"}
+		aTags = {"STURNRS","ATURN"}
 		for _, nodeCT in pairs(ctEntries) do
 			local rActor = ActorManager.resolveActor(nodeCT)
 			if rActor ~= rSource then
@@ -162,7 +162,7 @@ function customTurnStart(sourceNodeCT)
 					if tEffect.sTag == "STURNRS" then
 						modifyEffect(tEffect.nodeCT, "Remove")
 					end
-					if tEffect.sTag == "ACTTURN" then
+					if tEffect.sTag == "ATURN" then
 						modifyEffect(tEffect.nodeCT, "Activate")
 					end
 
@@ -296,7 +296,6 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 
 	-- Iterate through each effect
 	local aMatch = {}
-	local nMatch = 1
 	for _,v in pairs(DB.getChildren(ActorManager.getCTNode(rActor), "effects")) do
 		local nActive = DB.getValue(v, "isactive", 0);
 		local sLabel = DB.getValue(v, "label", "")
@@ -311,12 +310,13 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		if User.getRulesetName() == "5E" and EffectsManagerBCE5E.hasAdvancedEffects() then
 			bAEValid = EffectManagerADND.isValidCheckEffect(rActor,v)
 		end
-
+		if  sLabel:match("DUSE") then
+			bDisableUse = true
+		end
 		-- We only want to process a specific effect. Used mostly
 		-- for something to happen after a save result
 		if nodeEffect == nil or nodeEffect == v then
 			-- Iterate through each effect component looking for a type match
-			bDisableUse = false
 			local tMatch = {}
 			for kEffectComp,sEffectComp in ipairs(tEffectComps) do
 				if RulesetEffectManager.parseEffectComp then
@@ -337,10 +337,6 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 					if not RulesetEffectManager.checkConditional(rTarget, v, rEffectComp.remainder, rActor) then
 						break
 					end
-				end
-
-				if rEffectComp.original:upper() == "DISUSE" or rEffectComp.type:upper() == "DISUSE" then
-					bDisableUse = true
 				end
 				-- Check for match
 				for _,sTag in pairs(aTags) do
@@ -409,10 +405,10 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 
 								if bTargeted and not aOptions.bIgnoreEffectTargets and bDiscard == false then
 									if EffectManager.isEffectTarget(v, rTarget) then
-										table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
+										table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, bDisableUse = bDisableUse, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
 									end
 								elseif not aOptions.bTargetedOnly and bDiscard == false then
-									table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, sLabel = sLabel, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
+									table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, bDisableUse = bDisableUse, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
 								end
 							end
 						end
@@ -425,7 +421,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 							DB.setValue(v, "isactive", "number", 1)
 						else
 							table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect, 
-							sLabel = aMatchComp.sLabel, nGMOnly = aMatchComp.nGMOnly, rEffectComp = rEffectComp})
+							sLabel = sLabel, nGMOnly = aMatchComp.nGMOnly, bDisableUse = aMatchComp.bDisableUse, rEffectComp = rEffectComp})
 							local sApply = DB.getValue(v, "apply", "")
 							if sApply == "action" then
 								EffectManager.notifyExpire(v, 0)
@@ -437,21 +433,14 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 						end
 					elseif type(v) == "databasenode" and aMatchComp.bIgnoreOneShot == true then
 						table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect, 
-						sLabel = aMatchComp.sLabel, nGMOnly = aMatchComp.nGMOnly, rEffectComp = rEffectComp})
+						sLabel = sLabel, nGMOnly = aMatchComp.nGMOnly, bDisableUse = aMatchComp.bDisableUse, rEffectComp = rEffectComp})
 					end
 				end
-			end
-			-- Mark for disabled
-			if bDisableUse then
-				for i = nMatch, #aMatch, 1 do
-					aMatch[i].bDisableUse = bDisableUse
-				end
-			nMatch = #aMatch+1
 			end
 		end
 	end
 	for _,tEffect in ipairs(aMatch) do
-		if tEffect.bDisableUse and type(tEffect.nodeCT) == "databasenode" then
+		if tEffect.sLabel:match("DUSE") and tEffect.bDisableUse and type(tEffect.nodeCT) == "databasenode" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Deactivate")
 		end
 	end
