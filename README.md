@@ -131,7 +131,7 @@ __*__ = Multiple entries of this descriptor type allowed
 ## Options
 | Name| Default | Options | Notes |
 |---|---|---|---|
-|Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor| 
+|Add Prone when Unconscious| off| off/on| When on, will add prone to an actor who also is unconscious| 
 |Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor| 
 |Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire| 
 |Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE| 
@@ -141,7 +141,7 @@ __*__ = Multiple entries of this descriptor type allowed
 ### Save vs Condition
 Saves against conditions will automatically be granted adv/dis based on the traits of the Actor making the saving throw. The parser will match traits with the following verbiage: words ... {advantage,disadvantage} ... words ... {saves,saving throws} ... words ... {condition(s)} ... words. Make up your own homebrew traits and have them process automagiclly.
 
-### Replace [ ] with ( )
+### Replace [] with ()
 When writing NPC effects, the CT doesn't process tags such as [CLASS] [PRF] [LVL]. BCE Gold will allow those tags to be written as (CLASS) (PRF) (LVL) which enables them to be processed by FG. In addition the BCE tag of [SDC] can also be written as (SDC)
 
 ### Add Effect on Damage Modifiers

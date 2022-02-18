@@ -10,8 +10,8 @@ local messageDamage = nil
 local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
 
-function setProcessEffectOnDamage(ProcessEffectOnDamage)
-	fProcessEffectOnDamage = ProcessEffectOnDamage
+function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
+	fProcessEffectApplyDamage = ProcessEffectApplyDamage
 end
 
 function customRest(nodeActor, bLong, bMilestone)
@@ -256,7 +256,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	-- Play nice with others
 	-- Do damage first then modify any effects
-	onDamage(rSource, rTarget, rRoll)
+	applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 
 	local sTargetNodeType, targetNode = ActorManager.getTypeAndNode(rTarget)
 	local nTotalHP, nWounds
@@ -312,8 +312,8 @@ function customOnDamage(rSource, rTarget, rRoll)
 		end
 	end
 
-	if (fProcessEffectOnDamage ~= nil) then
-		fProcessEffectOnDamage(rSource,rTarget,rRoll)
+	if (fProcessEffectApplyDamage ~= nil) then
+		fProcessEffectApplyDamage(rSource,rTarget)
 	end
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
@@ -614,8 +614,7 @@ function onClose()
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
 
-		ActionDamage.onDamage = onDamage
-		ActionsManager.unregisterResultHandler("damage")
+		ActionDamage.applyDamage = applyDamage
 		ActionsManager.unregisterResultHandler("effectbce")
 
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartDND)
