@@ -70,7 +70,7 @@ function onInit()
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost5E)
-		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage)
+		EffectsManagerBCEDND.setProcessEffectApplyDamage(applyDamage)
 
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
@@ -395,7 +395,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	end
 end
 
-function onDamage(rSource,rTarget, rRoll)
+function applyDamagee(rSource,rTarget)
 	local tMatch = {}
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
@@ -429,8 +429,9 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		rSaveVsRoll.sSaveType = "Save"
 		rSaveVsRoll.nTarget = nDC -- Save DC
 		rSaveVsRoll.sSourceCTNode = rSource.sCTNode -- Node who applied
+	--	rSaveVsRoll.sDesc = "[SAVE VS] " .. tEffect.sLabel -- Effect Label
 		rSaveVsRoll.sDesc = "[ONGOING SAVE] " .. tEffect.sLabel -- Effect Label
-		if rSaveVsRoll then
+	if rSaveVsRoll then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [" .. sAbility .. " DC " .. rSaveVsRoll.nTarget .. "]";
 		end
 		if tEffect.rEffectComp.original:match("%(M%)") then
@@ -464,6 +465,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		else
 			rSaveVsRoll.sEffectPath = ""
 		end
+	--	ActionsManager.actionRoll(rSource,{{rSource}}, {rSaveVsRoll})
 
 		ActionsManager.actionRoll(rTarget,{{rTarget}}, {rSaveVsRoll})
 	end

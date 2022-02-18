@@ -5,12 +5,12 @@
 
 local RulesetEffectManager = nil
 local RulesetActorManager = nil
-local onDamage = nil
-local fProcessEffectOnDamage = nil
+local applyDamage = nil
+local fProcessEffectApplyDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
 
-function setProcessEffectOnDamage(ProcessEffectOnDamage)
-	fProcessEffectOnDamage = ProcessEffectOnDamage
+function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
+	fProcessEffectApplyDamage = ProcessEffectApplyDamage
 end
 
 function customRest(nodeActor, bLong, bMilestone)
@@ -197,10 +197,7 @@ function processEffectTurnEndDND(rSource)
 	return true
 end
 
-function customOnDamage(rSource, rTarget, rRoll)
-	if not rTarget or not rSource or not rRoll  then
-		return onDamage(rSource, rTarget, rRoll)
-	end
+function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local nodeSource = ActorManager.getCTNode(rSource)
 
@@ -209,7 +206,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 
 	-- Play nice with others
 	-- Do damage first then modify any effects
-	onDamage(rSource, rTarget, rRoll)
+	applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 
 	-- get temp hp and wounds after damage
 	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
@@ -240,8 +237,8 @@ function customOnDamage(rSource, rTarget, rRoll)
 		end
 	end
 
-	if (fProcessEffectOnDamage ~= nil) then
-		fProcessEffectOnDamage(rSource,rTarget,rRoll)
+	if (fProcessEffectApplyDamage ~= nil) then
+		fProcessEffectApplyDamage(rSource,rTarget)
 	end
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
@@ -460,9 +457,8 @@ function onInit()
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost)
 		
 		-- save off the originals so we play nice with others
-		onDamage = ActionDamage.onDamage
-		ActionDamage.onDamage = customOnDamage
-		ActionsManager.registerResultHandler("damage", customOnDamage)
+		applyDamage = ActionDamage.applyDamage
+		ActionDamage.applyDamage = customApplyDamage
 		ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
 
 		aExtensions = Extension.getExtensions()
@@ -483,8 +479,7 @@ function onClose()
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
 
-		ActionDamage.onDamage = onDamage
-		ActionsManager.unregisterResultHandler("damage")
+		ActionDamage.applyDamage = applyDamage
 		ActionsManager.unregisterResultHandler("effectbce")
 
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartDND)

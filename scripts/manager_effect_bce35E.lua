@@ -34,7 +34,7 @@ function onInit()
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd35E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre35E)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost35E)
-		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage)
+		EffectsManagerBCEDND.setProcessEffectApplyDamage(applyDamage)
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler35E)
 
@@ -167,7 +167,7 @@ function addEffectPost35E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	return true
 end
 
-function onDamage(rSource,rTarget, rRoll)
+function applyDamage(rSource,rTarget)
 	local tMatch = {}
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
