@@ -5,7 +5,7 @@
 
 local RulesetEffectManager = nil
 local RulesetActorManager = nil
-local onDamage = nil
+local applyDamage = nil
 local messageDamage = nil
 local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
@@ -242,11 +242,7 @@ function processEffectTurnEndDND(rSource)
 	return true
 end
 
-function customOnDamage(rSource, rTarget, rRoll)
-	if not rTarget or not rSource or not rRoll  then
-		return onDamage(rSource, rTarget, rRoll)
-	end
-
+function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 	local bDead = false
 	local nodeTarget = ActorManager.getCTNode(rTarget.sCreatureNode)
 	local nodeSource = ActorManager.getCTNode(rSource.sCreatureNode)
@@ -288,8 +284,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 		return
 	end
 
-	
-		--if the target is dead, process all effects with (E)
+	--if the target is dead, process all effects with (E)
 	if(bDead == true) then
 		local sTarget =ActorManager.getCTNodeName(rTarget)
 		CombatManager.callForEachCombatantEffect(endEffectsOnDead, sTarget)
@@ -300,8 +295,9 @@ function customOnDamage(rSource, rTarget, rRoll)
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
 
-	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
+	local rDamageOutput = ActionDamage.decodeDamageText(nTotal, sDamage)
+
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, rDamageOutput)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
@@ -598,9 +594,9 @@ function onInit()
 		--Comment out because only needed for absorb
 	--	messageDamage = ActionDamage.messageDamage
 	--	ActionDamage.messageDamage = customMessageDamage
-		onDamage = ActionDamage.onDamage
-		ActionDamage.onDamage = customOnDamage
-		ActionsManager.registerResultHandler("damage", customOnDamage)
+		applyDamage = ActionDamage.applyDamage
+		ActionDamage.applyDamage = customApplyDamage
+
 		ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
 	end
 end

@@ -366,13 +366,8 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 									for _,sRemainder in ipairs(rEffectComp.remainder) do
 										if sRemainder == "all" then
 											bDiscard = false
-										else
-											for _,aDMGClause in ipairs(aDMGTypes) do
-												if StringManager.contains(aDMGClause.aDMG, sRemainder) then
-													bDiscard = false
-													break
-												end
-											end
+										elseif aDMGTypes.aDamageTypes[sRemainder] then
+											bDiscard = false
 										end
 										if bDiscard == false then
 											break

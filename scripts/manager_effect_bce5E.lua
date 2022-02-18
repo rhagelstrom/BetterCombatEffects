@@ -1097,8 +1097,6 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		else
 			rSaveVsRoll.sEffectPath = ""
 		end
-	--	ActionsManager.actionRoll(rSource,{{rSource}}, {rSaveVsRoll})
-
 		ActionsManager.actionRoll(rTarget,{{rTarget}}, {rSaveVsRoll})
 	end
 end

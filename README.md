@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
 **Current Version:** 3.6
-**Updated::** 02/16/22
+**Updated::** 02/18/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -30,7 +30,6 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 | **Expire Effect** | | | |
 |EXPIREADD|(-)| [effect] or [condition] |Add effect or condition when this effect expires|
 | **Misc** | | | |
-|ATURN|(-)||Enable effect on the start of the following turn|
 |DC|(N)|  |(N) will be added  to the [SDC] when [SDC] is automatically replaced|
 |DUSE|(-)||Disable effect when a tag is used (matched)|
 |DUR|(D)||Sets the duration of the effect when the effect is applied|
@@ -68,6 +67,7 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 | **Stack**| | | |
 |STACK|(-)| | Multiple of this effect is allow to be applied. The option "Allow Duplicate Effects" must be set to off|
 | **Turn** | | | |
+|ATURN|(-)||Enable effect on the start of any turn|
 |TURNAS|(-)| | ACTIVATE effect on the START of the Actor’s turn|
 |TURNDS|(-) | | DEACTIVATE effect on the START of the Actor’s turn|
 |TURNRS|(-)| | REMOVE effect on the START of the Actor’s turn if current duration is 1|
@@ -153,7 +153,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 ### Changelog BCE Gold vs BCE
   * IMMUNE: CUSTOM([effect]) Immune to an effect where [effect]is an effect in custom effects window
-  * ATURN - Enable effect on the start of the next turn
+  * ATURN - Enable effect on the start any turn
   * DUSE - Disable effect if a tag in the effect is used
   * Save vs Condition - Saves against conditions and damage types will automatically be granted adv/dis based on the traits of the actor making the saving throw
   * ADVCOND,DISCOND: [condition] or [damage type]- Explicit advantage/disadvantage when rolling a save vs condition or damage type
