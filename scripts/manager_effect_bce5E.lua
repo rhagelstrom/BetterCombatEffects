@@ -395,7 +395,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	end
 end
 
-function applyDamagee(rSource,rTarget)
+function applyDamage(rSource,rTarget)
 	local tMatch = {}
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
