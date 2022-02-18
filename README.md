@@ -88,7 +88,7 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 **[skill]** = any skill name  
 **[effect]** = Any effect label in the custom effect list. Effect label is defined as anything before the first ; i.e. My Custom; ATKDS; "My Custom" would be the effect label  
 **[condition]** = Any condition as noted above except exhaustion. Note [condition] must be all lower case  
-**[SDC]** = (5E only) [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF],  
+**[SDC]** = [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF],  
 **(ADV)** advantage on ongoing save  
 **(DIS)** disadvantage on ongoing save  
 **(R)** will remove the save effect on a successful save  
@@ -153,7 +153,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 
 ### Changelog BCE Gold vs BCE
   * IMMUNE: CUSTOM([effect]) Immune to an effect where [effect]is an effect in custom effects window
-  * ATURN - Enable effect on the start any turn
+  * ATURN - Enable effect on the start of any turn
   * DUSE - Disable effect if a tag in the effect is used
   * Save vs Condition - Saves against conditions and damage types will automatically be granted adv/dis based on the traits of the actor making the saving throw
   * ADVCOND,DISCOND: [condition] or [damage type]- Explicit advantage/disadvantage when rolling a save vs condition or damage type

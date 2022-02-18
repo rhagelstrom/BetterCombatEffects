@@ -303,7 +303,7 @@ function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveO
 			end
 		else
 			if DB.isOwner(nodeTarget) then
-				handleApplySaveVs(msgOOB);
+				customHandleApplySaveVs(msgOOB);
 				return;
 			end
 		end
@@ -1018,7 +1018,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	rTarget.nResult = nil
 end
 
-function applyDamagee(rSource,rTarget)
+function applyDamage(rSource,rTarget)
 	local tMatch = {}
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
