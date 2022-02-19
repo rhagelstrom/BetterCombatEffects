@@ -8,6 +8,10 @@ local RulesetActorManager = nil
 local applyDamage = nil
 local fProcessEffectApplyDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
+local handleApplyDamage = nil
+local notifyApplyDamage = nil 
+
+local OOB_MSGTYPE_APPLYDMG = "applydmg";
 
 function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
 	fProcessEffectApplyDamage = ProcessEffectApplyDamage
@@ -198,12 +202,17 @@ function processEffectTurnEndDND(rSource)
 end
 
 function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
-	local nodeTarget = ActorManager.getCTNode(rTarget)
-	local nodeSource = ActorManager.getCTNode(rSource)
-
+	local bDead = false
+	local nodeSource = nil
+	local nodeTarget = nil
+	if rTarget and rTarget.sCreatureNode then
+		nodeTarget = ActorManager.getCTNode(rTarget.sCreatureNode)
+	end
+	if rSource and rSource.sCreatureNode then
+		nodeSource = ActorManager.getCTNode(rSource.sCreatureNode)
+	end
 	-- save off temp hp and wounds before damage
 	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
-
 	-- Play nice with others
 	-- Do damage first then modify any effects
 	applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
@@ -259,7 +268,6 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 	end
 
 	aTags = {"SDMGADDT","SDMGADDS"}
-	
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget, rSource)
 	for _,tEffect in pairs(tMatch) do
 		--if type(tEffect.nodeCT) ~= "userdata" then
@@ -267,7 +275,7 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 		if rEffect ~= {} then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
-			if tEffect.sTag == "SDMGADDT" then
+			if tEffect.sTag == "SDMGADDT"   then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 			elseif tEffect.sTag == "SDMGADDS" then
 				EffectManager.addEffect("", "", nodeSource, rEffect, true)
@@ -396,6 +404,51 @@ function getTempHPAndWounds(rTarget)
 	return nTempHP, nWounds
 end
 
+-- only for Advanced Effects
+-- ##WARNING CONFLICT POTENTIAL
+function customHandleApplyDamage(msgOOB)
+	local rSource = ActorManager.resolveActor(msgOOB.sSourceNode);
+	local rTarget = ActorManager.resolveActor(msgOOB.sTargetNode);
+	if rTarget then
+		rTarget.nOrder = msgOOB.nTargetOrder;
+	end
+	if msgOOB.itemPath then
+		rSource.itemPath = msgOOB.itemPath
+	end
+
+	local nTotal = tonumber(msgOOB.nTotal) or 0;
+	customApplyDamage(rSource, rTarget, (tonumber(msgOOB.nSecret) == 1), msgOOB.sDamage, nTotal);
+end
+
+-- only for Advanced Effects
+-- ##WARNING CONFLICT POTENTIAL
+function customNotifyApplyDamage(rSource, rTarget, bSecret, sDesc, nTotal)
+	if not rTarget then
+		return;
+	end
+
+	local msgOOB = {};
+	msgOOB.type = OOB_MSGTYPE_APPLYDMG;
+	
+	if bSecret then
+		msgOOB.nSecret = 1;
+	else
+		msgOOB.nSecret = 0;
+	end
+	if rSource and rSource.itemPath then
+		msgOOB.itemPath = rSource.itemPath
+	end
+
+	msgOOB.nTotal = nTotal;
+	msgOOB.sDamage = sDesc;
+
+	msgOOB.sSourceNode = ActorManager.getCreatureNodeName(rSource);
+	msgOOB.sTargetNode = ActorManager.getCreatureNodeName(rTarget);
+	msgOOB.nTargetOrder = rTarget.nOrder;
+
+	Comm.deliverOOBMessage(msgOOB, "");
+end
+
 function onInit()
 	if  User.getRulesetName() == "5E"  or 
 		User.getRulesetName() == "4E"  or
@@ -459,14 +512,22 @@ function onInit()
 		-- save off the originals so we play nice with others
 		applyDamage = ActionDamage.applyDamage
 		ActionDamage.applyDamage = customApplyDamage
+
 		ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
 
-		aExtensions = Extension.getExtensions()
+		local aExtensions = Extension.getExtensions()
 		for _,sExtension in ipairs(aExtensions) do
 			tExtension = Extension.getExtensionInfo(sExtension)
 			if (tExtension.name == "MNM Charsheet Effects Display") then
 				bMadNomadCharSheetEffectDisplay = true
-			end
+			elseif (tExtension.name == "5E - Advanced Effects") then
+				bAdvanceEffects = true
+				notifyApplyDamage = ActionDamage.notifyApplyDamage
+				handleApplyDamage = ActionDamage.handleApplyDamage
+				ActionDamage.notifyApplyDamage = customNotifyApplyDamage
+				ActionDamage.handleApplyDamage = customHandleApplyDamage
+				OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_APPLYDMG, customHandleApplyDamage);
+			end			
 		end
 	end
 end
@@ -478,8 +539,12 @@ function onClose()
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
-
+		
 		ActionDamage.applyDamage = applyDamage
+		if bAdvanceEffects then
+			ActionDamage.notifyApplyDamage = notifyApplyDamage
+			ActionDamage.handleApplyDamage = handleApplyDamage
+		end
 		ActionsManager.unregisterResultHandler("effectbce")
 
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartDND)
