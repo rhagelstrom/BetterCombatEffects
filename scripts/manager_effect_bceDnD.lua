@@ -198,12 +198,18 @@ function processEffectTurnEndDND(rSource)
 end
 
 function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
-	local nodeTarget = ActorManager.getCTNode(rTarget)
-	local nodeSource = ActorManager.getCTNode(rSource)
-
+	local bDead = false
+	local nodeSource = nil
+	local nodeTarget = nil
+	if rTarget ~= nil then
+		nodeTarget = ActorManager.getCTNode(rTarget.sCreatureNode)
+	end
+	if rSource ~= nil then
+		nodeSource = ActorManager.getCTNode(rSource.sCreatureNode)
+	end
 	-- save off temp hp and wounds before damage
 	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
-
+Debug.chat("Here")
 	-- Play nice with others
 	-- Do damage first then modify any effects
 	applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
@@ -250,16 +256,15 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rTarget.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 			
-			if tEffect.sTag == "TDMGADDT" then
+			if tEffect.sTag == "TDMGADDT" and nodeTarget ~= nil then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
-			elseif tEffect.sTag == "TDMGADDS" then
+			elseif tEffect.sTag == "TDMGADDS" and nodeeSource ~= nil then
 				EffectManager.addEffect("", "", nodeSource, rEffect, true)
 			end
 		end
 	end
 
 	aTags = {"SDMGADDT","SDMGADDS"}
-	
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget, rSource)
 	for _,tEffect in pairs(tMatch) do
 		--if type(tEffect.nodeCT) ~= "userdata" then
@@ -267,9 +272,9 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 		if rEffect ~= {} then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
-			if tEffect.sTag == "SDMGADDT" then
+			if tEffect.sTag == "SDMGADDT" and nodeTarget ~= nil then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
-			elseif tEffect.sTag == "SDMGADDS" then
+			elseif tEffect.sTag == "SDMGADDS" and nodeSource ~= nil then
 				EffectManager.addEffect("", "", nodeSource, rEffect, true)
 			end
 		end
