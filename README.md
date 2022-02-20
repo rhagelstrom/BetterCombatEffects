@@ -1,12 +1,7 @@
 # Better Combat Effects Gold
 
-<<<<<<< HEAD
 **Current Version:** 3.6
-**Updated::** 02/18/22
-=======
-**Current Version:** 2.36
 **Updated::** 02/19/22
->>>>>>> free
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
