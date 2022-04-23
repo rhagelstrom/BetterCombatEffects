@@ -10,11 +10,11 @@ local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
-local bAdvanceEffects = nil 
+local bAdvanceEffects = nil
 
 function onInit()
-	if User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG" then 
-	
+	if User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG" then
+
 		rest = CombatManager2.rest
 		CombatManager2.rest = customRest
 		charRest = CharManager.rest
@@ -45,14 +45,14 @@ function onInit()
 		--parseEffects = PowerManager.parseEffects
 		--PowerManager.parseEffects = customParseEffects
 
-		--evalAction = PowerManager.evalAction 
+		--evalAction = PowerManager.evalAction
 		--PowerManager.evalAction = customEvalAction
-	
+
 	end
 end
 
 function onClose()
-	if User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG" then 
+	if User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG" then
 		CombatManager2.rest = rest
 		CharManager.rest = charRest
 		ActionsManager.unregisterResultHandler("save")
@@ -69,7 +69,7 @@ function customEvalAction(rActor, nodePower, rAction)
 	if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
 		local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
 		if aPowerGroup and aPowerGroup.sStat and DataCommon.ability_ltos[aPowerGroup.sStat] then
-			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager35E.getAbilityBonus(rActor, aPowerGroup.sStat) 
+			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager35E.getAbilityBonus(rActor, aPowerGroup.sStat)
 			if aPowerGroup.nSaveDCProf == 1 then
 				nDC = nDC + ActorManager35E.getAbilityBonus(rActor, "prf")
 			end
@@ -190,7 +190,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	if rRoll.sSubtype ~= "bce" then
 		return ActionSave.onSave(rSource, rTarget, rRoll)
 	end
-	local nodeEffect = nil 
+	local nodeEffect = nil
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
 	end
@@ -217,12 +217,12 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	--multiple different things. We have to be careful about the one shot options expireing
 	--our effect hence the check for nil
 
-	if bAct and nodeEffect ~= nil then	
+	if bAct and nodeEffect ~= nil then
 		aTags = {"SAVEADDP"}
 		if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
 			table.insert(aTags, "SAVEDMG")
 		end
-		
+
 		if rRoll.bRemoveOnSave  then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove");
 		elseif rRoll.bDisableOnSave then
@@ -234,12 +234,12 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 			if tEffect.sTag == "SAVEADDP" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if rEffect ~= {} then
-					rEffect.sSource = rRoll.sSourceCTNode 
+					rEffect.sSource = rRoll.sSourceCTNode
 					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
-				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true) 
+				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true)
 			end
 		end
 	elseif nodeEffect ~= nil then
@@ -264,7 +264,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 	local aParsedRemiander = StringManager.parseWords(tEffect.rEffectComp.remainder[1])
 	local sAbility = aParsedRemiander[1]
 	sAbility = DataCommon.ability_stol[sAbility]
-	
+
 	local nDC = tonumber(aParsedRemiander[2])
 	if  (nDC and sAbility) ~= nil then
 		local rSaveVsRoll = {}
@@ -298,10 +298,10 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 			rSaveVsRoll.bActonFail = true
 		end
 
-		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]" 
+		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]"
 		local rRoll = {}
 		rRoll = ActionSave.getRoll(rTarget,sAbility) -- call to get the modifiers
-		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers 
+		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers
 		rSaveVsRoll.aDice = rRoll.aDice
 		-- Pass the effect node if it wasn't expired by a One Shot
 		if(type(tEffect.nodeCT) == "databasenode") then

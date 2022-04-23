@@ -3,42 +3,40 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
-local bMadNomadCharSheetEffectDisplay = false
-local restChar = nil
 local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
-local bAdvanceEffects = nil 
+local bAdvanceEffects = nil
 
 
 OOB_MSGTYPE_APPLYDMG = "applydmg";
 
 function onInit()
-	if User.getRulesetName() == "5E" then 
+	if User.getRulesetName() == "5E" then
 		if Session.IsHost then
-			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects", 
-			"option_Allow_Duplicate", "option_entry_cycler", 
+			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects",
+			"option_Allow_Duplicate", "option_entry_cycler",
 			{ labels = "option_val_off", values = "off",
 				baselabel = "option_val_on", baseval = "on", default = "on" });
 
-			OptionsManager.registerOption2("CONSIDER_DUPLICATE_DURATION", false, "option_Better_Combat_Effects", 
-			"option_Consider_Duplicate_Duration", "option_entry_cycler", 
+			OptionsManager.registerOption2("CONSIDER_DUPLICATE_DURATION", false, "option_Better_Combat_Effects",
+			"option_Consider_Duplicate_Duration", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 
-			OptionsManager.registerOption2("ADD_PRONE", false, "option_Better_Combat_Effects", 
-			"option_Add_Prone", "option_entry_cycler", 
+			OptionsManager.registerOption2("ADD_PRONE", false, "option_Better_Combat_Effects",
+			"option_Add_Prone", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
-	
-			OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects", 
-			"option_Concentrate_Restrict", "option_entry_cycler", 
+
+			OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects",
+			"option_Concentrate_Restrict", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
-		
-				OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects", 
-			"option_Autoparse_Effects", "option_entry_cycler", 
+
+				OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects",
+			"option_Autoparse_Effects", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 		end
@@ -56,14 +54,14 @@ function onInit()
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		--4E/5E
 		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
-		
+
 		rest = CharManager.rest
 		CharManager.rest = customRest
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		parseEffects = PowerManager.parseEffects
 		PowerManager.parseEffects = customParseEffects
-		evalAction = PowerManager.evalAction 
+		evalAction = PowerManager.evalAction
 		PowerManager.evalAction = customEvalAction
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
@@ -74,16 +72,13 @@ function onInit()
 
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
-	
+
 		local aExtensions = Extension.getExtensions()
 		for _,sExtension in ipairs(aExtensions) do
 			tExtension = Extension.getExtensionInfo(sExtension)
-			if (tExtension.name == "MNM Charsheet Effects Display") then
-				bMadNomadCharSheetEffectDisplay = true
-			end
 			if (tExtension.name == "5E - Advanced Effects") then
 				bAdvanceEffects = true
-			end			
+			end
 		end
 
 		if bAdvanceEffects then
@@ -94,7 +89,7 @@ function onInit()
 end
 
 function onClose()
-	if User.getRulesetName() == "5E" then 
+	if User.getRulesetName() == "5E" then
 		CharManager.rest = rest
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
@@ -127,15 +122,14 @@ end
 -- End Advanced Effects
 
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
-	local sDuplicateMsg = nil; 
-	sDuplicateMsg = EffectManager5E.onEffectAddIgnoreCheck(nodeCT, rEffect)
+	local sDuplicateMsg = EffectManager5E.onEffectAddIgnoreCheck(nodeCT, rEffect)
 	local nodeEffectsList = nodeCT.createChild("effects")
 	if not nodeEffectsList then
 		return sDuplicateMsg
 	end
 	local bIgnoreDuration = OptionsManager.isOption("CONSIDER_DUPLICATE_DURATION", "off");
 	if OptionsManager.isOption("ALLOW_DUPLICATE_EFFECT", "off")  and not rEffect.sName:match("STACK") then
-		for k, nodeEffect in pairs(nodeEffectsList.getChildren()) do
+		for _, nodeEffect in pairs(nodeEffectsList.getChildren()) do
 			if (DB.getValue(nodeEffect, "label", "") == rEffect.sName) and
 					(DB.getValue(nodeEffect, "init", 0) == rEffect.nInit) and
 					(bIgnoreDuration or (DB.getValue(nodeEffect, "duration", 0) == rEffect.nDuration)) and
@@ -155,11 +149,9 @@ end
 
 
 function processEffectTurnStart5E(rSource)
-	local tMatch = {}
 	local aTags = {"SAVES"}
-	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -174,11 +166,9 @@ function processEffectTurnStart5E(rSource)
 end
 
 function processEffectTurnEnd5E(rSource)
-	local tMatch = {}
 	local aTags = {"SAVEE"}
-	local rEffectSource = {}
 
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -194,20 +184,20 @@ end
 
 function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
-	local rSource = nil
+	local rSource
 	if rNewEffect.sSource == nil or rNewEffect.sSource == "" then
 		rSource = rActor
 	else
 		local nodeSource = DB.findNode(rNewEffect.sSource)
-		rSource = ActorManager.resolveActor(nodeSource)		
+		rSource = ActorManager.resolveActor(nodeSource)
 	end
 
 	-- Save off original so we can match the name. Rebuilding a fully parsed effect
 	-- will nuke spaces after a , and thus EE extension will not match names correctly.
 	local aOriginalComps = EffectManager.parseEffect(rNewEffect.sName);
-	
+
 	rNewEffect.sName = EffectManager5E.evalEffect(rSource, rNewEffect.sName)
-	
+
 	local aNewComps = EffectManager.parseEffect(rNewEffect.sName);
 	aNewComps[1] = aOriginalComps[1]
 	rNewEffect.sName = EffectManager.rebuildParsedEffect(aNewComps);
@@ -227,16 +217,14 @@ end
 
 function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	local rTarget = ActorManager.resolveActor(nodeCT)
-	local rSource = {}
 	if rNewEffect.sSource == "" then
 		rSource = rTarget
 	else
 		rSource = ActorManager.resolveActor(rNewEffect.sSource)
 	end
 
-	local tMatch = {}
 	local aTags = {"SAVEA"}
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nodeEffect)
+	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nodeEffect)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "SAVEA" then
 			saveEffect(rSource, rTarget, tEffect)
@@ -272,7 +260,7 @@ function customEvalAction(rActor, nodePower, rAction)
 	if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
 		local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
 		if aPowerGroup and aPowerGroup.sStat and DataCommon.ability_ltos[aPowerGroup.sStat] then
-			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sStat) 
+			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sStat)
 			if aPowerGroup.nSaveDCProf == 1 then
 				nDC = nDC + ActorManager5E.getAbilityBonus(rActor, "prf")
 			end
@@ -284,9 +272,9 @@ function customEvalAction(rActor, nodePower, rAction)
 end
 
 function replaceSaveDC(rNewEffect, rActor)
-	if rNewEffect.sName:match("%[SDC]") and  
-			(rNewEffect.sName:match("SAVEE%s*:") or 
-			rNewEffect.sName:match("SAVES%s*:") or 
+	if rNewEffect.sName:match("%[SDC]") and
+			(rNewEffect.sName:match("SAVEE%s*:") or
+			rNewEffect.sName:match("SAVES%s*:") or
 			rNewEffect.sName:match("SAVEA%s*:") or
 		    rNewEffect.sName:match("SAVEONDMG%s*:")) then
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
@@ -299,11 +287,11 @@ function replaceSaveDC(rNewEffect, rActor)
 				if sFeatureName == "spellcasting" then
 					local sDesc = DB.getValue(nodeFeature, "text", ""):lower();
 					local sStat = sDesc:match("(%w+) is your spellcasting ability") or ""
-					nSpellcastingDC = nSpellcastingDC + ActorManager5E.getAbilityBonus(rActor, sStat) 
+					nSpellcastingDC = nSpellcastingDC + ActorManager5E.getAbilityBonus(rActor, sStat)
 					--TODO savemod is the db tag in the power group to get the power modifier
 					break
 				end
-			end 	
+			end
 		elseif sNodeType == "ct" or sNodeType == "npc" then
 			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf") + nDC
 			for _,nodeTrait in pairs(DB.getChildren(nodeActor, "traits")) do
@@ -325,14 +313,14 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	if rRoll.sSubtype ~= "bce" then
 		return ActionSave.onSave(rSource, rTarget, rRoll)
 	end
-	local nodeEffect = nil 
+	local nodeEffect = nil
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
 	end
 	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
-	local tMatch = {}
-	local aTags = {}
+	local tMatch
+	local aTags
 	ActionSave.onSave(rSource, rTarget, rRoll)
 	local nResult = ActionsManager.total(rRoll)
 	local bAct = false
@@ -345,19 +333,18 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			bAct = true
 		end
 	end
-	local sEffect = DB.getValue(nodeEffect, "label", "")
 
 	--Need the original effect because we only want to do things that are in the same effect
 	--if we just pull all the tags on the Actor then we can't have multiple saves doing
 	--multiple different things. We have to be careful about the one shot options expireing
 	--our effect hence the check for nil
 
-	if bAct and nodeEffect ~= nil then	
+	if bAct and nodeEffect ~= nil then
 		aTags = {"SAVEADDP"}
 		if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
 			table.insert(aTags, "SAVEDMG")
 		end
-		
+
 		if rRoll.bRemoveOnSave  then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove");
 		elseif rRoll.bDisableOnSave then
@@ -369,12 +356,12 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			if tEffect.sTag == "SAVEADDP" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if rEffect ~= {} then
-					rEffect.sSource = rRoll.sSourceCTNode 
+					rEffect.sSource = rRoll.sSourceCTNode
 					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
-				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true) 
+				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true)
 			end
 		end
 	elseif nodeEffect ~= nil then
@@ -396,11 +383,10 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 end
 
 function applyDamage(rSource,rTarget)
-	local tMatch = {}
 	local aTags = {"SAVEONDMG"}
-	local rEffectSource = {}
+	local rEffectSource
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
@@ -454,10 +440,10 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 			rSaveVsRoll.bActonFail = true
 		end
 
-		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]" 
-		local rRoll = {}
-		rRoll = ActionSave.getRoll(rTarget,sAbility) -- call to get the modifiers
-		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers 
+		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]"
+
+		local rRoll = ActionSave.getRoll(rTarget,sAbility) -- call to get the modifiers
+		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers
 		rSaveVsRoll.aDice = rRoll.aDice
 		-- Pass the effect node if it wasn't expired by a One Shot
 		if(type(tEffect.nodeCT) == "databasenode") then
@@ -477,7 +463,7 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
 	local aFinal = {};
 	for _,v in pairs(tEffects) do
 		local rReduction = {};
-		
+
 		rReduction.mod = v.mod;
 		rReduction.aNegatives = {};
 		for _,vType in pairs(v.remainder) do
@@ -496,13 +482,13 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
 			end
 		end
 	end
-	
+
 	return aFinal;
 end
 
 
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
-	local nDamageAdjust = 0
+	local nDamageAdjust
 	local nReduce = 0
 	local bVulnerable, bResist
 	local aReduce = getReductionType(rSource, rTarget, "DMGR", rDamageOutput)
@@ -529,7 +515,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
 	end
 	nDamageAdjust, bVulnerable, bResist = getDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
 	nDamageAdjust = nDamageAdjust - nReduce
-	return nDamageAdjust, bVulnerable, bResist 
+	return nDamageAdjust, bVulnerable, bResist
 end
 
 --5E Only - Check if this effect has concentration and drop all previous effects of concentration from the source
@@ -554,7 +540,7 @@ function dropConcentration(rNewEffect, nDuration)
 				local sEffect = DB.getValue(nodeEffect, "label", "")
 				tEffectComps = EffectManager.parseEffect(sEffect)
 				local sEffectTag = tEffectComps[1]
-				if (sEffect:match("%(C%)") and (DB.getValue(nodeEffect, "source_name", "") == sSource)) and 
+				if (sEffect:match("%(C%)") and (DB.getValue(nodeEffect, "source_name", "") == sSource)) and
 						(sEffectTag ~= sNewEffectTag) or
 						((sEffectTag == sNewEffectTag and (DB.getValue(nodeEffect, "duration", 0) ~= nDuration))) then
 							EffectsManagerBCE.modifyEffect(nodeEffect, "Remove", sEffect)
@@ -565,7 +551,7 @@ function dropConcentration(rNewEffect, nDuration)
 end
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
-function onModSaveHandler(rSource, rTarget, rRoll)	
+function onModSaveHandler(rSource, rTarget, rRoll)
 		ActionSave.modSave(rSource, rTarget, rRoll)
 end
 
@@ -583,7 +569,7 @@ function customParseEffects(sPowerName, aWords)
 		if StringManager.isWord(aWords[i], "damage") then
 			i, rCurrent = PowerManager.parseDamagePhrase(aWords, i);
 			if rCurrent then
-				if StringManager.isWord(aWords[i+1], "at") and 
+				if StringManager.isWord(aWords[i+1], "at") and
 						StringManager.isWord(aWords[i+2], "the") and
 						StringManager.isWord(aWords[i+3], { "start", "end" }) and
 						StringManager.isWord(aWords[i+4], "of") then
@@ -593,7 +579,7 @@ function customParseEffects(sPowerName, aWords)
 					local nTrigger = i + 4;
 					if StringManager.isWord(aWords[nTrigger+1], "each") and
 							StringManager.isWord(aWords[nTrigger+2], "of") then
-						if StringManager.isWord(aWords[nTrigger+3], "its") then 
+						if StringManager.isWord(aWords[nTrigger+3], "its") then
 							nTrigger = nTrigger + 3;
 						else
 							nTrigger = nTrigger + 4;
@@ -608,13 +594,13 @@ function customParseEffects(sPowerName, aWords)
 						nTrigger = nTrigger + 1;
 					end
 					rCurrent.endindex = nTrigger;
-					
+
 					if StringManager.isWord(aWords[rCurrent.startindex - 1], "takes") and
 							StringManager.isWord(aWords[rCurrent.startindex - 2], "and") and
 							StringManager.isWord(aWords[rCurrent.startindex - 3], DataCommon.conditions) then
 						rCurrent.startindex = rCurrent.startindex - 2;
 					end
-					
+
 					local aName = {};
 					for _,v in ipairs(rCurrent.clauses) do
 						local sDmg = StringManager.convertDiceToString(v.dice, v.modifier);
@@ -638,7 +624,7 @@ function customParseEffects(sPowerName, aWords)
 					rCurrent.startindex = rCurrent.startindex - 1;
 					rCurrent.sTargeting = "self";
 					rCurrent.sApply = "roll";
-					
+
 					local aName = {};
 					for _,v in ipairs(rCurrent.clauses) do
 						local sDmg = StringManager.convertDiceToString(v.dice, v.modifier);
@@ -654,8 +640,8 @@ function customParseEffects(sPowerName, aWords)
 					rCurrent = nil;
 				end
 			end
-		-- Handle ongoing saves 
-		elseif  StringManager.isWord(aWords[i], "repeat") and StringManager.isWord(aWords[i+2], "saving") and 
+		-- Handle ongoing saves
+		elseif  StringManager.isWord(aWords[i], "repeat") and StringManager.isWord(aWords[i+2], "saving") and
 			StringManager.isWord(aWords[i +3], "throw") then
 				local tSaves = PowerManager.parseSaves(sPowerName, aWords, false, false)
 				local aSave = tSaves[#tSaves]
@@ -666,8 +652,8 @@ function customParseEffects(sPowerName, aWords)
 				local bStartTurn = false
 				local bEndSuccess = false
 				local aName = {};
-				local sClause = nil;
-				
+				local sClause
+
 				while aWords[j] do
 					if StringManager.isWord(aWords[j], "start") then
 						bStartTurn = true
@@ -682,10 +668,10 @@ function customParseEffects(sPowerName, aWords)
 				else
 					sClause = "SAVEE:"
 				end
-				
+
 				sClause  = sClause .. " " .. DataCommon.ability_ltos[aSave.save]
 				sClause  = sClause .. " " .. aSave.savemod
-				
+
 				if bEndSuccess == true then
 					sClause = sClause .. " (R)"
 				end
@@ -711,31 +697,31 @@ function customParseEffects(sPowerName, aWords)
 						nConditionStart = j;
 						break;
 					end
-				
+
 				elseif StringManager.isWord(aWords[j], "being") and
 						StringManager.isWord(aWords[j-1], "against") then
 					bValidCondition = true;
 					nConditionStart = j;
 					break;
-				
-				elseif StringManager.isWord(aWords[j], { "also", "magically" }) then
-				
+
+				--elseif StringManager.isWord(aWords[j], { "also", "magically" }) then
+
 				-- Special handling: Blindness/Deafness
-				elseif StringManager.isWord(aWords[j], "or") and StringManager.isWord(aWords[j-1], DataCommon.conditions) and 
+				elseif StringManager.isWord(aWords[j], "or") and StringManager.isWord(aWords[j-1], DataCommon.conditions) and
 						StringManager.isWord(aWords[j-2], "either") and StringManager.isWord(aWords[j-3], "is") then
 					bValidCondition = true;
 					break;
-					
+
 				elseif StringManager.isWord(aWords[j], { "while", "when", "cannot", "not", "if", "be", "or" }) then
 					bValidCondition = false;
 					break;
-				
+
 				elseif StringManager.isWord(aWords[j], { "target", "creature", "it" }) then
 					if StringManager.isWord(aWords[j-1], "the") then
 						j = j - 1;
 					end
 					nConditionStart = j;
-					
+
 				elseif StringManager.isWord(aWords[j], "and") then
 					if #effects == 0 then
 						break;
@@ -746,7 +732,7 @@ function customParseEffects(sPowerName, aWords)
 					end
 					bValidCondition = true;
 					nConditionStart = j;
-					
+
 				elseif StringManager.isWord(aWords[j], "is") then
 					if bValidCondition or StringManager.isWord(aWords[i], "prone") or
 							(StringManager.isWord(aWords[i], "invisible") and StringManager.isWord(aWords[j-1], {"wearing", "wears", "carrying", "carries"})) then
@@ -754,7 +740,7 @@ function customParseEffects(sPowerName, aWords)
 					end
 					bValidCondition = true;
 					nConditionStart = j;
-				
+
 				elseif StringManager.isWord(aWords[j], DataCommon.conditions) then
 					break;
 
@@ -768,11 +754,11 @@ function customParseEffects(sPowerName, aWords)
 						nConditionStart = j;
 						break;
 					end
-				
+
 				elseif StringManager.isWord(aWords[j], {"knock", "knocks", "knocked", "fall", "falls"}) and StringManager.isWord(aWords[i], "prone")  then
 					bValidCondition = true;
 					nConditionStart = j;
-					
+
 				elseif StringManager.isWord(aWords[j], {"knock", "knocks", "fall", "falls", "falling", "remain", "is"}) and StringManager.isWord(aWords[i], "unconscious") then
 					if StringManager.isWord(aWords[j], "falling") and StringManager.isWord(aWords[j-1], "of") and StringManager.isWord(aWords[j-2], "instead") then
 						break;
@@ -788,31 +774,31 @@ function customParseEffects(sPowerName, aWords)
 					if StringManager.isWord(aWords[j], "fall") and StringManager.isWord(aWords[j-1], "or") then
 						break;
 					end
-					
+
 				elseif StringManager.isWord(aWords[j], {"become", "becomes"}) and StringManager.isWord(aWords[i], "frightened")  then
 					bValidCondition = true;
 					nConditionStart = j;
 					break;
-					
-				elseif StringManager.isWord(aWords[j], {"turns", "become", "becomes"}) 
+
+				elseif StringManager.isWord(aWords[j], {"turns", "become", "becomes"})
 						and StringManager.isWord(aWords[i], {"invisible"}) then
 					if StringManager.isWord(aWords[j-1], {"can't", "cannot"}) then
 						break;
 					end
 					bValidCondition = true;
 					nConditionStart = j;
-				
+
 				-- Special handling: Blindness/Deafness
 				elseif StringManager.isWord(aWords[j], "either") and StringManager.isWord(aWords[j-1], "is") then
 					bValidCondition = true;
 					break;
-				
+
 				else
 					break;
 				end
 				j = j - 1;
 			end
-			
+
 			if bValidCondition then
 				rCurrent = {};
 				rCurrent.sName = sPowerName .. "; " .. StringManager.capitalize(aWords[i]);
@@ -824,19 +810,19 @@ function customParseEffects(sPowerName, aWords)
 				rPrevious = rCurrent
 			end
 		end
-		
+
 		if rCurrent then
 			PowerManager.parseEffectsAdd(aWords, i, rCurrent, effects);
 			rCurrent = nil;
 		end
-		
+
 		i = i + 1;
 	end
 
 	if rCurrent then
 		PowerManager.parseEffectsAdd(aWords, i - 1, rCurrent, effects);
 	end
-	
+
 	-- Handle duration field in NPC spell translations
 	i = 1;
 	while aWords[i] do
@@ -881,7 +867,7 @@ function customParseEffects(sPowerName, aWords)
 		end
 		i = i + 1;
 	end
-	
+
 	return effects;
 end
 
@@ -890,8 +876,8 @@ function getTurnModifier(aWords, i)
 	while aWords[i] do
 		if StringManager.isWord(aWords[i], "until") and
 			StringManager.isWord(aWords[i+1], "the") and
-			StringManager.isWord(aWords[i+2], {"start","end"}) and 
-			StringManager.isWord(aWords[i+3], "of") then 
+			StringManager.isWord(aWords[i+2], {"start","end"}) and
+			StringManager.isWord(aWords[i+3], "of") then
 			if StringManager.isWord(aWords[i+4], "its") then
 				if StringManager.isWord(aWords[i+2], "start") then
 					sRemoveTurn = "TURNRS"
