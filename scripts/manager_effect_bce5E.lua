@@ -194,14 +194,19 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 
 	-- Save off original so we can match the name. Rebuilding a fully parsed effect
 	-- will nuke spaces after a , and thus EE extension will not match names correctly.
-	local aOriginalComps = EffectManager.parseEffect(rNewEffect.sName);
+	-- Consequently, if the name changes at all, AURA hates it and thus it isnt the same effect
+	-- Really this is just to do some string replace. We just won't do string replace for any
+	-- Effect that has FROMAURA;
 
-	rNewEffect.sName = EffectManager5E.evalEffect(rSource, rNewEffect.sName)
+	if  not rNewEffect.sName:upper():find("FROMAURA;") then
+		local aOriginalComps = EffectManager.parseEffect(rNewEffect.sName);
 
-	local aNewComps = EffectManager.parseEffect(rNewEffect.sName);
-	aNewComps[1] = aOriginalComps[1]
-	rNewEffect.sName = EffectManager.rebuildParsedEffect(aNewComps);
+		rNewEffect.sName = EffectManager5E.evalEffect(rSource, rNewEffect.sName)
 
+		local aNewComps = EffectManager.parseEffect(rNewEffect.sName);
+		aNewComps[1] = aOriginalComps[1]
+		rNewEffect.sName = EffectManager.rebuildParsedEffect(aNewComps);
+	end
 	replaceSaveDC(rNewEffect, rSource)
 
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
