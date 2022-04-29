@@ -8,11 +8,11 @@ local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
 local bAdvanceEffects = nil
-local bAutomaticShieldMaster = nil 
+--local bAutomaticShieldMaster = nil
+--local bMadNomadCharSheetEffectDisplay = nil
 local modSave = nil
-local getEffectsByType = nil 
+local getEffectsByType = nil
 local hasEffect = nil
-local OOB_MSGTYPE_APPLYDMG = "applydmg";
 
 
 -- Save vs condition
@@ -24,8 +24,8 @@ local handleApplySaveVs = nil
 local notifyApplySaveVs = nil
 local performVsRoll = nil
 local performSaveVsRoll = nil
-local addCustomNPC = nil 
-local addCustomPC = nil 
+local addCustomNPC = nil
+local addCustomPC = nil
 -- end save vs condition
 
 local OOB_MSGTYPE_APPLYSAVEVS = "applysavevs";
@@ -35,30 +35,30 @@ local tTraitsDisadvantage = {}
 
 function onInit()
 
-	if User.getRulesetName() == "5E" then 
+	if User.getRulesetName() == "5E" then
 		if Session.IsHost then
-			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects_Gold", 
-			"option_Allow_Duplicate", "option_entry_cycler", 
+			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects_Gold",
+			"option_Allow_Duplicate", "option_entry_cycler",
 			{ labels = "option_val_off", values = "off",
 				baselabel = "option_val_on", baseval = "on", default = "on" });
 
-			OptionsManager.registerOption2("CONSIDER_DUPLICATE_DURATION", false, "option_Better_Combat_Effects_Gold", 
-			"option_Consider_Duplicate_Duration", "option_entry_cycler", 
+			OptionsManager.registerOption2("CONSIDER_DUPLICATE_DURATION", false, "option_Better_Combat_Effects_Gold",
+			"option_Consider_Duplicate_Duration", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 
-			OptionsManager.registerOption2("ADD_PRONE", false, "option_Better_Combat_Effects_Gold", 
-			"option_Add_Prone", "option_entry_cycler", 
+			OptionsManager.registerOption2("ADD_PRONE", false, "option_Better_Combat_Effects_Gold",
+			"option_Add_Prone", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
-	
-			OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects_Gold", 
-			"option_Concentrate_Restrict", "option_entry_cycler", 
+
+			OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects_Gold",
+			"option_Concentrate_Restrict", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
-		
-			OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects_Gold", 
-			"option_Autoparse_Effects", "option_entry_cycler", 
+
+			OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects_Gold",
+			"option_Autoparse_Effects", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 
@@ -94,20 +94,20 @@ function onInit()
 
 		rest = CharManager.rest
 		CharManager.rest = customRest
-		
+
 		--Save vs Condition
 		hasEffect = EffectManager5E.hasEffect
 		getEffectsByType = EffectManager5E.getEffectsByType
-		decodeActors  = ActionsManager.decodeActors 
-		encodeActors  = ActionsManager.encodeActors 
-		performAction =PowerManager.performAction 
+		decodeActors  = ActionsManager.decodeActors
+		encodeActors  = ActionsManager.encodeActors
+		performAction =PowerManager.performAction
 		getPCPowerAction = PowerManager.getPCPowerAction
 		handleApplySaveVs = PowerManager.handleApplySaveVs
 		notifyApplySaveVs = ActionPower.notifyApplySaveVs
 		performVsRoll = ActionSave.performVsRoll
 		performSaveVsRoll = ActionPower.performSaveVsRoll
-		addCustomNPC = CombatManager.addNPC 
-		addCustomPC = CombatManager.addPC 
+		addCustomNPC = CombatManager.addNPC
+		addCustomPC = CombatManager.addPC
 
 		EffectManager5E.hasEffect = customHasEffect
 		EffectManager5E.getEffectsByType = customGetEffectsByType
@@ -122,7 +122,7 @@ function onInit()
 		CombatManager.addNPC = addNPCtoCT
 		CombatManager.addPC = addPCtoCT
 		-- End Save vs Condiition
-		
+
 		modSave = ActionSave.modSave
 		ActionSave.modSave = onModSaveHandler
 		getDamageAdjust = ActionDamage.getDamageAdjust
@@ -132,7 +132,7 @@ function onInit()
 		evalAction = PowerManager.evalAction
 		PowerManager.evalAction = customEvalAction
 
-		onAttack = ActionAttack.onAttack 
+		onAttack = ActionAttack.onAttack
 		ActionAttack.onAttack = customOnAttack
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
@@ -144,7 +144,7 @@ function onInit()
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		ActionsManager.registerResultHandler("attack", customOnAttack)
 		ActionsManager.registerModHandler("save", onModSaveHandler)
-	
+
 		OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_APPLYSAVEVS, customHandleApplySaveVs);
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
@@ -152,17 +152,17 @@ function onInit()
 		local aExtensions = Extension.getExtensions()
 		for _,sExtension in ipairs(aExtensions) do
 			tExtension = Extension.getExtensionInfo(sExtension)
-			if (tExtension.name == "MNM Charsheet Effects Display") then
-				bMadNomadCharSheetEffectDisplay = true
-			elseif (tExtension.name == "5E - Advanced Effects") then
+			if (tExtension.name == "5E - Advanced Effects") then
 				bAdvanceEffects = true
-			elseif (tExtension.name == "5E - Automatic Shield Master") then
-				bAutomaticShieldMaster = true
-			end			
+			-- elseif (tExtension.name == "MNM Charsheet Effects Display") then
+			-- 	bMadNomadCharSheetEffectDisplay = true
+			-- elseif (tExtension.name == "5E - Automatic Shield Master") then
+			-- 	bAutomaticShieldMaster = true
+			end
 		end
 
 		initTraitTables()
-		
+
 		if bAdvanceEffects then
 			performMultiAction = ActionsManager.performMultiAction
 			ActionsManager.performMultiAction = customPerformMultiAction
@@ -184,7 +184,7 @@ function onClose()
 
 		EffectManager5E.hasEffect = hasEffect
 		EffectManager5E.getEffectsByType = getEffectsByType
-		ActionsManager.encodeActors = encodeActors 
+		ActionsManager.encodeActors = encodeActors
 		ActionsManager.decodeActors = decodeActors
 		PowerManager.performAction = performAction
 		PowerManager.getPCPowerAction = getPCPowerAction
@@ -209,7 +209,6 @@ end
 function customPerformSaveVsRoll(draginfo, rActor, rAction)
 	local rRoll = ActionPower.getSaveVsRoll(rActor, rAction);
 	if rAction.sConditions == nil then
-		local sConditions = ""
 		if rAction.sType == "powersave" and rAction.label ~= nil then
 			rActor.sConditions = searchPowerGetConditions(rActor, rAction.label)
 		end
@@ -223,7 +222,7 @@ end
 -- WARNING: Conflict Potential
 --Need to set conditions in rRoll
 function customPerformVsRoll(draginfo, rActor, sSave, nTargetDC, bSecretRoll, rSource, bRemoveOnMiss, sSaveDesc, sConditions)
-	local rRoll = ActionSave.getRoll(rActor, sSave);	
+	local rRoll = ActionSave.getRoll(rActor, sSave);
 	if bSecretRoll then
 		rRoll.bSecret = true;
 	end
@@ -265,7 +264,7 @@ function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveO
 	end
 	local msgOOB = {};
 	msgOOB.type = OOB_MSGTYPE_APPLYSAVEVS;
-	
+
 	if bSecret then
 		msgOOB.nSecret = 1;
 	else
@@ -314,7 +313,6 @@ end
 -- for the PC and NPC
 function customPerformAction(draginfo, rActor, rAction, nodePower)
 	if rAction.type == "powersave" or rAction.type == "cast" then
-		local sNodeType, nodeCT = ActorManager.getTypeAndNode(rActor)
 		local sConditions = ""
 		if rActor.sType == "pc" or rActor.sType == "charsheet" then
 			for _,v in pairs(DB.getChildren(nodePower, "actions")) do
@@ -334,7 +332,7 @@ function customPerformAction(draginfo, rActor, rAction, nodePower)
 						local aDmgList = nodeDmgList.getChildren()
 						for _, nodeDmg in pairs(aDmgList) do
 							local type = DB.getValue(nodeDmg, "type", "")
-							sConditions = sConditions .. type .. ","	
+							sConditions = sConditions .. type .. ","
 						end
 					end
 				end
@@ -346,7 +344,7 @@ function customPerformAction(draginfo, rActor, rAction, nodePower)
 			sConditions = getNPCPowerConditions(nodePower)
 		end
 		rActor.sConditions = sConditions
-	end 
+	end
 
 	if (draginfo and rActor.sConditions and rActor.sConditions ~= "") then
         draginfo.setMetaData("sConditions",rActor.sConditions)
@@ -358,7 +356,7 @@ end
 function customDecodeActors(draginfo)
 	-- Reset the slot to 1. Needed when we drag a cast. It'll work the first roll but then will set the slot
 	-- to two and never reset it.
-	draginfo.setSlot(1)	
+	draginfo.setSlot(1)
 	local rSource, aTargets = decodeActors(draginfo)
 	local sConditions = draginfo.getMetaData("sConditions");
     if (rSource and sConditions and sConditions ~= "") then
@@ -381,7 +379,7 @@ function customGetPCPowerAction(nodeAction, sSubRoll)
 	if rActor ~= nil and rAction.save then
 		for _,v in pairs(DB.getChildren(nodeAction.getParent(), "")) do
 			local sType = DB.getValue(v, "type", "")
-			local sLabel = DB.getValue(v, "label", "")			
+			local sLabel = DB.getValue(v, "label", "")
 			if sType == "effect" then
 				local aEffectComps = EffectManager.parseEffect(sLabel)
 				for _,sEffectComp in ipairs(aEffectComps) do
@@ -395,7 +393,7 @@ function customGetPCPowerAction(nodeAction, sSubRoll)
 				if nodeDmgList ~= nil then
 					local aDmgList = nodeDmgList.getChildren()
 					for _, nodeDmg in pairs(aDmgList) do
-						local sType = DB.getValue(nodeDmg, "type", "")	
+						sType = DB.getValue(nodeDmg, "type", "")
 						sConditions = sConditions .. sType:lower() .. ","
 					end
 				end
@@ -459,7 +457,6 @@ end
 
 function getSaveConditions(sLabel)
 	local sRet = ""
-	local aHasCondition = {}
 	local tEffectComps = EffectManager.parseEffect(sLabel)
 	for _,sEffectComp in ipairs(tEffectComps) do
 		rEffectComp =  EffectManager5E.parseEffectComp(sEffectComp)
@@ -472,7 +469,7 @@ function getSaveConditions(sLabel)
 		-- already has  a conditiion
 		if StringManager.contains(DataCommon.conditions, rEffectComp.original:lower())  then
 			sRet = sRet .. rEffectComp.original:lower() .. ","
-		end	
+		end
 	end
 	if rRet ~= "" then
 		sRet = sRet:sub(1, #sRet -1 )
@@ -532,7 +529,7 @@ function addNPCtoCT(sClass, nodeNPC, sName)
 end
 
 function addTraitstoConditionsTables(rActor)
-	local bAdvantage = false
+	local bAdvantage
 	local nodeActor = ActorManager.getCreatureNode(rActor)
 	local nodeTraits = nodeActor.getChild("traitlist") or nodeActor.getChild("traits")
 	if nodeTraits ~= nil then
@@ -556,7 +553,7 @@ function addTraitstoConditionsTables(rActor)
 							local k = j
 							local sConditions = ""
 							while aWords[k] do
-								if StringManager.isWord(aWords[k], DataCommon.conditions) or 
+								if StringManager.isWord(aWords[k], DataCommon.conditions) or
 									StringManager.isWord(aWords[k], DataCommon.dmgtypes)then
 									sConditions = sConditions .. aWords[k] .. ","
 								end
@@ -577,7 +574,7 @@ function addTraitstoConditionsTables(rActor)
 					end
 				end
 				i=i+1
-			end	
+			end
 		end
 
 --		if bAdvanceEffects then
@@ -624,7 +621,7 @@ end
 
 function noRest(nodeActor, bLong, bMilestone)
 	local rSource = ActorManager.resolveActor(nodeActor)
-	local tMatch = {}
+	local tMatch
 	local aTags = {"NOREST"}
 	if bLong then
 		table.insert(aTags, "NORESTL")
@@ -636,7 +633,7 @@ end
 function customRest(nodeActor, bLong, bMilestone)
 	local bRest = true
 	EffectsManagerBCEDND.customRest(nodeActor, bLong, nil)
-	local tMatch = {}
+	local tMatch
 	tMatch = noRest(nodeActor, bLong, bMilestone)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "NORESTL" or tEffect.sTag == "NOREST" then
@@ -649,9 +646,8 @@ function customRest(nodeActor, bLong, bMilestone)
 end
 
 function customOnAttack(rSource, rTarget, rRoll)
-	local tMatch = {}
+	local tMatch
 	local aTags = {"ATKD","ATKA","ATKR"}
-	local rEffectSource = {}
 
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
@@ -682,7 +678,7 @@ function processEffectTurnStart5E(rSource)
 	end
 	local ctEntries = CombatManager.getCombatantNodes()
 	--Tags to be processed on other nodes in the CT
-	local aTags = {"SSAVES"}
+	aTags = {"SSAVES"}
 	for _, nodeCT in pairs(ctEntries) do
 		local rActor = ActorManager.resolveActor(nodeCT)
 		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
@@ -712,7 +708,7 @@ function processEffectTurnEnd5E(rSource)
 
 	local ctEntries = CombatManager.getCombatantNodes()
 	--Tags to be processed on other nodes in the CT
-	local aTags = {"SSAVEE"}
+	aTags = {"SSAVEE"}
 	for _, nodeCT in pairs(ctEntries) do
 		local rActor = ActorManager.resolveActor(nodeCT)
 		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
@@ -760,7 +756,7 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	-- Repalace effects with () that fantasygrounds will autocalc with [ ]
 	local aReplace = {"PRF", "LVL"}
 	for _,sClass in pairs(DataCommon.classes) do
-		table.insert(aReplace, sClass:upper())	
+		table.insert(aReplace, sClass:upper())
 	end
 	for _,sAbility in pairs(DataCommon.abilities) do
 		table.insert(aReplace, DataCommon.ability_ltos[sAbility]:upper())
@@ -856,7 +852,7 @@ function abilityReplacement(rNewEffect, rActor)
 	for i,sEffectComp in ipairs(aEffectComps) do
 		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
 		if rEffectComp.mod ~= 0 and
-			rEffectComp.type == "SAVEE"  or 
+			rEffectComp.type == "SAVEE"  or
 			rEffectComp.type == "SAVES" or
 			rEffectComp.type == "SAVEA" or
 			rEffectComp.type == "SAVEONDMG" then
@@ -882,7 +878,6 @@ end
 
 -- Replace SDC when applied from a power
 function customEvalAction(rActor, nodePower, rAction)
-	local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
 	if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
 		local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
 		if aPowerGroup and aPowerGroup.sStat and DataCommon.ability_ltos[aPowerGroup.sStat] then
@@ -898,9 +893,9 @@ function customEvalAction(rActor, nodePower, rAction)
 end
 
 function replaceSaveDC(rNewEffect, rActor)
-	if (rNewEffect.sName:match("%[SDC]") or rNewEffect.sName:match("%(SDC%)")) and  
-			(rNewEffect.sName:match("SAVEE%s*:") or 
-			rNewEffect.sName:match("SAVES%s*:") or 
+	if (rNewEffect.sName:match("%[SDC]") or rNewEffect.sName:match("%(SDC%)")) and
+			(rNewEffect.sName:match("SAVEE%s*:") or
+			rNewEffect.sName:match("SAVES%s*:") or
 			rNewEffect.sName:match("SAVEA%s*:") or
 		    rNewEffect.sName:match("SAVEONDMG%s*:")) then
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
@@ -1080,10 +1075,10 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		if tEffect.rEffectComp.original:match("%(DIS%)") then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [DIS]"
 		end
-		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]" 
-		local rRoll = {}
+		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]"
+		local rRoll
 		rRoll = ActionSave.getRoll(rTarget,sAbility) -- call to get the modifiers
-		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers 
+		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers
 		rSaveVsRoll.aDice = rRoll.aDice
 		-- Pass the effect node if it wasn't expired by a One Shot
 		if(type(tEffect.nodeCT) == "databasenode") then
@@ -1201,7 +1196,7 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	-- Do the Trait advantage first so we don't burn our effect if we don't need to
 	if rRoll.sConditions ~= "" then
 		local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
-		tTraits = hasAdvDisCondition(rSource, aConditions) 
+		tTraits = hasAdvDisCondition(rSource, aConditions)
 	end
 	for _, sDesc in pairs(tTraits) do
 		if  sDesc:match("%[ADV]") and not rRoll.sDesc:match("%[ADV]") then
@@ -1228,8 +1223,8 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "ADVCOND" then
 			rRoll.sDesc = rRoll.sDesc .. " [" .. tEffect.rEffectComp.original .. "] [ADV]"
-		elseif tEffect.sTag == "DISCOND" then 
-			rRoll.sDesc = rRoll.sDesc .. " [" .. tEffect.rEffectComp.original .. "] [DIS]"		
+		elseif tEffect.sTag == "DISCOND" then
+			rRoll.sDesc = rRoll.sDesc .. " [" .. tEffect.rEffectComp.original .. "] [DIS]"
 		end
 	end
 	return modSave(rSource, rTarget, rRoll)

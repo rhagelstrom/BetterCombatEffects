@@ -4,10 +4,8 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
 local RulesetActorManager = nil
-local origConvertStringToDice = nil
 local applyDamage = nil
 local messageDamage = nil
-local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
 local handleApplyDamage = nil
 local notifyApplyDamage = nil
@@ -45,8 +43,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		return
 	end
 	local nodeSource = ActorManager.getCTNode(rSource)
-	local sEffect = ""
-	local sEffectOriginal = ""
+	local sEffect
 
 	if rRoll.subtype and rRoll.subtype == "DUR" and rRoll.nodeEffectCT and type(DB.findNode(rRoll.nodeEffectCT)) == "databasenode" then
 		local nResult = tonumber(ActionsManager.total(rRoll))
@@ -57,7 +54,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		elseif rRoll.sUnits == "day" then
 			nResult = nResult * 10 * 60 * 24
 		end
-		
+
 		local nodeCT = DB.findNode(rRoll.nodeEffectCT)
 		DB.setValue(nodeCT, "duration", "number", nResult)
 		EffectsManagerBCE.updateEffect(nodeSource,nodeCT, rRoll.sEffect)
@@ -101,10 +98,8 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 	else
 		rSource = ActorManager.resolveActor(rNewEffect.sSource)
 	end
-	local tMatch = {}
-	local aTags = {"REGENA", "TREGENA", "DMGA", "DUR"}
 
-	local aTags = {"REGENA", "TREGENA", "DMGA"}
+	local aTags = {"REGENA", "TREGENA", "DMGA", "DUR"}
 	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "REGENA" and tEffect.rEffectComp.type == "REGENA" then
@@ -131,7 +126,7 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 			else
 				rRoll.bSecret = false
 			end
-			ActionsManager.performAction(nil, rTarget, rRoll)		
+			ActionsManager.performAction(nil, rTarget, rRoll)
 		end
 	end
 	return true
@@ -269,13 +264,14 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 	if nTotalHP == nWounds then
 		bDead = true
 	end
-	
+
 	--Dropping this because Blistful Ignorance does this better
 	--and there is less risk of conflict if this isn't a thing in BCE
 	--processAbsorb(rSource, rTarget, rRoll)
 
 	-- get temp hp and wounds after damage
-	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
+	local nTempHP
+	nTempHP, nWounds = getTempHPAndWounds(rTarget)
 
 	if OptionsManager.isOption("TEMP_IS_DAMAGE", "on") then
 		-- If no damage was applied then return
@@ -292,8 +288,8 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 		local sTarget =ActorManager.getCTNodeName(rTarget)
 		CombatManager.callForEachCombatantEffect(endEffectsOnDead, sTarget)
 	end
-	
-	local tMatch = {}
+
+	local tMatch
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
@@ -323,7 +319,7 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 		if rEffect ~= {} then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rTarget.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
-			
+
 			if tEffect.sTag == "TDMGADDT" and nodeTarget ~= nil then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 			elseif tEffect.sTag == "TDMGADDS" and nodeeSource ~= nil then
@@ -359,12 +355,12 @@ end
 -- This function is disabled but left here incase someone wants it for
 --another ruleset
 function processAbsorb(rSource, rTarget, rRoll)
-	local tMatch = {}
+	local tMatch
 	local aTags = {"ABSORB"}
 	local bHalf = false
 	local nDMGAmount = 0
 	local sDMGType
-	
+
 	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
 
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
@@ -589,23 +585,15 @@ function customNotifyApplyDamage(rSource, rTarget, bSecret, sDesc, nTotal)
 end
 
 function onInit()
-	local aExtensions = Extension.getExtensions()
-	for _,sExtension in ipairs(aExtensions) do
-		local tExtension = Extension.getExtensionInfo(sExtension)
-		if (tExtension.name == "MNM Charsheet Effects Display") then
-			bMadNomadCharSheetEffectDisplay = true
-		end			
-	end
-
-	if  User.getRulesetName() == "5E"  or 
+	if  User.getRulesetName() == "5E"  or
 		User.getRulesetName() == "4E"  or
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
 
 		if Session.IsHost then
-			OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects_Gold", 
-			"option_Temp_Is_Damage", "option_entry_cycler", 
+			OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects_Gold",
+			"option_Temp_Is_Damage", "option_entry_cycler",
 			{ labels = "option_val_off", values = "off",
 				baselabel = "option_val_on", baseval = "on", default = "on" })
 		end
@@ -677,7 +665,7 @@ end
 
 function onClose()
 
-	if  User.getRulesetName() == "5E"  or 
+	if  User.getRulesetName() == "5E"  or
 		User.getRulesetName() == "4E"  or
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or

@@ -58,7 +58,7 @@ function onInit()
 	addEffect = EffectManager.addEffect
 	EffectManager.addEffect = customAddEffect
 
-	expireEffect = EffectManager.expireEffect	
+	expireEffect = EffectManager.expireEffect
 	RulesetEffectManager.expireEffect = customExpireEffect
 
 	ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
@@ -86,7 +86,7 @@ function registerBCETag(sTag, aOptions, bNoUpdate)
 		tBCETag[sTag] = aOptions
 	elseif bNoUpdate and tBCETag[sTag] == nil then
 		tBCETag[sTag] = aOptions
-	else 
+	else
 		-- Not updated
 		bUpdated = false
 	end
@@ -94,7 +94,7 @@ function registerBCETag(sTag, aOptions, bNoUpdate)
 end
 
 function unregisterBCETag(sTag)
-	tBCETag[sTag] = nil 
+	tBCETag[sTag] = nil
 end
 
 -- Expire effect is called twice. Once initially and then once for delayed remove
@@ -224,7 +224,7 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local nodeDisableEffect = nil
 	local bDeactivate = false
-	
+
 	--Deactivate Check here. Deactivate at end
 	if rNewEffect.sName:match("%(DE%)") then
 		for _,nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
@@ -419,7 +419,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 						if nActive == 2 then
 							DB.setValue(v, "isactive", "number", 1)
 						else
-							table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect, 
+							table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect,
 							sLabel = sLabel, nGMOnly = aMatchComp.nGMOnly, bDisableUse = aMatchComp.bDisableUse, rEffectComp = rEffectComp})
 							local sApply = DB.getValue(v, "apply", "")
 							if sApply == "action" then
@@ -431,7 +431,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 							end
 						end
 					elseif type(v) == "databasenode" and aMatchComp.bIgnoreOneShot == true then
-						table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect, 
+						table.insert(aMatch, {nodeCT = v, sTag = aMatchComp.sTag, sSource = aMatchComp.sSourceEffect,
 						sLabel = sLabel, nGMOnly = aMatchComp.nGMOnly, bDisableUse = aMatchComp.bDisableUse, rEffectComp = rEffectComp})
 					end
 				end
