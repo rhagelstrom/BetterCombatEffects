@@ -7,7 +7,7 @@ local applyOngoingRegenBCE = nil
 local getDamageAdjust = nil
 
 function onInit()
-	if User.getRulesetName() == "4E" then 
+	if User.getRulesetName() == "4E" then
 		rest = CharManager.rest
 		CharManager.rest = customRest
 
@@ -30,20 +30,22 @@ function onInit()
         --No save support yet for 4E or is it really not that useful?
 --		ActionsManager.registerResultHandler("savebce", onSaveRollHandler35E)
 --		ActionsManager.registerModHandler("savebce", onModSaveHandler)
-	
+
 	end
 end
 
 function onClose()
-	CharManager.rest = rest
-	ActionDamage.getDamageAdjust = getDamageAdjust
+	if User.getRulesetName() == "4E" then
+		CharManager.rest = rest
+		ActionDamage.getDamageAdjust = getDamageAdjust
 --		ActionsManager.unregisterResultHandler("savebce")
 --		ActionsManager.unregisterModHandler("savebce")
-	EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart4E)
-	EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd4E)
-	EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre4E)
-	EffectsManagerBCEDND.applyOngoingDamage = applyOngoingDamageBCE
-	EffectsManagerBCEDND.applyOngoingRegen = applyOngoingRegenBCE
+		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart4E)
+		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd4E)
+		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre4E)
+		EffectsManagerBCEDND.applyOngoingDamage = applyOngoingDamageBCE
+		EffectsManagerBCEDND.applyOngoingRegen = applyOngoingRegenBCE
+	end
 
 end
 
@@ -53,7 +55,7 @@ function customRest(nodeActor, bLong, bMilestone)
 end
 
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
-	local sDuplicateMsg = nil; 
+	local sDuplicateMsg = nil;
 	sDuplicateMsg = EffectManager4E.onEffectAddIgnoreCheck(nodeCT, rEffect)
 	if sDuplicateMsg ~= nil and rEffect.sName:match("STACK") and sDuplicateMsg:match("ALREADY EXISTS") then
 		sDuplicateMsg = nil
@@ -64,7 +66,7 @@ end
 
 function checkNumericalReductionType(aReduction, aDmgType, nLimit)
 	local nAdjust = 0;
-	
+
 	for _,sDmgType in pairs(aDmgType) do
 		if nLimit then
 			local nSpecificAdjust = checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType, nLimit);
@@ -76,7 +78,7 @@ function checkNumericalReductionType(aReduction, aDmgType, nLimit)
 			nAdjust = nAdjust + checkNumericalReductionTypeHelper(aReduction["all"], aDmgType);
 		end
 	end
-	
+
 	return nAdjust;
 end
 
@@ -100,7 +102,7 @@ function checkNumericalReductionTypeHelper(rMatch, aDmgType, nLimit)
 	else
 		bMatch = true;
 	end
-	
+
 	local nAdjust = 0;
 	if bMatch then
 		nAdjust = rMatch.mod - (rMatch.nApplied or 0);
@@ -109,7 +111,7 @@ function checkNumericalReductionTypeHelper(rMatch, aDmgType, nLimit)
 		end
 		rMatch.nApplied = (rMatch.nApplied or 0) + nAdjust;
 	end
-	
+
 	return nAdjust;
 end
 
@@ -118,7 +120,7 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
 	local aFinal = {};
 	for _,v in pairs(tEffects) do
 		local rReduction = {};
-		
+
 		rReduction.mod = v.mod;
 		rReduction.aNegatives = {};
 		for _,vType in pairs(v.remainder) do
@@ -137,7 +139,7 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
 			end
 		end
 	end
-	
+
 	return aFinal;
 end
 
@@ -190,7 +192,7 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
 	local rAction = {}
 	local aClause = {}
 	rAction.clauses = {}
-	
+
 	aClause.basedice  = rEffectComp.dice;
 	aClause.dicestr = StringManager.convertDiceToString(rEffectComp.dice,rEffectComp.mod, true);
 	aClause.mod = rEffectComp.mod
@@ -202,7 +204,7 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
 	table.insert(rAction.clauses, aClause)
 
 	rAction.name = "Ongoing Effect"
-	
+
 	local rRoll = ActionDamage.getRoll(rTarget, rAction)
 	if  bHalf then
 		rRoll.sDesc = rRoll.sDesc .. " [HALF]"
@@ -222,7 +224,7 @@ function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp)
 	aClause.stat = {}
 	aClause.basemult = 0
 	aClause.cost = 0
-	
+
 	if bTemp == true then
 		rAction.name = "Ongoing Temporary Hitpoints"
 		aClause.subtype = "temp"

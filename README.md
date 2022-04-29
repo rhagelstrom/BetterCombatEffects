@@ -102,6 +102,7 @@ __*__ = Multiple entries of this descriptor type allowed
 **(E)** If the source of the effect drops to zero hit points, this effect will be removed  
 
 ## Examples
+
 |Power [Source]| Effect Code | Duration/Target/Expend|Notes|
 |---|---|---|---|
 | Belt of Frost Giant Strength [Item] |Belt of Frost Giant Strength; STR: 19-X| Targeting=Self| |
@@ -111,7 +112,7 @@ __*__ = Multiple entries of this descriptor type allowed
 | Dragon [NPC] |Frightful Presence; Frightened; SAVEE: WIS 16 (R)|||
 | General Action| Dodge; TURNRS|Targeting=Self| |
 | Ghoul [NPC] | Ghoul Claws; SDMGADDT: GOTU| Targeting=Self| GTOU is an effect in the custom effects list|
-| Ghoul [NPC] | GOTU; Paralyzed; SAVEA: CON 10 (R); SAVEE: CON 10 (R)| |
+| Ghoul [NPC] | GOTU; Paralyzed; SAVEA: CON 10 (R); SAVEE: CON 10 (R)| | |
 | Headband of Intellect [Item]|Headband of Intellect; INT: 19-X| Targeting=Self| |
 | Heavy Armor Master [Feat]|Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic| Targeting=Self| |
 | Interception Fighting Style [Class - Fighter]|Interception Fighting Style; DMGR: 1d10 [PRF],all| | |
@@ -122,8 +123,8 @@ __*__ = Multiple entries of this descriptor type allowed
 | Shield of the 300 [Item]| Shield of the 300 Bonus; AC: 1; TURNRS; STACK| ||
 | Sleep [Spell]|Sleep; Unconscious; DMGRT|Duration=1 Min| |
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
-| Stunning Strike [Class - Monk]|Stunning Strike; Stunned; STURNRE | Duration=1 Rnd |
-| Vitriolic Sphere [Spell]|Vitriolic Sphere; DMGOE: 5d4 acid| Duration=2 Rnd |
+| Stunning Strike [Class - Monk]|Stunning Strike; Stunned; STURNRE | Duration=1 Rnd | |
+| Vitriolic Sphere [Spell]|Vitriolic Sphere; DMGOE: 5d4 acid| Duration=2 Rnd | |
 | Wall of Thorns [Spell]|Wall of Thorns; SAVEE: DEX [SDC] (H)(C); SAVEDMG: 7d8 slashing| | |
 | Water Elemental [NPC]|Water Elemental Whelm; grappled; restrained; SDMGOS: 2d8+4 bludgeoning| | |
 | Web [Spell]| Web; Restrained; SAVES: DEX [SDC] (C) | | |
@@ -146,7 +147,8 @@ When writing NPC effects, the CT doesn't process tags such as [CLASS] [PRF] [LVL
 
 ### Add Effect on Damage Modifiers
 Effects can be automatically added to the source or the target on the damage by either the source of the damage or the target of the damage. For this to work we need two different effects.  Example:
-  * Shadow; SDMGADDT: Strength Drain
+
+* Shadow; SDMGADDT: Strength Drain
 
 The Shadow has strength drain so we put the above effect on the shadow. When the shadow deals damage, it will apply the effect "Strength Drain" to the target of the damage. The effect "Strength Drain" needs to be an effect listed in our custom effects list or conditions table. The effect looks like this:
   * Strength Drain; STR: -1d4; STACK; RESTL

@@ -3,14 +3,14 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
-local RulesetEffectManager = nil
 local RulesetActorManager = nil
+local origConvertStringToDice = nil
 local applyDamage = nil
 local messageDamage = nil
 local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
 local handleApplyDamage = nil
-local notifyApplyDamage = nil 
+local notifyApplyDamage = nil
 
 local OOB_MSGTYPE_APPLYDMG = "applydmg";
 
@@ -19,9 +19,7 @@ function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
 end
 
 function customRest(nodeActor, bLong, bMilestone)
---	local nodeCT = ActorManager.getCTNode(nodeActor)
 	local rSource = ActorManager.resolveActor(nodeActor)
-	local tMatch = {}
 
 	local aTags = {"RESTS"}
 	if bLong == true then
@@ -31,7 +29,7 @@ function customRest(nodeActor, bLong, bMilestone)
 		end
 	end
 
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "RESTL" or tEffect.sTag == "RESTS" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
@@ -46,7 +44,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		ChatManager.SystemMessage(Interface.getString("ct_error_effectclient"))
 		return
 	end
-	local nodeSource = ActorManager.getCTNode(rSource)	
+	local nodeSource = ActorManager.getCTNode(rSource)
 	local sEffect = ""
 	local sEffectOriginal = ""
 
@@ -69,7 +67,6 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 	for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
 		sEffect = DB.getValue(nodeEffect, "label", "")
 		if sEffect == rRoll.sEffect then
-			sEffectOriginal = sEffect
 			local nResult = tonumber(ActionsManager.total(rRoll))
 			local sResult = tostring(nResult)
 			local sValue = rRoll.sValue
@@ -98,7 +95,7 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 		return true
 	end
 	local rTarget = ActorManager.resolveActor(nodeCT)
-	local rSource = {}
+	local rSource
 	if rNewEffect.sSource == "" then
 		rSource = rTarget
 	else
@@ -107,13 +104,14 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 	local tMatch = {}
 	local aTags = {"REGENA", "TREGENA", "DMGA", "DUR"}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	local aTags = {"REGENA", "TREGENA", "DMGA"}
+	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
-		if tEffect.sTag == "REGENA" then
+		if tEffect.sTag == "REGENA" and tEffect.rEffectComp.type == "REGENA" then
 			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, false)
-		elseif tEffect.sTag == "TREGENA" then
+		elseif tEffect.sTag == "TREGENA" and tEffect.rEffectComp.type == "TREGENA" then
 			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, true)
-		elseif tEffect.sTag == "DMGA" then
+		elseif tEffect.sTag == "DMGA" and tEffect.rEffectComp.type == "DMGA" then
 			applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp)
 		elseif tEffect.sTag == "DUR" and type(tEffect.nodeCT) == "databasenode" then
 			local sLabel = DB.getValue(tEffect.nodeCT, "label", "")
@@ -143,14 +141,14 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
 	local rAction = {}
 	local aClause = {}
 	rAction.clauses = {}
-	
+
 	aClause.dice  = rEffectComp.dice;
 	aClause.modifier = rEffectComp.mod
 	aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ","))
 	table.insert(rAction.clauses, aClause)
 
 	rAction.label = "Ongoing Effect"
-	
+
 	local rRoll = ActionDamage.getRoll(rTarget, rAction)
 	if  bHalf then
 		rRoll.sDesc = rRoll.sDesc .. " [HALF]"
@@ -179,11 +177,10 @@ function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp)
 end
 
 function processEffectTurnStartDND(rSource)
-	local tMatch = {}
 	local aTags = {"TREGENS"}
 
 	-- Only process these if on the source node
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, rSource)
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, rSource)
 	for _,tEffect in pairs(tMatch) do
 		applyOngoingRegen(rSource, rSource, tEffect.rEffectComp, true)
 	end
@@ -210,11 +207,10 @@ function processEffectTurnStartDND(rSource)
 end
 
 function processEffectTurnEndDND(rSource)
-  	local tMatch = {}
 	local aTags = {"DMGOE", "REGENE", "TREGENE"}
 
 	-- Only process these if on the source node
-	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGOE" then
 				applyOngoingDamage(rSource, rSource, tEffect.rEffectComp)
@@ -247,9 +243,8 @@ function processEffectTurnEndDND(rSource)
 end
 
 function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
-	local bDead = false
-	local nodeSource = nil
-	local nodeTarget = nil
+	local nodeSource
+	local nodeTarget
 	if rTarget and rTarget.sCreatureNode then
 		nodeTarget = ActorManager.getCTNode(rTarget.sCreatureNode)
 	end
@@ -321,7 +316,7 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 	end
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
-	
+
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
@@ -411,7 +406,7 @@ end
 function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
 	replaceAbilityScores(rNewEffect, rActor)
-	local rRoll = {}
+	local rRoll
 	rRoll = isDie(rNewEffect.sName)
 	if next(rRoll) ~= nil and next(rRoll.aDice) ~= nil then
 		rRoll.rActor = rActor
@@ -436,7 +431,7 @@ function replaceAbilityScores(rNewEffect, rActor)
 			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
 			local nAbility = 0
 
-			if rEffectComp.type == "STR" or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "STRMNM") then			
+			if rEffectComp.type == "STR" or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "STRMNM") then
 				nAbility = RulesetActorManager.getAbilityScore(rActor, "strength")
 			elseif rEffectComp.type  == "DEX"  or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == "DEXMNM") then
 				nAbility = RulesetActorManager.getAbilityScore(rActor, "dexterity")
@@ -469,23 +464,44 @@ function replaceAbilityScores(rNewEffect, rActor)
 	end
 end
 
+function customConvertStringToDice(s)
+	local tDice = {};
+	local nMod = 0;
+
+	local tTerms = DiceManager.convertDiceStringToTerms(s);
+	for _,vTerm in ipairs(tTerms) do
+		if StringManager.isNumberString(vTerm) then
+			nMod = nMod + (tonumber(vTerm) or 0);
+		else
+			local nDieCount, sDieType = DiceManager.parseDiceTerm(vTerm);
+			if sDieType then
+				for i = 1, nDieCount do
+					table.insert(tDice, sDieType)
+				end
+			-- next two lines enable "-X" ability replacement
+			elseif vTerm and vTerm == "-X" then
+				nMod = 0;
+			end
+		end
+	end
+
+	return tDice, nMod;
+end
+
 function isDie(sEffect)
 	local rRoll = {}
 	local tEffectComps = EffectManager.parseEffect(sEffect)
-	local nMatch = 0
-	for kEffectComp,sEffectComp in ipairs(tEffectComps) do
+	for _,sEffectComp in ipairs(tEffectComps) do
 		local aWords = StringManager.parseWords(sEffectComp, "%.%[%]%(%):")
-		local bNegative = 0
 		if #aWords > 0 then
-			sType = aWords[1]:match("^([^:]+):")
+			local sType = aWords[1]:match("^([^:]+):")
 			-- Only roll dice for ability score mods
-			if sType and (sType == "STR" or sType == "DEX" or sType == "CON" or sType == "INT" or sType == "WIS" or sType == "CHA" or sType == "DMGR") then
-				local nRemainderIndex = 2
-				local sValueCheck = ""
+			if sType and (sType == "STR" or sType == "DEX" or sType == "CON" or
+						sType == "INT" or sType == "WIS" or sType == "CHA" or sType == "DMGR") then
+				local sValueCheck
 				local sTypeRemainder = aWords[1]:sub(#sType + 2)
 				if sTypeRemainder == "" then
 					sValueCheck = aWords[2] or ""
-					nRemainderIndex = nRemainderIndex + 1
 				else
 					sValueCheck = sTypeRemainder
 				end
@@ -493,7 +509,7 @@ function isDie(sEffect)
 				if sValueCheck:match("%-^[d%.%dF%+%-]+$") then
 					sValueCheck = sValueCheck:gsub("%-", "", 1)
 				end
-				if StringManager.isDiceString(sValueCheck) then		
+				if StringManager.isDiceString(sValueCheck) then
 					local aDice, nMod = StringManager.convertStringToDice(sValueCheck)
 					rRoll.sType = "effectbce"
 					rRoll.sDesc = "[EFFECT " .. sEffect .. "] "
@@ -516,7 +532,7 @@ function getTempHPAndWounds(rTarget)
 	if not nodeTarget then
 		return nTempHP, nWounds
 	end
-	
+
 	if sTargetNodeType == "pc" then
 		nTempHP = DB.getValue(nodeTarget, "hp.temporary", 0)
 		nWounds = DB.getValue(nodeTarget, "hp.wounds", 0)
@@ -552,7 +568,7 @@ function customNotifyApplyDamage(rSource, rTarget, bSecret, sDesc, nTotal)
 
 	local msgOOB = {};
 	msgOOB.type = OOB_MSGTYPE_APPLYDMG;
-	
+
 	if bSecret then
 		msgOOB.nSecret = 1;
 	else
@@ -591,28 +607,15 @@ function onInit()
 			OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects_Gold", 
 			"option_Temp_Is_Damage", "option_entry_cycler", 
 			{ labels = "option_val_off", values = "off",
-				baselabel = "option_val_on", baseval = "on", default = "on" })  
-		end
-
-		if User.getRulesetName() == "5E" then
-			RulesetActorManager = ActorManager5E
-			RulesetEffectManager = EffectManager5E
-		end
-		if User.getRulesetName() == "4E" then
-			RulesetActorManager = ActorManager4E
-			RulesetEffectManager = EffectManager4E
-		end
-		if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
-			RulesetActorManager = ActorManager35E
-			RulesetEffectManager = EffectManager35E
+				baselabel = "option_val_on", baseval = "on", default = "on" })
 		end
 
 		-- BCE DND TAGS
 		EffectsManagerBCE.registerBCETag("DMGAT", EffectsManagerBCE.aBCEActivateOptions)
-			
+
 		EffectsManagerBCE.registerBCETag("DMGRT", EffectsManagerBCE.aBCEDeactivateOptions)
 		EffectsManagerBCE.registerBCETag("DMGDT", EffectsManagerBCE.aBCEDeactivateOptions)
-		
+
 		EffectsManagerBCE.registerBCETag("DMGOE", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("RESTL", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("RESTS", EffectsManagerBCE.aBCEDefaultOptions)
@@ -636,18 +639,21 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SREGENE", EffectsManagerBCE.aBCESourceMattersOptions)
 		EffectsManagerBCE.registerBCETag("SDMGOS", EffectsManagerBCE.aBCESourceMattersOptions)
 		EffectsManagerBCE.registerBCETag("SDMGOE", EffectsManagerBCE.aBCESourceMattersOptions)
-	
+
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStartDND)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEndDND)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectStart)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost)
-		
+
 		-- save off the originals so we play nice with others
 		--Comment out because only needed for absorb
 	--	messageDamage = ActionDamage.messageDamage
 	--	ActionDamage.messageDamage = customMessageDamage
 		applyDamage = ActionDamage.applyDamage
 		ActionDamage.applyDamage = customApplyDamage
+
+		convertStringToDice = DiceManager.convertStringToDice
+		DiceManager.convertStringToDice = customConvertStringToDice
 
 		ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
 
@@ -662,8 +668,8 @@ function onInit()
 				handleApplyDamage = ActionDamage.handleApplyDamage
 				ActionDamage.notifyApplyDamage = customNotifyApplyDamage
 				ActionDamage.handleApplyDamage = customHandleApplyDamage
-				OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_APPLYDMG, customHandleApplyDamage);
-			end			
+				OOBManager.registerOOBMsgHandler(ActionDamage.OOB_MSGTYPE_APPLYDMG, customHandleApplyDamage);
+			end
 		end
 	end
 end
@@ -676,7 +682,7 @@ function onClose()
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
-		
+
 		ActionDamage.applyDamage = applyDamage
 		if bAdvanceEffects then
 			ActionDamage.notifyApplyDamage = notifyApplyDamage

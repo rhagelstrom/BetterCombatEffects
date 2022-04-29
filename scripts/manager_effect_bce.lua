@@ -10,8 +10,7 @@ OOB_MSGTYPE_BCEUPDATE = "updateeffect"
 
 local addEffect = nil
 local expireEffect = nil
-local bExpired = false -- Expried is called twice to support one-shot effects but we only want to do our processing once.
-local RulesetEffectManager =  nil 
+local RulesetEffectManager =  nil
 
 -- Predefined option arrays for getting effect tags
 aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = false, nDuration = 0}
@@ -66,12 +65,12 @@ function onInit()
 
 	CombatManager.setCustomTurnStart(customTurnStart)
 	CombatManager.setCustomTurnEnd(customTurnEnd)
-	
+
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEACTIVATE, handleActivateEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect)
-	
+
 end
 function onClose()
 	EffectManager.addEffect = addEffect
@@ -104,33 +103,38 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 	if not nodeActor then
 		return expireEffect(nodeActor, nodeEffect, nExpireComp)
 	end
-	local rEffect = {}
 	local rSource = ActorManager.resolveActor(nodeActor)
 
-	if bExpired == false then
-		local aTags = {"EXPIREADD"}
-		local tMatch = getEffects(rSource, aTags, rSource)
-		for _,tEffect in pairs(tMatch) do
-			if tEffect.nodeCT == nodeEffect and tEffect.sTag == "EXPIREADD" then
-				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
-				if rEffect ~= {} then
-					rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
-					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
-					EffectManager.addEffect("", "", nodeActor, rEffect, true)
+	-- Adding an effect before we expire the existing can make a feedback loop
+	-- which causes a stack overflow
+
+	expireEffect(nodeActor, nodeEffect, nExpireComp)
+	local aTags = {"EXPIREADD"}
+	local tMatch = getEffects(rSource, aTags, rSource)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.nodeCT == nodeEffect and tEffect.sTag == "EXPIREADD" then
+			local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+			if rEffect ~= {} then
+				rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
+				rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
+				aTags  = EffectManager.parseEffect(tEffect.sLabel)
+				-- Check for match
+				for i,sTag in pairs(aTags) do
+					rEffectComp = nil
+					if RulesetEffectManager.parseEffectComp then
+						rEffectComp = RulesetEffectManager.parseEffectComp(sTag)
+					else
+						rEffectComp = RulesetEffectManager.parseEffectCompSimple(sTag)
+					end
+					if "EXPIREADD" == rEffectComp.type:upper() then
+						expireEffect(nodeActor, nodeEffect, i)
+						EffectManager.addEffect("", "", nodeActor, rEffect, true)
+					end
 				end
-				break
 			end
+			break
 		end
 	end
-	if expireEffect(nodeActor, nodeEffect, nExpireComp) then
-		if bExpired == false then
-			bExpired = true
-		else
-			bExpired = false
-		end
-		return true
-	end
-	return false
 end
 
 function customTurnStart(sourceNodeCT)
@@ -170,7 +174,7 @@ function customTurnStart(sourceNodeCT)
 			end
 		end
 	end
-end	
+end
 
 function customTurnEnd(sourceNodeCT)
 	if not sourceNodeCT then
@@ -178,7 +182,7 @@ function customTurnEnd(sourceNodeCT)
 	end
 	local rSource = ActorManager.resolveActor(sourceNodeCT)
 	local ctEntries = CombatManager.getCombatantNodes()
-	
+
 	if onCustomProcessTurnEnd(rSource) then
 		local aTags = {"TURNAE", "TURNDE", "TURNRE"}
 		local tMatch = getEffects(rSource, aTags, rSource)
@@ -242,7 +246,7 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		local aTags = {"TURNRS"}
 		local tMatch = getEffects(rActor, aTags, rActor)
 		for _,tEffect in pairs(tMatch) do
-			if type(tEffect.nodeCT) == "databasenode" and 
+			if type(tEffect.nodeCT) == "databasenode" and
 			tEffect.sTag == "TURNRS" and
 			(DB.getValue(tEffect.nodeCT, "label", "") == rNewEffect.sName) and
 			(DB.getValue(tEffect.nodeCT, "init", 0) == rNewEffect.nInit) and
@@ -289,7 +293,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 	-- If we have no vaild tags to process or no rActor return empty
 	if aTags == {} or not rActor then
 		return {}
-	end	
+	end
 
 	local rEffectComp
 	local aOptions
@@ -324,7 +328,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 				else
 					rEffectComp = RulesetEffectManager.parseEffectCompSimple(sEffectComp)
 				end
-				
+
 				-- Handle conditionals
 				if rEffectComp.type == "IF" and RulesetEffectManager.checkConditional then
 					if not RulesetEffectManager.checkConditional(rActor, v, rEffectComp.remainder) then
@@ -350,8 +354,8 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 						end
 						-- If we have rSourceEffect, then only match effects where the source of the
 						-- effect matches rSourceEffect
-						if rSourceEffect ~= nil and 
-						aOptions.bOnlySourceEffect == true and 
+						if rSourceEffect ~= nil and
+						aOptions.bOnlySourceEffect == true and
 						rSourceEffect.sCTNode ~= DB.getValue(v, "source_name", "") then
 							break
 						end
@@ -382,7 +386,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 											bDiscard = false
 											break
 										end
-									end                                   
+									end
 								end
 								-- Check to see if we have a hard fail save
 								if rEffectComp.type == "SAVEADD" then
@@ -407,7 +411,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 								end
 							end
 						end
-					end	
+					end
 				end
 				for _,aMatchComp in pairs(tMatch) do
 					-- If matched, then remove one-off effects
@@ -443,13 +447,13 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 end
 
 -- We are looking for the label which is the first tag followed by ; if not the end
-function matchEffect(sEffect, aComps)
-	local rEffect = {}
-	local sEffectLookup = sEffect:lower()
+function matchEffect(sEffectSearch, aComps)
+	local sEffectLookup = sEffectSearch:lower()
 
 	--search conditions table first
-	if DataCommon and DataCommon.conditions  then 
+	if DataCommon and DataCommon.conditions  then
 		if StringManager.contains(DataCommon.conditions, sEffectLookup:lower()) then
+			local rEffect = {}
 			rEffect.sName = StringManager.capitalize(sEffectLookup)
 			rEffect.nDuration = 0
 			rEffect.sUnits = ""
@@ -457,16 +461,17 @@ function matchEffect(sEffect, aComps)
 			return rEffect
 		end
 	end
+
+	local rEffect = {}
 	--Find the effect name in our custom effects list
 	for _,v in pairs(DB.getChildrenGlobal("effects")) do
-		rEffect = {}
 		local sEffect = DB.getValue(v, "label", "")
-		if sEffect ~= nil and sEffect ~= "" then
+		if sEffect ~= "" then
 			aEffectComps = EffectManager.parseEffect(sEffect)
 			-- Is this the effeect we are looking for?
 			-- Name is parsed to index 1 in the array
 			if aEffectComps[1]:lower() == sEffectLookup:lower() then
-				local nodeGMOnly = DB.getChild(v, "isgmonly")	
+				local nodeGMOnly = DB.getChild(v, "isgmonly")
 				if nodeGMOnly then
 					rEffect.nGMOnly = nodeGMOnly.getValue()
 				end
@@ -494,7 +499,7 @@ function modifyEffect(nodeEffect, sAction, sEffect)
 	-- Must be database node, if not it is probably marked for deletion from one-shot
 	if type(nodeEffect) ~= "databasenode" then
 		return
-	end 
+	end
 	local nActive = DB.getValue(nodeEffect, "isactive", 0)
 
 	if sAction == "Activate" then
@@ -559,7 +564,7 @@ function handleUpdateEffect(msgOOB)
 		local nodeEffect = DB.findNode(msgOOB.sNodeEffect)
 		updateEffect(nodeActor, nodeEffect, msgOOB.sLabel)
 	end
-end 
+end
 
 function handleDeactivateEffect(msgOOB)
 	if handlerCheck(msgOOB) then
@@ -672,7 +677,7 @@ end
 
 function onCustomMatchEffect(sEffect)
 	for _,fMatchEffect in ipairs(aCustomMatchEffectHandlers) do
-		if fMatchEffect(sourceNodeCT, nodeCT, nodeEffect) == false then
+		if fMatchEffect(sEffect) == false then
 			return false
 		end
 	end
@@ -719,6 +724,6 @@ end
 
 function onCustomPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	for _,fPostAddEffect in ipairs(aCustomPostAddEffectHandlers) do
-		fPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect) 
+		fPostAddEffect(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	end
 end
