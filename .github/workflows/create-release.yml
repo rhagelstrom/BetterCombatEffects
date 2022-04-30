@@ -22,16 +22,16 @@ jobs:
     - name: Archive Extension
       uses: thedoctor0/zip-release@master
       with:
-        filename: '.resources/BetterCombatEffects.ext'
+        filename: '.resources/BetterCombatEffectsGold.ext'
         exclusions: '*.git* *.github* *.resources* /*node_modules/* .editorconfig *.ext *.mod README.md'
     - name: Archive Release
       uses: thedoctor0/zip-release@master
       with:
         path: '.resources/'
-        filename: '.resources/BetterCombatEffects.zip'
+        filename: '.resources/BetterCombatEffectsGold.zip'
     - name: Create Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: ".resources/BetterCombatEffects.ext,.resources/BetterCombatEffects.zip"
+        artifacts: ".resources/BetterCombatEffectsGold.ext,.resources/BetterCombatEffectsGold.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
         allowUpdates: true

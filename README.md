@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.6
-**Updated::** 02/19/22
+**Current Version:** 3.7
+**Updated::** 04/30/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -18,9 +18,9 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 |ATKD|(-)| | DEACTIVATE effect when the Actor takes the attack action|
 |ATKR|(-)| | REMOVE effect when the Actor takes the attack action|
 | **Damage** | | | |
-|DMGAT|(D)|[damage type]__*__,all,[Range]__*__| ACTIVATE effect when the Actor takes damage|
-|DMGDT|(D)|[damage type]__*__,all,[Range]__*__| DEACTIVATE effect when the Actor takes damage|
-|DMGRT|(D)|[damage type]__*__,all,[Range]__*__| REMOVE effect when the Actor takes damage|
+|DMGAT|(-)|[damage type]__*__,all,[Range]__*__| ACTIVATE effect when the Actor takes damage|
+|DMGDT|(-)|[damage type]__*__,all,[Range]__*__| DEACTIVATE effect when the Actor takes damage|
+|DMGRT|(-)|[damage type]__*__,all,[Range]__*__| REMOVE effect when the Actor takes damage|
 |TDMGADDT|(-)| [effect] |TARGET of the attack will add an effect to the TARGET (itself) when damage is done|
 |TDMGADDS|(-)| [effect] |TARGET of the attack will add an effect to the SOURCE of the attack when damage is done|
 |SDMGADDT|(-)| [effect] |SOURCE of the attack will add an effect to the TARGET when damage is done|

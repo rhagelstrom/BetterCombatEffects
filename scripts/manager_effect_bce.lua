@@ -126,7 +126,7 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 					else
 						rEffectComp = RulesetEffectManager.parseEffectCompSimple(sTag)
 					end
-					if "EXPIREADD" == rEffectComp.type:upper() then
+					if "EXPIREADD" == rEffectComp.sTag then
 						expireEffect(nodeActor, nodeEffect, i)
 						EffectManager.addEffect("", "", nodeActor, rEffect, true)
 					end
@@ -321,8 +321,8 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		-- for something to happen after a save result
 		if nodeEffect == nil or nodeEffect == v then
 			-- Iterate through each effect component looking for a type match
-			local tMatch = {}
 			for kEffectComp,sEffectComp in ipairs(tEffectComps) do
+				local tMatch = {}
 				if RulesetEffectManager.parseEffectComp then
 					rEffectComp = RulesetEffectManager.parseEffectComp(sEffectComp)
 				else
@@ -401,7 +401,6 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 								if bAEValid == false and aOptions.bAdvancedEffects then
 									bDiscard = true
 								end
-
 								if bTargeted and not aOptions.bIgnoreEffectTargets and bDiscard == false then
 									if EffectManager.isEffectTarget(v, rTarget) then
 										table.insert(tMatch, {nMatch = kEffectComp, sTag = sTag, sSourceEffect = sSourceEffect, bDisableUse = bDisableUse, nGMOnly = nGMOnly, bIgnoreOneShot = aOptions.bIgnoreOneShot})
@@ -414,6 +413,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 					end
 				end
 				for _,aMatchComp in pairs(tMatch) do
+
 					-- If matched, then remove one-off effects
 					if type(v) == "databasenode" and aMatchComp.bIgnoreOneShot == false  then
 						if nActive == 2 then

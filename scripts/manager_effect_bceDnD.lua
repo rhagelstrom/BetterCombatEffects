@@ -10,8 +10,6 @@ local bMadNomadCharSheetEffectDisplay = false
 local handleApplyDamage = nil
 local notifyApplyDamage = nil
 
-local OOB_MSGTYPE_APPLYDMG = "applydmg";
-
 function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
 	fProcessEffectApplyDamage = ProcessEffectApplyDamage
 end
@@ -322,7 +320,7 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 
 			if tEffect.sTag == "TDMGADDT" and nodeTarget ~= nil then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
-			elseif tEffect.sTag == "TDMGADDS" and nodeeSource ~= nil then
+			elseif tEffect.sTag == "TDMGADDS" and nodeSource ~= nil then
 				EffectManager.addEffect("", "", nodeSource, rEffect, true)
 			end
 		end
@@ -563,7 +561,7 @@ function customNotifyApplyDamage(rSource, rTarget, bSecret, sDesc, nTotal)
 	end
 
 	local msgOOB = {};
-	msgOOB.type = OOB_MSGTYPE_APPLYDMG;
+	msgOOB.type = ActionDamage.OOB_MSGTYPE_APPLYDMG;
 
 	if bSecret then
 		msgOOB.nSecret = 1;
@@ -596,6 +594,16 @@ function onInit()
 			"option_Temp_Is_Damage", "option_entry_cycler",
 			{ labels = "option_val_off", values = "off",
 				baselabel = "option_val_on", baseval = "on", default = "on" })
+		end
+
+		if User.getRulesetName() == "5E" then
+			RulesetActorManager = ActorManager5E
+		end
+		if User.getRulesetName() == "4E" then
+			RulesetActorManager = ActorManager4E
+		end
+		if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
+			RulesetActorManager = ActorManager35E
 		end
 
 		-- BCE DND TAGS
@@ -670,6 +678,7 @@ function onClose()
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
+
 
 		ActionDamage.applyDamage = applyDamage
 		if bAdvanceEffects then

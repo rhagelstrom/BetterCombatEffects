@@ -28,8 +28,6 @@ local addCustomNPC = nil
 local addCustomPC = nil
 -- end save vs condition
 
-local OOB_MSGTYPE_APPLYSAVEVS = "applysavevs";
-
 local tTraitsAdvantage = {}
 local tTraitsDisadvantage = {}
 
@@ -145,7 +143,7 @@ function onInit()
 		ActionsManager.registerResultHandler("attack", customOnAttack)
 		ActionsManager.registerModHandler("save", onModSaveHandler)
 
-		OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_APPLYSAVEVS, customHandleApplySaveVs);
+		OOBManager.registerOOBMsgHandler(ActionPower.OOB_MSGTYPE_APPLYSAVEVS, customHandleApplySaveVs);
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 
@@ -263,7 +261,7 @@ function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveO
 		return;
 	end
 	local msgOOB = {};
-	msgOOB.type = OOB_MSGTYPE_APPLYSAVEVS;
+	msgOOB.type =ActionPower.OOB_MSGTYPE_APPLYSAVEVS;
 
 	if bSecret then
 		msgOOB.nSecret = 1;
