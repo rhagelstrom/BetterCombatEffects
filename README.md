@@ -1,7 +1,7 @@
 # Better Combat Effects
 
-**Current Version:** 2.37
-**Updated::** 04/28/22
+**Current Version:** 2.38
+**Updated::** 05/01/22
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -60,7 +60,7 @@ Better Combat Effects is an extension that allows for fine tuning of when effect
 |<span style="color:green">RESTS</span>|(-)| |Remove effect when the Actor takes a short rest|5E 4E 3.5E PFRPG|
 |<span style="color:green">RESTL</span>|(-)| |Remove effect when the Actor takes a short or long rest|5E 4E 3.5E PFRPG|
 | **Stack**| | | | |
-|<span style="color:orange">STACK</span>|(-)| | Multiple of this effect is allow to be applied. The option "Allow Duplicate Effects" must be set to off|5E|
+|<span style="color:crimson">STACK</span>|(-)| | Multiple of this effect is allow to be applied. The option "Allow Duplicate Effects" must be set to off|5E 3.5E PFRPG|
 | **Turn** | | | | |
 |<span style="color:blue">TURNAS</span>|(-)| | ACTIVATE effect on the START of the Actor’s turn|CoreRPG|
 |<span style="color:blue">TURNDS</span>|(-) | | DEACTIVATE effect on the START of the Actor’s turn|CoreRPG|

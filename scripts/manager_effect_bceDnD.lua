@@ -4,14 +4,13 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
 local RulesetActorManager = nil
-local origConvertStringToDice = nil
 local applyDamage = nil
-local fProcessEffectApplyDamage = nil
+local messageDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
 local handleApplyDamage = nil
 local notifyApplyDamage = nil
+local convertStringToDice = nil
 
-local OOB_MSGTYPE_APPLYDMG = "applydmg";
 
 function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
 	fProcessEffectApplyDamage = ProcessEffectApplyDamage
@@ -23,12 +22,17 @@ function customRest(nodeActor, bLong, bMilestone)
 	local aTags = {"RESTS"}
 	if bLong == true then
 		table.insert(aTags, "RESTL")
+		if User.getRulesetName() == "5E" then
+			table.insert(aTags, "SAVERESTL")
+		end
 	end
 
 	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "RESTL" or tEffect.sTag == "RESTS" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
+		elseif tEffect.sTag == "SAVERESTL" then
+			EffectsManagerBCE5E.saveEffect(rSource, rSource, tEffect)
 		end
 	end
 end
@@ -39,7 +43,24 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 		return
 	end
 	local nodeSource = ActorManager.getCTNode(rSource)
-	local sEffect = ""
+	local sEffect
+
+	if rRoll.subtype and rRoll.subtype == "DUR" and rRoll.nodeEffectCT and type(DB.findNode(rRoll.nodeEffectCT)) == "databasenode" then
+		local nResult = tonumber(ActionsManager.total(rRoll))
+		if rRoll.sUnits == "minute" then
+			nResult = nResult * 10
+		elseif rRoll.sUnits == "hour" then
+			nResult = nResult * 10 * 60
+		elseif rRoll.sUnits == "day" then
+			nResult = nResult * 10 * 60 * 24
+		end
+
+		local nodeCT = DB.findNode(rRoll.nodeEffectCT)
+		DB.setValue(nodeCT, "duration", "number", nResult)
+		EffectsManagerBCE.updateEffect(nodeSource,nodeCT, rRoll.sEffect)
+		return
+	end
+
 	for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
 		sEffect = DB.getValue(nodeEffect, "label", "")
 		if sEffect == rRoll.sEffect then
@@ -67,6 +88,9 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 end
 
 function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
+	if (nodeCT == nil) then
+		return true
+	end
 	local rTarget = ActorManager.resolveActor(nodeCT)
 	local rSource
 	if rNewEffect.sSource == "" then
@@ -75,7 +99,7 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 		rSource = ActorManager.resolveActor(rNewEffect.sSource)
 	end
 
-	local aTags = {"REGENA", "TREGENA", "DMGA"}
+	local aTags = {"REGENA", "TREGENA", "DMGA", "DUR"}
 	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "REGENA" and tEffect.rEffectComp.type == "REGENA" then
@@ -84,6 +108,25 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, true)
 		elseif tEffect.sTag == "DMGA" and tEffect.rEffectComp.type == "DMGA" then
 			applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp)
+		elseif tEffect.sTag == "DUR" and type(tEffect.nodeCT) == "databasenode" then
+			local sLabel = DB.getValue(tEffect.nodeCT, "label", "")
+			local rRoll = {}
+			rRoll.sType = "effectbce"
+			rRoll.sDesc = "[EFFECT " .. sLabel .. "] "
+			rRoll.aDice = tEffect.rEffectComp.dice
+			rRoll.nMod = tonumber(tEffect.rEffectComp.mod)
+			rRoll.sEffect = sLabel
+			rRoll.subtype = "DUR"
+			rRoll.rActor = rTarget
+			rRoll.sUnits = rNewEffect.sUnits
+
+			rRoll.nodeEffectCT = tEffect.nodeCT.getPath()
+			if tEffect.nGMOnly == 1 then
+				rRoll.bSecret = true
+			else
+				rRoll.bSecret = false
+			end
+			ActionsManager.performAction(nil, rTarget, rRoll)
 		end
 	end
 	return true
@@ -194,9 +237,15 @@ function processEffectTurnEndDND(rSource)
 	return true
 end
 
-function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
+function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal)
 	local nodeSource
 	local nodeTarget
+	-- 3.5E header changed added extra param resolve that here
+	if not (User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG") then
+		nTotal = sDamage
+		sDamage = rRollType
+	end
+
 	if rTarget and rTarget.sCreatureNode then
 		nodeTarget = ActorManager.getCTNode(rTarget.sCreatureNode)
 	end
@@ -207,10 +256,33 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
 	-- Play nice with others
 	-- Do damage first then modify any effects
-	applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
+	if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG"then
+		applyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal)
+	else
+		applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
+	end
+
+
+	local sTargetNodeType, targetNode = ActorManager.getTypeAndNode(rTarget)
+	local nTotalHP, nWounds
+	if sTargetNodeType == "pc" then
+		nTotalHP = DB.getValue(targetNode, "hp.total", 0)
+		nWounds = DB.getValue(targetNode, "hp.wounds", 0)
+	else
+		nTotalHP = DB.getValue(targetNode, "hptotal", 0)
+		nWounds = DB.getValue(targetNode, "wounds", 0)
+	end
+	if nTotalHP == nWounds then
+		bDead = true
+	end
+
+	--Dropping this because Blistful Ignorance does this better
+	--and there is less risk of conflict if this isn't a thing in BCE
+	--processAbsorb(rSource, rTarget, rRoll)
 
 	-- get temp hp and wounds after damage
-	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
+	local nTempHP
+	nTempHP, nWounds = getTempHPAndWounds(rTarget)
 
 	if OptionsManager.isOption("TEMP_IS_DAMAGE", "on") then
 		-- If no damage was applied then return
@@ -219,14 +291,23 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 		end
 	-- return if no damage was applied theen return
 	elseif nWoundsPrev >= nWounds then
-			return
+		return
 	end
 
-	--local rSourceEffect = ActorManager.resolveActor(sEffectSource)
+	--if the target is dead, process all effects with (E)
+	if(bDead == true) then
+		local sTarget =ActorManager.getCTNodeName(rTarget)
+		CombatManager.callForEachCombatantEffect(endEffectsOnDead, sTarget)
+	end
+
+	local tMatch
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
-	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+
+	local rDamageOutput = ActionDamage.decodeDamageText(nTotal, sDamage)
+
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, rDamageOutput)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
@@ -250,9 +331,9 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rTarget.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 
-			if tEffect.sTag == "TDMGADDT" then
+			if tEffect.sTag == "TDMGADDT" and nodeTarget ~= nil then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
-			elseif tEffect.sTag == "TDMGADDS" then
+			elseif tEffect.sTag == "TDMGADDS" and nodeSource ~= nil then
 				EffectManager.addEffect("", "", nodeSource, rEffect, true)
 			end
 		end
@@ -261,19 +342,72 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 	aTags = {"SDMGADDT","SDMGADDS"}
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget, rSource)
 	for _,tEffect in pairs(tMatch) do
-		--if type(tEffect.nodeCT) ~= "userdata" then
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if rEffect ~= {} then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
-			if tEffect.sTag == "SDMGADDT"   then
+			if tEffect.sTag == "SDMGADDT" and nodeTarget ~= nil then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
-			elseif tEffect.sTag == "SDMGADDS" then
+			elseif tEffect.sTag == "SDMGADDS" and nodeSource ~= nil then
 				EffectManager.addEffect("", "", nodeSource, rEffect, true)
 			end
 		end
 	end
+end
 
+function endEffectsOnDead(nodeEffect, sTarget)
+	local sEffect = DB.getValue(nodeEffect, "label", "")
+
+	if (sEffect:match("%(E%)") and sTarget ==  DB.getValue(nodeEffect,"source_name", "")) then
+		EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
+	end
+end
+
+-- This function is disabled but left here incase someone wants it for
+--another ruleset
+function processAbsorb(rSource, rTarget, rRoll)
+	local tMatch
+	local aTags = {"ABSORB"}
+	local bHalf = false
+	local nDMGAmount = 0
+	local sDMGType
+
+	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
+
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "ABSORB" then
+			for _,sRemainder in ipairs(tEffect.rEffectComp.remainder) do
+				if sRemainder == "(H)" then
+					bHalf = true
+				end
+				-- If we match any of our damage types we absorb it
+				for _,aDMGClause in ipairs(aDMGTypes) do
+					if StringManager.contains(aDMGClause.aDMG, sRemainder) then
+						nDMGAmount = aDMGClause.nTotal
+						sDMGType = sRemainder
+					end
+				end
+			end
+			if nDMGAmount > 0 then
+				local sLabel =  "[ABSORBED: " .. sDMGType .. "]"
+				if bHalf then
+					nDMGAmount= math.floor(nDMGAmount/2)
+				end
+				ActionDamage.applyDamage(rSource, rTarget, tEffect.nGMOnly, "[HEAL]" .. sLabel, nDMGAmount)
+			end
+		end
+	end
+end
+
+--Dead code. Here for Absorb if it is needed for some reason
+function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
+
+	local sAbsorb = sDamageDesc:match("%[ABSORBED:%s*%l*]")
+	if sAbsorb ~= nil then
+		sExtraResult = sAbsorb .. sExtraResult
+	end
+	return messageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
 end
 
 function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
@@ -283,6 +417,7 @@ function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	rRoll = isDie(rNewEffect.sName)
 	if next(rRoll) ~= nil and next(rRoll.aDice) ~= nil then
 		rRoll.rActor = rActor
+		rRoll.subtype = "DUR"
 		if rNewEffect.nGMOnly  then
 			rRoll.bSecret = true
 		else
@@ -292,7 +427,6 @@ function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
 	return true
 end
-
 
 -- Any effect that modifies ability score and is coded with -X
 -- has the -X replaced with the targets ability score and then calculated
@@ -440,7 +574,7 @@ function customNotifyApplyDamage(rSource, rTarget, bSecret, sDesc, nTotal)
 	end
 
 	local msgOOB = {};
-	msgOOB.type = OOB_MSGTYPE_APPLYDMG;
+	msgOOB.type = ActionDamage.OOB_MSGTYPE_APPLYDMG;
 
 	if bSecret then
 		msgOOB.nSecret = 1;
@@ -469,10 +603,20 @@ function onInit()
 		User.getRulesetName() == "PFRPG" then
 
 		if Session.IsHost then
-			OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects",
+			OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects_Gold",
 			"option_Temp_Is_Damage", "option_entry_cycler",
 			{ labels = "option_val_off", values = "off",
 				baselabel = "option_val_on", baseval = "on", default = "on" })
+		end
+
+		if User.getRulesetName() == "5E" then
+			RulesetActorManager = ActorManager5E
+		end
+		if User.getRulesetName() == "4E" then
+			RulesetActorManager = ActorManager4E
+		end
+		if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
+			RulesetActorManager = ActorManager35E
 		end
 
 		-- BCE DND TAGS
@@ -491,10 +635,12 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("TREGENE", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SDMGADDT", EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("SDMGADDS", EffectsManagerBCE.aBCEDefaultOptionsAE)
+		--EffectsManagerBCE.registerBCETag("ABSORB", EffectsManagerBCE.aBCEDefaultOptions)
 
 		EffectsManagerBCE.registerBCETag("REGENA", EffectsManagerBCE.aBCEOneShotOptions)
 		EffectsManagerBCE.registerBCETag("TREGENA", EffectsManagerBCE.aBCEOneShotOptions)
 		EffectsManagerBCE.registerBCETag("DMGA", EffectsManagerBCE.aBCEOneShotOptions)
+		EffectsManagerBCE.registerBCETag("DUR", EffectsManagerBCE.aBCEOneShotOptions)
 
 		EffectsManagerBCE.registerBCETag("STREGENS", EffectsManagerBCE.aBCESourceMattersOptions)
 		EffectsManagerBCE.registerBCETag("STREGENE", EffectsManagerBCE.aBCESourceMattersOptions)
@@ -509,6 +655,9 @@ function onInit()
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost)
 
 		-- save off the originals so we play nice with others
+		--Comment out because only needed for absorb
+	--	messageDamage = ActionDamage.messageDamage
+	--	ActionDamage.messageDamage = customMessageDamage
 		applyDamage = ActionDamage.applyDamage
 		ActionDamage.applyDamage = customApplyDamage
 
@@ -536,13 +685,17 @@ end
 
 
 function onClose()
+
 	if  User.getRulesetName() == "5E"  or
 		User.getRulesetName() == "4E"  or
 		User.getRulesetName() == "3.5E"  or
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
 
+
 		ActionDamage.applyDamage = applyDamage
+		DiceManager.convertStringToDice = convertStringToDice
+
 		if bAdvanceEffects then
 			ActionDamage.notifyApplyDamage = notifyApplyDamage
 			ActionDamage.handleApplyDamage = handleApplyDamage
