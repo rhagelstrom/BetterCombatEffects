@@ -263,8 +263,6 @@ end
 function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect is on, BCE String
 	local aParsedRemiander = StringManager.parseWords(tEffect.rEffectComp.remainder[1])
 	local sAbility = aParsedRemiander[1]
-	sAbility = DataCommon.ability_stol[sAbility]
-
 	local nDC = tonumber(aParsedRemiander[2])
 	if  (nDC and sAbility) ~= nil then
 		local rSaveVsRoll = {}

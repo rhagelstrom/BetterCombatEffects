@@ -235,9 +235,17 @@ function processEffectTurnEndDND(rSource)
 	return true
 end
 
-function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
+--Extra params to support 3.5E as well as Kelrugem Extended automation and overlays
+--extra params "should" be harmless if EAaO is not loaded
+function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
 	local nodeSource
 	local nodeTarget
+	-- 3.5E header changed added extra param resolve that here
+	if not (User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG") then
+		nTotal = sDamage
+		sDamage = rRollType
+	end
+
 	if rTarget and rTarget.sCreatureNode then
 		nodeTarget = ActorManager.getCTNode(rTarget.sCreatureNode)
 	end
@@ -248,7 +256,11 @@ function customApplyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
 	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
 	-- Play nice with others
 	-- Do damage first then modify any effects
-	applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
+	if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG"then
+		applyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
+	else
+		applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
+	end
 
 	local sTargetNodeType, targetNode = ActorManager.getTypeAndNode(rTarget)
 	local nTotalHP, nWounds

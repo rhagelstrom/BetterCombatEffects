@@ -22,8 +22,8 @@ jobs:
     - name: Archive Extension
       uses: thedoctor0/zip-release@master
       with:
-        filename: '.resources/BetterCombatEffectsGold.ext'
-        exclusions: '*.git* *.github* *.resources* /*node_modules/* .editorconfig *.ext *.mod README.md'
+        filename: '.resources/BetterCombatEffects.ext'
+        exclusions: '*.git* *.github* *.resources* /*node_modules/* .editorconfig *.ext *.mod README.md *.yml *.pdf'
     - name: Archive Release
       uses: thedoctor0/zip-release@master
       with:
