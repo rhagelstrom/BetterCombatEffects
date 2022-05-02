@@ -9,9 +9,6 @@ local evalAction = nil
 local performMultiAction = nil
 local bAdvanceEffects = nil
 
-
-OOB_MSGTYPE_APPLYDMG = "applydmg";
-
 function onInit()
 	if User.getRulesetName() == "5E" then
 		if Session.IsHost then

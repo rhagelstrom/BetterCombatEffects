@@ -4,14 +4,12 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
 local RulesetActorManager = nil
-local origConvertStringToDice = nil
+local convertStringToDice = nil
 local applyDamage = nil
 local fProcessEffectApplyDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
 local handleApplyDamage = nil
 local notifyApplyDamage = nil
-
-local OOB_MSGTYPE_APPLYDMG = "applydmg";
 
 function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
 	fProcessEffectApplyDamage = ProcessEffectApplyDamage
@@ -199,8 +197,8 @@ end
 function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
 	local nodeSource
 	local nodeTarget
-	-- 3.5E header changed added extra param resolve that here
-	if not (User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG") then
+	--5E header has different params
+	if User.getRulesetName() == "5E" then
 		nTotal = sDamage
 		sDamage = rRollType
 	end
@@ -215,10 +213,10 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
 	-- Play nice with others
 	-- Do damage first then modify any effects
-	if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG"then
-		applyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
-	else
+	if User.getRulesetName() == "5E" then
 		applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
+	else
+		applyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
 	end
 
 	-- get temp hp and wounds after damage
@@ -452,7 +450,7 @@ function customNotifyApplyDamage(rSource, rTarget, bSecret, sDesc, nTotal)
 	end
 
 	local msgOOB = {};
-	msgOOB.type = OOB_MSGTYPE_APPLYDMG;
+	msgOOB.type = ActionDamage.OOB_MSGTYPE_APPLYDMG;
 
 	if bSecret then
 		msgOOB.nSecret = 1;
@@ -560,7 +558,7 @@ function onClose()
 			ActionDamage.handleApplyDamage = handleApplyDamage
 		end
 		ActionsManager.unregisterResultHandler("effectbce")
-
+		DiceManager.convertStringToDice = convertStringToDice
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartDND)
 		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEndDND)
 
