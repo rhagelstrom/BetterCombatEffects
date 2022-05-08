@@ -967,12 +967,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			table.insert(aTags, "SAVEDMG")
 		end
 
-		if rRoll.bRemoveOnSave  then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove");
-		elseif rRoll.bDisableOnSave then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
-		end
-
 		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADDP" then
@@ -985,6 +979,11 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 			elseif tEffect.sTag == "SAVEDMG" then
 				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true)
 			end
+		end
+		if rRoll.bRemoveOnSave  then
+			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove");
+		elseif rRoll.bDisableOnSave then
+			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
 		end
 	elseif nodeEffect ~= nil then
 		aTags = {"SAVEADD", "SAVEDMG"}

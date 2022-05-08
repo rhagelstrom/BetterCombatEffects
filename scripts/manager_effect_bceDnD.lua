@@ -240,8 +240,8 @@ end
 function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
 	local nodeSource
 	local nodeTarget
-	-- 3.5E header changed added extra param resolve that here
-	if not (User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG") then
+	--5E header has different params
+	if User.getRulesetName() == "5E" then
 		nTotal = sDamage
 		sDamage = rRollType
 	end
@@ -256,10 +256,10 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
 	-- Play nice with others
 	-- Do damage first then modify any effects
-	if User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG"then
-		applyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
-	else
+	if User.getRulesetName() == "5E" then
 		applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
+	else
+		applyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
 	end
 
 	local sTargetNodeType, targetNode = ActorManager.getTypeAndNode(rTarget)
@@ -698,7 +698,7 @@ function onClose()
 			ActionDamage.handleApplyDamage = handleApplyDamage
 		end
 		ActionsManager.unregisterResultHandler("effectbce")
-
+		DiceManager.convertStringToDice = convertStringToDice
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartDND)
 		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEndDND)
 

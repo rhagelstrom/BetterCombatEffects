@@ -186,6 +186,7 @@ function applyDamage(rSource,rTarget)
 	return true
 end
 
+
 function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	if rRoll.sSubtype ~= "bce" then
 		return ActionSave.onSave(rSource, rTarget, rRoll)
@@ -196,8 +197,8 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	end
 	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
-	local tMatch = {}
-	local aTags = {}
+	local tMatch
+	local aTags
 	ActionSave.onSave(rSource, rTarget, rRoll)
 	local nResult = ActionsManager.total(rRoll)
 	local bAct = false
@@ -210,8 +211,6 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 			bAct = true
 		end
 	end
-	local sEffect = DB.getValue(nodeEffect, "label", "")
-
 	--Need the original effect because we only want to do things that are in the same effect
 	--if we just pull all the tags on the Actor then we can't have multiple saves doing
 	--multiple different things. We have to be careful about the one shot options expireing
@@ -221,12 +220,6 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 		aTags = {"SAVEADDP"}
 		if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
 			table.insert(aTags, "SAVEDMG")
-		end
-
-		if rRoll.bRemoveOnSave  then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove");
-		elseif rRoll.bDisableOnSave then
-			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
 		end
 
 		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
@@ -241,6 +234,11 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 			elseif tEffect.sTag == "SAVEDMG" then
 				EffectsManagerBCEDND.applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, true)
 			end
+		end
+		if rRoll.bRemoveOnSave  then
+			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove");
+		elseif rRoll.bDisableOnSave then
+			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
 		end
 	elseif nodeEffect ~= nil then
 		aTags = {"SAVEADD", "SAVEDMG"}
@@ -259,6 +257,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 		end
 	end
 end
+
 
 function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect is on, BCE String
 	local aParsedRemiander = StringManager.parseWords(tEffect.rEffectComp.remainder[1])

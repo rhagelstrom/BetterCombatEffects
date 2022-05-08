@@ -84,7 +84,7 @@ Better Combat Effects Gold is an extension that allows for fine tuning of when e
 **[range]** = melee, ranged  
 **[damage type]** = acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, thunder, adamantine, bludgeoning, cold-forged iron, magic, piercing, silver, slashing  
 **[stat]** = strength, constitution, dexterity, intelligence, wisdom, charisma  
-**[ability]** = STR, CON, DEX, INT, WIS, CHA  
+**[ability]** = STR, CON, DEX, INT, WIS, CHA, (FORTITUDE, REFLEX, WILL) - 3.5E  
 **[skill]** = any skill name  
 **[effect]** = Any effect label in the custom effect list. Effect label is defined as anything before the first ; i.e. My Custom; ATKDS; "My Custom" would be the effect label  
 **[condition]** = Any condition as noted above except exhaustion. Note [condition] must be all lower case  
