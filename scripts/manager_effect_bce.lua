@@ -59,7 +59,7 @@ function onInit()
 	EffectManager.addEffect = customAddEffect
 
 	expireEffect = EffectManager.expireEffect
-	RulesetEffectManager.expireEffect = customExpireEffect
+	EffectManager.expireEffect = customExpireEffect
 
 	ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
 
@@ -126,7 +126,7 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 					else
 						rEffectComp = RulesetEffectManager.parseEffectCompSimple(sTag)
 					end
-					if "EXPIREADD" == rEffectComp.sTag then
+					if "EXPIREADD" == rEffectComp.type:upper() then
 						expireEffect(nodeActor, nodeEffect, i)
 						EffectManager.addEffect("", "", nodeActor, rEffect, true)
 					end

@@ -9,6 +9,7 @@ local messageDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
 local handleApplyDamage = nil
 local notifyApplyDamage = nil
+local convertStringToDice = nil
 
 function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
 	fProcessEffectApplyDamage = ProcessEffectApplyDamage
