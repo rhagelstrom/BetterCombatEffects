@@ -440,6 +440,10 @@ function matchEffect(sEffectSearch, aComps)
 				if nodeUnits then
 					rEffect.sUnits = nodeUnits.getValue()
 				end
+				local apply = DB.getChild(v, "apply")
+				if apply then
+					rEffect.sApply = DB.getValue(v, "apply", "")
+				end
 				rEffect.sName = sEffect
 				if onCustomMatchEffect(sEffect) then
 					break
