@@ -341,7 +341,7 @@ function replaceAbilityScores(rNewEffect, rActor)
 					local sReplace = rEffectComp.type .. ":" ..tostring(nAbility)
 					local sMatch =  rEffectComp.type ..":%s-%d+%-X"
 					rNewEffect.sName = rNewEffect.sName:gsub(sMatch, sReplace)
-				end
+				 end
 			end
 		end
 	end
@@ -350,7 +350,6 @@ end
 function customConvertStringToDice(s)
 	local tDice = {};
 	local nMod = 0;
-
 	local tTerms = DiceManager.convertDiceStringToTerms(s);
 	for _,vTerm in ipairs(tTerms) do
 		if StringManager.isNumberString(vTerm) then
@@ -485,6 +484,13 @@ function onInit()
 				baselabel = "option_val_on", baseval = "on", default = "on" })
 		end
 
+		if User.getRulesetName() == "5E" then
+			RulesetActorManager = ActorManager5E
+		elseif User.getRulesetName() == "4E" then
+			RulesetActorManager = ActorManager4E
+		elseif User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
+			RulesetActorManager = ActorManager35E
+		end
 		-- BCE DND TAGS
 		EffectsManagerBCE.registerBCETag("DMGAT", EffectsManagerBCE.aBCEActivateOptions)
 
