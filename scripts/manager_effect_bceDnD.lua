@@ -74,7 +74,7 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 	end
 
 	local aTags = {"REGENA", "TREGENA", "DMGA"}
-	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "REGENA" and tEffect.rEffectComp.type == "REGENA" then
 			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, false)
@@ -236,7 +236,7 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
-	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
@@ -253,10 +253,10 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
-		if rEffect ~= {} then
+		if next(rEffect) then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rTarget.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 
@@ -273,7 +273,7 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	for _,tEffect in pairs(tMatch) do
 		--if type(tEffect.nodeCT) ~= "userdata" then
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
-		if rEffect ~= {} then
+		if next(rEffect) then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 			if tEffect.sTag == "SDMGADDT"   then

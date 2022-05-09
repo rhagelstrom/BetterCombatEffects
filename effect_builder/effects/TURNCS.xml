@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<root>
+    <windowclass name="effect_TURNCS">
+        <script file="effect_builder/effects/scripts/TURNCS.lua" />
+		<margins control="0,0,0,2" />
+        <sheetdata>
+            <leftanchor_eb />
+            <cycler_eb_effect_state />
+            <cycler_eb_turn />
+        </sheetdata>
+    </windowclass>
+    <script name="loader_TURNCS">
+        function onInit()
+            if ExtensionBCE.shouldLoadEffects() then
+                EditorManager.addEditor(
+                    "category_bce_cs",
+                    {
+                        value="TURN",
+                        labelres="effect_turncs",
+                        windowclass="effect_TURNCS"
+                    }
+                )
+            end
+        end
+    </script>
+</root>

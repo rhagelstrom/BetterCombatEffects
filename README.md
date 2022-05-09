@@ -1,7 +1,7 @@
 # Better Combat Effects
 
-**Current Version:** 2.43
-**Updated::** 05/08/22
+**Current Version:** 2.44
+**Updated::** 05/17/22
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -28,6 +28,9 @@ Better Combat Effects is an extension that allows for fine tuning of when effect
 | **Attack** | | | | |
 |<span style="color:magenta">ATKDS</span>|(-)| |DEACTIVATE effect if the source of the effect is attacked|4E|
 | **Damage** | | | | |
+|<span style="color:green">DMGAT</span>|(-)| |Activate effect when damage is taken|5E 4E 3.5E PFRPG|
+|<span style="color:green">DMGDT</span>|(-)| |Deactivate effect when damage is taken|5E 4E 3.5E PFRPG|
+|<span style="color:green">DMGRT</span>|(-)| |Remove effect when damage is take|5E 4E 3.5E PFRPG|
 |<span style="color:green">TDMGADDT</span>|(-)| [effect] |TARGET of the attack will add an effect to the TARGET (itself) when damage is done|5E 4E 3.5E PFRPG|
 |<span style="color:green">TDMGADDS</span>|(-)| [effect] |TARGET of the attack will add an effect to the SOURCE of the attack when damage is done|5E 4E 3.5E PFRPG|
 |<span style="color:green">SDMGADDT</span>|(-)| [effect] |SOURCE of the attack will add an effect to the TARGET when damage is done|5E 4E 3.5E PFRPG|

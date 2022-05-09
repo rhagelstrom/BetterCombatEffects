@@ -91,17 +91,20 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 	local rSource = ActorManager.resolveActor(nodeActor)
 
 	-- Adding an effect before we expire the existing can make a feedback loop
-	-- which causes a stack overflow
-
-	expireEffect(nodeActor, nodeEffect, nExpireComp)
+	-- which causes a stack overflow so we see if the effect has expire add, grab it
+	-- expire the effect and then process for any adds or additional expires
+	local sSource = DB.getValue(nodeEffect,"source_name", "")
+	local nInit = DB.getValue(nodeEffect,"init", 0)
 	local aTags = {"EXPIREADD"}
+
 	local tMatch = getEffects(rSource, aTags, rSource)
+	expireEffect(nodeActor, nodeEffect, nExpireComp)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.nodeCT == nodeEffect and tEffect.sTag == "EXPIREADD" then
 			local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
-			if rEffect ~= {} then
-				rEffect.sSource = DB.getValue(nodeEffect,"source_name", "")
-				rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
+			if next(rEffect) then
+				rEffect.sSource = sSource
+				rEffect.nInit = nInit
 				aTags  = EffectManager.parseEffect(tEffect.sLabel)
 				-- Check for match
 				for i,sTag in pairs(aTags) do
@@ -112,7 +115,10 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 						rEffectComp = RulesetEffectManager.parseEffectCompSimple(sTag)
 					end
 					if "EXPIREADD" == rEffectComp.type:upper() then
-						expireEffect(nodeActor, nodeEffect, i)
+						-- if the effect has already been deleted in full
+						if type(nodeEffect) ~= "error" then
+							expireEffect(nodeActor, nodeEffect, i)
+						end
 						EffectManager.addEffect("", "", nodeActor, rEffect, true)
 					end
 				end

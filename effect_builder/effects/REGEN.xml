@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<root>
+    <windowclass name="effect_REGEN">
+        <script file="effect_builder/effects/scripts/REGEN.lua" />
+		<margins control="0,0,0,2" />
+        <sheetdata>
+            <leftanchor_eb />
+
+            <cycler_eb_turn />
+            <cycler_eb_actor />
+
+            <label_eb>
+                <static textres="effect_temphp"/>
+            </label_eb>
+            <checkbox_eb_valueholder name="effect_temphp"/>
+
+            <subwindow_eb_dice_value />
+
+            <combobox_eb_damage_type name="damage_type_1">
+                <anchored>
+                    <left offset="5" />
+                </anchored>
+            </combobox_eb_damage_type>
+
+            <cycler_eb_and_or />
+
+            <combobox_eb_damage_type name="damage_type_2"/>
+        </sheetdata>
+    </windowclass>
+    <script name="loader_REGEN">
+        function onInit()
+            if ExtensionBCE.shouldLoadEffects() then
+                EditorManager.addEditor(
+                    "category_heal",
+                    {
+                        value="REGEN",
+                        labelres="effect_regen",
+                        windowclass="effect_REGEN"
+                    }
+                )
+            end
+        end
+    </script>
+</root>

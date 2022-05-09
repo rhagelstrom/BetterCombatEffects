@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root version="3.3">
+    <!-- Strings -->
+    <includefile source="effect_builder/strings/strings_effect_builder.xml" />
+    <!-- Scripts -->
+    <script name="ExtensionBCE" file="effect_builder/scripts/manager_extensions.lua" />
+    <!-- Templates -->
+    <includefile source="effect_builder/common/cyclers.xml" />
+    <includefile source="effect_builder/common/stringfield.xml" />
+
+    <!-- Effect Editors-->
+    <includefile source="effect_builder/effects/DMGA.xml" />
+    <includefile source="effect_builder/effects/DMGADD.xml" />
+    <includefile source="effect_builder/effects/DMGCS.xml" />
+    <includefile source="effect_builder/effects/DMGO.xml" />
+    <includefile source="effect_builder/effects/DMGR.xml" />
+    <includefile source="effect_builder/effects/EXPIREADD.xml" />
+    <includefile source="effect_builder/effects/REGEN.xml" />
+    <includefile source="effect_builder/effects/REGENA.xml" />
+    <includefile source="effect_builder/effects/REST.xml" />
+    <includefile source="effect_builder/effects/SAVEADD.xml" />
+    <includefile source="effect_builder/effects/SAVEDMG.xml" />
+    <includefile source="effect_builder/effects/SAVEO.xml" />
+    <includefile source="effect_builder/effects/SAVEONDMG.xml" />
+    <includefile source="effect_builder/effects/STACK.xml" />
+    <includefile source="effect_builder/effects/STURNR.xml" />
+    <includefile source="effect_builder/effects/TURNCS.xml" />
+
+</root>
