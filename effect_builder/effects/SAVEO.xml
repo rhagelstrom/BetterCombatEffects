@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<root>
+    <windowclass name="effect_SAVEO">
+        <script file="effect_builder/effects/scripts/SAVEO.lua" />
+		<margins control="0,0,0,2" />
+        <sheetdata>
+            <leftanchor_eb />
+            <cycler_eb_turn_add />
+            <cycler_eb_stat_values name="stat_value" />
+            <subwindow_eb_number_value name="number_value" />
+            <label_eb>
+                <static textres="effect_savesdc"/>
+            </label_eb>
+            <checkbox_eb_valueholder name="effect_savesdc"/>
+            <label_eb>
+                <static textres="effect_savemagic"/>
+            </label_eb>
+            <checkbox_eb_valueholder name="effect_savemagic"/>
+            <label_eb>
+                <static textres="effect_saveinvert"/>
+            </label_eb>
+            <checkbox_eb_valueholder name="effect_saveinvert"/>
+
+            <label_eb>
+                <static textres="effect_saveonsuccess"/>
+            </label_eb>
+
+            <label_eb>
+                <static textres="effect_saveonhalf"/>
+            </label_eb>
+            <checkbox_eb_valueholder name="effect_saveonhalf"/>
+            <label_eb>
+                <static textres="effect_deactivate"/>
+            </label_eb>
+            <checkbox_eb_valueholder name="effect_deactivate"/>
+            <label_eb>
+                <static textres="effect_remove"/>
+            </label_eb>
+            <checkbox_eb_valueholder name="effect_remove"/>
+            <label_eb>
+                <static text="]"/>
+            </label_eb>
+        </sheetdata>
+    </windowclass>
+    <script name="loader_SAVEO">
+        function onInit()
+            if ExtensionBCE.shouldLoadEffects() then
+                EditorManager.addEditor(
+                    "category_bce_ongoingsave",
+                    {
+                        value="SAVE",
+                        labelres="effect_saveo",
+                        windowclass="effect_SAVEO"
+                    }
+                )
+            end
+        end
+    </script>
+</root>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<root>
+    <windowclass name="effect_DMGADD">
+        <script file="effect_builder/effects/scripts/DMGADD.lua" />
+		<margins control="0,0,0,2" />
+        <sheetdata>
+            <leftanchor_eb />
+             <label_eb>
+                <static textres="effect_dmgaddfirst"/>
+            </label_eb>
+            <cycler_eb_dmgadd name="dmgadd_first" />
+            <leftanchor_eb />
+             <label_eb>
+                <static textres="effect_dmgaddsecond"/>
+            </label_eb>
+            <cycler_eb_dmgadd name="dmgadd_second"/>
+
+        </sheetdata>
+    </windowclass>
+    <script name="loader_DMGADD">
+        function onInit()
+            if ExtensionBCE.shouldLoadEffects() then
+                EditorManager.addEditor(
+                    "category_attack",
+                    {
+                        value="DMGADD",
+                        labelres="effect_dmgadd",
+                        windowclass="effect_DMGADD"
+                    }
+                )
+            end
+        end
+    </script>
+</root>

@@ -11,6 +11,7 @@
 	<base>
     		<icon name="BetterCombatEffects" file="graphics/icons/bce.png"></icon>
     		<includefile source="strings/strings_bce.xml" />
+			<includefile source="effect_builder/editor_loader.xml" />
     		<script name="EffectsManagerBCE" file="scripts/manager_effect_bce.lua" />
     		<script name="EffectsManagerBCEDND" file="scripts/manager_effect_bceDND.lua" />
     		<script name="EffectsManagerBCE5E" file="scripts/manager_effect_bce5E.lua" />
