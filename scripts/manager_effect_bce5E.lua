@@ -1255,7 +1255,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 		--- we don't want to update existing BCE tag properties by mistake
 		bUpdated = EffectsManagerBCE.registerBCETag(sEffectType:upper(), EffectsManagerBCE.aBCEIgnoreOneShotOptions, true)
 		table.insert(aTags, sEffectType:upper())
-		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rActor)
+		tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rFilterActor)
 		-- Remove the tag from BCE tags
 		if bUpdated then
 			EffectsManagerBCE.unregisterBCETag(sEffectType:upper())
