@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<root>
+    <string name="category_bce_turn">Turn</string>
+    <string name="category_bce_add">One Shot Add</string>
+    <string name="category_bce_ongoingsave">Ongoing Save</string>
+    <string name="effect_activate">Activate</string>
+    <string name="effect_deactivate">Deactivate</string>
+    <string name="effect_remove">Remove</string>
+    <string name="effect_turncs">Change State</string>
+    <string name="effect_sturnr">Remove Source Turn</string>
+    <string name="effect_stack">Stack</string>
+    <string name="effect_expireadd">Add Effect on Expire</string>
+
+    <string name="effect_rest">Rest</string>
+    <string name="effect_temphp">Temp HP</string>
+    <string name="effect_saveo">Ongoing Save</string>
+    <string name="effect_predicate">Predicate</string>
+    <string name="effect_savesdc">SDC</string>
+    <string name="effect_add">On Add</string>
+    <string name="effect_dmgr">Damage Reduction</string>
+    <string name ="effect_draganddrop">Drag and Drop Effect</string>
+
+    <string name="effect_dmgadd">Add Effect on Damage</string>
+    <string name="effect_dmgcs">Change State on Damage</string>
+    <string name="effect_dmgaddfirst">Actor applying effect:</string>
+    <string name="effect_dmgaddsecond">Actor effect applied to:</string>
+    <string name="effect_dmgadds">Source of Damage</string>
+    <string name="effect_dmgaddt">Target of Damage</string>
+
+    <string name="effect_saveondamage">Save when Damage Taken</string>
+    <string name="effect_regena">Heal Once on Add</string>
+    <string name="effect_dmga">Damage Once on Add</string>
+
+    <string name="effect_saveadd">Add Effect on Save</string>
+    <string name="effect_savedmg">Ongoing Save Damage</string>
+
+    <string name="effect_saveaddpass">Add on Success</string>
+    <string name="effect_saveaddfail">Add on Failure</string>
+
+    <string name="effect_saveonsuccess">On Success [</string>
+    <string name="effect_savemagic">Magic</string>
+    <string name="effect_saveinvert">Invert</string>
+    <string name="effect_saveonhalf">Half</string>
+
+    <string name="effect_start">Start</string>
+    <string name="effect_end">End</string>
+    <string name="effect_target">Target Turn</string>
+    <string name="effect_source">Source Turn</string>
+    <string name="effect_turnsource">Remove on source of effect turn</string>
+    <string name="effect_dmgosource">Act on source of effect turn</string>
+    <string name="effect_shortrest">Short Rest</string>
+
+ </root>

@@ -226,7 +226,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADDP" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
-				if rEffect ~= {} then
+				if next( rEffect) then
 					rEffect.sSource = rRoll.sSourceCTNode
 					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
@@ -246,7 +246,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADD" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
-				if rEffect ~= {} then
+				if next(rEffect) then
 					rEffect.sSource = rRoll.sSourceCTNode
 					rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)

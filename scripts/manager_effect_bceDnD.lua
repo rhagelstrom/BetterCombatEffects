@@ -327,7 +327,7 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
-		if rEffect ~= {} then
+		if next(rEffect) then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rTarget.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 
@@ -343,7 +343,7 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget, rSource)
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
-		if rEffect ~= {} then
+		if next(rEffect) then
 			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 			if tEffect.sTag == "SDMGADDT" and nodeTarget ~= nil then
