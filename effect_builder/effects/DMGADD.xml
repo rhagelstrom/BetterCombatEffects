@@ -16,6 +16,8 @@
             </label_eb>
             <cycler_eb_dmgadd name="dmgadd_second"/>
 
+            <bce_stringfield_eb_valueholder name="bce_stringfield_valueholder" />
+
         </sheetdata>
     </windowclass>
     <script name="loader_DMGADD">

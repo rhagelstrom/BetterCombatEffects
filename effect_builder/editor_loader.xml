@@ -6,7 +6,7 @@
     <script name="ExtensionBCE" file="effect_builder/scripts/manager_extensions.lua" />
     <!-- Templates -->
     <includefile source="effect_builder/common/cyclers.xml" />
-    <!-- <includefile source="effect_builder/common/template_cycler.xml" /> -->
+    <includefile source="effect_builder/common/stringfield.xml" />
 
     <!-- Effect Editors-->
     <includefile source="effect_builder/effects/DMGA.xml" />
@@ -14,6 +14,7 @@
     <includefile source="effect_builder/effects/DMGCS.xml" />
     <includefile source="effect_builder/effects/DMGO.xml" />
     <includefile source="effect_builder/effects/DMGR.xml" />
+    <includefile source="effect_builder/effects/EXPIREADD.xml" />
     <includefile source="effect_builder/effects/REGEN.xml" />
     <includefile source="effect_builder/effects/REGENA.xml" />
     <includefile source="effect_builder/effects/REST.xml" />

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<root>
+    <template name="bce_stringfield_eb_valueholder">
+        <stringfield_eb_valueholder name="bce_stringfield_valueholder">
+            <anchored width="120" />
+            <script file="effect_builder/common/scripts/bce_stringfield_eb_valueholder.lua" />
+            <frame name="fieldlight" offset="7,5,7,5" />
+            <readonly/>
+            <visible/>
+        </stringfield_eb_valueholder>
+    </template>
+
+
+</root>

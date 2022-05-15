@@ -10,6 +10,8 @@
     <string name="effect_turncs">Change State</string>
     <string name="effect_sturnr">Remove Source Turn</string>
     <string name="effect_stack">Stack</string>
+    <string name="effect_expireadd">Add Effect on Expire</string>
+
     <string name="effect_rest">Rest</string>
     <string name="effect_temphp">Temp HP</string>
     <string name="effect_saveo">Ongoing Save</string>
@@ -17,6 +19,7 @@
     <string name="effect_savesdc">SDC</string>
     <string name="effect_add">On Add</string>
     <string name="effect_dmgr">Damage Reduction</string>
+    <string name ="effect_draganddrop">Drag and Drop Effect</string>
 
     <string name="effect_dmgadd">Add Effect on Damage</string>
     <string name="effect_dmgcs">Change State on Damage</string>

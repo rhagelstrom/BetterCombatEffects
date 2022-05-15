@@ -1,25 +1,25 @@
 function createEffectString()
-    local effectString = parentcontrol.window.effect.getStringValue() .. ": " .. stat_value.getStringValue() .. " "
+    local effectString = parentcontrol.window.effect.getStringValue() .. ": " .. stat_value.getStringValue()
     if effect_savesdc.getValue() > 0 then
-        effectString = effectString .. "[SDC] "
+        effectString = effectString .. " [SDC]"
     else
-        effectString = effectString .. number_value.getStringValue() .. " "
+        effectString = effectString .. number_value.getStringValue()
     end
 
     if effect_savemagic.getValue() > 0 then
-        effectString = effectString .. "(M) "
+        effectString = effectString .. " (M)"
     end
     if effect_saveinvert.getValue() > 0 then
-        effectString = effectString .. "(F) "
+        effectString = effectString .. " (F)"
     end
     if effect_saveonhalf.getValue() > 0 then
-        effectString = effectString .. "(H) "
+        effectString = effectString .. " (H)"
     end
     if effect_deactivate.getValue() > 0 then
-        effectString = effectString .. "(D) "
+        effectString = effectString .. " (D)"
     end
     if effect_remove.getValue() > 0 then
-        effectString = effectString .. "(R) "
+        effectString = effectString .. " (R)"
     end
 
     return effectString
