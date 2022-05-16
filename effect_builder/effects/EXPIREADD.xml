@@ -13,7 +13,7 @@
         function onInit()
             if ExtensionBCE.shouldLoadEffects() then
                 EditorManager.addEditor(
-                    "category_misc",
+                    "category_bce_cs",
                     {
                         value="EXPIREADD",
                         labelres="effect_expireadd",

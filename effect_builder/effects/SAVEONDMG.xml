@@ -12,6 +12,9 @@
                 <static textres="effect_savesdc"/>
             </label_eb>
             <checkbox_eb_valueholder name="effect_savesdc"/>
+
+            <cycler_eb_save_adv  />
+
             <label_eb>
                 <static textres="effect_savemagic"/>
             </label_eb>

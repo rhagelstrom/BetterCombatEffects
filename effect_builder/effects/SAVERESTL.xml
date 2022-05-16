@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
 <root>
-    <windowclass name="effect_SAVEO">
-        <script file="effect_builder/effects/scripts/SAVEO.lua" />
+    <windowclass name="effect_SAVERESTL">
+        <script file="effect_builder/effects/scripts/SAVERESTL.lua" />
 		<margins control="0,0,0,2" />
         <sheetdata>
             <leftanchor_eb />
-            <cycler_eb_actor />
-            <cycler_eb_turn_add />
             <cycler_eb_stat_values name="stat_value" />
             <subwindow_eb_number_value name="number_value" />
             <label_eb>
                 <static textres="effect_savesdc"/>
             </label_eb>
             <checkbox_eb_valueholder name="effect_savesdc"/>
+
             <cycler_eb_save_adv  />
 
             <label_eb>
@@ -46,15 +45,15 @@
             </label_eb>
         </sheetdata>
     </windowclass>
-    <script name="loader_SAVEO">
+    <script name="loader_SAVERESTL">
         function onInit()
             if ExtensionBCE.shouldLoadEffects() then
                 EditorManager.addEditor(
-                    "category_bce_ongoingsave",
+                    "category_bce_rest",
                     {
-                        value="SAVE",
-                        labelres="effect_saveo",
-                        windowclass="effect_SAVEO"
+                        value="SAVERESTL",
+                        labelres="effect_saverestl",
+                        windowclass="effect_SAVERESTL"
                     }
                 )
             end

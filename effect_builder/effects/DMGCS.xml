@@ -13,7 +13,7 @@
         function onInit()
             if ExtensionBCE.shouldLoadEffects() then
                 EditorManager.addEditor(
-                    "category_attack",
+                    "category_bce_cs",
                     {
                         value="DMG",
                         labelres="effect_dmgcs",

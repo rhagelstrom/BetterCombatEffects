@@ -14,7 +14,7 @@
         function onInit()
             if ExtensionBCE.shouldLoadEffects() then
                 EditorManager.addEditor(
-                    "category_bce_turn",
+                    "category_bce_cs",
                     {
                         value="TURN",
                         labelres="effect_turncs",

@@ -49,6 +49,18 @@
         </cycler_eb_valueholder>
     </template>
 
+    <template name="cycler_eb_save_adv">
+        <cycler_eb_valueholder name="cycler_save_adv">
+            <anchored width="80" />
+            <parameters mergerule="replace">
+                <defaultlabelres>effect_adv_none</defaultlabelres>
+                <defaultvalue></defaultvalue>
+                <labelsres>effect_save_adv|effect_save_dis</labelsres>
+                <values>(ADV)|(DIS)</values>
+            </parameters>
+        </cycler_eb_valueholder>
+    </template>
+
     <template name="cycler_eb_save_add">
         <cycler_eb_valueholder name="cycler_save_add">
             <anchored width="90" />
