@@ -99,7 +99,7 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 	end
 
 	local aTags = {"REGENA", "TREGENA", "DMGA", "DUR"}
-	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "REGENA" and tEffect.rEffectComp.type == "REGENA" then
 			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, false)
@@ -304,10 +304,7 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
-
-	local rDamageOutput = ActionDamage.decodeDamageText(nTotal, sDamage)
-
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, rDamageOutput)
+	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nil, rDamageOutput)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
@@ -324,7 +321,7 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if next(rEffect) then

@@ -7,6 +7,5 @@ function onInit()
 end
 
 function shouldLoadEffects()
-    return extensions["FG-Effect-Builder"] and extensions["FG-Effect-Builder-Plugin-5E"]
-    --return extensions["FG-Effect-Builder"] and extensions["FG-Effect-Builder-Plugin-35E-PFRPG"]
+    return extensions["FG-Effect-Builder"] and (extensions["FG-Effect-Builder-Plugin-5E"] or extensions["FG-Effect-Builder-Plugin-35E-PFRPG"])
 end
