@@ -1,12 +1,17 @@
 # Better Combat Effects
 
-**Current Version:** 2.44
-**Updated::** 05/17/22
+**Current Version:** 2.45
+**Updated::** 05/20/22
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
 <a href="https://www.fantasygrounds.com/forums/showthread.php?68831-Better-Combat-Effects" target="_blank">Comments and Bug Reports</a>
 
+Better Combat Effects supports Effect Builder, a GUI for building effects
+
+<a href="https://forge.fantasygrounds.com/shop/items/457/view" target="_blank">Effect Builder</a>
+<a href="https://forge.fantasygrounds.com/shop/items/463/view" target="_blank">Effect Builder Plugin 5E</a>
+<a href="https://forge.fantasygrounds.com/shop/items/464/view" target="_blank">Effect Builder Plugin 3.5E/PFRPG</a>
 ## BCE Modifier Tags
 
 | Color| Rulesets Supported |

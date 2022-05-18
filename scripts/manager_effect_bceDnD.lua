@@ -438,7 +438,7 @@ function customHandleApplyDamage(msgOOB)
 	end
 
 	local nTotal = tonumber(msgOOB.nTotal) or 0;
-	customApplyDamage(rSource, rTarget, (tonumber(msgOOB.nSecret) == 1), msgOOB.sDamage, nTotal);
+	ActionDamage.applyDamage(rSource, rTarget, (tonumber(msgOOB.nSecret) == 1), msgOOB.sDamage, nTotal);
 end
 
 -- only for Advanced Effects
