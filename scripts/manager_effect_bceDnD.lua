@@ -296,8 +296,8 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 
 	--if the target is dead, process all effects with (E)
 	if(bDead == true) then
-		local sTarget =ActorManager.getCTNodeName(rTarget)
-		CombatManager.callForEachCombatantEffect(endEffectsOnDead, sTarget)
+		local node = ActorManager.getCTNode(rTarget);
+		CombatManager.callForEachCombatant(endEffectsOnDead, node)
 	end
 
 	local tMatch
@@ -352,12 +352,15 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	end
 end
 
-function endEffectsOnDead(nodeEffect, sTarget)
-	local sEffect = DB.getValue(nodeEffect, "label", "")
+function endEffectsOnDead(node, nodeTarget)
+	for _,nodeEffect in pairs(DB.getChildren(node, "effects")) do
+		local sEffect = DB.getValue(nodeEffect, "label", "")
 
-	if (sEffect:match("%(E%)") and sTarget ==  DB.getValue(nodeEffect,"source_name", "")) then
-		EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
+		if (sEffect:match("%(E%)") and (node == nodeTarget or ActorManager.getCTNodeName(nodeTarget) == DB.getValue(nodeEffect,"source_name", ""))) then
+			EffectsManagerBCE.modifyEffect(nodeEffect, "Remove")
+		end
 	end
+
 end
 
 -- This function is disabled but left here incase someone wants it for
