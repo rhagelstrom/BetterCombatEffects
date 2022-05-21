@@ -191,10 +191,14 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	if rRoll.sSubtype ~= "bce" then
 		return ActionSave.onSave(rSource, rTarget, rRoll)
 	end
+
 	local nodeEffect = nil
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
+		local nodeTarget = nodeEffect.getParent().getParent()
+		rTarget = ActorManager.resolveActor(nodeTarget)
 	end
+
 	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	local tMatch
