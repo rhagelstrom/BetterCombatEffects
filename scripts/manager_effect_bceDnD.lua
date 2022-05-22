@@ -304,7 +304,8 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
-	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource, nil, nil, rDamageOutput)
+	local rDamageOutput = ActionDamage.decodeDamageText(nTotal, sDamage);
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, rDamageOutput)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")

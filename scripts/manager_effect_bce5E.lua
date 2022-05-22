@@ -411,6 +411,9 @@ end
 function getNPCPowerConditions(nodePower)
 	local sConditions = ""
 	local sValue = DB.getValue(nodePower, "value")
+	if sValue == nil then
+		return sConditions
+	end
 	local rPower = CombatManager2.parseAttackLine(sValue)
 	for _,aAbility in ipairs(rPower.aAbilities) do
 		if aAbility.sType == "effect" then
