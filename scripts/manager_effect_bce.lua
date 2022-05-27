@@ -11,7 +11,7 @@ OOB_MSGTYPE_BCEUPDATE = "updateeffect"
 local addEffect = nil
 local expireEffect = nil
 local RulesetEffectManager =  nil
-
+local lastExpire = ""
 -- Predefined option arrays for getting effect tags
 aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
 aBCEDeactivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
@@ -85,15 +85,15 @@ end
 -- Expire effect is called twice. Once initially and then once for delayed remove
 -- to get the delay expire action options
 function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
-	if not nodeActor then
+	if not nodeActor or nodeEffect == lastExpire then
 		return expireEffect(nodeActor, nodeEffect, nExpireComp)
 	end
-	local rSource = ActorManager.resolveActor(nodeActor)
-
+	lastExpire = nodeEffect
 	-- Adding an effect before we expire the existing can make a feedback loop
 	-- which causes a stack overflow so we see if the effect has expire add, grab it
 	-- expire the effect and then process for any adds or additional expires
 	local sSource = DB.getValue(nodeEffect,"source_name", "")
+	local rSource = ActorManager.resolveActor(nodeActor)
 	local nInit = DB.getValue(nodeEffect,"init", 0)
 	local aTags = {"EXPIREADD"}
 
