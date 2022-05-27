@@ -89,6 +89,7 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("NORESTL",  EffectsManagerBCE.aBCEDefaultOptions)
 
 		EffectsManagerBCE.registerBCETag("IMMUNE",  EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SDC",  EffectsManagerBCE.aBCEDefaultOptions)
 
 		rest = CharManager.rest
 		CharManager.rest = customRest
@@ -205,7 +206,7 @@ function initTraitTables()
 end
 ---------------------Save Vs Condition ----------------------------
 function customPerformSaveVsRoll(draginfo, rActor, rAction)
-	local rRoll = ActionPower.getSaveVsRoll(rActor, rAction);
+	local rRoll = ActionPower.getSaveVsRoll(rActor, rAction)
 	if rAction.sConditions == nil then
 		if rAction.sType == "powersave" and rAction.label ~= nil then
 			rActor.sConditions = searchPowerGetConditions(rActor, rAction.label)
@@ -220,7 +221,7 @@ end
 -- WARNING: Conflict Potential
 --Need to set conditions in rRoll
 function customPerformVsRoll(draginfo, rActor, sSave, nTargetDC, bSecretRoll, rSource, bRemoveOnMiss, sSaveDesc, sConditions)
-	local rRoll = ActionSave.getRoll(rActor, sSave);
+	local rRoll = ActionSave.getRoll(rActor, sSave)
 	if bSecretRoll then
 		rRoll.bSecret = true;
 	end
@@ -260,6 +261,12 @@ function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveO
 	if not rTarget then
 		return;
 	end
+	local aTags = {"SDC"}
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	for _,tEffect in pairs(tMatch) do
+		nDC = nDC + tEffect.rEffectComp.mod
+	end
+
 	local msgOOB = {};
 	msgOOB.type =ActionPower.OOB_MSGTYPE_APPLYSAVEVS;
 
@@ -1237,7 +1244,6 @@ end
 function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
 	local bRet = hasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
 	if bRet == true then
-		local tMatch = {}
 		local aTags = {}
 		local bUpdated = false
 		--- we don't want to update existing BCE tag properties by mistake
@@ -1256,7 +1262,6 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 	local results = getEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
 	-- This is probably super inefficient
 	if results ~= {} then
-		local tMatch = {}
 		local aTags = {}
 		local bUpdated = false
 		--- we don't want to update existing BCE tag properties by mistake

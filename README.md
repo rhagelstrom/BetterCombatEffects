@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.13
-**Updated::** 05/25/22
+**Current Version:** 3.14
+**Updated::** 05/26/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -36,6 +36,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |EXPIREADD|(-)| [effect] or [condition] |Add effect or condition when this effect expires|
 | **Misc** | | | |
 |DC|(N)|  |(N) will be added  to the [SDC] when [SDC] is automatically replaced|
+|SDC|(N)| |(N) will be added (or subtracted) from the Actors spell save DC
 |DUSE|(-)||Disable effect when a tag is used (matched)|
 |DUR|(D)||Sets the duration of the effect when the effect is applied|
 |EFFINIT|(D)| |Add an effect with initiative number|
