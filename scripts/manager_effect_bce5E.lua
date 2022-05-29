@@ -8,6 +8,7 @@ local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
 local bAdvanceEffects = nil
+local resetHealth = nil
 
 function onInit()
 	if User.getRulesetName() == "5E" then
@@ -49,11 +50,14 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptionsAE)
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
+		ActionsManager.registerModHandler("save", onModSaveHandler)
 		--4E/5E
 		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
 
+		resetHealth = CombatManager2.resetHealth
+		CombatManager2.resetHealth = customResetHealth
 		rest = CharManager.rest
-		CharManager.rest = customRest
+		CharManager.rest= customRest
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		parseEffects = PowerManager.parseEffects
@@ -88,6 +92,7 @@ end
 function onClose()
 	if User.getRulesetName() == "5E" then
 		CharManager.rest = rest
+		CombatManager2.resetHealth = resetHealth
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
 		ActionsManager.unregisterResultHandler("save")
@@ -142,6 +147,24 @@ end
 function customRest(nodeActor, bLong, bMilestone)
 	EffectsManagerBCEDND.customRest(nodeActor, bLong, nil)
 	rest(nodeActor, bLong)
+end
+
+-- For NPC
+function customResetHealth (nodeCT, bLong)
+	local rSource = ActorManager.resolveActor(nodeCT)
+
+	local aTags = {"RESTS"}
+	if bLong == true then
+		table.insert(aTags, "RESTL")
+	end
+
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "RESTL" or tEffect.sTag == "RESTS" then
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
+		end
+	end
+	resetHealth(nodeCT,bLong)
 end
 
 
@@ -557,7 +580,11 @@ end
 
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
 function onModSaveHandler(rSource, rTarget, rRoll)
-		ActionSave.modSave(rSource, rTarget, rRoll)
+	if rRoll.sSubtype ~= "bce" then
+		return ActionSave.onSave(rSource, rTarget, rRoll)
+	else
+	 	return ActionSave.modSave(rTarget, rSource, rRoll)
+	 end
 end
 
 function customParseEffects(sPowerName, aWords)

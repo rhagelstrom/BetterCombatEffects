@@ -20,6 +20,7 @@ function onInit()
 		charRest = CharManager.rest
 		CharManager.rest = customCharRest
 
+
 		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptions)
 
 		EffectsManagerBCE.registerBCETag("SAVES", EffectsManagerBCE.aBCEDefaultOptions)
@@ -37,6 +38,7 @@ function onInit()
 		EffectsManagerBCEDND.setProcessEffectApplyDamage(applyDamage)
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler35E)
+		ActionsManager.registerModHandler("save", onModSaveHandler)
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 
@@ -110,6 +112,19 @@ end
 function customRest(bShort)
     local bLong = not bShort
 	for _,v in pairs(CombatManager.getCombatantNodes()) do
+		local rSource = ActorManager.resolveActor(v)
+		local aTags = {"RESTS"}
+		if bLong == true then
+			table.insert(aTags, "RESTL")
+		end
+
+		local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+		for _,tEffect in pairs(tMatch) do
+			if tEffect.sTag == "RESTL" or tEffect.sTag == "RESTS" then
+				EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
+			end
+		end
+
 		local sClass, sRecord = DB.getValue(v, "link", "", "");
 		if sClass == "charsheet" and sRecord ~= "" then
 			local nodePC = DB.findNode(sRecord);
@@ -312,4 +327,13 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		end
 		ActionsManager.actionRoll(rTarget,{{rTarget}}, {rSaveVsRoll})
 	end
+end
+
+-- Needed for ongoing save. Have to flip source/target to get the correct mods
+function onModSaveHandler(rSource, rTarget, rRoll)
+	if rRoll.sSubtype ~= "bce" then
+		return ActionSave.onSave(rSource, rTarget, rRoll)
+	else
+	 	return ActionSave.modSave(rTarget, rSource, rRoll)
+	 end
 end
