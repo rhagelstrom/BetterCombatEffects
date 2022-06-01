@@ -332,7 +332,7 @@ end
 -- Needed for ongoing save. Have to flip source/target to get the correct mods
 function onModSaveHandler(rSource, rTarget, rRoll)
 	if rRoll.sSubtype ~= "bce" then
-		return ActionSave.onSave(rSource, rTarget, rRoll)
+		return ActionSave.modSave(rSource, rTarget, rRoll)
 	else
 	 	return ActionSave.modSave(rTarget, rSource, rRoll)
 	 end
