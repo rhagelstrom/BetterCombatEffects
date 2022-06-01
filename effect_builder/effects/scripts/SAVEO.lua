@@ -1,8 +1,9 @@
 function createEffectString()
-    local effectString =  parentcontrol.window.effect.getStringValue() .. cycler_turn_add.getStringValue().. ": " .. stat_value.getStringValue()
+    local effectString = parentcontrol.window.effect.getStringValue() .. cycler_turn_add.getStringValue().. ": " .. stat_value.getStringValue() .. " "
     if cycler_actor.getStringValue() ~= true and cycler_turn_add.getStringValue() ~= "A" then
         effectString =  cycler_actor.getStringValue() .. effectString
     end
+
     if effect_savesdc.getValue() > 0 then
         effectString = effectString .. " [SDC]"
     else

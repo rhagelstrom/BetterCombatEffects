@@ -8,6 +8,7 @@ local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
 local bAdvanceEffects = nil
+
 --local bAutomaticShieldMaster = nil
 --local bMadNomadCharSheetEffectDisplay = nil
 local modSave = nil
@@ -30,6 +31,9 @@ local addCustomPC = nil
 
 local tTraitsAdvantage = {}
 local tTraitsDisadvantage = {}
+
+local resetHealth = nil
+
 
 function onInit()
 
@@ -73,6 +77,7 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("SAVERESTL", EffectsManagerBCE.aBCEDefaultOptions)
 
+
 		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
 
 		EffectsManagerBCE.registerBCETag("SSAVES", EffectsManagerBCE.aBCESourceMattersOptions)
@@ -91,6 +96,8 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("IMMUNE",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SDC",  EffectsManagerBCE.aBCEDefaultOptions)
 
+		resetHealth = CombatManager2.resetHealth
+		CombatManager2.resetHealth = customResetHealth
 		rest = CharManager.rest
 		CharManager.rest = customRest
 
@@ -124,6 +131,7 @@ function onInit()
 
 		modSave = ActionSave.modSave
 		ActionSave.modSave = onModSaveHandler
+
 		getDamageAdjust = ActionDamage.getDamageAdjust
 		ActionDamage.getDamageAdjust = customGetDamageAdjust
 		parseEffects = PowerManager.parseEffects
@@ -172,6 +180,7 @@ end
 function onClose()
 	if User.getRulesetName() == "5E" then
 		CharManager.rest = rest
+		CombatManager2.resetHealth = resetHealth
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
 		ActionsManager.unregisterResultHandler("save")
@@ -629,6 +638,7 @@ end
 
 function noRest(nodeActor, bLong, bMilestone)
 	local rSource = ActorManager.resolveActor(nodeActor)
+	Debug.chat(rSource)
 	local tMatch
 	local aTags = {"NOREST"}
 	if bLong then
@@ -668,6 +678,24 @@ function customOnAttack(rSource, rTarget, rRoll)
 		end
 	end
 	return onAttack(rSource, rTarget, rRoll)
+end
+
+-- For NPC
+function customResetHealth (nodeCT, bLong)
+	local bRest = true
+	EffectsManagerBCEDND.customRest(nodeCT, bLong, nil)
+	local tMatch
+	Debug.chat("Reset Health")
+	tMatch = noRest(nodeCT, bLong, bMilestone)
+	Debug.chat(tMatch)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "NORESTL" or tEffect.sTag == "NOREST" then
+			bRest = false
+		end
+	end
+	if bRest then
+		resetHealth(nodeCT,bLong)
+	end
 end
 
 function processEffectTurnStart5E(rSource)
@@ -1194,20 +1222,32 @@ function dropConcentration(rNewEffect, nDuration)
 	end
 end
 
--- Needed for ongoing save. Have to flip source/target to get the correct mods
+-- Needed for ongoing save. Have to flip source/target to get the correct mods for BCE
 function onModSaveHandler(rSource, rTarget, rRoll)
 	local tTraits = {}
 	local tMatch = {}
 	local aTags = {}
+	local rBCESource
+	local rBCETarget
+	--messy
+	if rRoll.sSubtype ~= "bce" then
+		rBCESource = rSource
+		rBCETarget = rTarget
+	else
+		rBCESource = rTarget
+		rBCETarget = rSource
+
+	end
+
 	local rEffectSource = {}
 	--Temp Solution.. Trait tables not init on clients
-	addTraitstoConditionsTables(rSource)
+	addTraitstoConditionsTables(rBCESource)
 
 	--Determine if we have a trait gives adv or disadv
 	-- Do the Trait advantage first so we don't burn our effect if we don't need to
 	if rRoll.sConditions ~= "" then
 		local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
-		tTraits = hasAdvDisCondition(rSource, aConditions)
+		tTraits = hasAdvDisCondition(rBCESource, aConditions)
 	end
 	for _, sDesc in pairs(tTraits) do
 		if  sDesc:match("%[ADV]") and not rRoll.sDesc:match("%[ADV]") then
@@ -1228,7 +1268,7 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	-- Get tags if any
 	if rRoll.sConditions and aTags ~= {} then
 		local aConditions =  StringManager.split(rRoll.sConditions, "," ,true)
-			tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, nil,nil,nil,aConditions)
+			tMatch = EffectsManagerBCE.getEffects(rBCESource, aTags, rBCESource, nil,nil,nil,aConditions)
 	end
 
 	for _,tEffect in pairs(tMatch) do
@@ -1238,7 +1278,8 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 			rRoll.sDesc = rRoll.sDesc .. " [" .. tEffect.rEffectComp.original .. "] [DIS]"
 		end
 	end
-	return modSave(rSource, rTarget, rRoll)
+
+	return modSave(rBCESource, rBCETarget, rRoll)
 end
 
 function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
