@@ -638,7 +638,6 @@ end
 
 function noRest(nodeActor, bLong, bMilestone)
 	local rSource = ActorManager.resolveActor(nodeActor)
-	Debug.chat(rSource)
 	local tMatch
 	local aTags = {"NOREST"}
 	if bLong then
@@ -685,9 +684,7 @@ function customResetHealth (nodeCT, bLong)
 	local bRest = true
 	EffectsManagerBCEDND.customRest(nodeCT, bLong, nil)
 	local tMatch
-	Debug.chat("Reset Health")
 	tMatch = noRest(nodeCT, bLong, bMilestone)
-	Debug.chat(tMatch)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "NORESTL" or tEffect.sTag == "NOREST" then
 			bRest = false
@@ -916,8 +913,8 @@ end
 function customEvalAction(rActor, nodePower, rAction)
 	if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
 		local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
-		if aPowerGroup and aPowerGroup.sStat and DataCommon.ability_ltos[aPowerGroup.sStat] then
-			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sStat)
+		if aPowerGroup and aPowerGroup.sSaveDCStat and DataCommon.ability_ltos[aPowerGroup.sSaveDCStat] then
+			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sSaveDCStat)
 			if aPowerGroup.nSaveDCProf == 1 then
 				nDC = nDC + ActorManager5E.getAbilityBonus(rActor, "prf")
 			end
@@ -936,6 +933,7 @@ function replaceSaveDC(rNewEffect, rActor)
 		    rNewEffect.sName:match("SAVEONDMG%s*:")) then
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
 		local nSpellcastingDC = 0
+		local bNewSpellcasting = true
 		local nDC = getDCEffectMod(ActorManager.getCTNode(rActor))
 		if sNodeType == "pc" then
 			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf") + nDC
@@ -957,7 +955,18 @@ function replaceSaveDC(rNewEffect, rActor)
 					local sDesc = DB.getValue(nodeTrait, "desc", ""):lower();
 					local sStat = sDesc:match("its spellcasting ability is (%w+)") or ""
 					nSpellcastingDC = nSpellcastingDC + ActorManager5E.getAbilityBonus(rActor, sStat)
+					bNewSpellcasting = false
 					break
+				end
+			end
+			if bNewSpellcasting then
+				for _,nodeAction in pairs(DB.getChildren(nodeActor, "actions")) do
+					local sActionName = StringManager.trim(DB.getValue(nodeAction, "name", ""):lower())
+					if sActionName == "spellcasting" then
+						local sDesc = DB.getValue(nodeAction, "desc", ""):lower();
+						nSpellcastingDC = nDC + (tonumber(sDesc:match("spell save dc (%d+)")) or 0)
+						break
+					end
 				end
 			end
 		end
@@ -1236,7 +1245,6 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	else
 		rBCESource = rTarget
 		rBCETarget = rSource
-
 	end
 
 	local rEffectSource = {}
