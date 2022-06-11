@@ -227,6 +227,7 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		aNewComps[1] = aOriginalComps[1]
 		rNewEffect.sName = EffectManager.rebuildParsedEffect(aNewComps);
 	end
+
 	replaceSaveDC(rNewEffect, rSource)
 
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
@@ -354,12 +355,18 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeEffect = nil
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
-		local nodeTarget = nodeEffect.getParent().getParent()
-		rTarget = ActorManager.resolveActor(nodeTarget)
+		if nodeEffect ~= nil then
+			local nodeTarget = nodeEffect.getParent().getParent()
+			rTarget = ActorManager.resolveActor(nodeTarget)
+		end
 	end
 
 	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
+	-- something is wrong. Likely an extension messign with things
+	if nodeTarget == nil then
+		return
+	end
 	local tMatch
 	local aTags
 	ActionSave.onSave(rSource, rTarget, rRoll)
@@ -447,6 +454,9 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		sAbility = DataCommon.ability_stol[sAbility]
 	end
 	local nDC = tonumber(aParsedRemiander[2])
+	if not nDC and tEffect.rEffectComp.mod ~= 0 then
+		nDC = tEffect.rEffectComp.mod
+	end
 	if  (nDC and sAbility) ~= nil then
 		local rSaveVsRoll = {}
 		rSaveVsRoll.sType = "save"
