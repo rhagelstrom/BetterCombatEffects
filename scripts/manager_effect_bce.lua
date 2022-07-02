@@ -85,7 +85,7 @@ end
 -- Expire effect is called twice. Once initially and then once for delayed remove
 -- to get the delay expire action options
 function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
-	if not nodeActor or nodeEffect == lastExpire then
+	if not nodeActor or not nodeEffect or nodeEffect == lastExpire then
 		return expireEffect(nodeActor, nodeEffect, nExpireComp)
 	end
 	lastExpire = nodeEffect
@@ -97,8 +97,8 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 	local nInit = DB.getValue(nodeEffect,"init", 0)
 	local aTags = {"EXPIREADD"}
 
+	local bRet = expireEffect(nodeActor, nodeEffect, nExpireComp)
 	local tMatch = getEffects(rSource, aTags, rSource)
-	expireEffect(nodeActor, nodeEffect, nExpireComp)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.nodeCT == nodeEffect and tEffect.sTag == "EXPIREADD" then
 			local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
@@ -108,7 +108,7 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 				aTags  = EffectManager.parseEffect(tEffect.sLabel)
 				-- Check for match
 				for i,sTag in pairs(aTags) do
-					rEffectComp = nil
+					local rEffectComp = nil
 					if RulesetEffectManager.parseEffectComp then
 						rEffectComp = RulesetEffectManager.parseEffectComp(sTag)
 					else
@@ -126,6 +126,7 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 			break
 		end
 	end
+	return bRet
 end
 
 function customTurnStart(sourceNodeCT)
