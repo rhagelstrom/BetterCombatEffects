@@ -149,15 +149,15 @@ __*__ = Multiple entries of this descriptor type allowed
 Saves against conditions will automatically be granted adv/dis based on the traits of the Actor making the saving throw. The parser will match traits with the following verbiage: words ... {advantage,disadvantage} ... words ... {saves,saving throws} ... words ... {condition(s)} ... words. Make up your own homebrew traits and have them process automagiclly.
 
 ### Options
-| Name| Default | Options | Notes | Ruleset|
-|---|---|---|---|---|
-|Add Prone to NPC with Undead Fortitude| off| off/on| When on, will add Prone to NPCs with the Undead Fortitude trait when they are Unconscious as a result of falling to 0 HP. This option requires the option "Add Prone to Unconscious" to be set to "on" to have any affect| 5E|
-|Add Prone when Unconscious| off| off/on| When on, will add the Prone condition to the Actor when the Actor is Unconscious as a result of falling to 0 HP| 5E|
-|Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor| 5E|
-|Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire| 5E|
-|Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE| 5E|
-|Restrict Concentration| off| off/on| When on, expires any previous spells with concentration (C) when a new concentration spell is cast| 5E|
-|TempHP Reduction is Damage| on| off/on| For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage| CoreRPG|
+| Name| Default | Options | Notes |
+|---|---|---|---|
+|Add Prone to NPC with Undead Fortitude| off| off/on| When on, will add Prone to NPCs with the Undead Fortitude trait when they are Unconscious as a result of falling to 0 HP. This option requires the option "Add Prone to Unconscious" to be set to "on" to have any affect|
+|Add Prone when Unconscious| off| off/on| When on, will add the Prone condition to the Actor when the Actor is Unconscious as a result of falling to 0 HP|
+|Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor|
+|Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire|
+|Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE|
+|Restrict Concentration| off| off/on| When on, expires any previous spells with concentration (C) when a new concentration spell is cast|
+|TempHP Reduction is Damage| on| off/on| For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage|
 
 ### Replace [] with ()
 When writing NPC effects, the CT doesn't process tags such as [CLASS] [PRF] [LVL]. BCE Gold will allow those tags to be written as (CLASS) (PRF) (LVL) which enables them to be processed by FG. In addition the BCE tag of [SDC] can also be written as (SDC)
