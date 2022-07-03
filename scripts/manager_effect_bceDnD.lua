@@ -10,6 +10,7 @@ local bMadNomadCharSheetEffectDisplay = false
 local handleApplyDamage = nil
 local notifyApplyDamage = nil
 local convertStringToDice = nil
+local outputResult = nil
 
 function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
 	fProcessEffectApplyDamage = ProcessEffectApplyDamage
@@ -471,7 +472,15 @@ function replaceAbilityScores(rNewEffect, rActor)
 		end
 	end
 end
-
+function customOutputResult(bTower, rSource, rTarget, rMessageGM, rMessagePlayer)
+	if rMessageGM.text:gmatch("%w+")() == "Save" then
+		rMessageGM.icon = "bce_save"
+	end
+	if rMessagePlayer.text:gmatch("%w+")() == "Save" then
+		rMessagePlayer.icon = "bce_save"
+	end
+	outputResult(bTower, rSource, rTarget, rMessageGM, rMessagePlayer)
+end
 function customConvertStringToDice(s)
 	local tDice = {};
 	local nMod = 0;
@@ -662,6 +671,8 @@ function onInit()
 		DiceManager.convertStringToDice = customConvertStringToDice
 
 		ActionsManager.registerResultHandler("effectbce", onEffectRollHandler)
+		outputResult = ActionsManager.outputResult
+		ActionsManager.outputResult = customOutputResult
 
 		local aExtensions = Extension.getExtensions()
 		for _,sExtension in ipairs(aExtensions) do
@@ -691,6 +702,8 @@ function onClose()
 
 
 		ActionDamage.applyDamage = applyDamage
+		ActionsManager.outputResult = outputResult
+
 		if bAdvanceEffects then
 			ActionDamage.notifyApplyDamage = notifyApplyDamage
 			ActionDamage.handleApplyDamage = handleApplyDamage

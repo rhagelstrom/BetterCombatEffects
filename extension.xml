@@ -13,6 +13,7 @@
 	</properties>
 	<base>
     	<icon name="BetterCombatEffectsGold" file="graphics/icons/bceg.png"></icon>
+		<icon name="bce_save" file="graphics/icons/bce_save.png"></icon>
     	<includefile source="strings/strings_bceg.xml" />
 		<includefile source="ct/ct_host.xml" />
 		<includefile source="effect_builder/editor_loader.xml" />

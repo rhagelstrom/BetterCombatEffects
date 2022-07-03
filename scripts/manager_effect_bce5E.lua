@@ -33,8 +33,7 @@ local tTraitsAdvantage = {}
 local tTraitsDisadvantage = {}
 
 local resetHealth = nil
-
-
+local bExpandedNPC = nil
 function onInit()
 
 	if User.getRulesetName() == "5E" then
@@ -61,6 +60,11 @@ function onInit()
 
 			OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects_Gold",
 			"option_Autoparse_Effects", "option_entry_cycler",
+			{ labels = "option_val_on", values = "on",
+				baselabel = "option_val_off", baseval = "off", default = "off" });
+
+			OptionsManager.registerOption2("PRONE_UF", false, "option_Better_Combat_Effects_Gold",
+			"option_Undead_Fortitude", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 
@@ -165,6 +169,8 @@ function onInit()
 			-- 	bMadNomadCharSheetEffectDisplay = true
 			-- elseif (tExtension.name == "5E - Automatic Shield Master") then
 			-- 	bAutomaticShieldMaster = true
+			elseif (tExtension.name == "5E - Expanded NPCs") then
+				bExpandedNPC = true
 			end
 		end
 
@@ -825,6 +831,7 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		aNewComps[1] = aOriginalComps[1]
 		rNewEffect.sName = EffectManager.rebuildParsedEffect(aNewComps);
 	end
+
 	replaceSaveDC(rNewEffect, rSource)
 	abilityReplacement(rNewEffect,rSource)
 
@@ -856,13 +863,31 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	end
 
 	if OptionsManager.isOption("ADD_PRONE", "on") and rNewEffect.sName:lower():match("unconscious") and EffectManager5E.hasEffectCondition(nodeCT, "Unconscious") and not EffectManager5E.hasEffectCondition(nodeCT, "Prone") then
-		local rProne = {sName = "Prone" , nInit = rNewEffect.nInit, nDuration = rNewEffect.nDuration, sSource = rNewEffect.sSource, nGMOnly = rNewEffect.nGMOnly}
-		EffectManager.addEffect("", "", nodeCT, rProne, true)
+		if  not ((OptionsManager.isOption("PRONE_UF", "off") and hasUndeadFort(nodeCT))) then
+			local rProne = {sName = "Prone" , nInit = rNewEffect.nInit, nDuration = rNewEffect.nDuration, sSource = rNewEffect.sSource, nGMOnly = rNewEffect.nGMOnly}
+			EffectManager.addEffect("", "", nodeCT, rProne, true)
+		end
 	end
 
 	return true
 end
 
+function hasUndeadFort(nodeActor)
+	local bRet = false
+	local nodeTraits = nodeActor.getChild("traits")
+	local rActor = ActorManager.resolveActor(nodeActor)
+	if nodeTraits ~= nil and rActor.sType == "npc" then
+		local aTraits = nodeTraits.getChildren()
+		for _, nodeTrait in pairs(aTraits) do
+			local sName = DB.getValue(nodeTrait, "name", "")
+			if sName:lower() == "undead fortitude" then
+				bRet = true
+				break
+			end
+		end
+	end
+	return bRet
+end
 function getDCEffectMod(nodeActor)
 	local nDC = 0
 	for _,nodeEffect in pairs(DB.getChildren(nodeActor, "effects")) do
@@ -984,12 +1009,21 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeEffect = nil
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
-		local nodeTarget = nodeEffect.getParent().getParent()
-		rTarget = ActorManager.resolveActor(nodeTarget)
+		if nodeEffect and not rTarget then
+			local nodeTarget = nodeEffect.getParent().getParent()
+			rTarget = ActorManager.resolveActor(nodeTarget)
+		end
+	end
+	if not rTarget or not rSource then
+		return ActionSave.onSave(rSource, rTarget, rRoll)
 	end
 
 	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
+	-- something is wrong. Likely an extension messign with things
+	if nodeTarget == nil then
+		return
+	end
 	local tMatch
 	local aTags
 	ActionSave.onSave(rSource, rTarget, rRoll)
@@ -1082,6 +1116,9 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		sAbility = DataCommon.ability_stol[sAbility]
 	end
 	local nDC = tonumber(aParsedRemiander[2])
+	if not nDC and tEffect.rEffectComp.mod ~= 0 then
+		nDC = tEffect.rEffectComp.mod
+	end
 	if  (nDC and sAbility) ~= nil then
 		local rSaveVsRoll = {}
 		rSaveVsRoll.sType = "save"
@@ -1571,7 +1608,11 @@ function customParseEffects(sPowerName, aWords)
 
 			if bValidCondition then
 				rCurrent = {};
-				rCurrent.sName = sPowerName .. "; " .. StringManager.capitalize(aWords[i]);
+				if not sPowerName then
+					rCurrent.sName = StringManager.capitalize(aWords[i]);
+				else
+					rCurrent.sName = sPowerName .. "; " .. StringManager.capitalize(aWords[i]);
+				end
 				rCurrent.startindex = nConditionStart;
 				rCurrent.endindex = i;
 				if sRemoveTurn ~= "" then
