@@ -1,0 +1,6 @@
+{
+    "Lua.diagnostics.globals": [
+        "User"
+    ],
+    "markdown-pdf.styles": [".css/mkdwn-pdf.css"]
+}

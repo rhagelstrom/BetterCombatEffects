@@ -23,7 +23,7 @@ jobs:
       uses: thedoctor0/zip-release@master
       with:
         filename: '.resources/BetterCombatEffectsGold.ext'
-        exclusions: '*.git* *.github* *.resources* /*node_modules/* .editorconfig *.ext *.mod README.md *.yml *.pdf'
+        exclusions: '*.git* *.github* *.resources* /*node_modules/* .editorconfig *.ext *.mod README.md *.yml *.pdf *.css* *.vscode*'
     - name: Archive Release
       uses: thedoctor0/zip-release@master
       with:

@@ -135,29 +135,8 @@ __*__ = Multiple entries of this descriptor type allowed
 | Water Elemental [NPC]|Water Elemental Whelm; grappled; restrained; SDMGOS: 2d8+4 bludgeoning| | |
 | Web [Spell]| Web; Restrained; SAVES: DEX [SDC] (C) | | |
 
-## Options
-| Name| Default | Options | Notes |
-|---|---|---|---|
-|Add Prone when Unconscious| off| off/on| When on, will add prone to an actor who also is unconscious| 
-|Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor| 
-|Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire| 
-|Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE| 
-|Restrict Concentration| off| off/on| When on, expires any previous spells with concentration (C) when a new concentration spell is cast| 
-|TempHP Reduction is Damage| on| off/on| For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage|
-
 ### Save vs Condition
 Saves against conditions will automatically be granted adv/dis based on the traits of the Actor making the saving throw. The parser will match traits with the following verbiage: words ... {advantage,disadvantage} ... words ... {saves,saving throws} ... words ... {condition(s)} ... words. Make up your own homebrew traits and have them process automagiclly.
-
-### Options
-| Name| Default | Options | Notes |
-|---|---|---|---|
-|Add Prone to NPC with Undead Fortitude| off| off/on| When on, will add Prone to NPCs with the Undead Fortitude trait when they are Unconscious as a result of falling to 0 HP. This option requires the option "Add Prone to Unconscious" to be set to "on" to have any affect|
-|Add Prone when Unconscious| off| off/on| When on, will add the Prone condition to the Actor when the Actor is Unconscious as a result of falling to 0 HP|
-|Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor|
-|Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire|
-|Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE|
-|Restrict Concentration| off| off/on| When on, expires any previous spells with concentration (C) when a new concentration spell is cast|
-|TempHP Reduction is Damage| on| off/on| For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage|
 
 ### Replace [] with ()
 When writing NPC effects, the CT doesn't process tags such as [CLASS] [PRF] [LVL]. BCE Gold will allow those tags to be written as (CLASS) (PRF) (LVL) which enables them to be processed by FG. In addition the BCE tag of [SDC] can also be written as (SDC)
@@ -170,10 +149,21 @@ Effects can be automatically added to the source or the target on the damage by 
 The Shadow has strength drain so we put the above effect on the shadow. When the shadow deals damage, it will apply the effect "Strength Drain" to the target of the damage. The effect "Strength Drain" needs to be an effect listed in our custom effects list or conditions table. The effect looks like this:
   * Strength Drain; STR: -1d4; STACK; RESTL
 
+### Options
+| Name| Default | Options | Notes |
+|---|---|---|---|
+|Add Prone to NPC with Undead Fortitude| off| off/on| When on, will add Prone to NPCs with the Undead Fortitude trait when they are Unconscious as a result of falling to 0 HP. This option requires the option "Add Prone to Unconscious" to be set to "on" to have any affect|
+|Add Prone when Unconscious| off| off/on| When on, will add the Prone condition to the Actor when the Actor is Unconscious as a result of falling to 0 HP|
+|Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor|
+|Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire|
+|Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE|
+|Restrict Concentration| off| off/on| When on, expires any previous spells with concentration (C) when a new concentration spell is cast|
+|TempHP Reduction is Damage| on| off/on| For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage|
 ### Changelog BCE Gold vs BCE
   * IMMUNE: CUSTOM([effect]) Immune to an effect where [effect]is an effect in custom effects window
   * ATURN - Enable effect on the start of any turn
   * DUSE - Disable effect if a tag in the effect is used
+  * SDC: (N) - Adjust the spell save DC by N
   * Save vs Condition - Saves against conditions and damage types will automatically be granted adv/dis based on the traits of the actor making the saving throw
   * ADVCOND,DISCOND: [condition] or [damage type]- Explicit advantage/disadvantage when rolling a save vs condition or damage type
   * Ongoing Saves (ADV) (DIS) - (ADV)(DIS) can be added to BCE ongoing saves to grant advantage or disadvantage
