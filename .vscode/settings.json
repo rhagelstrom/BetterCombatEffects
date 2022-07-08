@@ -2,5 +2,5 @@
     "Lua.diagnostics.globals": [
         "User"
     ],
-    "markdown-pdf.styles": [".css/mkdwn-pdf.css"]
+    "markdown-pdf.styles": [".css/torillic.css"]
 }
