@@ -7,11 +7,13 @@ OOB_MSGTYPE_BCEACTIVATE = "activateeffect"
 OOB_MSGTYPE_BCEDEACTIVATE = "deactivateeffect"
 OOB_MSGTYPE_BCEREMOVE = "removeeffect"
 OOB_MSGTYPE_BCEUPDATE = "updateeffect"
-
+local bAdvanceEffects = false
 local addEffect = nil
 local expireEffect = nil
 local RulesetEffectManager =  nil
 local lastExpire = ""
+local extensions = {}
+
 -- Predefined option arrays for getting effect tags
 aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = false, nDuration = 0}
 aBCEActivateNoDisableOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, bNoDisable = true, nDuration = 0}
@@ -71,6 +73,11 @@ function onInit()
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect)
 
+	for index, name in pairs(Extension.getExtensions()) do
+		extensions[name] = index
+   	end
+	
+	bAdvanceEffects =  hasExtension("5E - Advanced Effects")
 end
 function onClose()
 	EffectManager.addEffect = addEffect
@@ -95,6 +102,14 @@ end
 
 function unregisterBCETag(sTag)
 	tBCETag[sTag] = nil
+end
+
+function hasExtension(sName)
+	if extensions[sName] then
+		return true
+	else
+		return false
+	end
 end
 
 -- Expire effect is called twice. Once initially and then once for delayed remove
@@ -318,7 +333,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		local bAEValid = true
 		local bDisableUse = false
 
-		if User.getRulesetName() == "5E" and EffectsManagerBCE5E.hasAdvancedEffects() then
+		if User.getRulesetName() == "5E" and bAdvanceEffects then
 			bAEValid = EffectManagerADND.isValidCheckEffect(rActor,v)
 		end
 		if  sLabel:match("DUSE") then
