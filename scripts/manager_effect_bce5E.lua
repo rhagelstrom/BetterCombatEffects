@@ -1133,6 +1133,9 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		if tEffect.rEffectComp.original:match("%(F%)") then
 			rSaveVsRoll.bActonFail = true
 		end
+		local aSaveFilter = {};
+		table.insert(aSaveFilter, sAbility:lower())
+		
 		if tEffect.rEffectComp.original:match("%(ADV%)") then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [ADV]"
 		elseif #(EffectManager5E.getEffectsByType(rTarget, "ADVSAV", aSaveFilter, rSource)) > 0 then
@@ -1148,8 +1151,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		rRoll = ActionSave.getRoll(rTarget,sAbility) -- call to get the modifiers
 		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers
 		rSaveVsRoll.aDice = rRoll.aDice
-		local aSaveFilter = {};
-		table.insert(aSaveFilter, sAbility:lower());
+
 
 		-- Pass the effect node if it wasn't expired by a One Shot
 		if(type(tEffect.nodeCT) == "databasenode") then

@@ -7,8 +7,7 @@
   --body: 'Alegreya', sans-serif;
   --mono: 'Source Code Pro';
   font-family: var(--body);
-  font-size: var(--vscode-markdown-font-size, 8px);
-  font-size: 8pt;
+  font-size: 2pt;
 
   --offwhite: #fcf5e5;
   --green: #e0e5c1;
@@ -17,6 +16,14 @@
   --purple: #704cd9;
 }
 
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 10px);
+	padding: 0 14px;
+	line-height: var(--vscode-markdown-line-height, 12px);
+	word-wrap: break-word;
+}
 /** Background **/
 
 content, .typora-export-content {
