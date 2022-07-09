@@ -7,11 +7,13 @@ OOB_MSGTYPE_BCEACTIVATE = "activateeffect"
 OOB_MSGTYPE_BCEDEACTIVATE = "deactivateeffect"
 OOB_MSGTYPE_BCEREMOVE = "removeeffect"
 OOB_MSGTYPE_BCEUPDATE = "updateeffect"
-
+local bAdvanceEffects = false
 local addEffect = nil
 local expireEffect = nil
 local RulesetEffectManager =  nil
 local lastExpire = ""
+local extensions = {}
+
 -- Predefined option arrays for getting effect tags
 aBCEActivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = true, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
 aBCEDeactivateOptions = {bTargetedOnly = false, bIgnoreEffectTargets = true, bOnlyDisabled = false, bOnlySourceEffect = false, bIgnoreOneShot = false, bOneShot = false, bAdvancedEffects = false, nDuration = 0}
@@ -70,6 +72,11 @@ function onInit()
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect)
 
+	for index, name in pairs(Extension.getExtensions()) do
+		extensions[name] = index
+   	end
+	
+	bAdvanceEffects =  hasExtension("5E - Advanced Effects")
 end
 function onClose()
 	EffectManager.addEffect = addEffect
@@ -78,9 +85,18 @@ function onClose()
 	ActionsManager.unregisterResultHandler("effectbce")
 end
 
+function hasExtension(sName)
+	if extensions[sName] then
+		return true
+	else
+		return false
+	end
+end
+
 function registerBCETag(sTag, aOptions)
 	tBCETag[sTag] = aOptions
 end
+
 
 -- Expire effect is called twice. Once initially and then once for delayed remove
 -- to get the delay expire action options
@@ -278,7 +294,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		local tEffectComps = EffectManager.parseEffect(sLabel)
 		local bAEValid = true
 
-		if User.getRulesetName() == "5E" and EffectsManagerBCE5E.hasAdvancedEffects() then
+		if User.getRulesetName() == "5E" and bAdvanceEffects then
 			bAEValid = EffectManagerADND.isValidCheckEffect(rActor,v)
 		end
 

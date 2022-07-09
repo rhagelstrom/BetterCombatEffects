@@ -8,6 +8,7 @@ local convertStringToDice = nil
 local applyDamage = nil
 local fProcessEffectApplyDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
+local bAdvancedEffects = false
 local handleApplyDamage = nil
 local notifyApplyDamage = nil
 local outputResult = nil
@@ -544,19 +545,14 @@ function onInit()
 		outputResult = ActionsManager.outputResult
 		ActionsManager.outputResult = customOutputResult
 
-		local aExtensions = Extension.getExtensions()
-		for _,sExtension in ipairs(aExtensions) do
-			tExtension = Extension.getExtensionInfo(sExtension)
-			if (tExtension.name == "MNM Charsheet Effects Display") then
-				bMadNomadCharSheetEffectDisplay = true
-			elseif (tExtension.name == "5E - Advanced Effects") then
-				bAdvanceEffects = true
-				notifyApplyDamage = ActionDamage.notifyApplyDamage
-				handleApplyDamage = ActionDamage.handleApplyDamage
-				ActionDamage.notifyApplyDamage = customNotifyApplyDamage
-				ActionDamage.handleApplyDamage = customHandleApplyDamage
-				OOBManager.registerOOBMsgHandler(ActionDamage.OOB_MSGTYPE_APPLYDMG, customHandleApplyDamage);
-			end
+		bMadNomadCharSheetEffectDisplay = EffectsManagerBCE.hasExtension("MNM Charsheet Effects Display")
+		bAdvancedEffects = EffectsManagerBCE.hasExtension("5E - Advanced Effects")
+		if bAdvancedEffects then
+			notifyApplyDamage = ActionDamage.notifyApplyDamage
+			handleApplyDamage = ActionDamage.handleApplyDamage
+			ActionDamage.notifyApplyDamage = customNotifyApplyDamage
+			ActionDamage.handleApplyDamage = customHandleApplyDamage
+			OOBManager.registerOOBMsgHandler(ActionDamage.OOB_MSGTYPE_APPLYDMG, customHandleApplyDamage);
 		end
 	end
 end

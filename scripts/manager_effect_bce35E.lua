@@ -140,14 +140,39 @@ function replaceSaveDC(rNewEffect, rActor)
 	-- TODO
 end
 
-function processEffectTurnStart35E(sourceNodeCT, nodeCT, nodeEffect)
-    return EffectsManagerBCE5E.processEffectTurnStart5E(sourceNodeCT, nodeCT, nodeEffect)
+function processEffectTurnStart35E(rSource)
+	local aTags = {"SAVES"}
+
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	for _,tEffect in pairs(tMatch) do
+		if(tEffect.sSource == "") then
+			rEffectSource = rSource
+		else
+			rEffectSource = ActorManager.resolveActor(tEffect.sSource)
+		end
+		if tEffect.sTag == "SAVES" then
+			saveEffect(rEffectSource, rSource, tEffect)
+		end
+	end
+	return true
 end
 
-function processEffectTurnEnd35E(sourceNodeCT, nodeCT, nodeEffect)
-    return EffectsManagerBCE5E.processEffectTurnEnd5E(sourceNodeCT, nodeCT, nodeEffect)
-end
+function processEffectTurnEnd35E(rSource)
+	local aTags = {"SAVEE"}
 
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	for _,tEffect in pairs(tMatch) do
+		if(tEffect.sSource == "") then
+			rEffectSource = rSource
+		else
+			rEffectSource = ActorManager.resolveActor(tEffect.sSource)
+		end
+		if tEffect.sTag == "SAVEE" then
+			saveEffect(rEffectSource, rSource, tEffect)
+		end
+	end
+	return true
+end
 function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
 	local rSource = nil
@@ -216,7 +241,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 		end
 	end
 
-	local nodeSource = ActorManager.getCTNode(rRoll.sSourceCTNode)
+	local nodeSource = ActorManager.getCTNode(rRoll.sSource)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	-- something is wrong. Likely an extension messign with things
 	if nodeTarget == nil then
@@ -252,7 +277,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 			if tEffect.sTag == "SAVEADDP" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if next( rEffect) then
-					rEffect.sSource = rRoll.sSourceCTNode
+					rEffect.sSource = rRoll.sSource
 					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 				end
@@ -272,7 +297,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 			if tEffect.sTag == "SAVEADD" then
 				rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if next(rEffect) then
-					rEffect.sSource = rRoll.sSourceCTNode
+					rEffect.sSource = rRoll.sSource
 					rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
 					EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 				end
@@ -283,33 +308,29 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	end
 end
 
-
 function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect is on, BCE String
 	local aParsedRemiander = StringManager.parseWords(tEffect.rEffectComp.remainder[1])
 	local sAbility = aParsedRemiander[1]
 	local nDC = tonumber(aParsedRemiander[2])
-	if not nDC and tEffect.rEffectComp.mod ~= 0 then
+	if not nDC then
 		nDC = tEffect.rEffectComp.mod
 	end
-	if  (nDC and sAbility) ~= nil then
-		local rSaveVsRoll = {}
-		rSaveVsRoll.sType = "save"
+	if  sAbility and sAbility ~= "" then
+		local rSaveVsRoll = ActionSave.getRoll(rTarget,sAbility) -- call to get the modifiers
+
 		rSaveVsRoll.sSubtype = "bce"
-		rSaveVsRoll.aDice = {}
-		rSaveVsRoll.sSaveType = "Save"
 		rSaveVsRoll.nTarget = nDC -- Save DC
-		rSaveVsRoll.sSourceCTNode = rSource.sCTNode -- Node who applied
+		rSaveVsRoll.sSource = rSource.sCTNode -- Node who applied
 		rSaveVsRoll.sDesc = "[ONGOING SAVE] " .. tEffect.sLabel -- Effect Label
-		if rSaveVsRoll then
-			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [" .. sAbility .. " DC " .. rSaveVsRoll.nTarget .. "]";
-		end
+		rSaveVsRoll.sSaveDesc = "[ONGOING SAVE] " .. StringManager.capitalize(sAbility)
+		rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [" .. sAbility .. " DC " .. rSaveVsRoll.nTarget .. "]"
+
 		if tEffect.rEffectComp.original:match("%(M%)") then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [MAGIC]";
 		end
 		if tEffect.rEffectComp.original:match("%(H%)") then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [HALF ON SAVE]";
 		end
-		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc
 		if tEffect.nGMOnly == 1 then
 			rSaveVsRoll.bSecret = true
 		end
@@ -322,18 +343,14 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		if tEffect.rEffectComp.original:match("%(F%)") then
 			rSaveVsRoll.bActonFail = true
 		end
-
-		rSaveVsRoll.sSaveDesc = rSaveVsRoll.sDesc .. "[TYPE " .. tEffect.sLabel .. "]"
-		local rRoll = {}
-		rRoll = ActionSave.getRoll(rTarget,sAbility) -- call to get the modifiers
-		rSaveVsRoll.nMod = rRoll.nMod -- Modfiers
-		rSaveVsRoll.aDice = rRoll.aDice
 		-- Pass the effect node if it wasn't expired by a One Shot
 		if(type(tEffect.nodeCT) == "databasenode") then
 			rSaveVsRoll.sEffectPath = tEffect.nodeCT.getPath()
 		else
 			rSaveVsRoll.sEffectPath = ""
 		end
+	--	ActionsManager.actionRoll(rSource,{{rSource}}, {rSaveVsRoll})
+
 		ActionsManager.actionRoll(rTarget,{{rTarget}}, {rSaveVsRoll})
 	end
 end
