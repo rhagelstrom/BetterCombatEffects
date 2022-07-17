@@ -7,7 +7,7 @@ OOB_MSGTYPE_BCEACTIVATE = "activateeffect"
 OOB_MSGTYPE_BCEDEACTIVATE = "deactivateeffect"
 OOB_MSGTYPE_BCEREMOVE = "removeeffect"
 OOB_MSGTYPE_BCEUPDATE = "updateeffect"
-local bAdvanceEffects = false
+local bAdvancedEffects = false
 local addEffect = nil
 local expireEffect = nil
 local RulesetEffectManager =  nil
@@ -76,8 +76,9 @@ function onInit()
 	for index, name in pairs(Extension.getExtensions()) do
 		extensions[name] = index
    	end
-	
-	bAdvanceEffects =  hasExtension("5E - Advanced Effects")
+	if hasExtension("AdvancedEffects") or hasExtension("FG-PFRPG-Advanced-Effects") then
+		bAdvancedEffects =  true
+	end
 end
 function onClose()
 	EffectManager.addEffect = addEffect
@@ -333,8 +334,12 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		local bAEValid = true
 		local bDisableUse = false
 
-		if User.getRulesetName() == "5E" and bAdvanceEffects then
-			bAEValid = EffectManagerADND.isValidCheckEffect(rActor,v)
+		if bAdvancedEffects then
+			if User.getRulesetName() == "5E" then
+				bAEValid = EffectManagerADND.isValidCheckEffect(rActor,v)
+			elseif User.getRulesetName() == "PFRPG" or User.getRulesetName() == "3.5E" then
+				bAEValid = AdvancedEffects.isValidCheckEffect(rActor,v)
+			end
 		end
 		if  sLabel:match("DUSE") then
 			bDisableUse = true
@@ -356,11 +361,22 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 					if not RulesetEffectManager.checkConditional(rActor, v, rEffectComp.remainder) then
 						break
 					end
+				elseif hasExtension("IF_NOT_untrue_effects_berwind") and rEffectComp.type == "IFN" then
+					if RulesetEffectManager.checkConditional(rActor, v, rEffectComp.remainder) then
+						break;
+					end
 				elseif rEffectComp.type == "IFT" and RulesetEffectManager.checkConditional then
 					if not rTarget then
 						break
 					end
 					if not RulesetEffectManager.checkConditional(rTarget, v, rEffectComp.remainder, rActor) then
+						break
+					end
+				elseif  hasExtension("IF_NOT_untrue_effects_berwind") and rEffectComp.type == "IFTN" then
+					if not rTarget then
+						break;
+					end
+					if RulesetEffectManager.checkConditional(rTarget, v, rEffectComp.remainder, rActor) then
 						break
 					end
 				end

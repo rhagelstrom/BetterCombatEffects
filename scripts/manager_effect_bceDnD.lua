@@ -7,11 +7,8 @@ local RulesetActorManager = nil
 local applyDamage = nil
 local messageDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
-local bAdvancedEffects = false
-local handleApplyDamage = nil
-local notifyApplyDamage = nil
-local convertStringToDice = nil
 local outputResult = nil
+local convertStringToDice = nil
 
 function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
 	fProcessEffectApplyDamage = ProcessEffectApplyDamage
@@ -560,51 +557,6 @@ function getTempHPAndWounds(rTarget)
 	return nTempHP, nWounds
 end
 
--- only for Advanced Effects
--- ##WARNING CONFLICT POTENTIAL
-function customHandleApplyDamage(msgOOB)
-	local rSource = ActorManager.resolveActor(msgOOB.sSourceNode);
-	local rTarget = ActorManager.resolveActor(msgOOB.sTargetNode);
-	if rTarget then
-		rTarget.nOrder = msgOOB.nTargetOrder;
-	end
-	if msgOOB.itemPath then
-		rSource.itemPath = msgOOB.itemPath
-	end
-
-	local nTotal = tonumber(msgOOB.nTotal) or 0;
-	ActionDamage.applyDamage(rSource, rTarget, (tonumber(msgOOB.nSecret) == 1), msgOOB.sDamage, nTotal);
-end
-
--- only for Advanced Effects
--- ##WARNING CONFLICT POTENTIAL
-function customNotifyApplyDamage(rSource, rTarget, bSecret, sDesc, nTotal)
-	if not rTarget then
-		return;
-	end
-
-	local msgOOB = {};
-	msgOOB.type = ActionDamage.OOB_MSGTYPE_APPLYDMG;
-
-	if bSecret then
-		msgOOB.nSecret = 1;
-	else
-		msgOOB.nSecret = 0;
-	end
-	if rSource and rSource.itemPath then
-		msgOOB.itemPath = rSource.itemPath
-	end
-
-	msgOOB.nTotal = nTotal;
-	msgOOB.sDamage = sDesc;
-
-	msgOOB.sSourceNode = ActorManager.getCreatureNodeName(rSource);
-	msgOOB.sTargetNode = ActorManager.getCreatureNodeName(rTarget);
-	msgOOB.nTargetOrder = rTarget.nOrder;
-
-	Comm.deliverOOBMessage(msgOOB, "");
-end
-
 function onInit()
 	if  User.getRulesetName() == "5E"  or
 		User.getRulesetName() == "4E"  or
@@ -676,14 +628,7 @@ function onInit()
 		ActionsManager.outputResult = customOutputResult
 
 		bMadNomadCharSheetEffectDisplay = EffectsManagerBCE.hasExtension("MNM Charsheet Effects Display")
-		bAdvancedEffects = EffectsManagerBCE.hasExtension("5E - Advanced Effects")
-		if bAdvancedEffects then
-			notifyApplyDamage = ActionDamage.notifyApplyDamage
-			handleApplyDamage = ActionDamage.handleApplyDamage
-			ActionDamage.notifyApplyDamage = customNotifyApplyDamage
-			ActionDamage.handleApplyDamage = customHandleApplyDamage
-			OOBManager.registerOOBMsgHandler(ActionDamage.OOB_MSGTYPE_APPLYDMG, customHandleApplyDamage);
-		end
+
 	end
 end
 
@@ -700,10 +645,6 @@ function onClose()
 		ActionDamage.applyDamage = applyDamage
 		ActionsManager.outputResult = outputResult
 
-		if bAdvanceEffects then
-			ActionDamage.notifyApplyDamage = notifyApplyDamage
-			ActionDamage.handleApplyDamage = handleApplyDamage
-		end
 		ActionsManager.unregisterResultHandler("effectbce")
 		DiceManager.convertStringToDice = convertStringToDice
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartDND)
