@@ -3,13 +3,16 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
+local notifyApplyDamage = nil
+local handleApplyDamage = nil
 local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
-local bAdvanceEffects = nil
+local bAdvancedEffects = nil
 local resetHealth = nil
 local bExpandedNPC = nil
+
 function onInit()
 	if User.getRulesetName() == "5E" then
 		if Session.IsHost then
@@ -80,9 +83,13 @@ function onInit()
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 
 		bExpandedNPC = EffectsManagerBCE.hasExtension( "5E - Expanded NPCs")
-		bAdvanceEffects = EffectsManagerBCE.hasExtension("5E - Advanced Effects")
-
-		if bAdvanceEffects then
+		bAdvancedEffects = EffectsManagerBCE.hasExtension("AdvancedEffects")
+		if bAdvancedEffects then
+			notifyApplyDamage = ActionDamage.notifyApplyDamage
+			handleApplyDamage = ActionDamage.handleApplyDamage
+			ActionDamage.notifyApplyDamage = customNotifyApplyDamage
+			ActionDamage.handleApplyDamage = customHandleApplyDamage
+			OOBManager.registerOOBMsgHandler(ActionDamage.OOB_MSGTYPE_APPLYDMG, customHandleApplyDamage)
 			performMultiAction = ActionsManager.performMultiAction
 			ActionsManager.performMultiAction = customPerformMultiAction
 		end
@@ -103,8 +110,10 @@ function onClose()
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost5E)
 
-		if bAdvanceEffects then
+		if bAdvancedEffects then
 			ActionsManager.performMultiAction = performMultiAction
+			ActionDamage.notifyApplyDamage = notifyApplyDamage
+			ActionDamage.handleApplyDamage = handleApplyDamage
 		end
 	end
 end
@@ -625,6 +634,49 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	else
 	 	return ActionSave.modSave(rTarget, rSource, rRoll)
 	 end
+end
+
+-- only for Advanced Effects
+-- ##WARNING CONFLICT POTENTIAL
+function customHandleApplyDamage(msgOOB)
+	local rSource = ActorManager.resolveActor(msgOOB.sSourceNode);
+	local rTarget = ActorManager.resolveActor(msgOOB.sTargetNode);
+	if rTarget then
+		rTarget.nOrder = msgOOB.nTargetOrder;
+	end
+	if msgOOB.itemPath then
+		rSource.itemPath = msgOOB.itemPath
+	end
+	local nTotal = tonumber(msgOOB.nTotal) or 0;
+	ActionDamage.applyDamage(rSource, rTarget, (tonumber(msgOOB.nSecret) == 1), msgOOB.sDamage, nTotal);
+end
+
+-- only for Advanced Effects
+-- ##WARNING CONFLICT POTENTIAL
+function customNotifyApplyDamage(rSource, rTarget, bSecret, sDesc, nTotal)
+	if not rTarget then
+		return;
+	end
+
+	local msgOOB = {};
+	msgOOB.type = ActionDamage.OOB_MSGTYPE_APPLYDMG;
+
+	if bSecret then
+		msgOOB.nSecret = 1;
+	else
+		msgOOB.nSecret = 0;
+	end
+	if rSource and rSource.itemPath then
+		msgOOB.itemPath = rSource.itemPath
+	end
+
+	msgOOB.nTotal = nTotal;
+	msgOOB.sDamage = sDesc;
+
+	msgOOB.sSourceNode = ActorManager.getCreatureNodeName(rSource);
+	msgOOB.sTargetNode = ActorManager.getCreatureNodeName(rTarget);
+	msgOOB.nTargetOrder = rTarget.nOrder;
+	Comm.deliverOOBMessage(msgOOB, "");
 end
 
 function customParseEffects(sPowerName, aWords)
