@@ -204,9 +204,11 @@ function customApplyDamage(rSource, rTarget, vRollOrSecret, sRollType, sDamage, 
 		bSecret = rRoll.bSecret;
 		sDamage = rRoll.sDesc;
 		nTotal = rRoll.nTotal;
-	else
+	elseif User.getRulesetName() == "5E" then
 		Debug.console("ActionDamage.applyDamage - DEPRECATED - 2022-07-19 - Use ActionDamage.applyDamage(rSource, rTarget, rRoll)");
 		bSecret = vRollOrSecret;
+	else
+		bSecret = vRollOrSecret
 	end
 
 	if rTarget and rTarget.sCreatureNode then
