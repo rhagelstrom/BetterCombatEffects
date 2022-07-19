@@ -193,13 +193,20 @@ end
 
 --Extra params to support 3.5E as well as Kelrugem Extended automation and overlays
 --extra params "should" be harmless if EAaO is not loaded
-function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
+function customApplyDamage(rSource, rTarget, vRollOrSecret, sRollType, sDamage, nTotal, ...)
 	local nodeSource
 	local nodeTarget
-	--5E header has different params
-	if User.getRulesetName() == "5E" then
-		nTotal = sDamage
-		sDamage = rRollType
+	local bSecret, rRoll
+
+	if User.getRulesetName() == "5E"  and type(vRollOrSecret) == "table" then
+		rRoll = vRollOrSecret;
+
+		bSecret = rRoll.bSecret;
+		sDamage = rRoll.sDesc;
+		nTotal = rRoll.nTotal;
+	else
+		Debug.console("ActionDamage.applyDamage - DEPRECATED - 2022-07-19 - Use ActionDamage.applyDamage(rSource, rTarget, rRoll)");
+		bSecret = vRollOrSecret;
 	end
 
 	if rTarget and rTarget.sCreatureNode then
@@ -213,7 +220,7 @@ function customApplyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal
 	-- Play nice with others
 	-- Do damage first then modify any effects
 	if User.getRulesetName() == "5E" then
-		applyDamage(rSource, rTarget, bSecret, sDamage, nTotal)
+		applyDamage(rSource, rTarget, vRollOrSecret)
 	else
 		applyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
 	end
