@@ -252,30 +252,10 @@ function customOnDamage(rSource, rTarget, rRoll)
 	-- Do damage first then modify any effects
 	onDamage(rSource, rTarget, rRoll)
 
-	local sTargetNodeType, targetNode = ActorManager.getTypeAndNode(rTarget)
-	local nTotalHP, nWounds
-	if sTargetNodeType == "pc" then
-		nTotalHP = DB.getValue(targetNode, "hp.total", 0)
-		nWounds = DB.getValue(targetNode, "hp.wounds", 0)
-	else
-		nTotalHP = DB.getValue(targetNode, "hptotal", 0)
-		nWounds = DB.getValue(targetNode, "wounds", 0)
-	end
-	if nTotalHP == nWounds then
-		bDead = true
-	end
-
 	--Dropping this because Blistful Ignorance does this better
 	--and there is less risk of conflict if this isn't a thing in BCE
 	--processAbsorb(rSource, rTarget, rRoll)
 
-	--if the target is dead, process all effects with (E)
-	if(bDead == true) then
-		local node = ActorManager.getCTNode(rTarget);
-		CombatManager.callForEachCombatant(endEffectsOnDead, node)
-	end
-
-	local tMatch
 	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
 	-- on a client it seems the DB isn't updated fast enough for the wounds to register
 	-- maybe handle this with some sort of callback?
@@ -289,13 +269,18 @@ function customOnDamage(rSource, rTarget, rRoll)
 		elseif nWoundsPrev >= nWounds then
 				return
 		end
+		if nTotalHP == nWounds then
+			CombatManager.callForEachCombatant(endEffectsOnDead, nodeTarget)
+		end
 	end
 
+	local tMatch
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
-	local rDamageOutput = ActionDamage.decodeDamageText(nTotal, sDamage);
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, rDamageOutput)
+
+	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.sTag == "DMGAT" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
@@ -353,52 +338,52 @@ function endEffectsOnDead(node, nodeTarget)
 
 end
 
--- This function is disabled but left here incase someone wants it for
+-- Dead Code. This function is disabled but left here incase someone wants it for
 --another ruleset
-function processAbsorb(rSource, rTarget, rRoll)
-	local tMatch
-	local aTags = {"ABSORB"}
-	local bHalf = false
-	local nDMGAmount = 0
-	local sDMGType
+-- function processAbsorb(rSource, rTarget, rRoll)
+-- 	local tMatch
+-- 	local aTags = {"ABSORB"}
+-- 	local bHalf = false
+-- 	local nDMGAmount = 0
+-- 	local sDMGType
 
-	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
+-- 	local aDMGTypes = EffectsManagerBCE.getDamageTypes(rRoll)
 
-	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
-	for _,tEffect in pairs(tMatch) do
-		if tEffect.sTag == "ABSORB" then
-			for _,sRemainder in ipairs(tEffect.rEffectComp.remainder) do
-				if sRemainder == "(H)" then
-					bHalf = true
-				end
-				-- If we match any of our damage types we absorb it
-				for _,aDMGClause in ipairs(aDMGTypes) do
-					if StringManager.contains(aDMGClause.aDMG, sRemainder) then
-						nDMGAmount = aDMGClause.nTotal
-						sDMGType = sRemainder
-					end
-				end
-			end
-			if nDMGAmount > 0 then
-				local sLabel =  "[ABSORBED: " .. sDMGType .. "]"
-				if bHalf then
-					nDMGAmount= math.floor(nDMGAmount/2)
-				end
-				ActionDamage.applyDamage(rSource, rTarget, tEffect.nGMOnly, "[HEAL]" .. sLabel, nDMGAmount)
-			end
-		end
-	end
-end
+-- 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aDMGTypes)
+-- 	for _,tEffect in pairs(tMatch) do
+-- 		if tEffect.sTag == "ABSORB" then
+-- 			for _,sRemainder in ipairs(tEffect.rEffectComp.remainder) do
+-- 				if sRemainder == "(H)" then
+-- 					bHalf = true
+-- 				end
+-- 				-- If we match any of our damage types we absorb it
+-- 				for _,aDMGClause in ipairs(aDMGTypes) do
+-- 					if StringManager.contains(aDMGClause.aDMG, sRemainder) then
+-- 						nDMGAmount = aDMGClause.nTotal
+-- 						sDMGType = sRemainder
+-- 					end
+-- 				end
+-- 			end
+-- 			if nDMGAmount > 0 then
+-- 				local sLabel =  "[ABSORBED: " .. sDMGType .. "]"
+-- 				if bHalf then
+-- 					nDMGAmount= math.floor(nDMGAmount/2)
+-- 				end
+-- 				ActionDamage.applyDamage(rSource, rTarget, tEffect.nGMOnly, "[HEAL]" .. sLabel, nDMGAmount)
+-- 			end
+-- 		end
+-- 	end
+-- end
 
 --Dead code. Here for Absorb if it is needed for some reason
-function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
+-- function customMessageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
 
-	local sAbsorb = sDamageDesc:match("%[ABSORBED:%s*%l*]")
-	if sAbsorb ~= nil then
-		sExtraResult = sAbsorb .. sExtraResult
-	end
-	return messageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
-end
+-- 	local sAbsorb = sDamageDesc:match("%[ABSORBED:%s*%l*]")
+-- 	if sAbsorb ~= nil then
+-- 		sExtraResult = sAbsorb .. sExtraResult
+-- 	end
+-- 	return messageDamage(rSource, rTarget, bSecret, sDamageType, sDamageDesc, sTotal, sExtraResult)
+-- end
 
 function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
