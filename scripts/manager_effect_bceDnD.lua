@@ -6,12 +6,15 @@
 local RulesetActorManager = nil
 local applyDamage = nil
 local messageDamage = nil
+
+local convertStringToDice = nil
+local fProcessEffectOnDamage = nil
 local bMadNomadCharSheetEffectDisplay = false
 local outputResult = nil
-local convertStringToDice = nil
+local onDamage = nil
 
-function setProcessEffectApplyDamage(ProcessEffectApplyDamage)
-	fProcessEffectApplyDamage = ProcessEffectApplyDamage
+function setProcessEffectOnDamage(ProcessEffectOnDamage)
+	fProcessEffectOnDamage = ProcessEffectOnDamage
 end
 
 function customRest(nodeActor, bLong, bMilestone)
@@ -235,39 +238,19 @@ function processEffectTurnEndDND(rSource)
 	return true
 end
 
---Extra params to support 3.5E as well as Kelrugem Extended automation and overlays
---extra params "should" be harmless if EAaO is not loaded
-function customApplyDamage(rSource, rTarget, vRollOrSecret, sRollType, sDamage, nTotal, ...)
-	local nodeSource
-	local nodeTarget
-	local bSecret, rRoll
-
-	if User.getRulesetName() == "5E"  and type(vRollOrSecret) == "table" then
-		rRoll = vRollOrSecret;
-
-		bSecret = rRoll.bSecret;
-		sDamage = rRoll.sDesc;
-		nTotal = rRoll.nTotal;
-	else
-		Debug.console("ActionDamage.applyDamage - DEPRECATED - 2022-07-19 - Use ActionDamage.applyDamage(rSource, rTarget, rRoll)");
-		bSecret = vRollOrSecret;
+function customOnDamage(rSource, rTarget, rRoll)
+	if not rTarget or not rSource or not rRoll  then
+		return onDamage(rSource, rTarget, rRoll)
 	end
 
-	if rTarget and rTarget.sCreatureNode then
-		nodeTarget = ActorManager.getCTNode(rTarget.sCreatureNode)
-	end
-	if rSource and rSource.sCreatureNode then
-		nodeSource = ActorManager.getCTNode(rSource.sCreatureNode)
-	end
+	local nodeTarget = ActorManager.getCTNode(rTarget)
+	local nodeSource = ActorManager.getCTNode(rSource)
+
 	-- save off temp hp and wounds before damage
 	local nTempHPPrev, nWoundsPrev = getTempHPAndWounds(rTarget)
 	-- Play nice with others
 	-- Do damage first then modify any effects
-	if User.getRulesetName() == "5E" then
-		applyDamage(rSource, rTarget, vRollOrSecret)
-	else
-		applyDamage(rSource, rTarget, bSecret, rRollType, sDamage, nTotal, ...)
-	end
+	onDamage(rSource, rTarget, rRoll)
 
 	local sTargetNodeType, targetNode = ActorManager.getTypeAndNode(rTarget)
 	local nTotalHP, nWounds
@@ -286,20 +269,6 @@ function customApplyDamage(rSource, rTarget, vRollOrSecret, sRollType, sDamage, 
 	--and there is less risk of conflict if this isn't a thing in BCE
 	--processAbsorb(rSource, rTarget, rRoll)
 
-	-- get temp hp and wounds after damage
-	local nTempHP
-	nTempHP, nWounds = getTempHPAndWounds(rTarget)
-
-	if OptionsManager.isOption("TEMP_IS_DAMAGE", "on") then
-		-- If no damage was applied then return
-		if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP then
-			return
-		end
-	-- return if no damage was applied theen return
-	elseif nWoundsPrev >= nWounds then
-		return
-	end
-
 	--if the target is dead, process all effects with (E)
 	if(bDead == true) then
 		local node = ActorManager.getCTNode(rTarget);
@@ -307,6 +276,21 @@ function customApplyDamage(rSource, rTarget, vRollOrSecret, sRollType, sDamage, 
 	end
 
 	local tMatch
+	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
+	-- on a client it seems the DB isn't updated fast enough for the wounds to register
+	-- maybe handle this with some sort of callback?
+	if Session.IsHost then
+		if OptionsManager.isOption("TEMP_IS_DAMAGE", "on") then
+			-- If no damage was applied then return
+			if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP then
+				return
+			end
+		-- return if no damage was applied theen return
+		elseif nWoundsPrev >= nWounds then
+				return
+		end
+	end
+
 	local aTags = {"DMGAT", "DMGDT", "DMGRT"}
 	--We need to do the activate, deactivate and remove first as a single action in order to get the rest
 	-- of the tags to be applied as expected
@@ -322,18 +306,17 @@ function customApplyDamage(rSource, rTarget, vRollOrSecret, sRollType, sDamage, 
 		end
 	end
 
-	if (fProcessEffectApplyDamage ~= nil) then
-		fProcessEffectApplyDamage(rSource,rTarget)
+	if (fProcessEffectOnDamage) then
+		fProcessEffectOnDamage(rSource,rTarget,rRoll)
 	end
 
 	aTags = {"TDMGADDT", "TDMGADDS"}
-
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if next(rEffect) then
-			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rTarget.sCTNode)
-			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
+			rEffect.sSource = DB.getValue(nodeTarget,"source_name", rTarget.sCTNode)
+			rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
 
 			if tEffect.sTag == "TDMGADDT" and nodeTarget ~= nil then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
@@ -348,9 +331,9 @@ function customApplyDamage(rSource, rTarget, vRollOrSecret, sRollType, sDamage, 
 	for _,tEffect in pairs(tMatch) do
 		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if next(rEffect) then
-			rEffect.sSource = DB.getValue(nodeEffect,"source_name", rSource.sCTNode)
-			rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
-			if tEffect.sTag == "SDMGADDT" and nodeTarget ~= nil then
+			rEffect.sSource = DB.getValue(nodeSource,"source_name", rSource.sCTNode)
+			rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
+			if tEffect.sTag == "SDMGADDT"   then
 				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
 			elseif tEffect.sTag == "SDMGADDS" and nodeSource ~= nil then
 				EffectManager.addEffect("", "", nodeSource, rEffect, true)
@@ -620,12 +603,10 @@ function onInit()
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectStart)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost)
 
-		-- save off the originals so we play nice with others
-		--Comment out because only needed for absorb
-	--	messageDamage = ActionDamage.messageDamage
-	--	ActionDamage.messageDamage = customMessageDamage
-		applyDamage = ActionDamage.applyDamage
-		ActionDamage.applyDamage = customApplyDamage
+
+		ActionsManager.registerResultHandler("damage", customOnDamage);
+		onDamage = ActionDamage.onDamage
+		ActionDamage.onDamage = customOnDamage
 
 		convertStringToDice = DiceManager.convertStringToDice
 		DiceManager.convertStringToDice = customConvertStringToDice
@@ -635,7 +616,6 @@ function onInit()
 		ActionsManager.outputResult = customOutputResult
 
 		bMadNomadCharSheetEffectDisplay = EffectsManagerBCE.hasExtension("MNM Charsheet Effects Display")
-
 	end
 end
 
@@ -648,10 +628,7 @@ function onClose()
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
 
-
-		ActionDamage.applyDamage = applyDamage
-		ActionsManager.outputResult = outputResult
-
+		ActionDamage.onDamage = onDamage
 		ActionsManager.unregisterResultHandler("effectbce")
 		DiceManager.convertStringToDice = convertStringToDice
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartDND)

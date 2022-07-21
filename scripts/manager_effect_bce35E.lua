@@ -5,11 +5,6 @@
 
 local rest = nil
 local charRest = nil
-
-local getDamageAdjust = nil
-local notifyApplyDamage = nil
-local handleApplyDamage = nil
-local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
 local bAdvancedEffects = nil
@@ -37,34 +32,18 @@ function onInit()
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd35E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre35E)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost35E)
-		EffectsManagerBCEDND.setProcessEffectApplyDamage(applyDamage)
+		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage35E)
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler35E)
 		ActionsManager.registerModHandler("save", onModSaveHandler)
 
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 
-		--WIP: Advanced Effects
-		--bAdvancedEffects = EffectsManagerBCE.hasExtension("FG-PFRPG-Advanced-Effects")
-		
+		bAdvancedEffects = EffectsManagerBCE.hasExtension("FG-PFRPG-Advanced-Effects")
 		if bAdvancedEffects then
-			notifyApplyDamage = ActionDamage.notifyApplyDamage
-			handleApplyDamage = ActionDamage.handleApplyDamage
-			ActionDamage.notifyApplyDamage = customNotifyApplyDamage
-			ActionDamage.handleApplyDamage = customHandleApplyDamage
-			OOBManager.registerOOBMsgHandler(ActionDamage.OOB_MSGTYPE_APPLYDMG, customHandleApplyDamage)
 			performMultiAction = ActionsManager.performMultiAction
 			ActionsManager.performMultiAction = customPerformMultiAction
 		end
-
-		--getDamageAdjust = ActionDamage.getDamageAdjust
-		--ActionDamage.getDamageAdjust = customGetDamageAdjust
-		--parseEffects = PowerManager.parseEffects
-		--PowerManager.parseEffects = customParseEffects
-
-		--evalAction = PowerManager.evalAction
-		--PowerManager.evalAction = customEvalAction
-
 	end
 end
 
@@ -81,8 +60,6 @@ function onClose()
 
 		if bAdvancedEffects then
 			ActionsManager.performMultiAction = performMultiAction
-			ActionDamage.notifyApplyDamage = notifyApplyDamage
-			ActionDamage.handleApplyDamage = handleApplyDamage
 		end
 	end
 end
@@ -228,7 +205,7 @@ function addEffectPost35E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	return true
 end
 
-function applyDamage(rSource,rTarget)
+function onDamage35E(rSource,rTarget)
 	local tMatch = {}
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource = {}
@@ -387,51 +364,9 @@ end
 
 --Advanced Effects
 function customPerformMultiAction(draginfo, rActor, sType, rRolls)
-	if rActor ~= nil then
-		rRolls[1].itemPath = rActor.itemPath
+	if rActor then
+		rRolls[1].nodeWeapon = rActor.nodeWeapon
+		rRolls[1].nodeAmmo = rActor.nodeAmmo
 	end
 	return performMultiAction(draginfo, rActor, sType, rRolls)
-end
-
--- only for Advanced Effects
--- ##WARNING CONFLICT POTENTIAL
-function customHandleApplyDamage(msgOOB)
-	local rSource = ActorManager.resolveActor(msgOOB.sSourceNode);
-	local rTarget = ActorManager.resolveActor(msgOOB.sTargetNode);
-	if rTarget then
-		rTarget.nOrder = msgOOB.nTargetOrder;
-	end
-
-	local nTotal = tonumber(msgOOB.nTotal) or 0;
-	ActionDamage.applyDamage(rSource, rTarget, (tonumber(msgOOB.nSecret) == 1), msgOOB.sRollType, msgOOB.sDamage, nTotal);
-end
-
--- only for Advanced Effects
--- ##WARNING CONFLICT POTENTIAL
-function customNotifyApplyDamage(rSource, rTarget, bSecret, sRollType, sDesc, nTotal)
-	if not rTarget then
-		return;
-	end
-
-	local msgOOB = {};
-	msgOOB.type = ActionDamage.OOB_MSGTYPE_APPLYDMG;
-
-	if bSecret then
-		msgOOB.nSecret = 1;
-	else
-		msgOOB.nSecret = 0;
-	end
-	if rSource and rSource.itemPath then
-		msgOOB.itemPath = rSource.itemPath
-	end
-
-	msgOOB.sRollType = sRollType;
-	msgOOB.nTotal = nTotal;
-	msgOOB.sDamage = sDesc;
-
-	msgOOB.sSourceNode = ActorManager.getCreatureNodeName(rSource);
-	msgOOB.sTargetNode = ActorManager.getCreatureNodeName(rTarget);
-	msgOOB.nTargetOrder = rTarget.nOrder;
-
-	Comm.deliverOOBMessage(msgOOB, "");
 end

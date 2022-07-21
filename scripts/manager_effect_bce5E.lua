@@ -3,8 +3,6 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
-local notifyApplyDamage = nil
-local handleApplyDamage = nil
 local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
@@ -153,7 +151,7 @@ function onInit()
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre5E)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost5E)
-		EffectsManagerBCEDND.setProcessEffectApplyDamage(applyDamage)
+		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage5E)
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		ActionsManager.registerResultHandler("attack", customOnAttack)
@@ -168,13 +166,8 @@ function onInit()
 
 		bAdvancedEffects = EffectsManagerBCE.hasExtension("AdvancedEffects")
 		if bAdvancedEffects then
-			notifyApplyDamage = ActionDamage.notifyApplyDamage
-			handleApplyDamage = ActionDamage.handleApplyDamage
-			ActionDamage.notifyApplyDamage = customNotifyApplyDamage
-			ActionDamage.handleApplyDamage = customHandleApplyDamage
-			OOBManager.registerOOBMsgHandler(ActionDamage.OOB_MSGTYPE_APPLYDMG, customHandleApplyDamage)
-			performMultiAction = ActionsManager.performMultiAction
-			ActionsManager.performMultiAction = customPerformMultiAction
+		 	performMultiAction = ActionsManager.performMultiAction
+		 	ActionsManager.performMultiAction = customPerformMultiAction
 		end
 	end
 end
@@ -205,9 +198,7 @@ function onClose()
 		ActionPower.performSaveVsRoll = performSaveVsRoll
 		ActionSave.modSave = modSave
 		if bAdvancedEffects then
-			ActionsManager.performMultiAction = performMultiAction
-			ActionDamage.notifyApplyDamage = notifyApplyDamage
-			ActionDamage.handleApplyDamage = handleApplyDamage
+		 	ActionsManager.performMultiAction = performMultiAction
 		end
 	end
 end
@@ -601,11 +592,6 @@ function addTraitstoConditionsTables(rActor)
 				i=i+1
 			end
 		end
-
---		if bAdvanceEffects then
---			ActionsManager.performMultiAction = performMultiAction
---		end
-
 	end
 end
 ---------------------End Save Vs Condition -------------------------
@@ -617,7 +603,6 @@ function customPerformMultiAction(draginfo, rActor, sType, rRolls)
 	end
 	return performMultiAction(draginfo, rActor, sType, rRolls)
 end
-
 -- End Advanced Effects
 
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
@@ -887,6 +872,7 @@ function hasUndeadFort(nodeActor)
 	end
 	return bRet
 end
+
 function getDCEffectMod(nodeActor)
 	local nDC = 0
 	for _,nodeEffect in pairs(DB.getChildren(nodeActor, "effects")) do
@@ -999,7 +985,6 @@ function replaceSaveDC(rNewEffect, rActor)
 	end
 end
 
-
 function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	if rRoll.sSubtype ~= "bce" then
 		return ActionSave.onSave(rSource, rTarget, rRoll)
@@ -1089,7 +1074,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	rTarget.nResult = nil
 end
 
-function applyDamage(rSource,rTarget)
+function onDamage5E(rSource,rTarget)
 	local aTags = {"SAVEONDMG"}
 	local rEffectSource
 
@@ -1147,7 +1132,7 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 		end
 		local aSaveFilter = {};
 		table.insert(aSaveFilter, sAbility:lower())
-		
+
 		if tEffect.rEffectComp.original:match("%(ADV%)") then
 			rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [ADV]"
 		elseif #(EffectManager5E.getEffectsByType(rTarget, "ADVSAV", aSaveFilter, rSource)) > 0 then
@@ -1177,7 +1162,6 @@ function saveEffect(rSource, rTarget, tEffect) -- Effect, Node which this effect
 	end
 end
 
-
 function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
 	local tEffects = EffectManager5E.getEffectsByType(rTarget, sEffectType, rDamageOutput.aDamageFilter, rSource);
 	local aFinal = {};
@@ -1206,7 +1190,6 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
 	return aFinal;
 end
 
-
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
 	local nDamageAdjust
 	local nReduce = 0
@@ -1223,7 +1206,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
 			end
 		end
 		local nLocalReduce = ActionDamage.checkNumericalReductionType(aReduce, aSrcDmgClauseTypes, v)
-		--We need to do this nonsense because we need to reduce damagee before resist calculation
+		--We need to do this nonsense because we need to reduce damage before resist calculation
 		if nLocalReduce > 0 then
 			rDamageOutput.aDamageTypes[k] = rDamageOutput.aDamageTypes[k] - nLocalReduce
 			nDamage = nDamage - nLocalReduce
@@ -1362,49 +1345,6 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 		end
 	end
 	return results
-end
-
--- only for Advanced Effects
--- ##WARNING CONFLICT POTENTIAL
-function customHandleApplyDamage(msgOOB)
-	local rSource = ActorManager.resolveActor(msgOOB.sSourceNode);
-	local rTarget = ActorManager.resolveActor(msgOOB.sTargetNode);
-	if rTarget then
-		rTarget.nOrder = msgOOB.nTargetOrder;
-	end
-	if msgOOB.itemPath then
-		rSource.itemPath = msgOOB.itemPath
-	end
-	local nTotal = tonumber(msgOOB.nTotal) or 0;
-	ActionDamage.applyDamage(rSource, rTarget, (tonumber(msgOOB.nSecret) == 1), msgOOB.sDamage, nTotal);
-end
-
--- only for Advanced Effects
--- ##WARNING CONFLICT POTENTIAL
-function customNotifyApplyDamage(rSource, rTarget, bSecret, sDesc, nTotal)
-	if not rTarget then
-		return;
-	end
-
-	local msgOOB = {};
-	msgOOB.type = ActionDamage.OOB_MSGTYPE_APPLYDMG;
-
-	if bSecret then
-		msgOOB.nSecret = 1;
-	else
-		msgOOB.nSecret = 0;
-	end
-	if rSource and rSource.itemPath then
-		msgOOB.itemPath = rSource.itemPath
-	end
-
-	msgOOB.nTotal = nTotal;
-	msgOOB.sDamage = sDesc;
-
-	msgOOB.sSourceNode = ActorManager.getCreatureNodeName(rSource);
-	msgOOB.sTargetNode = ActorManager.getCreatureNodeName(rTarget);
-	msgOOB.nTargetOrder = rTarget.nOrder;
-	Comm.deliverOOBMessage(msgOOB, "");
 end
 
 function customParseEffects(sPowerName, aWords)
