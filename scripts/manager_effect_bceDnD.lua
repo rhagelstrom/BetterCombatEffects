@@ -277,7 +277,7 @@ function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	replaceAbilityScores(rNewEffect, rActor)
 	local rRoll
 	rRoll = isDie(rNewEffect.sName)
-	if next(rRoll) ~= nil and next(rRoll.aDice) ~= nil then
+	if next(rRoll) and next(rRoll.aDice) then
 		rRoll.rActor = rActor
 		if rNewEffect.nGMOnly  then
 			rRoll.bSecret = true
@@ -317,7 +317,7 @@ function replaceAbilityScores(rNewEffect, rActor)
 			if(rEffectComp.remainder[1]:match("%-X")) then
 				local sMod = rEffectComp.remainder[1]:gsub("%-X", "")
 				local nMod = tonumber(sMod)
-				if nMod ~= nil then
+				if nMod then
 					if(nMod > nAbility) then
 						nAbility = nMod - nAbility
 					else

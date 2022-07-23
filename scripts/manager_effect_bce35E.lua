@@ -174,7 +174,7 @@ end
 function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
 	local rSource = nil
-	if rNewEffect.sSource ~= nil and rNewEffect.sSource ~= "" then
+	if rNewEffect.sSource  and rNewEffect.sSource ~= "" then
 		local nodeSource = DB.findNode(rNewEffect.sSource)
 		rSource = ActorManager.resolveActor(nodeSource)
 	else
@@ -233,7 +233,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	local nodeEffect = nil
 	if rRoll.sEffectPath ~= "" then
 		nodeEffect = DB.findNode(rRoll.sEffectPath)
-		if nodeEffect ~= nil then
+		if nodeEffect then
 			local nodeTarget = nodeEffect.getParent().getParent()
 			rTarget = ActorManager.resolveActor(nodeTarget)
 		end
@@ -242,7 +242,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	local nodeSource = ActorManager.getCTNode(rRoll.sSource)
 	local nodeTarget = ActorManager.getCTNode(rTarget)
 	-- something is wrong. Likely an extension messign with things
-	if nodeTarget == nil then
+	if not nodeTarget then
 		return
 	end
 	local tMatch
@@ -264,7 +264,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	--multiple different things. We have to be careful about the one shot options expireing
 	--our effect hence the check for nil
 
-	if bAct and nodeEffect ~= nil then
+	if bAct and nodeEffect then
 		aTags = {"SAVEADDP"}
 		if rRoll.sDesc:match( " %[HALF ON SAVE%]") then
 			table.insert(aTags, "SAVEDMG")
@@ -288,7 +288,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 		elseif rRoll.bDisableOnSave then
 			EffectsManagerBCE.modifyEffect(nodeEffect, "Deactivate");
 		end
-	elseif nodeEffect ~= nil then
+	elseif nodeEffect then
 		aTags = {"SAVEADD", "SAVEDMG"}
 		tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
