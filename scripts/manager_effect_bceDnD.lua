@@ -256,7 +256,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 	--and there is less risk of conflict if this isn't a thing in BCE
 	--processAbsorb(rSource, rTarget, rRoll)
 
-	local nTempHP, nWounds = getTempHPAndWounds(rTarget)
+	local nTempHP, nWounds, nTotalHP = getTempHPAndWounds(rTarget)
 	-- on a client it seems the DB isn't updated fast enough for the wounds to register
 	-- maybe handle this with some sort of callback?
 	if Session.IsHost then
@@ -517,19 +517,22 @@ function getTempHPAndWounds(rTarget)
 	local sTargetNodeType, nodeTarget = ActorManager.getTypeAndNode(rTarget)
 	local nTempHP = 0
 	local nWounds = 0
+	local nTotalHP = 0
 
 	if not nodeTarget then
-		return nTempHP, nWounds
+		return nTempHP, nWounds, nTotalHP
 	end
 
 	if sTargetNodeType == "pc" then
+		nTotalHP = DB.getValue(nodeTarget, "hp.total", 0)
 		nTempHP = DB.getValue(nodeTarget, "hp.temporary", 0)
 		nWounds = DB.getValue(nodeTarget, "hp.wounds", 0)
 	elseif sTargetNodeType == "ct" or sTargetNodeType == "npc" then
+		nTotalHP = DB.getValue(nodeTarget, "hptotal", 0)
 		nTempHP = DB.getValue(nodeTarget, "hptemp", 0)
 		nWounds = DB.getValue(nodeTarget, "wounds", 0)
 	end
-	return nTempHP, nWounds
+	return nTempHP, nWounds, nTotalHP
 end
 
 function onInit()
