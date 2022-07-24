@@ -24,11 +24,6 @@ function onInit()
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 
-			OptionsManager.registerOption2("ADD_PRONE", false, "option_Better_Combat_Effects",
-			"option_Add_Prone", "option_entry_cycler",
-			{ labels = "option_val_on", values = "on",
-				baselabel = "option_val_off", baseval = "off", default = "off" });
-
 			OptionsManager.registerOption2("RESTRICT_CONCENTRATION", false, "option_Better_Combat_Effects",
 			"option_Concentrate_Restrict", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
@@ -36,11 +31,6 @@ function onInit()
 
 			OptionsManager.registerOption2("AUTOPARSE_EFFECTS", false, "option_Better_Combat_Effects",
 			"option_Autoparse_Effects", "option_entry_cycler",
-			{ labels = "option_val_on", values = "on",
-				baselabel = "option_val_off", baseval = "off", default = "off" });
-
-			OptionsManager.registerOption2("PRONE_UF", false, "option_Better_Combat_Effects",
-			"option_Undead_Fortitude", "option_entry_cycler",
 			{ labels = "option_val_on", values = "on",
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 
@@ -252,31 +242,7 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 		end
 	end
 
-	if OptionsManager.isOption("ADD_PRONE", "on") and rNewEffect.sName:lower():match("unconscious") and EffectManager5E.hasEffectCondition(nodeCT, "Unconscious") and not EffectManager5E.hasEffectCondition(nodeCT, "Prone") then
-		if  not ((OptionsManager.isOption("PRONE_UF", "off") and hasUndeadFort(nodeCT))) then
-			local rProne = {sName = "Prone" , nInit = rNewEffect.nInit, nDuration = rNewEffect.nDuration, sSource = rNewEffect.sSource, nGMOnly = rNewEffect.nGMOnly}
-			EffectManager.addEffect("", "", nodeCT, rProne, true)
-		end
-	end
-
 	return true
-end
-
-function hasUndeadFort(nodeActor)
-	local bRet = false
-	local nodeTraits = nodeActor.getChild("traits")
-	local rActor = ActorManager.resolveActor(nodeActor)
-	if nodeTraits and rActor.sType == "npc" then
-		local aTraits = nodeTraits.getChildren()
-		for _, nodeTrait in pairs(aTraits) do
-			local sName = DB.getValue(nodeTrait, "name", "")
-			if sName:lower() == "undead fortitude" then
-				bRet = true
-				break
-			end
-		end
-	end
-	return bRet
 end
 
 function getDCEffectMod(nodeActor)

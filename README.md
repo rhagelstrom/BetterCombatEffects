@@ -130,8 +130,6 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 
 | Name| Default | Options | Notes | Ruleset|
 |---|---|---|---|---|
-|Add Prone to NPC with Undead Fortitude| off| off/on| When on, will add Prone to NPCs with the Undead Fortitude trait when they are Unconscious as a result of falling to 0 HP. This option requires the option "Add Prone to Unconscious" to be set to "on" to have any affect| 5E|
-|Add Prone when Unconscious| off| off/on| When on, will add the Prone condition to the Actor when the Actor is Unconscious as a result of falling to 0 HP| 5E|
 |Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor| 5E|
 |Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire| 5E|
 |Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE| 5E|
