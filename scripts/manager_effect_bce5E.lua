@@ -981,7 +981,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeEffect =  DB.findNode(sNodeEffect)
 	local sEffectLabel = DB.getValue(nodeEffect, "label", "")
 	local tParseEffect = EffectManager.parseEffect(sEffectLabel)
-	local sLabel = StringManager.trim(tParseEffect[1])
+	local sLabel = StringManager.trim(tParseEffect[1]) or ""
 
 	sNodeEffect = sNodeEffect:gsub("%.", "%%%.")
 	sNodeEffect = StringManager.trim(sNodeEffect:gsub("%-", "%%%-"))

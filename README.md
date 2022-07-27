@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.18
-**Updated::** 07/20/22
+**Current Version:** 3.19
+**Updated::** 07/27/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -16,7 +16,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | **Add Effect** | | | |
 |DMGA|(D)| [damage type]* |Apply damage when the effect is added|
 |REGENA|(D)| |One time regeneration when the effect is added|
-|SAVEA|(-)| [ability] [SDC] (R) (D) (H) (M) (F) |Roll ongoing save when effect is added|
+|SAVEA|(N) or [SDC]| [ability] (R) (D) (H) (M) (F) |Roll ongoing save when effect is added where (N) is a number or [SDC]|
 |TREGENA|(D)| |One time regeneration to temporary HP when the effect is added|
 | **Attack** | | | |
 |ATKA|(-)| | ACTIVATE effect when the Actor takes the attack action|
@@ -31,11 +31,11 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |SDMGADDT|(-)| [effect] |SOURCE of the attack will add an effect to the TARGET when damage is done|
 |SDMGADDS|(-)| [effect] |SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done|
 |DMGR|(D)| [damage type]* ,all, [range]* |Reduce the damage taken by the specified damage type(s) by (D)|
-|SAVEONDMG|(-)|[ability] [SDC] (R) (D) (H) (M) (F)|Roll ongoing save when the  Actor's takes damage|
+|SAVEONDMG|(N) or [SDC] |[ability] (R) (D) (H) (M) (F)|Roll ongoing save when the Actor's takes damage where (N) is a number or [SDC]|
 | **Expire Effect** | | | |
 |EXPIREADD|(-)| [effect] or [condition] |Add effect or condition when this effect expires|
 | **Misc** | | | |
-|DC|(N)|  |(N) will be added  to the [SDC] when [SDC] is automatically replaced|
+|DC|(N)|  |(N) will be added to the [SDC] when [SDC] is automatically replaced|
 |SDC|(N)| |(N) will be added (or subtracted) from the Actors spell save DC
 |DUSE|(-)||Disable effect when a tag is used (matched)|
 |DUR|(D)||Sets the duration of the effect when the effect is applied|
@@ -54,10 +54,10 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |TREGENS|(D)| |Apply regeneration to temporary HP at the START of the Actor's turn|
 |TREGENE|(D)| |Apply regeneration to temporary HP at the END of the Actor's turn|
 | **Ongoing Save** | | | |
-|SAVES|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the START of the Actor's turn|
-|SAVEE|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the END of the Actor's turn|
-|SSAVES|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the START of the Actor's turn who applied the effect|
-|SSAVEE|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the END of the Actor's turn who applied the effect|
+|SAVES|(N) or [SDC]|[ability] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the START of the Actor's turn where (N) is a number or [SDC]|
+|SAVEE|(N) or [SDC]|[ability] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the END of the Actor's turn where (N) is a number or [SDC]|
+|SSAVES|(N) or [SDC]|[ability] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the START of the Actor's turn who applied the effect where (N) is a number or [SDC]|
+|SSAVEE|(N) or [SDC]|[ability] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save at the END of the Actor's turn who applied the effect where (N) is a number or [SDC]|
 |SAVEDMG|(D)|[damage type]* |Damage done on failed ongoing save|
 |SAVEADD|(N)|[effect] or [condition] |Add effect or condition on a failed ongoing save. If N, The save must fail by N or more to add. -N the result must be N or less to add.|
 |SAVEADDP|(-)|[effect] or [condition] |Add effect or condition on a successful ongoing save|
@@ -66,7 +66,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |NORESTL|(-)| |Actor will not gain the benefit of a long rest. Note: Will not prevent the actor from rolling Hit Dice|
 |RESTS|(-)| |Remove effect when the Actor takes a short rest|
 |RESTL|(-)| |Remove effect when the Actor takes a short or long rest|
-|SAVERESTL|(-)|[ability] [SDC] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save when the Actor takes a long rest|
+|SAVERESTL|(N) or [SDC]|[ability] (R) (D) (H) (M) (F) (ADV) (DIS)|Roll ongoing save when the Actor takes a long rest where (N) is a number or [SDC]|
 | **Save vs Condition**| | | |
 |ADVCOND|(-)|[condition] or [damage type]or [all]  |Grant advantage on a save by this actor against the defined condition or damage type|
 |DISCOND|(-)|[condition] or [damage type] or [all] |Grant disadvantage on a save by this actor against the defined condition or damage type|
@@ -114,11 +114,11 @@ __*__ = Multiple entries of this descriptor type allowed
 | Belt of Frost Giant Strength [Item] |Belt of Frost Giant Strength; STR: 19-X| Targeting=Self| |
 | Cloak of Displacement [Item], Displacer Beast [NPC]| Displacement; GRANTDISATK; TURNAS; DMGDT: all|Targeting=Self| |
 | Deflect Missiles [Class - Monk] |Deflect Missiles; DMGR: 1d10 [MONK],[DEX],ranged,bludgeoning,piercing|Targeting=Self||
-| Dominate Person [Spell] |Dominate Person; SAVEONDMG: WIS [SDC] (R)|||
-| Dragon [NPC] |Frightful Presence; Frightened; SAVEE: WIS 16 (R)|||
+| Dominate Person [Spell] |Dominate Person; SAVEONDMG: [SDC] WIS (R)|||
+| Dragon [NPC] |Frightful Presence; Frightened; SAVEE: 16 WIS (R)|||
 | General Action| Dodge; TURNRS|Targeting=Self| |
 | Ghoul [NPC] | Ghoul Claws; SDMGADDT: GOTU| Targeting=Self| GTOU is an effect in the custom effects list|
-| Ghoul [NPC] | GOTU; Paralyzed; SAVEA: CON 10 (R); SAVEE: CON 10 (R)| | |
+| Ghoul [NPC] | GOTU; Paralyzed; SAVEA: 10 CON (R); SAVEE: 10 CON (R)| | |
 | Headband of Intellect [Item]|Headband of Intellect; INT: 19-X| Targeting=Self| |
 | Heavy Armor Master [Feat]|Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic| Targeting=Self| |
 | Interception Fighting Style [Class - Fighter]|Interception Fighting Style; DMGR: 1d10 [PRF],all| | |
@@ -131,9 +131,9 @@ __*__ = Multiple entries of this descriptor type allowed
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
 | Stunning Strike [Class - Monk]|Stunning Strike; Stunned; STURNRE | Duration=1 Rnd | |
 | Vitriolic Sphere [Spell]|Vitriolic Sphere; DMGOE: 5d4 acid| Duration=2 Rnd | |
-| Wall of Thorns [Spell]|Wall of Thorns; SAVEE: DEX [SDC] (H)(C); SAVEDMG: 7d8 slashing| | |
+| Wall of Thorns [Spell]|Wall of Thorns; SAVEE: [SDC] DEX (H)(C); SAVEDMG: 7d8 slashing| | |
 | Water Elemental [NPC]|Water Elemental Whelm; grappled; restrained; SDMGOS: 2d8+4 bludgeoning| | |
-| Web [Spell]| Web; Restrained; SAVES: DEX [SDC] (C) | | |
+| Web [Spell]| Web; Restrained; SAVES: [SDC] DEX (C) | | |
 
 ### Save vs Condition
 Saves against conditions will automatically be granted adv/dis based on the traits of the Actor making the saving throw. The parser will match traits with the following verbiage: words ... {advantage,disadvantage} ... words ... {saves,saving throws} ... words ... {condition(s)} ... words. Make up your own homebrew traits and have them process automagiclly.
