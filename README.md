@@ -141,6 +141,7 @@ Saves against conditions will automatically be granted adv/dis based on the trai
 ### Replace [] with ()
 When writing NPC effects, the CT doesn't process tags such as [CLASS] [PRF] [LVL]. BCE Gold will allow those tags to be written as (CLASS) (PRF) (LVL) which enables them to be processed by FG. In addition the BCE tag of [SDC] can also be written as (SDC)
 
+
 ### Add Effect on Damage Modifiers
 Effects can be automatically added to the source or the target on the damage by either the source of the damage or the target of the damage. For this to work we need two different effects.  Example:
 
@@ -152,8 +153,6 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
 ### Options
 | Name| Default | Options | Notes |
 |---|---|---|---|
-|Add Prone to NPC with Undead Fortitude| off| off/on| When on, will add Prone to NPCs with the Undead Fortitude trait when they are Unconscious as a result of falling to 0 HP. This option requires the option "Add Prone to Unconscious" to be set to "on" to have any affect|
-|Add Prone when Unconscious| off| off/on| When on, will add the Prone condition to the Actor when the Actor is Unconscious as a result of falling to 0 HP|
 |Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor|
 |Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire|
 |Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE|

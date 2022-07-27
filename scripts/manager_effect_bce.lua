@@ -183,8 +183,8 @@ function customTurnStart(sourceNodeCT)
 		aTags = {"STURNRS","ATURN"}
 		for _, nodeCT in pairs(ctEntries) do
 			local rActor = ActorManager.resolveActor(nodeCT)
-			if rActor ~= rSource then
-				tMatch = getEffects(rActor, aTags, rSource, rSource)
+			if rActor.sCTNode ~= rSource.sCTNode then
+				tMatch = getEffects(rActor, aTags, rActor, rSource)
 				for _,tEffect in pairs(tMatch) do
 					if tEffect.sTag == "STURNRS" then
 						modifyEffect(tEffect.nodeCT, "Remove")
@@ -205,7 +205,6 @@ function customTurnEnd(sourceNodeCT)
 	end
 	local rSource = ActorManager.resolveActor(sourceNodeCT)
 	local ctEntries = CombatManager.getCombatantNodes()
-
 	if onCustomProcessTurnEnd(rSource) then
 		local aTags = {"TURNAE", "TURNDE", "TURNRE"}
 		local tMatch = getEffects(rSource, aTags, rSource)
@@ -222,7 +221,7 @@ function customTurnEnd(sourceNodeCT)
 		aTags = {"STURNRE"}
 		for _, nodeCT in pairs(ctEntries) do
 			local rActor = ActorManager.resolveActor(nodeCT)
-			if rActor ~= rSource then
+			if rActor.sCTNode ~= rSource.sCTNode then
 				tMatch = getEffects(rActor, aTags, rActor, rSource)
 				for _,tEffect in pairs(tMatch) do
 					if tEffect.sTag == "STURNRE" then
@@ -309,7 +308,7 @@ end
 function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes, aConditions)
 	for v,sTag in pairs(aTags) do
 		-- make sure passed tag is a registered tag
-		if tBCETag[sTag] == nil then
+		if not tBCETag[sTag]  then
 			table.remove(aTags, v)
 		end
 	end
@@ -346,7 +345,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 		end
 		-- We only want to process a specific effect. Used mostly
 		-- for something to happen after a save result
-		if nodeEffect == nil or nodeEffect == v then
+		if not nodeEffect or nodeEffect == v then
 			-- Iterate through each effect component looking for a type match
 			for kEffectComp,sEffectComp in ipairs(tEffectComps) do
 				local tMatch = {}
@@ -392,9 +391,8 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 						end
 						-- If we have rSourceEffect, then only match effects where the source of the
 						-- effect matches rSourceEffect
-						if rSourceEffect ~= nil and
-						aOptions.bOnlySourceEffect == true and
-						rSourceEffect.sCTNode ~= DB.getValue(v, "source_name", "") then
+						if rSourceEffect and aOptions.bOnlySourceEffect and
+							rSourceEffect.sCTNode ~= DB.getValue(v, "source_name", "") then
 							break
 						end
 

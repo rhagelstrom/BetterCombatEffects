@@ -103,10 +103,12 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 	local aTags = {"REGENA", "TREGENA", "DMGA", "DUR"}
 	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
+		local tParseEffect = EffectManager.parseEffect(tEffect.sLabel)
+		local sLabel = StringManager.trim(tParseEffect[1])
 		if tEffect.sTag == "REGENA" and tEffect.rEffectComp.type == "REGENA" then
-			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, false)
+			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, false, sLabel)
 		elseif tEffect.sTag == "TREGENA" and tEffect.rEffectComp.type == "TREGENA" then
-			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, true)
+			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, true, sLabel)
 		elseif tEffect.sTag == "DMGA" and tEffect.rEffectComp.type == "DMGA" then
 			applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp)
 		elseif tEffect.sTag == "DUR" and type(tEffect.nodeCT) == "databasenode" then
@@ -128,12 +130,13 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 				rRoll.bSecret = false
 			end
 			ActionsManager.performAction(nil, rTarget, rRoll)
+			applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, false, sLabel)
 		end
 	end
 	return true
 end
 
-function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
+function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf, sLabel)
 	local rAction = {}
 	local aClause = {}
 	rAction.clauses = {}
@@ -142,8 +145,10 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
 	aClause.modifier = rEffectComp.mod
 	aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ","))
 	table.insert(rAction.clauses, aClause)
-
-	rAction.label = "Ongoing Effect"
+	if not sLabel then
+		sLabel = "Ongoing Effect"
+	end
+	rAction.label = sLabel
 
 	local rRoll = ActionDamage.getRoll(rTarget, rAction)
 	if  bHalf then
@@ -152,7 +157,7 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
 	ActionsManager.actionDirect(rSource, "damage", {rRoll}, {{rTarget}})
 end
 
-function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp)
+function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp, sLabel)
 	local rAction = {}
 	local aClause = {}
 	rAction.clauses = {}
@@ -189,12 +194,14 @@ function processEffectTurnStartDND(rSource)
 		if rActor ~= rSource then
 			tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
 			for _,tEffect in pairs(tMatch) do
+				local tParseEffect = EffectManager.parseEffect(tEffect.sLabel)
+				local sLabel = StringManager.trim(tParseEffect[1])
 				if tEffect.sTag == "SDMGOS" then
-					applyOngoingDamage(rSource, rActor, tEffect.rEffectComp)
+					applyOngoingDamage(rSource, rActor, tEffect.rEffectComp, false, sLabel)
 				elseif tEffect.sTag == "SREGENS" then
-					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, false)
+					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, false, sLabel)
 				elseif tEffect.sTag == "STREGENS" then
-					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, true)
+					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, true, sLabel)
 				end
 			end
 		end
@@ -208,12 +215,14 @@ function processEffectTurnEndDND(rSource)
 	-- Only process these if on the source node
 	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
+		local tParseEffect = EffectManager.parseEffect(tEffect.sLabel)
+		local sLabel = StringManager.trim(tParseEffect[1])
 		if tEffect.sTag == "DMGOE" then
-				applyOngoingDamage(rSource, rSource, tEffect.rEffectComp)
+			applyOngoingDamage(rSource, rSource, tEffect.rEffectComp, false, sLabel)
 		elseif tEffect.sTag == "REGENE" then
-			applyOngoingRegen(rSource, rSource, tEffect.rEffectComp, false)
+			applyOngoingRegen(rSource, rSource, tEffect.rEffectComp, false, sLabel)
 		elseif tEffect.sTag == "TREGENE" then
-			applyOngoingRegen(rSource, rSource, tEffect.rEffectComp, true)
+			applyOngoingRegen(rSource, rSource, tEffect.rEffectComp, true, sLabel)
 		end
 	end
 
@@ -225,12 +234,14 @@ function processEffectTurnEndDND(rSource)
 		if rActor ~= rSource then
 			tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rSource, rSource)
 			for _,tEffect in pairs(tMatch) do
+				local tParseEffect = EffectManager.parseEffect(tEffect.sLabel)
+				local sLabel = StringManager.trim(tParseEffect[1])
 				if tEffect.sTag == "SDMGOE" then
-					applyOngoingDamage(rSource, rActor, tEffect.rEffectComp)
+					applyOngoingDamage(rSource, rActor, tEffect.rEffectComp, false, sLabel)
 				elseif tEffect.sTag == "SREGENE" then
-					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, false)
+					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, false, sLabel)
 				elseif tEffect.sTag == "STREGENE" then
-					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, true)
+					applyOngoingRegen(rSource, rActor, tEffect.rEffectComp, true, sLabel)
 				end
 			end
 		end
@@ -390,7 +401,7 @@ function addEffectStart(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	replaceAbilityScores(rNewEffect, rActor)
 	local rRoll
 	rRoll = isDie(rNewEffect.sName)
-	if next(rRoll) ~= nil and next(rRoll.aDice) ~= nil then
+	if next(rRoll) and next(rRoll.aDice) then
 		rRoll.rActor = rActor
 		rRoll.subtype = "DUR"
 		if rNewEffect.nGMOnly  then
@@ -430,7 +441,7 @@ function replaceAbilityScores(rNewEffect, rActor)
 			if(rEffectComp.remainder[1]:match("%-X")) then
 				local sMod = rEffectComp.remainder[1]:gsub("%-X", "")
 				local nMod = tonumber(sMod)
-				if nMod ~= nil then
+				if nMod then
 					if(nMod > nAbility) then
 						nAbility = nMod - nAbility
 					else

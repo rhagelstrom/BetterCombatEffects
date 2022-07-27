@@ -57,7 +57,7 @@ end
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 	local sDuplicateMsg = nil;
 	sDuplicateMsg = EffectManager4E.onEffectAddIgnoreCheck(nodeCT, rEffect)
-	if sDuplicateMsg ~= nil and rEffect.sName:match("STACK") and sDuplicateMsg:match("ALREADY EXISTS") then
+	if sDuplicateMsg and rEffect.sName:match("STACK") and sDuplicateMsg:match("ALREADY EXISTS") then
 		sDuplicateMsg = nil
 	end
 	return sDuplicateMsg
@@ -188,7 +188,7 @@ function onAttack4E(rSource, rTarget, rRoll)
 	ActionAttack.onAttack(rSource, rTarget, rRoll)
 end
 -- 4E is different enough that we need need to handle ongoing damage here
-function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
+function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf, sLabel)
 	local rAction = {}
 	local aClause = {}
 	rAction.clauses = {}
@@ -202,8 +202,10 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
 	aClause.critdicestr = ""
 
 	table.insert(rAction.clauses, aClause)
-
-	rAction.name = "Ongoing Effect"
+	if not sLabel then
+		sLabel = "Ongoing Effect"
+	end
+	rAction.name = sLabel
 
 	local rRoll = ActionDamage.getRoll(rTarget, rAction)
 	if  bHalf then
@@ -248,7 +250,7 @@ end
 function addEffectPre4E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	local rActor = ActorManager.resolveActor(nodeCT)
 	local rSource = nil
-	if rNewEffect.sSource == nil or rNewEffect.sSource == "" then
+	if not rNewEffect.sSource  or rNewEffect.sSource == "" then
 		rSource = rActor
 	else
 		local nodeSource = DB.findNode(rNewEffect.sSource)
