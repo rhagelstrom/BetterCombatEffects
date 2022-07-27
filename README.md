@@ -1,7 +1,7 @@
 # Better Combat Effects
 
 **Current Version:** 2.52
-**Updated::** 07/26/22
+**Updated::** 07/27/22
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -28,7 +28,7 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 | **Add Effect** | | | | |
 |<span style="color:green">DMGA</span>|(D)| [damage type]* |Apply damage when the effect is added|5E 4E 3.5E PFRPG|
 |<span style="color:green">REGENA</span>|(D)| |One time regeneration when the effect is added|5E 4E 3.5E PFRPG|
-|<span style="color:crimson">SAVEA</span>|(-)| [ability] [SDC] (R) (D) (H) (M) (F) |Roll ongoing save when effect is added|5E 3.5E PFRPG|
+|<span style="color:crimson">SAVEA</span>|(N) or [SDC]| [ability] (R) (D) (H) (M) (F) |Roll ongoing save when effect is added where (N) is a number or [SDC]|5E 3.5E PFRPG|
 |<span style="color:green">TREGENA</span>|(D)| |One time regeneration to temporary HP when the effect is added|5E 4E 3.5E PFRPG|
 | **Attack** | | | | |
 |<span style="color:magenta">ATKDS</span>|(-)| |DEACTIVATE effect if the source of the effect is attacked|4E|
@@ -41,7 +41,7 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 |<span style="color:green">SDMGADDT</span>|(-)| [effect] |SOURCE of the attack will add an effect to the TARGET when damage is done|5E 4E 3.5E PFRPG|
 |<span style="color:green">SDMGADDS</span>|(-)| [effect] |SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done|5E 4E 3.5E PFRPG|
 |<span style="color:purple">DMGR</span>|(D)| [damage type]*,all, [range]* |Reduce the damage taken by the specified damage type(s) by (D)|5E 4E|
-|<span style="color:crimson">SAVEONDMG</span>|(-)|[ability] [SDC] (R) (D) (H) (M) (F)|Roll ongoing save when the  Actor's takes damage|5E 3.5E PFRPG|
+|<span style="color:crimson">SAVEONDMG</span>|(N) or [SDC]|[ability] (R) (D) (H) (M) (F)|Roll ongoing save when the  Actor's takes damage where (N) is a number or [SDC]|5E 3.5E PFRPG|
 | **Expire Effect** | | | | |
 |<span style="color:blue">EXPIREADD</span>|(-)| [effect] or [condition] |Add effect or condition when this effect expires|CoreRPG|
 | **Misc** | | | | |
@@ -59,8 +59,8 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 |<span style="color:green">TREGENS</span>|(D)| |Apply regeneration to temporary HP at the START of the Actor's turn|5E 4E 3.5E PFRPG|
 |<span style="color:green">TREGENE</span>|(D)| |Apply regeneration to temporary HP at the END of the Actor's turn|5E 4E 3.5E PFRPG|
 | **Ongoing Save** | | | | |
-|<span style="color:crimson">SAVES</span>|(-)|[ability] [SDC] (R) (D) (H) (M) (F)|Roll ongoing save at the START of the Actor's turn|5E 3.5E PFRPG|
-|<span style="color:crimson">SAVEE</span>|(-)|[ability] [SDC] (R) (D) (H) (M) (F)|Roll ongoing save at the END of the Actor's turn|5E 3.5E PFRPG|
+|<span style="color:crimson">SAVES</span>|(N) or [SDC]|[ability] (R) (D) (H) (M) (F)|Roll ongoing save at the START of the Actor's turn where (N) is a number or [SDC]|5E 3.5E PFRPG|
+|<span style="color:crimson">SAVEE</span>|(N) or [SDC]|[ability] (R) (D) (H) (M) (F)|Roll ongoing save at the END of the Actor's turn where (N) is a number or [SDC]where (N) is a number or [SDC]|5E 3.5E PFRPG|
 |<span style="color:crimson">SAVEDMG</span>|(D)|[damage type]* |Damage done on failed ongoing save|5E 3.5E PFRPG|
 |<span style="color:crimson">SAVEADD</span>|(-)|[effect] or [condition] |Add effect or condition on a failed ongoing save|5E 3.5E PFRPG|
 |<span style="color:crimson">SAVEADDP</span>|(-)|[effect] or [condition] |Add effect or condition on a successful ongoing save|5E 3.5E PFRPG|
@@ -105,11 +105,11 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 | Belt of Frost Giant Strength [Item] |Belt of Frost Giant Strength; STR: 19-X| Targeting=Self| |
 | Cloak of Displacement [Item], Displacer Beast [NPC]| Displacement; GRANTDISATK; TURNAS; DMGDT|Targeting=Self| |
 | Deflect Missiles [Class - Monk] |Deflect Missiles; DMGR: 1d10 [MONK],[DEX],ranged,bludgeoning,piercing|Targeting=Self||
-| Dominate Person [Spell] |Dominate Person; SAVEONDMG: WIS [SDC] (R)|||
-| Dragon [NPC] |Frightful Presence; Frightened; SAVEE: WIS 16 (R)|||
+| Dominate Person [Spell] |Dominate Person; SAVEONDMG: [SDC] WIS (R)|||
+| Dragon [NPC] |Frightful Presence; Frightened; SAVEE: 16 WIS (R)|||
 | General Action| Dodge; TURNRS|Targeting=Self| |
 | Ghoul [NPC] | Ghoul Claws; SDMGADDT: GOTU| Targeting=Self| GTOU is an effect in the custom effects list|
-| Ghoul [NPC] | GOTU; Paralyzed; SAVEA: CON 10 (R); SAVEE: CON 10 (R)| | |
+| Ghoul [NPC] | GOTU; Paralyzed; SAVEA: 10 CON (R); SAVEE: 10 CON (R)| | |
 | Headband of Intellect [Item]|Headband of Intellect; INT: 19-X| Targeting=Self| |
 | Heavy Armor Master [Feat]|Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic| Targeting=Self| |
 | Interception Fighting Style [Class - Fighter]|Interception Fighting Style; DMGR: 1d10 [PRF],all| | |
@@ -122,9 +122,9 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
 | Stunning Strike [Class - Monk]|Stunning Strike; Stunned; STURNRE | Duration=1 Rnd | |
 | Vitriolic Sphere [Spell]|Vitriolic Sphere; DMGOE: 5d4 acid| Duration=2 Rnd | |
-| Wall of Thorns [Spell]|Wall of Thorns; SAVEE: DEX [SDC] (H)(C); SAVEDMG: 7d8 slashing| | |
+| Wall of Thorns [Spell]|Wall of Thorns; SAVEE: [SDC] DEX (H)(C); SAVEDMG: 7d8 slashing| | |
 | Water Elemental [NPC]|Water Elemental Whelm; grappled; restrained; SDMGOS: 2d8+4 bludgeoning| | |
-| Web [Spell]| Web; Restrained; SAVES: DEX [SDC] (C) | | |
+| Web [Spell]| Web; Restrained; SAVES: [SDC] DEX (C) | | |
 
 ## Options
 

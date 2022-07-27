@@ -355,7 +355,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeEffect =  DB.findNode(sNodeEffect)
 	local sEffectLabel = DB.getValue(nodeEffect, "label", "")
 	local tParseEffect = EffectManager.parseEffect(sEffectLabel)
-	local sLabel = StringManager.trim(tParseEffect[1])
+	local sLabel = StringManager.trim(tParseEffect[1]) or ""
 
 	sNodeEffect = sNodeEffect:gsub("%.", "%%%.")
 	sNodeEffect = StringManager.trim(sNodeEffect:gsub("%-", "%%%-"))
@@ -499,7 +499,7 @@ function saveEffect(rSource, rTarget, tEffect)
 			rSaveVsRoll.sEffectPath = ""
 		end
 
-		ActionSave.performVsRoll(nil,rTarget, sAbility, rSaveVsRoll.nMod, bSecret, rSource, rSaveVsRoll.bRemoveOnSave, rSaveVsRoll.sDesc)
+		ActionSave.performVsRoll(nil,rTarget, sAbility, rSaveVsRoll.nMod, bSecret, rSource, false, rSaveVsRoll.sDesc)
 	end
 end
 
