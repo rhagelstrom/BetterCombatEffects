@@ -1234,15 +1234,17 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	local tTraits = {}
 	local tMatch = {}
 	local aTags = {}
-
+	local sConditions
 	--Temp Solution.. Trait tables not init on clients
 	addTraitstoConditionsTables(rSource)
 
 	--Determine if we have a trait gives adv or disadv
 	-- Do the Trait advantage first so we don't burn our effect if we don't need to
-	local sConditions = rRoll.sSaveDesc:match("%[![%a%d%s%,]*!]")
-	if sConditions then
-		sConditions = sConditions:gsub("%[!", ""):gsub("!]", "")
+	if rRoll.sSaveDesc then
+		sConditions = rRoll.sSaveDesc:match("%[![%a%d%s%,]*!]")
+		if sConditions then
+			sConditions = sConditions:gsub("%[!", ""):gsub("!]", "")
+		end
 	end
 	if rRoll.sConditions and rRoll.sConditions ~= "" and sConditions then
 		sConditions = sConditions .. "," .. rRoll.sConditions
