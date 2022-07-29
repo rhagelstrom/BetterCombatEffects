@@ -9,6 +9,7 @@ local evalAction = nil
 local performMultiAction = nil
 local bAdvancedEffects = nil
 local resetHealth = nil
+local onSave = nil
 local bExpandedNPC = nil
 
 function onInit()
@@ -61,6 +62,8 @@ function onInit()
 		evalAction = PowerManager.evalAction
 		PowerManager.evalAction = customEvalAction
 
+		onSave = ActionSave.onSave
+		ActionSave.onSave = onSaveRollHandler5E
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectPre5E)
@@ -86,6 +89,7 @@ function onClose()
 		PowerManager.parseEffects = parseEffects
 
 		ActionsManager.unregisterResultHandler("save")
+		ActionSave.onSave = onSave
 		EffectsManagerBCE.removeCustomProcessTurnStart(processEffectTurnStart5E)
 		EffectsManagerBCE.removeCustomProcessTurnEnd(processEffectTurnEnd5E)
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre5E)
@@ -328,7 +332,7 @@ end
 -- rTarget is null for some reason.
 function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	if  not rRoll.sSaveDesc or not rRoll.sSaveDesc:match("%[BCE]") then
-		return ActionSave.onSave(rSource, rTarget, rRoll)
+		return onSave(rSource, rTarget, rRoll)
 	end
 	local nodeTarget =  DB.findNode(rRoll.sSource)
 	local nodeSource = ActorManager.getCTNode(rSource)
@@ -345,7 +349,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 
 	-- something is wrong. Likely an extension messing with things
 	if not rTarget or not rSource or not nodeTarget or not nodeSource then
-	 	return ActionSave.onSave(rSource, rTarget, rRoll)
+	 	return onSave(rSource, rTarget, rRoll)
 	end
 
 	local tMatch
@@ -361,7 +365,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	sNodeEffect = StringManager.trim(sNodeEffect:gsub("%-", "%%%-"))
 
 	rRoll.sSaveDesc = rRoll.sSaveDesc:gsub(sNodeEffect, sLabel)
-	ActionSave.onSave(rSource, rTarget, rRoll)
+	onSave(rSource, rTarget, rRoll)
 
 	local nResult = ActionsManager.total(rRoll)
 	local bAct = false
