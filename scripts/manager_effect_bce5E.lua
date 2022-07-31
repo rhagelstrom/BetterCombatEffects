@@ -984,6 +984,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local sNodeEffect = StringManager.trim(rRoll.sSaveDesc:gsub("%[[%a%s%d!]*]", ""))
 	local nodeEffect =  DB.findNode(sNodeEffect)
 	local sEffectLabel = DB.getValue(nodeEffect, "label", "")
+	local nGMOnly = DB.getValue(nodeEffect, "isgmonly", 0)
 	local tParseEffect = EffectManager.parseEffect(sEffectLabel)
 	local sLabel = StringManager.trim(tParseEffect[1]) or ""
 
@@ -1024,8 +1025,13 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 				local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if next(rEffect) then
 					rEffect.sSource = rRoll.sSource
+					rEffect.nGMOnly = nGMOnly -- If the parent is secret then we should be too.
 					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
-					EffectManager.addEffect("", "", nodeSource, rEffect, true)
+					if Session.IsHost then
+						EffectManager.addEffect("", "", nodeSource, rEffect, true)
+					else
+						EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect, tEffect.rEffectComp.remainder[1])
+					end
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
 				EffectsManagerBCEDND.applyOngoingDamage(rTarget, rSource, tEffect.rEffectComp, true, sLabel)
@@ -1044,8 +1050,13 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 				local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if next(rEffect) then
 					rEffect.sSource = rRoll.sSource
+					rEffect.nGMOnly = nGMOnly -- If the parent is secret then we should be too.
 					rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
-					EffectManager.addEffect("", "", nodeSource, rEffect, true)
+					if Session.IsHost then
+							EffectManager.addEffect("", "", nodeSource, rEffect, true)
+					else
+						EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect, tEffect.rEffectComp.remainder[1])
+					end
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
 				EffectsManagerBCEDND.applyOngoingDamage(rTarget, rSource, tEffect.rEffectComp, false, sLabel)

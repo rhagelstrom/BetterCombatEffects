@@ -8,6 +8,7 @@ local charRest = nil
 local evalAction = nil
 local performMultiAction = nil
 local bAdvancedEffects = nil
+local onSave = nil
 
 function onInit()
 	if User.getRulesetName() == "3.5E" or  User.getRulesetName() == "PFRPG" then
@@ -35,7 +36,8 @@ function onInit()
 		EffectsManagerBCEDND.setProcessEffectOnDamage(onDamage35E)
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler35E)
-
+		onSave = ActionSave.onSave
+		ActionSave.onSave = onSaveRollHandler35E
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 
 		bAdvancedEffects = EffectsManagerBCE.hasExtension("FG-PFRPG-Advanced-Effects")
@@ -56,6 +58,7 @@ function onClose()
 		EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre35E)
 		EffectsManagerBCE.removeCustomPostAddEffect(addEffectPost35E)
 
+		ActionSave.onSave = onSave
 		if bAdvancedEffects then
 			ActionsManager.performMultiAction = performMultiAction
 		end
@@ -227,7 +230,7 @@ end
 -- rTarget is null for some reason.
 function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	if  not rRoll.sSaveDesc or not rRoll.sSaveDesc:match("%[BCE]") then
-		return ActionSave.onSave(rSource, rTarget, rRoll)
+		return onSave(rSource, rTarget, rRoll)
 	end
 	local nodeTarget =  DB.findNode(rRoll.sSource)
 	local nodeSource = ActorManager.getCTNode(rSource)
@@ -235,7 +238,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 
 	-- something is wrong. Likely an extension messing with things
 	if not rTarget or not rSource or not nodeTarget or not nodeSource then
-	 	return ActionSave.onSave(rSource, rTarget, rRoll)
+	 	return onSave(rSource, rTarget, rRoll)
 	end
 
 	local tMatch
@@ -243,6 +246,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	local sNodeEffect = StringManager.trim(rRoll.sSaveDesc:gsub("%[[%a%s%d]*]", ""))
 	local nodeEffect =  DB.findNode(sNodeEffect)
 	local sEffectLabel = DB.getValue(nodeEffect, "label", "")
+	local nGMOnly = DB.getValue(nodeEffect, "isgmonly", 0)
 	local tParseEffect = EffectManager.parseEffect(sEffectLabel)
 	local sLabel = StringManager.trim(tParseEffect[1]) or ""
 
@@ -250,7 +254,7 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 	sNodeEffect = StringManager.trim(sNodeEffect:gsub("%-", "%%%-"))
 
 	rRoll.sSaveDesc = rRoll.sSaveDesc:gsub(sNodeEffect, sLabel)
-	ActionSave.onSave(rSource, rTarget, rRoll)
+	onSave(rSource, rTarget, rRoll)
 
 	local nResult = ActionsManager.total(rRoll)
 	local bAct = false
@@ -281,8 +285,13 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 				local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if next(rEffect) then
 					rEffect.sSource = rRoll.sSource
+					rEffect.nGMOnly = nGMOnly -- If the parent is secret then we should be too.
 					rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
-					EffectManager.addEffect("", "", nodeSource, rEffect, true)
+					if Session.IsHost then
+						EffectManager.addEffect("", "", nodeSource, rEffect, true)
+					else
+						EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect, tEffect.rEffectComp.remainder[1])
+					end
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
 				EffectsManagerBCEDND.applyOngoingDamage(rTarget, rSource, tEffect.rEffectComp, true, sLabel)
@@ -301,8 +310,13 @@ function onSaveRollHandler35E(rSource, rTarget, rRoll)
 				local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 				if next(rEffect) then
 					rEffect.sSource = rRoll.sSource
+					rEffect.nGMOnly = nGMOnly -- If the parent is secret then we should be too.
 					rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
-					EffectManager.addEffect("", "", nodeSource, rEffect, true)
+					if Session.IsHost then
+						EffectManager.addEffect("", "", nodeSource, rEffect, true)
+					else
+						EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect, tEffect.rEffectComp.remainder[1])
+					end
 				end
 			elseif tEffect.sTag == "SAVEDMG" then
 				EffectsManagerBCEDND.applyOngoingDamage(rTarget, rSource, tEffect.rEffectComp, false, sLabel)
