@@ -7,6 +7,8 @@ OOB_MSGTYPE_BCEACTIVATE = "activateeffect"
 OOB_MSGTYPE_BCEDEACTIVATE = "deactivateeffect"
 OOB_MSGTYPE_BCEREMOVE = "removeeffect"
 OOB_MSGTYPE_BCEUPDATE = "updateeffect"
+OOB_MSGTYPE_BCEADD = "addeffectbce"
+
 local bAdvancedEffects = false
 local addEffect = nil
 local expireEffect = nil
@@ -71,6 +73,7 @@ function onInit()
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect)
+	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEADD, handleAddEffect)
 
 	for index, name in pairs(Extension.getExtensions()) do
 		extensions[name] = index
@@ -490,6 +493,40 @@ function matchEffect(sEffectSearch, aComps)
 	return rEffect
 end
 
+function notifyAddEffect(nodeSource, rEffect, sLabel)
+	local msgOOB = {}
+	msgOOB.type = OOB_MSGTYPE_BCEADD
+	msgOOB.sSource = rEffect.sSource
+	msgOOB.sTarget =  nodeSource.getPath()
+	if sLabel then
+		msgOOB.sShortLabel = sLabel
+	end
+	msgOOB.sLabel = rEffect.sName
+	msgOOB.sInit = tostring(rEffect.nInit)
+	msgOOB.sGMOnly = tostring(rEffect.nGMOnly)
+	msgOOB.sDuration = tostring(rEffect.nDuration)
+
+	Comm.deliverOOBMessage(msgOOB, "")
+end
+
+function handleAddEffect(msgOOB)
+	local rEffect
+	if msgOOB.sShortLabel then
+		rEffect = EffectsManagerBCE.matchEffect(msgOOB.sShortLabel)
+	else
+		rEffect = EffectsManagerBCE.matchEffect(msgOOB.sLabel)
+	end
+	if next(rEffect) then
+		local nodeTarget = DB.findNode(msgOOB.sTarget)
+		rEffect.sSource = msgOOB.sSource
+		rEffect.nDuration = tonumber(msgOOB.sDuration)
+		rEffect.nGMOnly = tonumber(msgOOB.sGMOnly)
+		rEffect.nInit = tonumber(msgOOB.sInit)
+		if nodeTarget then
+			EffectManager.addEffect("", "", nodeTarget, rEffect, true)
+		end
+	end
+end
 
 function modifyEffect(nodeEffect, sAction, sEffect)
 	-- Must be database node, if not it is probably marked for deletion from one-shot

@@ -31,10 +31,6 @@ function customRest(nodeActor, bLong, bMilestone)
 end
 
 function onEffectRollHandler(rSource, rTarget, rRoll)
-	if not Session.IsHost then
-		ChatManager.SystemMessage(Interface.getString("ct_error_effectclient"))
-		return
-	end
 	local nodeSource = ActorManager.getCTNode(rSource)
 	local sEffect = ""
 	for _,nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
@@ -55,9 +51,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
 				sValue = "%-*" .. sValue:gsub("%-", "")
 			end
 			sEffect = sEffect:gsub(sValue, sResult)
-			if Session.IsHost then
-				DB.setValue(nodeEffect, "label", "string", sEffect)
-			end
+			DB.setValue(nodeEffect, "label", "string", sEffect)
 			break
 		end
 	end
