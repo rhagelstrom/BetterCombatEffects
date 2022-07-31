@@ -198,7 +198,7 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		local nodeSource = DB.findNode(rNewEffect.sSource)
 		rSource = ActorManager.resolveActor(nodeSource)
 	end
-
+	replaceSaveDC(rNewEffect, rSource)
 	-- Save off original so we can match the name. Rebuilding a fully parsed effect
 	-- will nuke spaces after a , and thus EE extension will not match names correctly.
 	-- Consequently, if the name changes at all, AURA hates it and thus it isnt the same effect
@@ -214,8 +214,6 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		aNewComps[1] = aOriginalComps[1]
 		rNewEffect.sName = EffectManager.rebuildParsedEffect(aNewComps);
 	end
-
-	replaceSaveDC(rNewEffect, rSource)
 
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
 		local nDuration = rNewEffect.nDuration
