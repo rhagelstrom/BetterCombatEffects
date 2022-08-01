@@ -10,6 +10,7 @@ OOB_MSGTYPE_BCEUPDATE = "updateeffect"
 OOB_MSGTYPE_BCEADD = "addeffectbce"
 
 local bAdvancedEffects = false
+local bUntrueEffects = false
 local addEffect = nil
 local expireEffect = nil
 local RulesetEffectManager =  nil
@@ -79,6 +80,7 @@ function onInit()
 	for index, name in pairs(Extension.getExtensions()) do
 		extensions[name] = index
    	end
+	bUntrueEffects = hasExtension("IF_NOT_untrue_effects_berwind")
 	if hasExtension("AdvancedEffects") or hasExtension("FG-PFRPG-Advanced-Effects") then
 		bAdvancedEffects =  true
 	end
@@ -363,7 +365,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 					if not RulesetEffectManager.checkConditional(rActor, v, rEffectComp.remainder) then
 						break
 					end
-				elseif hasExtension("IF_NOT_untrue_effects_berwind") and rEffectComp.type == "IFN" then
+				elseif bUntrueEffects and rEffectComp.type == "IFN" then
 					if RulesetEffectManager.checkConditional(rActor, v, rEffectComp.remainder) then
 						break;
 					end
@@ -374,7 +376,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 					if not RulesetEffectManager.checkConditional(rTarget, v, rEffectComp.remainder, rActor) then
 						break
 					end
-				elseif  hasExtension("IF_NOT_untrue_effects_berwind") and rEffectComp.type == "IFTN" then
+				elseif  bUntrueEffects and rEffectComp.type == "IFTN" then
 					if not rTarget then
 						break;
 					end

@@ -14,7 +14,6 @@ local modSave = nil
 local getEffectsByType = nil
 local hasEffect = nil
 
-
 -- Save vs condition
 local decodeActors = nil
 local encodeActors = nil
@@ -35,7 +34,7 @@ local bAdvancedEffects = nil
 local resetHealth = nil
 local onSave = nil
 local bExpandedNPC = nil
-
+local bUntrueEffects = nil
 function onInit()
 
 	if User.getRulesetName() == "5E" then
@@ -157,7 +156,7 @@ function onInit()
 
 		bExpandedNPC = EffectsManagerBCE.hasExtension( "5E - Expanded NPCs")
 		initTraitTables()
-
+		bUntrueEffects = EffectsManagerBCE.hasExtension("IF_NOT_untrue_effects_berwind")
 		bAdvancedEffects = EffectsManagerBCE.hasExtension("AdvancedEffects")
 		if bAdvancedEffects then
 		 	performMultiAction = ActionsManager.performMultiAction
@@ -1324,18 +1323,209 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 	local results = getEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
 	-- This is probably super inefficient
 	if results ~= {} then
-		local aTags = {}
-		local bUpdated = false
-		--- we don't want to update existing BCE tag properties by mistake
-		bUpdated = EffectsManagerBCE.registerBCETag(sEffectType:upper(), EffectsManagerBCE.aBCEIgnoreOneShotOptions, true)
-		table.insert(aTags, sEffectType:upper())
-		local tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rFilterActor)
-		-- Remove the tag from BCE tags
-		if bUpdated then
-			EffectsManagerBCE.unregisterBCETag(sEffectType:upper())
+		for _,v in pairs(DB.getChildren(ActorManager.getCTNode(rActor), "effects")) do
+			local sLabel = DB.getValue(v, "label", "");
+			if sLabel:match("DUSE") then
+				getEffectsByTypeBCE(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
+				Debug.chat("Go For It")
+				break
+			end
 		end
+
+		-- local aTags = {}
+		-- local bUpdated = false
+		-- --- we don't want to update existing BCE tag properties by mistake
+		-- bUpdated = EffectsManagerBCE.registerBCETag(sEffectType:upper(), EffectsManagerBCE.aBCEIgnoreOneShotOptions, true)
+		-- table.insert(aTags, sEffectType:upper())
+		-- local tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rFilterActor)
+		-- -- Remove the tag from BCE tags
+		-- if bUpdated then
+		-- 	EffectsManagerBCE.unregisterBCETag(sEffectType:upper())
+		-- end
 	end
 	return results
+end
+
+
+--Don't want to own this big scary function just yet so we'll just use my modded one it when we need to use it
+function getEffectsByTypeBCE(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
+	if not rActor then
+		return {};
+	end
+	local results = {};
+	-- Set up filters
+	local aRangeFilter = {};
+	local aOtherFilter = {};
+	if aFilter then
+		for _,v in pairs(aFilter) do
+			if type(v) ~= "string" then
+				table.insert(aOtherFilter, v);
+			elseif StringManager.contains(DataCommon.rangetypes, v) then
+				table.insert(aRangeFilter, v);
+			else
+				table.insert(aOtherFilter, v);
+			end
+		end
+	end
+
+	-- Iterate through effects
+	for _,v in pairs(DB.getChildren(ActorManager.getCTNode(rActor), "effects")) do
+		-- Check active
+		local nActive = DB.getValue(v, "isactive", 0);
+		-- COMPATIBILITY FOR ADVANCED EFFECTS
+		-- Thanks Kel
+		--if (nActive ~= 0) then
+		if ((not bAdvancedEffects and nActive ~= 0) or (bAdvancedEffects and EffectManagerADND.isValidCheckEffect(rActor,v))) then
+		-- END COMPATIBILITY
+			local bDisableUse = false
+
+			local sLabel = DB.getValue(v, "label", "");
+			local sApply = DB.getValue(v, "apply", "");
+			if  sLabel:match("DUSE") then
+				bDisableUse = true
+			end
+
+			-- IF COMPONENT WE ARE LOOKING FOR SUPPORTS TARGETS, THEN CHECK AGAINST OUR TARGET
+			local bTargeted = EffectManager.isTargetedEffect(v);
+			if not bTargeted or EffectManager.isEffectTarget(v, rFilterActor) then
+				local aEffectComps = EffectManager.parseEffect(sLabel);
+
+				-- Look for type/subtype match
+				local nMatch = 0;
+				for kEffectComp,sEffectComp in ipairs(aEffectComps) do
+					local rEffectComp = EffectManager5E.parseEffectComp(sEffectComp);
+					-- Handle conditionals
+					if rEffectComp.type == "IF" then
+						if not EffectManager5E.checkConditional(rActor, v, rEffectComp.remainder) then
+							break;
+						end
+					elseif bUntrueEffects and rEffectComp.type == "IFN" then
+						if EffectManager5E.checkConditional(rActor, v, rEffectComp.remainder) then
+							break;
+						end
+					elseif rEffectComp.type == "IFT" then
+						if not rFilterActor then
+							break;
+						end
+						if not EffectManager5E.checkConditional(rFilterActor, v, rEffectComp.remainder, rActor) then
+							break;
+						end
+						bTargeted = true;
+					elseif bUntrueEffects and rEffectComp.type == "IFTN" then
+						if OptionsManager.isOption('NO_TARGET', 'off') and not rFilterActor then
+							break;
+						end
+						if EffectManager5E.checkConditional(rFilterActor, v, rEffectComp.remainder, rActor) then
+							break;
+						end
+						bTargeted = true;
+
+					-- Compare other attributes
+					else
+						-- Strip energy/bonus types for subtype comparison
+						local aEffectRangeFilter = {};
+						local aEffectOtherFilter = {};
+						local j = 1;
+						while rEffectComp.remainder[j] do
+							local s = rEffectComp.remainder[j];
+							if #s > 0 and ((s:sub(1,1) == "!") or (s:sub(1,1) == "~")) then
+								s = s:sub(2);
+							end
+							if StringManager.contains(DataCommon.dmgtypes, s) or s == "all" or
+									StringManager.contains(DataCommon.bonustypes, s) or
+									StringManager.contains(DataCommon.conditions, s) or
+									StringManager.contains(DataCommon.connectors, s) then
+								-- SKIP
+							elseif StringManager.contains(DataCommon.rangetypes, s) then
+								table.insert(aEffectRangeFilter, s);
+							else
+								table.insert(aEffectOtherFilter, s);
+							end
+
+							j = j + 1;
+						end
+
+						-- Check for match
+						local comp_match = false;
+						if rEffectComp.type == sEffectType then
+
+							-- Check effect targeting
+							if bTargetedOnly and not bTargeted then
+								comp_match = false;
+							else
+								comp_match = true;
+							end
+
+							-- Check filters
+							if #aEffectRangeFilter > 0 then
+								local bRangeMatch = false;
+								for _,v2 in pairs(aRangeFilter) do
+									if StringManager.contains(aEffectRangeFilter, v2) then
+										bRangeMatch = true;
+										break;
+									end
+								end
+								if not bRangeMatch then
+									comp_match = false;
+								end
+							end
+							if #aEffectOtherFilter > 0 then
+								local bOtherMatch = false;
+								for _,v2 in pairs(aOtherFilter) do
+									if type(v2) == "table" then
+										local bOtherTableMatch = true;
+										for k3, v3 in pairs(v2) do
+											if not StringManager.contains(aEffectOtherFilter, v3) then
+												bOtherTableMatch = false;
+												break;
+											end
+										end
+										if bOtherTableMatch then
+											bOtherMatch = true;
+											break;
+										end
+									elseif StringManager.contains(aEffectOtherFilter, v2) then
+										bOtherMatch = true;
+										break;
+									end
+								end
+								if not bOtherMatch then
+									comp_match = false;
+								end
+							end
+						end
+
+						-- Match!
+						if comp_match then
+							nMatch = kEffectComp;
+							if nActive == 1 then
+								table.insert(results, rEffectComp);
+							end
+						end
+					end
+				end -- END EFFECT COMPONENT LOOP
+
+				-- Remove one shot effects
+				if nMatch > 0 then
+					if nActive == 2 then
+						DB.setValue(v, "isactive", "number", 1);
+					else
+						if sApply == "action" then
+							EffectManager.notifyExpire(v, 0);
+						elseif sApply == "roll" then
+							EffectManager.notifyExpire(v, 0, true);
+						elseif sApply == "single" then
+							EffectManager.notifyExpire(v, nMatch, true);
+						elseif bDisableUse then
+							EffectsManagerBCE.modifyEffect(v, "Deactivate")
+						end
+					end
+				end
+			end -- END TARGET CHECK
+		end  -- END ACTIVE CHECK
+	end  -- END EFFECT LOOP
+	-- RESULTS
+	return results;
 end
 
 function customParseEffects(sPowerName, aWords)
