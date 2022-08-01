@@ -242,9 +242,7 @@ function customAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	if not nodeCT or not rNewEffect or not rNewEffect.sName then
 		return addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
-	local sUnits = rNewEffect.sUnits or ""
-
-	if onCustomPreAddEffect(sUser, sIdentity, nodeCT, rNewEffect,bShowMsg) == false then
+	if onCustomPreAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg) == false then
 		return
 	end
 	-- Play nice with others

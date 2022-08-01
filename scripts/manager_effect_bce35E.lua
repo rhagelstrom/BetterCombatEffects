@@ -181,8 +181,8 @@ function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	else
 		rSource = rActor
 	end
-	rNewEffect.sName = EffectManager35E.evalEffect(rSource, rNewEffect.sName)
 	EffectsManagerBCE5E.replaceSaveDC(rNewEffect, rSource)
+	rNewEffect.sName = EffectManager35E.evalEffect(rSource, rNewEffect.sName)
 	return true
 end
 

@@ -748,6 +748,8 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		local nodeSource = DB.findNode(rNewEffect.sSource)
 		rSource = ActorManager.resolveActor(nodeSource)
 	end
+	abilityReplacement(rNewEffect,rSource)
+	replaceSaveDC(rNewEffect, rSource)
 
 	local aTags = {"IMMUNE"}
 	local aImmuneEffect = {};
@@ -768,7 +770,6 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 			return false
 		end
 	end
-
 	-- Repalace effects with () that fantasygrounds will autocalc with [ ]
 	local aReplace = {"PRF", "LVL"}
 	for _,sClass in pairs(DataCommon.classes) do
@@ -809,8 +810,6 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		rNewEffect.sName = EffectManager.rebuildParsedEffect(aNewComps);
 	end
 
-	replaceSaveDC(rNewEffect, rSource)
-	abilityReplacement(rNewEffect,rSource)
 
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
 		local nDuration = rNewEffect.nDuration
