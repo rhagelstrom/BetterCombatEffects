@@ -1318,36 +1318,8 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
 	return bRet
 end
 
+--WARNING BIGTIME CONFLICT POTENTIAL----
 function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
-	local results = getEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
-	-- This is probably super inefficient
-	if results ~= {} then
-		for _,v in pairs(DB.getChildren(ActorManager.getCTNode(rActor), "effects")) do
-			local sLabel = DB.getValue(v, "label", "");
-			if sLabel:match("DUSE") then
-				getEffectsByTypeBCE(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
-				Debug.chat("Go For It")
-				break
-			end
-		end
-
-		-- local aTags = {}
-		-- local bUpdated = false
-		-- --- we don't want to update existing BCE tag properties by mistake
-		-- bUpdated = EffectsManagerBCE.registerBCETag(sEffectType:upper(), EffectsManagerBCE.aBCEIgnoreOneShotOptions, true)
-		-- table.insert(aTags, sEffectType:upper())
-		-- local tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rFilterActor)
-		-- -- Remove the tag from BCE tags
-		-- if bUpdated then
-		-- 	EffectsManagerBCE.unregisterBCETag(sEffectType:upper())
-		-- end
-	end
-	return results
-end
-
-
---Don't want to own this big scary function just yet so we'll just use my modded one it when we need to use it
-function getEffectsByTypeBCE(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
 	if not rActor then
 		return {};
 	end
