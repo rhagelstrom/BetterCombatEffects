@@ -14,7 +14,7 @@ local bUntrueEffects = false
 local addEffect = nil
 local expireEffect = nil
 local RulesetEffectManager =  nil
-local lastExpire = ""
+local lastExpire = {}
 local extensions = {}
 
 -- Predefined option arrays for getting effect tags
@@ -119,12 +119,23 @@ function hasExtension(sName)
 end
 
 -- Expire effect is called twice. Once initially and then once for delayed remove
--- to get the delay expire action options
+-- to get the delay expire action options. The delay is protected by local scope so we can't
+-- get to it to determine if delayed. Solution we insert our expireing effect in a table,
+-- and delete it from the table the second time around.
 function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
-	if not nodeActor or not nodeEffect or nodeEffect == lastExpire then
+	if not nodeActor or not nodeEffect or StringManager.contains(lastExpire, nodeEffect) then
+		if  lastExpire  and  nodeEffect then
+			for i = 1, #lastExpire do
+				if lastExpire[i] == nodeEffect then
+					table.remove(lastExpire, i)
+				end
+			end
+		end
 		return expireEffect(nodeActor, nodeEffect, nExpireComp)
 	end
-	lastExpire = nodeEffect
+
+	table.insert(lastExpire, nodeEffect)
+
 	-- Adding an effect before we expire the existing can make a feedback loop
 	-- which causes a stack overflow so we see if the effect has expire add, grab it
 	-- expire the effect and then process for any adds or additional expires
@@ -133,8 +144,8 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 	local nInit = DB.getValue(nodeEffect,"init", 0)
 	local aTags = {"EXPIREADD"}
 
-	local bRet = expireEffect(nodeActor, nodeEffect, nExpireComp)
 	local tMatch = getEffects(rSource, aTags, rSource)
+	local bRet = expireEffect(nodeActor, nodeEffect, nExpireComp)
 	for _,tEffect in pairs(tMatch) do
 		if tEffect.nodeCT == nodeEffect and tEffect.sTag == "EXPIREADD" then
 			local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
@@ -357,7 +368,6 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 				else
 					rEffectComp = RulesetEffectManager.parseEffectCompSimple(sEffectComp)
 				end
-
 				-- Handle conditionals
 				if rEffectComp.type == "IF" and RulesetEffectManager.checkConditional then
 					if not RulesetEffectManager.checkConditional(rActor, v, rEffectComp.remainder) then
@@ -398,7 +408,6 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 							rSourceEffect.sCTNode ~= DB.getValue(v, "source_name", "") then
 							break
 						end
-
 						if ((aOptions.bOnlyDisabled and nActive == 0 ) or nActive ~= 0) then
 							if aOptions.nDuration ~= 0 and aOptions.nDuration ~= nDuration then
 								break
