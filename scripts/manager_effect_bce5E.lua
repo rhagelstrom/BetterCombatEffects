@@ -10,6 +10,7 @@ local performMultiAction = nil
 local bAdvancedEffects = nil
 local resetHealth = nil
 local onSave = nil
+local rest = nil
 local bExpandedNPC = nil
 
 function onInit()
@@ -228,6 +229,7 @@ end
 
 function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	local rTarget = ActorManager.resolveActor(nodeCT)
+	local rSource
 	if rNewEffect.sSource == "" then
 		rSource = rTarget
 	else

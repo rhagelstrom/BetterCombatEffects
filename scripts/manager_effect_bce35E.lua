@@ -144,6 +144,7 @@ function processEffectTurnStart35E(rSource)
 
 	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
+		local rEffectSource
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
 		else
@@ -158,9 +159,9 @@ end
 
 function processEffectTurnEnd35E(rSource)
 	local aTags = {"SAVEE"}
-
 	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
+		local rEffectSource
 		if(tEffect.sSource == "") then
 			rEffectSource = rSource
 		else

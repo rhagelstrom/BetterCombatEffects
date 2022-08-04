@@ -246,7 +246,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 	aTags = {"TDMGADDT", "TDMGADDS"}
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
-		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+		local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if next(rEffect) then
 			rEffect.sSource = DB.getValue(nodeTarget,"source_name", rTarget.sCTNode)
 			rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
@@ -263,7 +263,7 @@ function customOnDamage(rSource, rTarget, rRoll)
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget, rSource)
 	for _,tEffect in pairs(tMatch) do
 		--if type(tEffect.nodeCT) ~= "userdata" then
-		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+		local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if next(rEffect) then
 			rEffect.sSource = DB.getValue(nodeSource,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)

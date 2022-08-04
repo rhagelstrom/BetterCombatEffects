@@ -468,7 +468,7 @@ function matchEffect(sEffectSearch, aComps)
 	for _,v in pairs(DB.getChildrenGlobal("effects")) do
 		local sEffect = DB.getValue(v, "label", "")
 		if sEffect ~= "" then
-			aEffectComps = EffectManager.parseEffect(sEffect)
+			local aEffectComps = EffectManager.parseEffect(sEffect)
 			-- Is this the effeect we are looking for?
 			-- Name is parsed to index 1 in the array
 			if aEffectComps[1]:lower() == sEffectLookup:lower() then
