@@ -303,15 +303,15 @@ function customOnDamage(rSource, rTarget, rRoll)
 	aTags = {"TDMGADDT", "TDMGADDS"}
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
-		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+		local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if next(rEffect) then
 			rEffect.sSource = DB.getValue(nodeTarget,"source_name", rTarget.sCTNode)
 			rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
 
-			if tEffect.sTag == "TDMGADDT" and nodeTarget ~= nil then
-				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
-			elseif tEffect.sTag == "TDMGADDS" and nodeSource ~= nil then
-				EffectManager.addEffect("", "", nodeSource, rEffect, true)
+			if tEffect.sTag == "TDMGADDT" then
+				EffectsManagerBCE.notifyAddEffect(nodeTarget, rEffect,tEffect.rEffectComp.remainder[1])
+			elseif tEffect.sTag == "TDMGADDS" then
+				EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect,tEffect.rEffectComp.remainder[1])
 			end
 		end
 	end
@@ -319,14 +319,14 @@ function customOnDamage(rSource, rTarget, rRoll)
 	aTags = {"SDMGADDT","SDMGADDS"}
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget, rSource)
 	for _,tEffect in pairs(tMatch) do
-		rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+		local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 		if next(rEffect) then
 			rEffect.sSource = DB.getValue(nodeSource,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
 			if tEffect.sTag == "SDMGADDT"   then
-				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
-			elseif tEffect.sTag == "SDMGADDS" and nodeSource ~= nil then
-				EffectManager.addEffect("", "", nodeSource, rEffect, true)
+				EffectsManagerBCE.notifyAddEffect(nodeTarget, rEffect,tEffect.rEffectComp.remainder[1])
+			elseif tEffect.sTag == "SDMGADDS" then
+				EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect,tEffect.rEffectComp.remainder[1])
 			end
 		end
 	end

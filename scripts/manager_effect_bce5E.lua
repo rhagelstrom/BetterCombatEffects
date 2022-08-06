@@ -33,6 +33,7 @@ local tTraitsDisadvantage = {}
 local bAdvancedEffects = nil
 local resetHealth = nil
 local onSave = nil
+local rest = nil
 local bExpandedNPC = nil
 local bUntrueEffects = nil
 function onInit()
@@ -824,6 +825,7 @@ end
 
 function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	local rTarget = ActorManager.resolveActor(nodeCT)
+	local rSource
 	if rNewEffect.sSource == "" then
 		rSource = rTarget
 	else
@@ -1338,16 +1340,12 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 			end
 		end
 	end
-
 	-- Iterate through effects
 	for _,v in pairs(DB.getChildren(ActorManager.getCTNode(rActor), "effects")) do
 		-- Check active
 		local nActive = DB.getValue(v, "isactive", 0);
-		-- COMPATIBILITY FOR ADVANCED EFFECTS
-		-- Thanks Kel
-		--if (nActive ~= 0) then
+
 		if ((not bAdvancedEffects and nActive ~= 0) or (bAdvancedEffects and EffectManagerADND.isValidCheckEffect(rActor,v))) then
-		-- END COMPATIBILITY
 			local bDisableUse = false
 
 			local sLabel = DB.getValue(v, "label", "");
@@ -1478,6 +1476,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 
 				-- Remove one shot effects
 				if nMatch > 0 then
+
 					if nActive == 2 then
 						DB.setValue(v, "isactive", "number", 1);
 					else
