@@ -252,9 +252,9 @@ function customOnDamage(rSource, rTarget, rRoll)
 			rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
 
 			if tEffect.sTag == "TDMGADDT" then
-				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
+				EffectsManagerBCE.notifyAddEffect(nodeTarget, rEffect,tEffect.rEffectComp.remainder[1])
 			elseif tEffect.sTag == "TDMGADDS" then
-				EffectManager.addEffect("", "", nodeSource, rEffect, true)
+				EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect,tEffect.rEffectComp.remainder[1])
 			end
 		end
 	end
@@ -268,9 +268,9 @@ function customOnDamage(rSource, rTarget, rRoll)
 			rEffect.sSource = DB.getValue(nodeSource,"source_name", rSource.sCTNode)
 			rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
 			if tEffect.sTag == "SDMGADDT"   then
-				EffectManager.addEffect("", "", nodeTarget, rEffect, true)
+				EffectsManagerBCE.notifyAddEffect(nodeTarget, rEffect,tEffect.rEffectComp.remainder[1])
 			elseif tEffect.sTag == "SDMGADDS" then
-				EffectManager.addEffect("", "", nodeSource, rEffect, true)
+				EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect,tEffect.rEffectComp.remainder[1])
 			end
 		end
 	end
