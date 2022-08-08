@@ -449,6 +449,10 @@ end
 
 -- We are looking for the label which is the first tag followed by ; if not the end
 function matchEffect(sEffectSearch, aComps)
+	-- Badly formed effect
+	if not sEffectSearch then
+		return
+	end
 	local sEffectLookup = sEffectSearch:lower()
 
 	--search conditions table first
