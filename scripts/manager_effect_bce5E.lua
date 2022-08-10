@@ -95,6 +95,7 @@ function onInit()
 
 		EffectsManagerBCE.registerBCETag("IMMUNE",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SDC",  EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("DC",  EffectsManagerBCE.aBCEDefaultOptions)
 
 		resetHealth = CombatManager2.resetHealth
 		CombatManager2.resetHealth = customResetHealth
@@ -749,8 +750,10 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		local nodeSource = DB.findNode(rNewEffect.sSource)
 		rSource = ActorManager.resolveActor(nodeSource)
 	end
-	abilityReplacement(rNewEffect,rSource)
-	replaceSaveDC(rNewEffect, rSource)
+
+	rNewEffect = replaceEffectParens(rNewEffect)
+	rNewEffect = moveModtoMod(rNewEffect) -- Eventually we can get rid of this. Used to replace old format with New
+	rNewEffect = replaceSaveDC(rNewEffect, rSource)
 
 	local aTags = {"IMMUNE"}
 	local aImmuneEffect = {};
@@ -771,24 +774,6 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 			return false
 		end
 	end
-	-- Repalace effects with () that fantasygrounds will autocalc with [ ]
-	local aReplace = {"PRF", "LVL"}
-	for _,sClass in pairs(DataCommon.classes) do
-		table.insert(aReplace, sClass:upper())
-	end
-	for _,sAbility in pairs(DataCommon.abilities) do
-		table.insert(aReplace, DataCommon.ability_ltos[sAbility]:upper())
-	end
-	for _,sTag in pairs(aReplace) do
-		local sMatchString = "%([%-H%d+]?" .. sTag .. "%)"
-		local sSubMatch = rNewEffect.sName:match(sMatchString)
-		if sSubMatch ~= nil then
-			sSubMatch = sSubMatch:gsub("%-", "%%%-")
-			sSubMatch = sSubMatch:gsub("%(", "%%%[")
-			sSubMatch = sSubMatch:gsub("%)", "]")
-			rNewEffect.sName = rNewEffect.sName:gsub(sMatchString, sSubMatch)
-		end
-	end
 
 	if rNewEffect.sName:match("EFFINIT:%s*%-?%d+") then
 		local sInit = rNewEffect.sName:match("%d+")
@@ -800,7 +785,6 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	-- Consequently, if the name changes at all, AURA hates it and thus it isnt the same effect
 	-- Really this is just to do some string replace. We just won't do string replace for any
 	-- Effect that has FROMAURA;
-
 	if  not rNewEffect.sName:upper():find("FROMAURA;") then
 		local aOriginalComps = EffectManager.parseEffect(rNewEffect.sName);
 
@@ -811,7 +795,6 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		rNewEffect.sName = EffectManager.rebuildParsedEffect(aNewComps);
 	end
 
-
 	if OptionsManager.isOption("RESTRICT_CONCENTRATION", "on") then
 		local nDuration = rNewEffect.nDuration
 		if rNewEffect.sUnits == "minute" then
@@ -821,6 +804,54 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
 
 	return true
+end
+
+function replaceEffectParens(rEffect)
+	--	Repalace effects with () that fantasygrounds will autocalc with [ ]
+	local aReplace = {"PRF", "LVL", "SDC"}
+	for _,sClass in pairs(DataCommon.classes) do
+		table.insert(aReplace, sClass:upper())
+	end
+	for _,sAbility in pairs(DataCommon.abilities) do
+		table.insert(aReplace, DataCommon.ability_ltos[sAbility]:upper())
+	end
+
+	for _,sTag in pairs(aReplace) do
+		local sMatchString = "%([%-H%d+]?" .. sTag .. "%)"
+		local sSubMatch = rEffect.sName:match(sMatchString)
+		if sSubMatch then
+			sSubMatch = sSubMatch:gsub("%-", "%%%-")
+			sSubMatch = sSubMatch:gsub("%(", "%%%[")
+			sSubMatch = sSubMatch:gsub("%)", "]")
+			rEffect.sName = rEffect.sName:gsub(sMatchString, sSubMatch)
+		end
+	end
+	return rEffect
+end
+
+function moveModtoMod(rEffect)
+	local aMatch = {}
+	for _,sAbility in pairs(DataCommon.abilities) do
+		table.insert(aMatch, DataCommon.ability_ltos[sAbility]:upper())
+	end
+
+	local aEffectComps = EffectManager.parseEffect(rEffect.sName)
+	for i,sEffectComp in ipairs(aEffectComps) do
+		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+		if rEffectComp.type == "SAVEE"  or
+		rEffectComp.type == "SAVES" or
+		rEffectComp.type == "SAVEA" or
+		rEffectComp.type == "SAVEONDMG" then
+			local aSplitString = StringManager.splitTokens(sEffectComp)
+			if StringManager.contains(aMatch, aSplitString[2]) then
+				table.insert(aSplitString, 2, aSplitString[3])
+				table.remove(aSplitString, 4)
+			end
+			aEffectComps[i] = table.concat(aSplitString, " ")
+		end
+	end
+	rEffect.sName = EffectManager.rebuildParsedEffect(aEffectComps)
+	return rEffect
 end
 
 function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
@@ -843,51 +874,19 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	return true
 end
 
-function getDCEffectMod(nodeActor)
+function getDCEffectMod(rActor)
 	local nDC = 0
-	for _,nodeEffect in pairs(DB.getChildren(nodeActor, "effects")) do
-		local sEffect = DB.getValue(nodeEffect, "label", "")
-		local tEffectComps = EffectManager.parseEffect(sEffect)
-		for _,sEffectComp in ipairs(tEffectComps) do
-			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-			if rEffectComp.type == "DC" and (DB.getValue(nodeEffect, "isactive", 0) == 1) then
-				nDC = tonumber(rEffectComp.mod) or 0
-				break
-			end
+	local aTags = {"DC"}
+	local tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rActor)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "DC" then
+			nDC = tEffect.rEffectComp.mod
+			break
 		end
 	end
 	return nDC
 end
 
---For our save DC to work correctly we need to massage that number a bit and move it to the correct place
-function abilityReplacement(rNewEffect, rActor)
-	local aEffectComps = EffectManager.parseEffect(rNewEffect.sName)
-	for i,sEffectComp in ipairs(aEffectComps) do
-		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-		if rEffectComp.mod ~= 0 and
-			rEffectComp.type == "SAVEE"  or
-			rEffectComp.type == "SAVES" or
-			rEffectComp.type == "SAVEA" or
-			rEffectComp.type == "SAVEONDMG" then
-			for j,sRemainder in ipairs(rEffectComp.remainder) do
-				for _,sAbility in pairs(DataCommon.abilities) do
-					if sRemainder == DataCommon.ability_ltos[sAbility]:upper() then
-						nMod = tonumber(rEffectComp.remainder[j+1])
-						if (nMod ~= nil) then
-							rEffectComp.remainder[j+1] = tostring(nMod + rEffectComp.mod)
-						else
-							table.insert(rEffectComp.remainder, j+1, tostring(rEffectComp.mod))
-						end
-						rEffectComp.mod = 0
-						break
-					end
-				end
-			end
-			aEffectComps[i] =  EffectManager5E.rebuildParsedEffectComp(rEffectComp):gsub(",", " ")
-			rNewEffect.sName = EffectManager.rebuildParsedEffect(aEffectComps)
-		end
-	end
-end
 
 -- Replace SDC when applied from a power
 function customEvalAction(rActor, nodePower, rAction)
@@ -906,7 +905,7 @@ function customEvalAction(rActor, nodePower, rAction)
 end
 
 function replaceSaveDC(rNewEffect, rActor)
-	if (rNewEffect.sName:match("%[SDC]") or rNewEffect.sName:match("%(SDC%)")) and
+	if rNewEffect.sName:match("%[SDC]") and
 			(rNewEffect.sName:match("SAVEE%s*:") or
 			rNewEffect.sName:match("SAVES%s*:") or
 			rNewEffect.sName:match("SAVEA%s*:") or
@@ -914,7 +913,7 @@ function replaceSaveDC(rNewEffect, rActor)
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
 		local nSpellcastingDC = 0
 		local bNewSpellcasting = true
-		local nDC = getDCEffectMod(ActorManager.getCTNode(rActor))
+		local nDC = getDCEffectMod(rActor)
 		if sNodeType == "pc" then
 			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf") + nDC
 			for _,nodeFeature in pairs(DB.getChildren(nodeActor, "featurelist")) do
@@ -951,8 +950,8 @@ function replaceSaveDC(rNewEffect, rActor)
 			end
 		end
 		rNewEffect.sName = rNewEffect.sName:gsub("%[SDC]", tostring(nSpellcastingDC))
-		rNewEffect.sName = rNewEffect.sName:gsub("%(SDC%)", tostring(nSpellcastingDC))
 	end
+	return rNewEffect
 end
 
 -- rSource is the source of the actor making the roll, hence it is the target of whatever is causing the same
@@ -964,15 +963,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeTarget =  DB.findNode(rRoll.sSource)
 	local nodeSource = ActorManager.getCTNode(rSource)
 	rTarget = ActorManager.resolveActor(nodeTarget)
-
-	-- local nodeEffect = nil
-	-- if rRoll.sEffectPath ~= "" then
-	-- 	nodeEffect = DB.findNode(rRoll.sEffectPath)
-	-- 	if nodeEffect and not rTarget then
-	-- 		local nodeTarget = nodeEffect.getParent().getParent()
-	-- 		rTarget = ActorManager.resolveActor(nodeTarget)
-	-- 	end
-	-- end
 
 	-- something is wrong. Likely an extension messing with things
 	if not rTarget or not rSource or not nodeTarget or not nodeSource then
