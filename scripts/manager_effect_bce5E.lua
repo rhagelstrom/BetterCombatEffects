@@ -47,6 +47,7 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("DC",  EffectsManagerBCE.aBCEDefaultOptions)
 
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		--4E/5E
@@ -199,7 +200,8 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		local nodeSource = DB.findNode(rNewEffect.sSource)
 		rSource = ActorManager.resolveActor(nodeSource)
 	end
-	replaceSaveDC(rNewEffect, rSource)
+	rNewEffect = moveModtoMod(rNewEffect) -- Eventually we can get rid of this. Used to replace old format with New
+	rNewEffect = replaceSaveDC(rNewEffect, rSource)
 	-- Save off original so we can match the name. Rebuilding a fully parsed effect
 	-- will nuke spaces after a , and thus EE extension will not match names correctly.
 	-- Consequently, if the name changes at all, AURA hates it and thus it isnt the same effect
@@ -227,6 +229,31 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	return true
 end
 
+function moveModtoMod(rEffect)
+	local aMatch = {}
+	for _,sAbility in pairs(DataCommon.abilities) do
+		table.insert(aMatch, DataCommon.ability_ltos[sAbility]:upper())
+	end
+
+	local aEffectComps = EffectManager.parseEffect(rEffect.sName)
+	for i,sEffectComp in ipairs(aEffectComps) do
+		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+		if rEffectComp.type == "SAVEE"  or
+		rEffectComp.type == "SAVES" or
+		rEffectComp.type == "SAVEA" or
+		rEffectComp.type == "SAVEONDMG" then
+			local aSplitString = StringManager.splitTokens(sEffectComp)
+			if StringManager.contains(aMatch, aSplitString[2]) then
+				table.insert(aSplitString, 2, aSplitString[3])
+				table.remove(aSplitString, 4)
+			end
+			aEffectComps[i] = table.concat(aSplitString, " ")
+		end
+	end
+	rEffect.sName = EffectManager.rebuildParsedEffect(aEffectComps)
+	return rEffect
+end
+
 function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	local rTarget = ActorManager.resolveActor(nodeCT)
 	local rSource
@@ -247,17 +274,14 @@ function addEffectPost5E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
 	return true
 end
 
-function getDCEffectMod(nodeActor)
+function getDCEffectMod(rActor)
 	local nDC = 0
-	for _,nodeEffect in pairs(DB.getChildren(nodeActor, "effects")) do
-		local sEffect = DB.getValue(nodeEffect, "label", "")
-		local tEffectComps = EffectManager.parseEffect(sEffect)
-		for _,sEffectComp in ipairs(tEffectComps) do
-			local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
-			if rEffectComp.type == "DC" and (DB.getValue(nodeEffect, "isactive", 0) == 1) then
-				nDC = tonumber(rEffectComp.mod) or 0
-				break
-			end
+	local aTags = {"DC"}
+	local tMatch = EffectsManagerBCE.getEffects(rActor, aTags, rActor)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "DC" then
+			nDC = tEffect.rEffectComp.mod
+			break
 		end
 	end
 	return nDC
@@ -288,7 +312,7 @@ function replaceSaveDC(rNewEffect, rActor)
 		local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor)
 		local nSpellcastingDC = 0
 		local bNewSpellcasting = true
-		local nDC = getDCEffectMod(ActorManager.getCTNode(rActor))
+		local nDC = getDCEffectMod(rActor)
 		if sNodeType == "pc" then
 			nSpellcastingDC = 8 +  ActorManager5E.getAbilityBonus(rActor, "prf") + nDC
 			for _,nodeFeature in pairs(DB.getChildren(nodeActor, "featurelist")) do
@@ -326,6 +350,7 @@ function replaceSaveDC(rNewEffect, rActor)
 		end
 		rNewEffect.sName = rNewEffect.sName:gsub("%[SDC]", tostring(nSpellcastingDC))
 	end
+	return rNewEffect
 end
 
 -- rSource is the source of the actor making the roll, hence it is the target of whatever is causing the same
@@ -337,15 +362,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 	local nodeTarget =  DB.findNode(rRoll.sSource)
 	local nodeSource = ActorManager.getCTNode(rSource)
 	rTarget = ActorManager.resolveActor(nodeTarget)
-
-	-- local nodeEffect = nil
-	-- if rRoll.sEffectPath ~= "" then
-	-- 	nodeEffect = DB.findNode(rRoll.sEffectPath)
-	-- 	if nodeEffect and not rTarget then
-	-- 		local nodeTarget = nodeEffect.getParent().getParent()
-	-- 		rTarget = ActorManager.resolveActor(nodeTarget)
-	-- 	end
-	-- end
 
 	-- something is wrong. Likely an extension messing with things
 	if not rTarget or not rSource or not nodeTarget or not nodeSource then
