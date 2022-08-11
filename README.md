@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.23
-**Updated::** 08/06/22
+**Current Version:** 3.24
+**Updated::** 08/10/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -20,6 +20,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |TREGENA|(D)| |One time regeneration to temporary HP when the effect is added|
 | **Attack** | | | |
 |ATKA|(-)| | ACTIVATE effect when the Actor takes the attack action|
+|ATKADD|(-)|[effect] or [condition] | Add effect or condition when the Actor takes the attack action|
 |ATKD|(-)| | DEACTIVATE effect when the Actor takes the attack action|
 |ATKR|(-)| | REMOVE effect when the Actor takes the attack action|
 | **Damage** | | | |
@@ -173,6 +174,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * NOREST, NORESTL - Actor gains no benefit from short rest/long rest
   * DMGA,DMGD,DMGR now accept damage and range types as filters
   * ATKD,ATKA,ATKR - Activate,Deactivate,Remove effect when the attack action is taken
+  * ATKADD - Add custom effect when the attack action is taken
   * SAVEADD: (N) (effect) - Will only activate when the save fails by (N). Think of this as a "Hard fail". If (-N) will fire when the result is N or less
   * Replace FGU [] Tags - Tags like [PRF][LVL][CLASS] can now be defined in the NPC sheet effect list as (PRF)(LVL)(CLASS) to process as expected
   * (DE) - Will disable the effect on use
