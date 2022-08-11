@@ -27,7 +27,7 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptions)
-
+		EffectsManagerBCE.registerBCETag("DC",  EffectsManagerBCE.aBCEDefaultOptions)
 
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart35E)
 		EffectsManagerBCE.setCustomProcessTurnEnd(processEffectTurnEnd35E)
@@ -182,9 +182,32 @@ function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	else
 		rSource = rActor
 	end
-	EffectsManagerBCE5E.replaceSaveDC(rNewEffect, rSource)
+	rNewEffect = moveModtoMod(rNewEffect) -- Eventually we can get rid of this. Used to replace old format with New
+	rNewEffect = EffectsManagerBCE5E.replaceSaveDC(rNewEffect, rSource)
 	rNewEffect.sName = EffectManager35E.evalEffect(rSource, rNewEffect.sName)
 	return true
+end
+
+function moveModtoMod(rEffect)
+	local aMatch = {"WILL", "REFLEX", "FORTITUDE"}
+
+	local aEffectComps = EffectManager.parseEffect(rEffect.sName)
+	for i,sEffectComp in ipairs(aEffectComps) do
+		local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+		if rEffectComp.type == "SAVEE"  or
+		rEffectComp.type == "SAVES" or
+		rEffectComp.type == "SAVEA" or
+		rEffectComp.type == "SAVEONDMG" then
+			local aSplitString = StringManager.splitTokens(sEffectComp)
+			if StringManager.contains(aMatch, aSplitString[2]:upper()) then
+				table.insert(aSplitString, 2, aSplitString[3])
+				table.remove(aSplitString, 4)
+			end
+			aEffectComps[i] = table.concat(aSplitString, " ")
+		end
+	end
+	rEffect.sName = EffectManager.rebuildParsedEffect(aEffectComps)
+	return rEffect
 end
 
 function addEffectPost35E(sUser, sIdentity, nodeCT, rNewEffect, nodeEffect)
@@ -225,7 +248,6 @@ function onDamage35E(rSource,rTarget)
 	end
 	return true
 end
-
 
 -- rSource is the source of the actor making the roll, hence it is the target of whatever is causing the same
 -- rTarget is null for some reason.

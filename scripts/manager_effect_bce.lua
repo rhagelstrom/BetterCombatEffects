@@ -123,10 +123,10 @@ end
 -- get to it to determine if delayed. Solution we insert our expireing effect in a table,
 -- and delete it from the table the second time around.
 function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
-	if not nodeActor or not nodeEffect or StringManager.contains(lastExpire, nodeEffect) then
+	if not nodeActor or not nodeEffect or StringManager.contains(lastExpire, nodeEffect.getPath()) then
 		if  lastExpire  and  nodeEffect then
 			for i = 1, #lastExpire do
-				if lastExpire[i] == nodeEffect then
+				if lastExpire[i] == nodeEffect.getPath() then
 					table.remove(lastExpire, i)
 				end
 			end
@@ -134,7 +134,7 @@ function customExpireEffect(nodeActor, nodeEffect, nExpireComp)
 		return expireEffect(nodeActor, nodeEffect, nExpireComp)
 	end
 
-	table.insert(lastExpire, nodeEffect)
+	table.insert(lastExpire, nodeEffect.getPath())
 
 	-- Adding an effect before we expire the existing can make a feedback loop
 	-- which causes a stack overflow so we see if the effect has expire add, grab it
@@ -500,6 +500,10 @@ end
 
 -- We are looking for the label which is the first tag followed by ; if not the end
 function matchEffect(sEffectSearch, aComps)
+	-- Badly formed effect
+	if not sEffectSearch then
+		return
+	end
 	local sEffectLookup = sEffectSearch:lower()
 
 	--search conditions table first
