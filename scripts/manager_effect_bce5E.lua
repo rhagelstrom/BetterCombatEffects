@@ -86,6 +86,7 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("ATKR",  EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("ATKD",  EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("ATKA",  EffectsManagerBCE.aBCEActivateOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKADD",  EffectsManagerBCE.aBCEActivateOptionsAE)
 
 		EffectsManagerBCE.registerBCETag("ADVCOND",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("DISCOND",  EffectsManagerBCE.aBCEDefaultOptions)
@@ -649,7 +650,7 @@ end
 
 function customOnAttack(rSource, rTarget, rRoll)
 	local tMatch
-	local aTags = {"ATKD","ATKA","ATKR"}
+	local aTags = {"ATKD","ATKA","ATKR","ATKADD"}
 
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
@@ -659,6 +660,21 @@ function customOnAttack(rSource, rTarget, rRoll)
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Deactivate")
 		elseif  tEffect.sTag  == "ATKR" then
 			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
+		elseif  tEffect.sTag  == "ATKADD" then
+			local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+			if next(rEffect) then
+				rEffect.sSource = rRoll.sSource
+				rEffect.nGMOnly = nGMOnly -- If the parent is secret then we should be too.
+				rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
+				local nodeSource = ActorManager.getCTNode(rSource)
+				if Session.IsHost then
+					EffectManager.addEffect("", "", nodeSource, rEffect, true)
+				else
+					EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect, tEffect.rEffectComp.remainder[1])
+				end
+			end
+
+			--EffectsManagerBCE.notifyAddEffect(tEffect.nodeCT, rEffect, sLabel)
 		end
 	end
 	return onAttack(rSource, rTarget, rRoll)
