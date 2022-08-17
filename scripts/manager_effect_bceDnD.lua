@@ -104,9 +104,9 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 		elseif tEffect.sTag == "TREGENA" and tEffect.rEffectComp.type == "TREGENA" then
 			applyOngoingRegen(rSource, rTarget, tEffect.rEffectComp, true, sLabel)
 		elseif tEffect.sTag == "DMGA" and tEffect.rEffectComp.type == "DMGA" then
-			applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp)
+			applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, false, sLabel)
 		elseif tEffect.sTag == "DUR" and type(tEffect.nodeCT) == "databasenode" then
-			local sLabel = DB.getValue(tEffect.nodeCT, "label", "")
+			sLabel = DB.getValue(tEffect.nodeCT, "label", "")
 			local rRoll = {}
 			rRoll.sType = "effectbce"
 			rRoll.sDesc = "[EFFECT " .. sLabel .. "] "
@@ -124,7 +124,6 @@ function addEffectPost(sUser, sIdentity, nodeCT, rNewEffect, nodeEeffect)
 				rRoll.bSecret = false
 			end
 			ActionsManager.performAction(nil, rTarget, rRoll)
-			applyOngoingDamage(rSource, rTarget, tEffect.rEffectComp, false, sLabel)
 		end
 	end
 	return true
