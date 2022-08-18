@@ -182,9 +182,11 @@ function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	else
 		rSource = rActor
 	end
-	rNewEffect = moveModtoMod(rNewEffect) -- Eventually we can get rid of this. Used to replace old format with New
-	rNewEffect = EffectsManagerBCE5E.replaceSaveDC(rNewEffect, rSource)
-	rNewEffect.sName = EffectManager35E.evalEffect(rSource, rNewEffect.sName)
+	if  not rNewEffect.sName:upper():find("FROMAURA;") then
+		rNewEffect = moveModtoMod(rNewEffect) -- Eventually we can get rid of this. Used to replace old format with New
+		rNewEffect = EffectsManagerBCE5E.replaceSaveDC(rNewEffect, rSource)
+		rNewEffect.sName = EffectManager35E.evalEffect(rSource, rNewEffect.sName)
+	end
 	return true
 end
 
