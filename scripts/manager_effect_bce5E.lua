@@ -1274,6 +1274,13 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 	elseif not sConditions and (not rRoll.sConditions or rRoll.sConditions == "") then
 		sConditions = nil
 	end
+	if rRoll.sSaveDesc and rRoll.sSaveDesc:match("%[MAGIC]") then
+		if not sConditions  then
+			sConditions = "magic"
+		else
+			sConditions = ",magic"
+		end
+	end
 	if sConditions then
 		local aConditions =  StringManager.split(sConditions, "," ,true)
 		tTraits = hasAdvDisCondition(rSource, aConditions)
