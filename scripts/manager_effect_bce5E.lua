@@ -200,8 +200,6 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 		local nodeSource = DB.findNode(rNewEffect.sSource)
 		rSource = ActorManager.resolveActor(nodeSource)
 	end
-	rNewEffect = moveModtoMod(rNewEffect) -- Eventually we can get rid of this. Used to replace old format with New
-	rNewEffect = replaceSaveDC(rNewEffect, rSource)
 	-- Save off original so we can match the name. Rebuilding a fully parsed effect
 	-- will nuke spaces after a , and thus EE extension will not match names correctly.
 	-- Consequently, if the name changes at all, AURA hates it and thus it isnt the same effect
@@ -209,6 +207,9 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	-- Effect that has FROMAURA;
 
 	if  not rNewEffect.sName:upper():find("FROMAURA;") then
+		rNewEffect = moveModtoMod(rNewEffect) -- Eventually we can get rid of this. Used to replace old format with New
+		rNewEffect = replaceSaveDC(rNewEffect, rSource)
+
 		local aOriginalComps = EffectManager.parseEffect(rNewEffect.sName);
 
 		rNewEffect.sName = EffectManager5E.evalEffect(rSource, rNewEffect.sName)
