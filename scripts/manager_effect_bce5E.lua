@@ -266,7 +266,11 @@ function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveO
 		return;
 	end
 	local aTags = {"SDC"}
-	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
+	local aDMGTypes = {}
+	table.insert(aDMGTypes, {aDMG = ActionDamage.getDamageTypesFromString(rSource.sConditions), nTotal = 0})
+
+	Debug.chat(aDMGTypes)
+	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, nil, nil, aDMGTypes)
 	for _,tEffect in pairs(tMatch) do
 		nDC = nDC + tEffect.rEffectComp.mod
 	end
@@ -284,7 +288,7 @@ function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveO
 
 	msgOOB.sSourceNode = ActorManager.getCreatureNodeName(rSource);
 	msgOOB.sTargetNode = ActorManager.getCreatureNodeName(rTarget);
-	if rSource ~= nil then
+	if rSource then
 		msgOOB.sConditions = rSource.sConditions;
 	end
 	if bRemoveOnMiss then
