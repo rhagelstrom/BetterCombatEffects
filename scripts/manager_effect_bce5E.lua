@@ -268,8 +268,6 @@ function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveO
 	local aTags = {"SDC"}
 	local aDMGTypes = {}
 	table.insert(aDMGTypes, {aDMG = ActionDamage.getDamageTypesFromString(rSource.sConditions), nTotal = 0})
-
-	Debug.chat(aDMGTypes)
 	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, nil, nil, aDMGTypes)
 	for _,tEffect in pairs(tMatch) do
 		nDC = nDC + tEffect.rEffectComp.mod
