@@ -265,9 +265,13 @@ function customNotifyApplySaveVs(rSource, rTarget, bSecret, sDesc, nDC, bRemoveO
 	if not rTarget then
 		return;
 	end
-	local aTags = {"SDC"}
 	local aDMGTypes = {}
-	table.insert(aDMGTypes, {aDMG = ActionDamage.getDamageTypesFromString(rSource.sConditions), nTotal = 0})
+	if rSource.sConditions then
+		table.insert(aDMGTypes, {aDMG = ActionDamage.getDamageTypesFromString(rSource.sConditions), nTotal = 0})
+	else
+		aDMGTypes = nil
+	end
+	local aTags = {"SDC"}
 	local tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, nil, nil, aDMGTypes)
 	for _,tEffect in pairs(tMatch) do
 		nDC = nDC + tEffect.rEffectComp.mod
@@ -357,7 +361,7 @@ function customPerformAction(draginfo, rActor, rAction, nodePower)
 		rActor.sConditions = sConditions
 	end
 
-	if (draginfo and rActor.sConditions and rActor.sConditions ~= "") then
+	if (draginfo and rActor.sConditions) then
         draginfo.setMetaData("sConditions",rActor.sConditions)
     end
 	return performAction(draginfo, rActor, rAction, nodePower)
@@ -370,7 +374,7 @@ function customDecodeActors(draginfo)
 	draginfo.setSlot(1)
 	local rSource, aTargets = decodeActors(draginfo)
 	local sConditions = draginfo.getMetaData("sConditions");
-    if (rSource and sConditions and sConditions ~= "") then
+    if (rSource and sConditions) then
         rSource.sConditions = sConditions;
     end
 	return rSource, aTargets
@@ -378,11 +382,12 @@ end
 
 -- Needed for draged things
 function customEncodeActors(draginfo, rSource, aTargets)
-	if (draginfo and rSource and rSource.sConditions and rSource.sConditions ~= "") then
+	if (draginfo and rSource and rSource.sConditions) then
         draginfo.setMetaData("sConditions",rSource.sConditions)
     end
 	return	encodeActors(draginfo, rSource, aTargets)
 end
+
 -- setup up metadata for saves vs conditon when PC rolled from character sheet
 function customGetPCPowerAction(nodeAction, sSubRoll)
 	local sConditions = ""
@@ -414,7 +419,7 @@ function customGetPCPowerAction(nodeAction, sSubRoll)
 			sConditions =  sConditions:sub(1, #sConditions -1 )
 		end
 	end
-	if rActor ~= nil then
+	if rActor then
 		rActor.sConditions = sConditions
 	end
 	return rAction, rActor
@@ -424,7 +429,7 @@ end
 function getNPCPowerConditions(nodePower)
 	local sConditions = ""
 	local sValue = DB.getValue(nodePower, "value")
-	if sValue == nil then
+	if not sValue then
 		return sConditions
 	end
 	local rPower = CombatManager2.parseAttackLine(sValue)
