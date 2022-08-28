@@ -1194,10 +1194,8 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
 	return aFinal;
 end
 
-function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
-	local nDamageAdjust
+function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
 	local nReduce = 0
-	local bVulnerable, bResist
 	local aReduce = getReductionType(rSource, rTarget, "DMGR", rDamageOutput)
 
 	for k, v in pairs(rDamageOutput.aDamageTypes) do
@@ -1220,9 +1218,13 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
 	if (nReduce > 0) then
 		table.insert(rDamageOutput.tNotifications, "[REDUCED]");
 	end
-	nDamageAdjust, bVulnerable, bResist = getDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
-	nDamageAdjust = nDamageAdjust - nReduce
-	return nDamageAdjust, bVulnerable, bResist
+	local results = {getDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)}
+	-- By default FG returns the following values with anything else being another extension
+	--1 nDamageAdjust
+	--2 bVulnerable
+	--3 bResist
+	results[1] = results[1] - nReduce
+	return unpack(results)
 end
 
 --5E Only - Check if this effect has concentration and drop all previous effects of concentration from the source
