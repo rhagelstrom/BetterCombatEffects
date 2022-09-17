@@ -479,7 +479,7 @@ function getSaveConditions(sLabel)
 	local tEffectComps = EffectManager.parseEffect(sLabel)
 	for _,sEffectComp in ipairs(tEffectComps) do
 		rEffectComp =  EffectManager5E.parseEffectComp(sEffectComp)
-		if rEffectComp.type == "SAVEADD" or rEffectComp.type == "SAVEADDP" then
+		if rEffectComp.type == "SAVEADD" or rEffectComp.type == "SAVEADDP" or rEffectComp.type == "SAVEDMG" then
 			if  rEffectComp.remainder ~= {} and (StringManager.contains(DataCommon.conditions, rEffectComp.remainder[1]:lower()) or
 						StringManager.contains(DataCommon.dmgtypes, rEffectComp.remainder[1]:lower())) then
 				sRet = sRet .. rEffectComp.remainder[1]:lower() .. ","
@@ -1291,8 +1291,11 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 		end
 	end
 	if sConditions then
+		-- Debug.chat("Conditions: " .. sConditions)
 		local aConditions =  StringManager.split(sConditions, "," ,true)
 		tTraits = hasAdvDisCondition(rSource, aConditions)
+		-- Debug.chat("Traits Disadvantage: ", tTraitsDisadvantage)
+		-- Debug.chat("Traits Advantage: ", tTraitsAdvantage)
 		for _, sDesc in pairs(tTraits) do
 			if  sDesc:match("%[ADV]") and not rRoll.sDesc:match("%[ADV]") then
 				rRoll.sDesc = rRoll.sDesc .. sDesc
