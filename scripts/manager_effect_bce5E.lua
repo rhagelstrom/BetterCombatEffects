@@ -573,7 +573,7 @@ function addTraitstoConditionsTables(rActor)
 							local sConditions = ""
 							while aWords[k] do
 								if StringManager.isWord(aWords[k], DataCommon.conditions) or
-									StringManager.isWord(aWords[k], DataCommon.dmgtypes)then
+									(StringManager.isWord(aWords[k], DataCommon.dmgtypes) and (aWords[k] ~= "magic")) then
 									sConditions = sConditions .. aWords[k] .. ","
 								end
 								k=k+1
@@ -1291,11 +1291,8 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 		end
 	end
 	if sConditions then
-		-- Debug.chat("Conditions: " .. sConditions)
 		local aConditions =  StringManager.split(sConditions, "," ,true)
 		tTraits = hasAdvDisCondition(rSource, aConditions)
-		-- Debug.chat("Traits Disadvantage: ", tTraitsDisadvantage)
-		-- Debug.chat("Traits Advantage: ", tTraitsAdvantage)
 		for _, sDesc in pairs(tTraits) do
 			if  sDesc:match("%[ADV]") and not rRoll.sDesc:match("%[ADV]") then
 				rRoll.sDesc = rRoll.sDesc .. sDesc
