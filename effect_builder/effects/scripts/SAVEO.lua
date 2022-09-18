@@ -1,11 +1,12 @@
 function createEffectString()
-    local effectString = parentcontrol.window.effect.getStringValue() .. cycler_turn_add.getStringValue().. ": " .. stat_value.getStringValue() .. " "
+    local effectString = parentcontrol.window.effect.getStringValue() .. cycler_turn_add.getStringValue().. ": "
     if effect_savesdc.getValue() > 0 then
         effectString = effectString .. " [SDC]"
     else
         effectString = effectString .. number_value.getStringValue()
     end
 
+    effectString = effectString .. " " .. stat_value.getStringValue()
     if effect_savemagic.getValue() > 0 then
         effectString = effectString .. " (M)"
     end
