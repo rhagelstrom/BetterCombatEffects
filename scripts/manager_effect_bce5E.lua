@@ -980,7 +980,8 @@ end
 -- rSource is the source of the actor making the roll, hence it is the target of whatever is causing the same
 -- rTarget is null for some reason.
 function onSaveRollHandler5E(rSource, rTarget, rRoll)
-	if  not rRoll.sSaveDesc or not rRoll.sSaveDesc:match("%[BCE]") then
+	-- Something is wrong if rRoll.sSource is null
+	if  not rRoll.sSaveDesc or not rRoll.sSaveDesc:match("%[BCE]") or not rRoll.sSource then
 		return onSave(rSource, rTarget, rRoll)
 	end
 	local nodeTarget =  DB.findNode(rRoll.sSource)
