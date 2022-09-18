@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.26
-**Updated::** 08/28/22
+**Current Version:** 3.27
+**Updated::** 09/18/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -84,29 +84,29 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |STURNRS|(-)| | REMOVE effect on the START of the Actor’s turn who applied the effect if current duration is 1|
 |STURNRE|(-)| | REMOVE effect on the END of the Actor’s turn who applied the effect if current duration is 1|
 
-**(D)** = Dice and numbers supported for value attribute  
-**(N)** = Only numbers supported for value attribute  
-**(-)** = Neither number nor dice supported for value attribute  
-**(T)** = Effects can be targeted to only apply to modifiers against certain opponents  
-**[range]** = melee, ranged  
-**[damage type]** = acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, thunder, adamantine, bludgeoning, cold-forged iron, magic, piercing, silver, slashing  
-**[stat]** = strength, constitution, dexterity, intelligence, wisdom, charisma  
-**[ability]** = STR, CON, DEX, INT, WIS, CHA, (FORTITUDE, REFLEX, WILL) - 3.5E  
-**[skill]** = any skill name  
-**[effect]** = Any effect label in the custom effect list. Effect label is defined as anything before the first ; i.e. My Custom; ATKDS; "My Custom" would be the effect label  
-**[condition]** = Any condition as noted above except exhaustion. Note [condition] must be all lower case  
-**[SDC]** = [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF],  
-**(ADV)** advantage on ongoing save  
-**(DIS)** disadvantage on ongoing save  
-**(R)** will remove the save effect on a successful save  
-**(D)** will disable the save effect on a successful save  
-**(H)** will deal half damage on a successful ongoing save  
-**(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save  
-**(F)** will invert the roll. SAVEDMG, (R), (D), (H) will be performed on a failed save rather than successful one  
-__*__ = Multiple entries of this descriptor type allowed  
-##### The following can be added to any effect:  
-**(DE)** will cause the effect to be disabled when added to the CT  
-**(E)** If the source of the effect drops to zero hit points, this effect will be removed  
+**(D)** = Dice and numbers supported for value attribute
+**(N)** = Only numbers supported for value attribute
+**(-)** = Neither number nor dice supported for value attribute
+**(T)** = Effects can be targeted to only apply to modifiers against certain opponents
+**[range]** = melee, ranged
+**[damage type]** = acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, thunder, adamantine, bludgeoning, cold-forged iron, magic, piercing, silver, slashing
+**[stat]** = strength, constitution, dexterity, intelligence, wisdom, charisma
+**[ability]** = STR, CON, DEX, INT, WIS, CHA, (FORTITUDE, REFLEX, WILL) - 3.5E
+**[skill]** = any skill name
+**[effect]** = Any effect label in the custom effect list. Effect label is defined as anything before the first ; i.e. My Custom; ATKDS; "My Custom" would be the effect label
+**[condition]** = Any condition as noted above except exhaustion. Note [condition] must be all lower case
+**[SDC]** = [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF],
+**(ADV)** advantage on ongoing save
+**(DIS)** disadvantage on ongoing save
+**(R)** will remove the save effect on a successful save
+**(D)** will disable the save effect on a successful save
+**(H)** will deal half damage on a successful ongoing save
+**(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save
+**(F)** will invert the roll. SAVEDMG, (R), (D), (H) will be performed on a failed save rather than successful one
+__*__ = Multiple entries of this descriptor type allowed
+##### The following can be added to any effect:
+**(DE)** will cause the effect to be disabled when added to the CT
+**(E)** If the source of the effect drops to zero hit points, this effect will be removed
 
 ## Examples
 
