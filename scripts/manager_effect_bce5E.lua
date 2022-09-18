@@ -1614,6 +1614,9 @@ function customParseEffects(sPowerName, aWords)
 				if not aSave  then
 					break
 				end
+				if not aSave.savemod then
+					aSave.savemod = 0
+				end
 				local j = i+3
 				local bStartTurn = false
 				local bEndSuccess = false
@@ -1635,8 +1638,8 @@ function customParseEffects(sPowerName, aWords)
 					sClause = "SAVEE:"
 				end
 
+				sClause  = sClause .. " " .. tostring(aSave.savemod)
 				sClause  = sClause .. " " .. DataCommon.ability_ltos[aSave.save]
-				sClause  = sClause .. " " .. aSave.savemod
 
 				if bEndSuccess == true then
 					sClause = sClause .. " (R)"
