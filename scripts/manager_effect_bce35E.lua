@@ -40,7 +40,7 @@ function onInit()
 		ActionSave.onSave = onSaveRollHandler35E
 		EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
 
-		bAdvancedEffects = EffectsManagerBCE.hasExtension("FG-PFRPG-Advanced-Effects")
+		bAdvancedEffects = EffectsManagerBCE.hasExtension("Feature: Advanced Effects")
 		if bAdvancedEffects then
 			performMultiAction = ActionsManager.performMultiAction
 			ActionsManager.performMultiAction = customPerformMultiAction

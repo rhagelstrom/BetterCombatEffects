@@ -26,6 +26,7 @@ local performSaveVsRoll = nil
 local addCustomNPC = nil
 local addCustomPC = nil
 -- end save vs condition
+local applyModifiers = nil
 
 local tTraitsAdvantage = {}
 local tTraitsDisadvantage = {}
@@ -35,7 +36,10 @@ local resetHealth = nil
 local onSave = nil
 local rest = nil
 local bExpandedNPC = nil
+local bFlanking = nil
 local bUntrueEffects = nil
+
+local checkFlanking = nil
 function onInit()
 
 	if User.getRulesetName() == "5E" then
@@ -87,6 +91,7 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("ATKD",  EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("ATKA",  EffectsManagerBCE.aBCEActivateOptionsAE)
 		EffectsManagerBCE.registerBCETag("ATKADD",  EffectsManagerBCE.aBCEActivateOptionsAE)
+		EffectsManagerBCE.registerBCETag("ELUSIVE",  EffectsManagerBCE.aBCEDefaultOptions)
 
 		EffectsManagerBCE.registerBCETag("ADVCOND",  EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("DISCOND",  EffectsManagerBCE.aBCEDefaultOptions)
@@ -144,6 +149,9 @@ function onInit()
 		onAttack = ActionAttack.onAttack
 		ActionAttack.onAttack = customOnAttack
 
+		applyModifiers =	ActionsManager.applyModifiers
+		ActionsManager.applyModifiers = customApplyModifiers
+
 		onSave = ActionSave.onSave
 		ActionSave.onSave = onSaveRollHandler5E
 		EffectsManagerBCE.setCustomProcessTurnStart(processEffectTurnStart5E)
@@ -159,11 +167,18 @@ function onInit()
 
 		bExpandedNPC = EffectsManagerBCE.hasExtension( "5E - Expanded NPCs")
 		initTraitTables()
-		bUntrueEffects = EffectsManagerBCE.hasExtension("IF_NOT_untrue_effects_berwind")
-		bAdvancedEffects = EffectsManagerBCE.hasExtension("AdvancedEffects")
+		bUntrueEffects = EffectsManagerBCE.hasExtension("Feature: Untrue Effects")
+		bAdvancedEffects = EffectsManagerBCE.hasExtension("5E - Advanced Effects")
+		bFlanking = EffectsManagerBCE.hasExtension("5E - Automatic Flanking and Range")
+
 		if bAdvancedEffects then
 		 	performMultiAction = ActionsManager.performMultiAction
 		 	ActionsManager.performMultiAction = customPerformMultiAction
+		end
+		if bFlanking then
+			EffectsManagerBCE.registerBCETag("UNFLANKABLE", EffectsManagerBCE.aBCEDefaultOptions)
+			checkFlanking = ActionAttackAFAR.checkFlanking
+			ActionAttackAFAR.checkFlanking = customCheckFlanking
 		end
 	end
 end
@@ -192,9 +207,12 @@ function onClose()
 		ActionPower.notifyApplySaveVs = notifyApplySaveVs
 		ActionSave.performVsRoll = performVsRoll
 		ActionPower.performSaveVsRoll = performSaveVsRoll
-		ActionSave.modSave = modSave
+		ActionsManager.applyModifiers = applyModifiers
 		if bAdvancedEffects then
 		 	ActionsManager.performMultiAction = performMultiAction
+		end
+		if bFlanking then
+			ActionAttackAFAR.checkFlanking = checkFlanking
 		end
 	end
 end
@@ -659,6 +677,19 @@ function customRest(nodeActor, bLong, bMilestone)
 	end
 end
 
+function customApplyModifiers(rSource, rTarget, rRoll, bSkipModStack)
+	local results = {applyModifiers(rSource, rTarget, rRoll, bSkipModStack)}
+	if rRoll.sType == "attack" and rRoll.sDesc:match("%[ADV]") then
+		local aTags = {"ELUSIVE"}
+		local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+		if next(tMatch)	then
+			rRoll.sDesc = rRoll.sDesc:gsub("%[ADV]", "%[ELUSIVE]")
+			rRoll.aDice[2] = nil
+		end
+	end
+	return unpack(results)
+end
+
 function customOnAttack(rSource, rTarget, rRoll)
 	local tMatch
 	local aTags = {"ATKD","ATKA","ATKR","ATKADD"}
@@ -684,8 +715,6 @@ function customOnAttack(rSource, rTarget, rRoll)
 					EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect, tEffect.rEffectComp.remainder[1])
 				end
 			end
-
-			--EffectsManagerBCE.notifyAddEffect(tEffect.nodeCT, rEffect, sLabel)
 		end
 	end
 	return onAttack(rSource, rTarget, rRoll)
@@ -1523,6 +1552,17 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 	end  -- END EFFECT LOOP
 	-- RESULTS
 	return results;
+end
+
+function customCheckFlanking(rSource, rTarget)
+	local aTags = {"UNFLANKABLE"}
+
+	local tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget)
+	if next(tMatch) then
+		return false
+	else
+		return checkFlanking(rSource, rTarget)
+	end
 end
 
 function customParseEffects(sPowerName, aWords)

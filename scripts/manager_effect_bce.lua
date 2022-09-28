@@ -77,11 +77,11 @@ function onInit()
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect)
 	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEADD, handleAddEffect)
 
-	for index, name in pairs(Extension.getExtensions()) do
-		extensions[name] = index
+	for _, name in pairs(Extension.getExtensions()) do
+		extensions[Extension.getExtensionInfo(name).name] = name
    	end
-	bUntrueEffects = hasExtension("IF_NOT_untrue_effects_berwind")
-	if hasExtension("AdvancedEffects") or hasExtension("FG-PFRPG-Advanced-Effects") then
+	bUntrueEffects = hasExtension("Feature: Untrue Effects")
+	if hasExtension("5E - Advanced Effects") or hasExtension("Feature: Advanced Effects") then
 		bAdvancedEffects =  true
 	end
 end

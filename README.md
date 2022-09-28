@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.27
-**Updated::** 09/18/22
+**Current Version:** 3.28
+**Updated::** 09/28/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -40,8 +40,10 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |SDC|(N)| [damage type]__*__,all|(N) will be added (or subtracted) from the Actors spell save DC
 |DUSE|(-)||Disable effect when a tag is used (matched)|
 |DUR|(D)||Sets the duration of the effect when the effect is applied|
+|ELUSIVE|(-)| |No attack roll has advantage against this Actor|
 |EFFINIT|(D)| |Add an effect with initiative number|
 |IMMUNE|-|CUSTOM([effect]) |Immune to an effect where [effect] is an effect in the custom effect window|
+|UNFLANKABLE|(-)| |Attack rolls do not gain flanking bonuses agaist this Actor - Requires Flanking and Range extension|
 | **Ongoing Damage** | | | |
 |DMGOE|(D)|[damage type]* |Apply ongoing damage at the END of the Actor's turn|
 |SDMGOS|(D)|[damage type]* |Apply ongoing damage at the START of the Actor's turn who applied the effect|
@@ -180,3 +182,5 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * (DE) - Will disable the effect on use
   * SDC - Can be written as [SDC] or (SDC)
   * (E) - Will remove the effect when the source of the effect drops to 0 HP
+  * ELUSIVE - No attack roll has advantage against this Actor
+  * UNFLANKABLE - Attack rolls do not gain flanking bonuses agaist this Actor - Requires Flanking and Range extension
