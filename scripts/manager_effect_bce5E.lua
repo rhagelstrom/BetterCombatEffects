@@ -211,11 +211,15 @@ end
 ---------------------Save Vs Condition ----------------------------
 function customPerformSaveVsRoll(draginfo, rActor, rAction)
 	local rRoll = ActionPower.getSaveVsRoll(rActor, rAction)
-	if rAction.sConditions == nil then
-		if rAction.sType == "powersave" and rAction.label ~= nil then
+
+	if rAction.sType == "powersave" and rAction.label ~= nil then
+		if rAction.sConditions == nil then
 			rActor.sConditions = searchPowerGetConditions(rActor, rAction.label)
+		else
+			rActor.sConditions = rActor.sConditions .. "," .. searchPowerGetConditions(rActor, rAction.label)
 		end
 	end
+
 	if (draginfo and rActor.sConditions and rActor.sConditions ~= "") then
         draginfo.setMetaData("sConditions",rActor.sConditions)
     end
@@ -1288,7 +1292,7 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 		if not sConditions  then
 			sConditions = "magic"
 		else
-			sConditions = ",magic"
+			sConditions = sConditions ..  ",magic"
 		end
 	end
 	if sConditions then
