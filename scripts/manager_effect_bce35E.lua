@@ -69,7 +69,7 @@ end
 function customEvalAction(rActor, nodePower, rAction)
 	if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
 		local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
-		if aPowerGroup and aPowerGroup.sStat and DataCommon.ability_ltos[aPowerGroup.sStat] then
+		if aPowerGroup and aPowerGroup.sStat  then
 			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager35E.getAbilityBonus(rActor, aPowerGroup.sStat)
 			if aPowerGroup.nSaveDCProf == 1 then
 				nDC = nDC + ActorManager35E.getAbilityBonus(rActor, "prf")
