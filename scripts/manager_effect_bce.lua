@@ -330,6 +330,15 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 	if aTags == {} or not rActor then
 		return {}
 	end
+	local aRangeFilter = {}
+	if aDMGTypes then
+		for i,v in ipairs(aDMGTypes) do
+			if StringManager.contains(DataCommon.rangetypes, v) then
+				table.insert(aRangeFilter, v);
+				table.remove(aDMGTypes,i)
+			end
+		end
+	end
 
 	local rEffectComp
 	local aOptions
@@ -413,7 +422,7 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 								break
 							else
 								-- Do damage and range filter
-								if aDMGTypes then
+								if aDMGTypes and next(aDMGTypes) then
 									bDiscard = true
 									for _,sRemainder in ipairs(rEffectComp.remainder) do
 										if sRemainder == "all" then
@@ -426,6 +435,15 @@ function getEffects(rActor, aTags, rTarget, rSourceEffect, nodeEffect, aDMGTypes
 											end
 										end
 										if bDiscard == false then
+											break
+										end
+									end
+								end
+								if not bDiscard and next(aRangeFilter) then
+									bDiscard = true
+									for _,sRemainder in ipairs(rEffectComp.remainder) do
+										if StringManager.contains(aRangeFilter, sRemainder) then
+											bDiscard = false
 											break
 										end
 									end

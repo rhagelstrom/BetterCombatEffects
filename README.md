@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.28
-**Updated::** 09/28/22
+**Current Version:** 3.29
+**Updated::** 11/15/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -23,6 +23,8 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |ATKADD|(-)|[effect] or [condition] | Add effect or condition when the Actor takes the attack action|
 |ATKD|(-)| | DEACTIVATE effect when the Actor takes the attack action|
 |ATKR|(-)| | REMOVE effect when the Actor takes the attack action|
+|TATKHDMGS|(D)|[damage type]__*__,all,[Range]__*__| Target damages source on successful hit|
+|TATKMDMGS|(D)|[damage type]__*__,all,[Range]__*__| Target damages source on miss|
 | **Damage** | | | |
 |DMGAT|(-)|[damage type]__*__,all,[Range]__*__| ACTIVATE effect when the Actor takes damage|
 |DMGDT|(-)|[damage type]__*__,all,[Range]__*__| DEACTIVATE effect when the Actor takes damage|
@@ -114,6 +116,7 @@ __*__ = Multiple entries of this descriptor type allowed
 
 |Power [Source]| Effect Code | Duration/Target/Expend|Notes|
 |---|---|---|---|
+| Armor of Agathys [Spell] |Armor of Agathys; TATKHDMGS: 5 cold,melee| Targeting=Self| |
 | Belt of Frost Giant Strength [Item] |Belt of Frost Giant Strength; STR: 19-X| Targeting=Self| |
 | Cloak of Displacement [Item], Displacer Beast [NPC]| Displacement; GRANTDISATK; TURNAS; DMGDT: all|Targeting=Self| |
 | Deflect Missiles [Class - Monk] |Deflect Missiles; DMGR: 1d10 [MONK],[DEX],ranged,bludgeoning,piercing|Targeting=Self||

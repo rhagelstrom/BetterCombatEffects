@@ -7,7 +7,7 @@ local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
-
+local onPostAttackResolve = nil
 --local bAutomaticShieldMaster = nil
 --local bMadNomadCharSheetEffectDisplay = nil
 local modSave = nil
@@ -91,6 +91,9 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("ATKD",  EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("ATKA",  EffectsManagerBCE.aBCEActivateOptionsAE)
 		EffectsManagerBCE.registerBCETag("ATKADD",  EffectsManagerBCE.aBCEActivateOptionsAE)
+		EffectsManagerBCE.registerBCETag("TATKHDMGS",  EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("TATKMDMGS",  EffectsManagerBCE.aBCEDefaultOptionsAE)
+
 		EffectsManagerBCE.registerBCETag("ELUSIVE",  EffectsManagerBCE.aBCEDefaultOptions)
 
 		EffectsManagerBCE.registerBCETag("ADVCOND",  EffectsManagerBCE.aBCEDefaultOptions)
@@ -148,6 +151,8 @@ function onInit()
 
 		onAttack = ActionAttack.onAttack
 		ActionAttack.onAttack = customOnAttack
+		onPostAttackResolve =ActionAttack.onPostAttackResolve
+		ActionAttack.onPostAttackResolve = customOnPostAttackResolve
 
 		applyModifiers =	ActionsManager.applyModifiers
 		ActionsManager.applyModifiers = customApplyModifiers
@@ -208,6 +213,9 @@ function onClose()
 		ActionSave.performVsRoll = performVsRoll
 		ActionPower.performSaveVsRoll = performSaveVsRoll
 		ActionsManager.applyModifiers = applyModifiers
+
+		ActionAttack.onPostAttackResolve = onPostAttackResolve
+
 		if bAdvancedEffects then
 		 	ActionsManager.performMultiAction = performMultiAction
 		end
@@ -719,6 +727,33 @@ function customOnAttack(rSource, rTarget, rRoll)
 	end
 	return onAttack(rSource, rTarget, rRoll)
 end
+
+function customOnPostAttackResolve(rSource, rTarget, rRoll, rMessage)
+
+	local tMatch
+	local aTags = {}
+	local aRange =  {}
+	if rRoll.sRange == "M" then
+		table.insert(aRange, "melee")
+	elseif rRoll.sRange == "R" then
+		table.insert(aRange, "ranged")
+	end
+	if rRoll.sResult == "hit" or rRoll.sResult == "crit" then
+		table.insert(aTags,"TATKHDMGS")
+	elseif rRoll.sResult == "miss" or rRoll.sResult == "fumble" then
+		table.insert(aTags,"TATKMDMGS")
+	end
+
+	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aRange)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "TATKHDMGS" or tEffect.sTag == "TATKMDMGS" then
+			EffectsManagerBCEDND.applyOngoingDamage(rTarget, rSource, tEffect.rEffectComp, false, "Return Damage")
+		end
+	end
+	return onPostAttackResolve(rSource, rTarget, rRoll, rMessage)
+end
+
+
 
 -- For NPC
 function customResetHealth (nodeCT, bLong)
