@@ -980,16 +980,41 @@ end
 -- Replace SDC when applied from a power
 function customEvalAction(rActor, nodePower, rAction)
 	if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
-		local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
-		if aPowerGroup and aPowerGroup.sSaveDCStat  then
-			local nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sSaveDCStat)
-			if aPowerGroup.nSaveDCProf == 1 then
+		local aNodeActionChild =  DB.getChildren(nodePower.getChild("actions"))
+		local rSave = {saveMod = 0, saveBase = "", saveStat = "", saveProf = 0}
+		local nDC = 0
+		for _,nodeChild in pairs(aNodeActionChild) do
+			local sSaveType = DB.getValue(nodeChild, "savetype", "");
+			if sSaveType ~= "" then
+				rSave.saveMod = DB.getValue(nodeChild, "savedcmod", 0);
+				rSave.saveBase = DB.getValue(nodeChild, "savedcbase", "group");
+				if rSave.saveBase == "ability" then
+					rSave.saveStat = DB.getValue(nodeChild, "savedcstat", "");
+					rSave.saveProf = DB.getValue(nodeChild, "savedcprof", 1);
+				end
+				break
+			end
+		end
+		if rSave.saveBase == "group" then
+			local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower)
+			if aPowerGroup and aPowerGroup.sSaveDCStat  then
+				nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sSaveDCStat) + rSave.saveMod
+				if aPowerGroup.nSaveDCProf == 1 then
+					nDC = nDC + ActorManager5E.getAbilityBonus(rActor, "prf")
+				end
+			end
+		elseif rSave.saveBase == "fixed" then
+			nDC = rSave.saveMod
+		elseif rSave.saveBase == "ability" then
+			nDC = 8 + rSave.saveMod + ActorManager5E.getAbilityBonus(rActor, rSave.savestat)
+			if rSave.saveProf == 1 then
 				nDC = nDC + ActorManager5E.getAbilityBonus(rActor, "prf")
 			end
-			rAction.sName =  rAction.sName:gsub("%[SDC]", tostring(nDC))
-			rAction.sName =  rAction.sName:gsub("%(SDC%)", tostring(nDC))
 		end
+		rAction.sName =  rAction.sName:gsub("%[SDC]", tostring(nDC))
+		rAction.sName =  rAction.sName:gsub("%(SDC%)", tostring(nDC))
 	end
+
 	evalAction(rActor, nodePower, rAction)
 end
 
