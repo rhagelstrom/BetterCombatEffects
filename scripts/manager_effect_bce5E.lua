@@ -2,7 +2,7 @@
 --	  	Copyright © 2021
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
-
+local onAttack = nil
 local getDamageAdjust = nil
 local parseEffects = nil
 local evalAction = nil
@@ -41,7 +41,6 @@ local bUntrueEffects = nil
 
 local checkFlanking = nil
 function onInit()
-
 	if User.getRulesetName() == "5E" then
 		if Session.IsHost then
 			OptionsManager.registerOption2("ALLOW_DUPLICATE_EFFECT", false, "option_Better_Combat_Effects_Gold",
@@ -213,7 +212,6 @@ function onClose()
 		ActionSave.performVsRoll = performVsRoll
 		ActionPower.performSaveVsRoll = performSaveVsRoll
 		ActionsManager.applyModifiers = applyModifiers
-
 		ActionAttack.onPostAttackResolve = onPostAttackResolve
 
 		if bAdvancedEffects then

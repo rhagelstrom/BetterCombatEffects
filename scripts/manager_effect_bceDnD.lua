@@ -4,8 +4,10 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 
 local RulesetActorManager = nil
+local RulesetEffectManager =  nil
 local applyDamage = nil
 local messageDamage = nil
+local checkConditional = nil
 
 local convertStringToDice = nil
 local fProcessEffectOnDamage = nil
@@ -539,6 +541,295 @@ function getTempHPAndWounds(rTarget)
 	return nTempHP, nWounds, nTotalHP
 end
 
+-----Conditional Operators--------
+function customCheckConditional(rActor, nodeEffect, aConditions, rTarget, aIgnore)
+	local bReturn = checkConditional(rActor, nodeEffect, aConditions, rTarget, aIgnore)
+
+	if bReturn then
+		for _,v in ipairs(aConditions) do
+			local sLower = v:lower();
+			local sTempHP = (sLower == "temphp" or sLower:match("^temphp%s*%(([^)]+)%)$"));
+			local sRange =  sLower:match("^range%s*%(([^)]+)%)$");
+			local sWounds = sLower:match("^wounds%s*%(([^)]+)%)$");
+
+			if sTempHP then
+				if not EffectsManagerBCEDND.hasTempHP(rActor, sTempHP) then
+					bReturn = false;
+					break;
+				end
+			end
+			if sLower == "healthy" or sLower == "light" or sLower == "moderate" or sLower == "heavy" or sLower == "critical" then
+				if not EffectsManagerBCEDND.isWounded(rActor, sLower) then
+					bReturn = false;
+					break;
+				end
+			end
+			if sLower == "dying" then
+				if not ActorHealthManager.isDyingOrDead(rActor) then
+					bReturn = false;
+					break;
+				end
+			end
+			if sWounds then
+				if not EffectsManagerBCEDND.isWoundsPercent(rActor, sWounds) then
+					bReturn = false;
+					break;
+				end
+			end
+			if sRange then
+				if not EffectsManagerBCEDND.isRange(rActor, sRange, rTarget) then
+					bReturn = false;
+					break;
+				end
+			end
+		end
+	end
+	return bReturn;
+end
+
+function hasTempHP(rActor, sTemp)
+	local bReturn = false;
+	local nTempHP = 0;
+	local nThreshold = nil
+	local sOperator = ""
+	local sThreshold = ""
+	if sTemp ~= true and sTemp ~= "temphp" and sTemp ~= "" then
+		sOperator, sThreshold = EffectsManagerBCEDND.parseOperator(sTemp);
+		nThreshold = tonumber(sThreshold);
+	end
+	local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor);
+	if sNodeType == "pc" then
+		nTempHP = DB.getValue(nodeActor, "hp.temporary", 0);
+	else
+		nTempHP = DB.getValue(nodeActor, "hptemp", 0);
+	end
+	if nThreshold and sOperator ~= "" then
+		if sOperator == ">=" and nTempHP >= nThreshold then
+			bReturn = true;
+		elseif sOperator == ">=" and nTempHP >= nThreshold then
+			bReturn = true;
+		elseif sOperator == ">" and nTempHP > nThreshold then
+			bReturn = true;
+		elseif sOperator == "<" and nTempHP < nThreshold then
+			bReturn = true;
+		elseif sOperator == "=" and nTempHP == nThreshold then
+			bReturn = true;
+		end
+	elseif not nThreshold and nTempHP > 0 then
+		bReturn = true
+	end
+	return  bReturn;
+end
+
+function isWounded(rActor, sOperator)
+	local bReturn = false;
+	local nPercentWounded = ActorHealthManager.getWoundPercent(rActor);
+	if sOperator == "healthy" and nPercentWounded == 0 then
+		bReturn = true;
+	elseif sOperator == "light" and nPercentWounded > 0 and nPercentWounded < .25 then
+		bReturn = true;
+	elseif sOperator == "moderate" and nPercentWounded >= .25 and nPercentWounded < .50 then
+		bReturn = true;
+	elseif sOperator == "heavy" and nPercentWounded >= .50 and nPercentWounded < .75 then
+		bReturn = true;
+	elseif sOperator == "critical" and nPercentWounded > .75 and nPercentWounded < 1 then
+		bReturn = true;
+	end
+	return bReturn;
+end
+
+function isWoundsPercent(rActor, sClause)
+	local bReturn = false;
+	if sClause and sClause ~= "" then
+		local sOperator, sPercent = EffectsManagerBCEDND.parseOperator(sClause);
+		local nThreshold = tonumber(sPercent);
+		if nThreshold and sOperator ~= "" then
+			local nPercentWounded = ActorHealthManager.getWoundPercent(rActor);
+			if sOperator == ">=" and nPercentWounded >= nThreshold then
+				bReturn = true;
+			elseif sOperator == ">=" and nPercentWounded >= nThreshold then
+				bReturn = true;
+			elseif sOperator == ">" and nPercentWounded > nThreshold then
+				bReturn = true;
+			elseif sOperator == "<" and nPercentWounded < nThreshold then
+				bReturn = true;
+			elseif sOperator == "=" and nPercentWounded == nThreshold then
+				bReturn = true;
+			end
+		end
+	end
+	return bReturn;
+end
+
+function isRange(rActor, sRange, rActorIgnore)
+	local bReturn = false;
+	local nodeCTActorIgnore = nil;
+	local tRange = EffectsManagerBCEDND.parseRange(sRange);
+	local nodeCTActor = ActorManager.getCTNode(rActor);
+	local tokenActor = CombatManager.getTokenFromCT(nodeCTActor);
+	if rActorIgnore then
+		nodeCTActorIgnore= ActorManager.getCTNode(rActorIgnore);
+		tRange.sFaction =  CombatManager.getFactionFromCT(nodeCTActorIgnore);
+	else
+		tRange.sFaction =  CombatManager.getFactionFromCT(nodeCTActor);
+	end
+	if tRange.nRange and tokenActor then
+		local tCombatNodes = CombatManager.getCombatantNodes();
+		for _, nodeCT in pairs(tCombatNodes) do
+			if (nodeCTActor ~= nodeCT and nodeCTActorIgnore ~= nodeCT) then
+				if EffectsManagerBCEDND.filterRange(nodeCT, tRange) then
+					local tokenCT = CombatManager.getTokenFromCT(nodeCT);
+					if tokenCT and (tRange.nRange >= Token.getDistanceBetween(tokenActor, tokenCT)) then
+						local rActorCT = ActorManager.resolveActor(nodeCT);
+						-- check in order of likeliness (subjective)
+						if not (EffectManager.hasCondition(rActorCT, "Stunned" or EffectManager.hasCondition(rActorCT, "Unconscious"))
+								or EffectManager.hasCondition(rActorCT, "Paralyzed") or EffectManager.hasCondition(rActorCT, "Incapacitated")
+								or EffectManager.hasCondition(rActorCT, "Petrified")) then
+							bReturn = true;
+							break;
+						end
+					end
+				end
+			end
+		end
+	end
+	return bReturn;
+end
+
+function parseOperator(sInput)
+	local sOperator = "";
+	local aClause = StringManager.splitByPattern(sInput, "%s*,%s*", true);
+	for i, sWord in pairs(aClause) do
+		if sWord == ">" or sWord == "<" or sWord == "<=" or sWord == ">=" or sWord == "=" then
+			sOperator = sWord;
+			table.remove(aClause, i);
+			break;
+		end
+	end
+	return sOperator, StringManager.combine(",",unpack(aClause));
+end
+
+function parseRange(sRange)
+	local tRange = {nRange = nil, aFaction = {}, aNamed = {}, aType = {}};
+	local aRange = StringManager.splitByPattern(sRange, "%s*,%s*", true);
+
+	for _, sWord in pairs(aRange) do
+		local sCleanWord = sWord;
+		if StringManager.startsWith(sWord, "!") then
+			sCleanWord = sWord:sub(2);
+		end
+		local nRange = tonumber(sWord);
+		if nRange then
+			tRange.nRange = nRange;
+		elseif sCleanWord == "friend" or sCleanWord == "foe" or sCleanWord == "neutral" or sCleanWord == "ally" or sCleanWord == "enemy" then
+			table.insert(tRange.aFaction, sWord);
+		elseif StringManager.contains(DataCommon.creaturetype, sCleanWord) or StringManager.contains(DataCommon.creaturesubtype, sCleanWord) then
+			table.insert(tRange.aType, sWord);
+		-- elseif StringManager.contains(DataCommon.creaturesubtype, sCleanWord) then
+		-- 	table.insert(tRange.aSubType, sWord);
+		else
+			table.insert(tRange.aNamed, sWord);
+		end
+	end
+	return tRange;
+end
+
+function filterRange(nodeCT, tRange)
+	if next(tRange.aFaction) and not EffectsManagerBCEDND.filterFaction(nodeCT, tRange) then
+		return false;
+	end
+	if next(tRange.aNamed) and not EffectsManagerBCEDND.filterCreatureName(nodeCT, tRange) then
+		return false;
+	end
+	if next(tRange.aType) and not EffectsManagerBCEDND.filterCreatureType(nodeCT, tRange) then
+		return false;
+	end
+	return true;
+end
+
+function filterFaction(nodeCT, tRange)
+	local bReturn = false;
+	local sFaction = CombatManager.getFactionFromCT(nodeCT);
+	for _, sFactionFilter in pairs(tRange.aFaction) do
+		local bInvert = false;
+		if StringManager.startsWith(sFactionFilter, "!") then
+			sFactionFilter = sFactionFilter:sub(2);
+			bInvert = true;
+		end
+		if bInvert then
+			if sFactionFilter == "enemy" and sFaction == tRange.sFaction then
+				bReturn = true;
+				break;
+			elseif sFactionFilter == "ally" and ((sFaction == "foe" and tRange.sFaction == "friend") or (sFaction == "friend" and tRange.sFaction == "foe")) then
+				bReturn = true;
+				break;
+			elseif (sFactionFilter ~= "ally" and sFactionFilter ~= "enemy") and sFaction ~= sFactionFilter  then
+				bReturn = true;
+				break;
+			end
+		else
+			if sFactionFilter == "ally" and sFaction == tRange.sFaction then
+				bReturn = true;
+				break;
+			elseif sFactionFilter == "enemy" and ((sFaction == "foe" and tRange.sFaction == "friend") or (sFaction == "friend" and tRange.sFaction == "foe")) then
+				bReturn = true;
+				break;
+			elseif (sFaction == sFactionFilter) then
+				bReturn = true;
+				break;
+			end
+		end
+	end
+	return bReturn;
+end
+
+function filterCreatureName(nodeCT, tRange)
+	local bReturn = false;
+	if next(tRange.aNamed) then
+		local rActorCT = ActorManager.resolveActor(nodeCT);
+		local sNameLower = rActorCT.sName:lower();
+		for _, sName in pairs(tRange.aNamed) do
+			local bInvert = false;
+			if StringManager.startsWith(sName, "!") then
+				sName = sName:sub(2);
+				bInvert = true;
+			end
+			if bInvert and  not sNameLower:match(sName) then
+				bReturn = true;
+				break;
+			elseif not bInvert and sNameLower:match(sName) then
+			 	bReturn = true;
+			 	break;
+			end
+		end
+	end
+	return bReturn;
+end
+
+function filterCreatureType(nodeCT, tRange)
+	local bReturn = false;
+	if next(tRange.aType) then
+		local rActorCT = ActorManager.resolveActor(nodeCT);
+		for _, sType in pairs(tRange.aType) do
+			local bInvert = false;
+			if StringManager.startsWith(sType, "!") then
+				sType = sType:sub(2);
+				bInvert = true;
+			end
+			if bInvert and not ActorCommonManager.isCreatureTypeDnD(rActorCT, sType) then
+				bReturn = true;
+				break;
+			elseif not bInvert and ActorCommonManager.isCreatureTypeDnD(rActorCT, sType) then
+			 	bReturn = true;
+			 	break;
+			end
+		end
+	end
+	return bReturn;
+end
+
+-- End Conditional Operators
+
 function onInit()
 	if  User.getRulesetName() == "5E"  or
 		User.getRulesetName() == "4E"  or
@@ -554,10 +845,13 @@ function onInit()
 		end
 
 		if User.getRulesetName() == "5E" then
+			RulesetEffectManager =  EffectManager5E
 			RulesetActorManager = ActorManager5E
 		elseif User.getRulesetName() == "4E" then
+			RulesetEffectManager =  EffectManager4E
 			RulesetActorManager = ActorManager4E
 		elseif User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
+			RulesetEffectManager =  EffectManager35E
 			RulesetActorManager = ActorManager35E
 		end
 		-- BCE DND TAGS
@@ -595,6 +889,8 @@ function onInit()
 		EffectsManagerBCE.setCustomPreAddEffect(addEffectStart)
 		EffectsManagerBCE.setCustomPostAddEffect(addEffectPost)
 
+		checkConditional = RulesetEffectManager.checkConditional;
+		RulesetEffectManager.checkConditional = customCheckConditional;
 
 		ActionsManager.registerResultHandler("damage", customOnDamage);
 		onDamage = ActionDamage.onDamage
@@ -620,6 +916,7 @@ function onClose()
 --		User.getRulesetName() == "2E"  or
 		User.getRulesetName() == "PFRPG" then
 
+		RulesetEffectManager.checkConditional = checkConditional;
 		ActionDamage.onDamage = onDamage
 		ActionsManager.unregisterResultHandler("effectbce")
 		DiceManager.convertStringToDice = convertStringToDice
