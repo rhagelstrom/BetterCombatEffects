@@ -1061,7 +1061,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 
 	local tMatch
 	local aTags
-	local sNodeEffect = StringManager.trim(rRoll.sSaveDesc:gsub("%[[%a%s%d!]*]", ""))
+	local sNodeEffect = StringManager.trim(rRoll.sSaveDesc:gsub("%[[%a%s%,%d!]*]", ""))
 	local nodeEffect =  DB.findNode(sNodeEffect)
 	local sEffectLabel = DB.getValue(nodeEffect, "label", "")
 	local nGMOnly = DB.getValue(nodeEffect, "isgmonly", 0)
@@ -1098,7 +1098,6 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 		if rRoll.sSaveDesc:match( "%[HALF ON SAVE]") then
 			table.insert(aTags, "SAVEDMG")
 		end
-
 		tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADDP" then
@@ -1124,6 +1123,7 @@ function onSaveRollHandler5E(rSource, rTarget, rRoll)
 		end
 	elseif nodeEffect  then
 		aTags = {"SAVEADD", "SAVEDMG"}
+
 		tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource, nil, nodeEffect)
 		for _,tEffect in pairs(tMatch) do
 			if tEffect.sTag == "SAVEADD" then
@@ -1228,7 +1228,6 @@ function saveEffect(rSource, rTarget, tEffect)
 		else
 			rSaveVsRoll.sEffectPath = ""
 		end
-
 		ActionSave.performVsRoll(nil,rTarget, sAbility, rSaveVsRoll.nMod, bSecret, rSource, false, rSaveVsRoll.sDesc)
 	end
 end
