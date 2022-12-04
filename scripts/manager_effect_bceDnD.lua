@@ -667,29 +667,25 @@ function isRange(rActor, sRange, rActorIgnore)
 	local tRange = EffectsManagerBCEDND.parseRange(sRange);
 	local nodeCTActor = ActorManager.getCTNode(rActor);
 	local tokenActor = CombatManager.getTokenFromCT(nodeCTActor);
+	local aSearchTokens = {};
+	if tRange.nRange and tokenActor then
+		aSearchTokens = Token.getTokensWithinDistance(tokenActor, tRange.nRange);
+	end
 	if rActorIgnore then
-		nodeCTActorIgnore= ActorManager.getCTNode(rActorIgnore);
+		nodeCTActorIgnore = ActorManager.getCTNode(rActorIgnore);
 		tRange.sFaction =  CombatManager.getFactionFromCT(nodeCTActorIgnore);
 	else
-		tRange.sFaction =  CombatManager.getFactionFromCT(nodeCTActor);
+		tRange.sFaction = CombatManager.getFactionFromCT(nodeCTActor);
 	end
-	if tRange.nRange and tokenActor then
-		local tCombatNodes = CombatManager.getCombatantNodes();
-		for _, nodeCT in pairs(tCombatNodes) do
-			if (nodeCTActor ~= nodeCT and nodeCTActorIgnore ~= nodeCT) then
-				if EffectsManagerBCEDND.filterRange(nodeCT, tRange) then
-					local tokenCT = CombatManager.getTokenFromCT(nodeCT);
-					if tokenCT and (tRange.nRange >= Token.getDistanceBetween(tokenActor, tokenCT)) then
-						local rActorCT = ActorManager.resolveActor(nodeCT);
-						-- check in order of likeliness (subjective)
-						if not (EffectManager.hasCondition(rActorCT, "Stunned" or EffectManager.hasCondition(rActorCT, "Unconscious"))
-								or EffectManager.hasCondition(rActorCT, "Paralyzed") or EffectManager.hasCondition(rActorCT, "Incapacitated")
-								or EffectManager.hasCondition(rActorCT, "Petrified")) then
-							bReturn = true;
-							break;
-						end
-					end
-				end
+	for _, tokenCT in pairs(aSearchTokens) do
+		local nodeCT = CombatManager.getCTFromToken(tokenCT);
+		if nodeCT and (nodeCTActor ~= nodeCT) and (nodeCTActorIgnore ~= nodeCT) and EffectsManagerBCEDND.filterRange(nodeCT, tRange) then
+			local rActorCT = ActorManager.resolveActor(nodeCT);
+			if not (EffectManager.hasCondition(rActorCT, "Stunned" or EffectManager.hasCondition(rActorCT, "Unconscious"))
+					or EffectManager.hasCondition(rActorCT, "Paralyzed") or EffectManager.hasCondition(rActorCT, "Incapacitated")
+					or EffectManager.hasCondition(rActorCT, "Petrified")) then
+				bReturn = true;
+				break;
 			end
 		end
 	end
@@ -725,8 +721,6 @@ function parseRange(sRange)
 			table.insert(tRange.aFaction, sWord);
 		elseif StringManager.contains(DataCommon.creaturetype, sCleanWord) or StringManager.contains(DataCommon.creaturesubtype, sCleanWord) then
 			table.insert(tRange.aType, sWord);
-		-- elseif StringManager.contains(DataCommon.creaturesubtype, sCleanWord) then
-		-- 	table.insert(tRange.aSubType, sWord);
 		else
 			table.insert(tRange.aNamed, sWord);
 		end
