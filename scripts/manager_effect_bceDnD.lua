@@ -670,12 +670,10 @@ function isRange(rActor, sRange, rActorIgnore)
 	local aSearchTokens = {};
 	if tRange.nRange and tokenActor then
 		aSearchTokens = Token.getTokensWithinDistance(tokenActor, tRange.nRange);
+		tRange.sFaction = CombatManager.getFactionFromCT(nodeCTActor);
 	end
 	if rActorIgnore then
 		nodeCTActorIgnore = ActorManager.getCTNode(rActorIgnore);
-		tRange.sFaction =  CombatManager.getFactionFromCT(nodeCTActorIgnore);
-	else
-		tRange.sFaction = CombatManager.getFactionFromCT(nodeCTActor);
 	end
 	for _, tokenCT in pairs(aSearchTokens) do
 		local nodeCT = CombatManager.getCTFromToken(tokenCT);

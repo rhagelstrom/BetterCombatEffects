@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.30
-**Updated:** 12/03/22
+**Current Version:** 3.31
+**Updated:** 12/04/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -45,7 +45,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |ELUSIVE|(-)| |No attack roll has advantage against this Actor|
 |EFFINIT|(D)| |Add an effect with initiative number|
 |IMMUNE|-|CUSTOM([effect]) |Immune to an effect where [effect] is an effect in the custom effect window|
-|UNFLANKABLE|(-)| |Attack rolls do not gain flanking bonuses agaist this Actor - Requires Flanking and Range extension|
+|UNFLANKABLE|(-)| |Attack rolls do not gain flanking bonuses against this Actor - Requires Flanking and Range extension|
 | **Ongoing Damage** | | | |
 |DMGOE|(D)|[damage type]* |Apply ongoing damage at the END of the Actor's turn|
 |SDMGOS|(D)|[damage type]* |Apply ongoing damage at the START of the Actor's turn who applied the effect|
@@ -149,13 +149,13 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | Headband of Intellect [Item]|Headband of Intellect; INT: 19-X| Targeting=Self| |
 | Heavy Armor Master [Feat]|Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic| Targeting=Self| |
 | Interception Fighting Style [Class - Fighter]|Interception Fighting Style; DMGR: 1d10 [PRF],all| | |
-| Pact Tactics [NPC] |Pack Tactics; IFT: RANGE(5,enemy); ADVATK| Targeting=Self| |
+| Pack Tactics [NPC] |Pack Tactics; IFT: RANGE(5,enemy); ADVATK| Targeting=Self| |
 | Turn Undead [Class - Cleric]|Turn Undead; Turned; DMGRT|Duration=1 Min| |
 | Shadow [NPC] |Shadow; SDMGADDT: Strength Drain|Target=Self|Strength Drain is an effect in the custom effects list|
 | Shadow [NPC] |Strength Drain; STR: -1d4; STACK; RESTL| | |
 | Shield of the 300 [Item]| Shield of the 300; TDMGADDT: Shield of the 300 Bonus| Targeting=self|Shield of the 300 Bonus is an effect in the custom effects list|
 | Shield of the 300 [Item]| Shield of the 300 Bonus; AC: 1; TURNRS; STACK| ||
-| Shield Wall [NPC] |Shield Wall; IF: RANGE(5,drauger guardian): GRANTDISATK;| Targeting=Self| |
+| Shield Wall [NPC] |Shield Wall; IF: RANGE(5,drauger guardian); GRANTDISATK;| Targeting=Self| |
 | Sleep [Spell]|Sleep; Unconscious; DMGRT|Duration=1 Min| |
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
 | Stunning Strike [Class - Monk]|Stunning Strike; Stunned; STURNRE | Duration=1 Rnd | |
