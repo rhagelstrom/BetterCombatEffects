@@ -565,7 +565,7 @@ function customCheckConditional(rActor, nodeEffect, aConditions, rTarget, aIgnor
 				end
 			end
 			if sLower == "dying" then
-				if not ActorHealthManager.isDyingOrDead(rActor) then
+				if ActorHealthManager.isDyingOrDead(rActor) then
 					bReturn = false;
 					break;
 				end

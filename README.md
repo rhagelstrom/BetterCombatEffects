@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
 **Current Version:** 3.30
-**Updated::** 12/03/22
+**Updated:** 12/03/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -151,7 +151,6 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | Interception Fighting Style [Class - Fighter]|Interception Fighting Style; DMGR: 1d10 [PRF],all| | |
 | Pact Tactics [NPC] |Pack Tactics; IFT: RANGE(5,enemy); ADVATK| Targeting=Self| |
 | Turn Undead [Class - Cleric]|Turn Undead; Turned; DMGRT|Duration=1 Min| |
-| Relentless Endurance [Half Orc] |Relentless Endurance; IF: DYING; HEAL: 1;| Targeting=Self Expend=On Next Action| |
 | Shadow [NPC] |Shadow; SDMGADDT: Strength Drain|Target=Self|Strength Drain is an effect in the custom effects list|
 | Shadow [NPC] |Strength Drain; STR: -1d4; STACK; RESTL| | |
 | Shield of the 300 [Item]| Shield of the 300; TDMGADDT: Shield of the 300 Bonus| Targeting=self|Shield of the 300 Bonus is an effect in the custom effects list|
