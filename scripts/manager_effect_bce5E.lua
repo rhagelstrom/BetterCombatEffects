@@ -64,6 +64,15 @@ function onInit()
 				baselabel = "option_val_off", baseval = "off", default = "off" });
 
 		end
+		EffectsManagerBCE.registerBCETag("ATKHA", EffectsManagerBCE.aBCEActivateOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKHR", EffectsManagerBCE.aBCERemoveOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKHD", EffectsManagerBCE.aBCEDeactivateOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKHADD", EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKMA", EffectsManagerBCE.aBCEActivateOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKMR", EffectsManagerBCE.aBCERemoveOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKMD", EffectsManagerBCE.aBCEDeactivateOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKMADD", EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKFADD", EffectsManagerBCE.aBCEDefaultOptionsAE)
 
 		--5E/3.5E BCE Tags
 		EffectsManagerBCE.registerBCETag("SAVEA", EffectsManagerBCE.aBCEOneShotOptions)
@@ -86,10 +95,10 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SSAVES", EffectsManagerBCE.aBCESourceMattersOptions)
 		EffectsManagerBCE.registerBCETag("SSAVEE", EffectsManagerBCE.aBCESourceMattersOptions)
 
-		EffectsManagerBCE.registerBCETag("ATKR",  EffectsManagerBCE.aBCEDefaultOptionsAE)
-		EffectsManagerBCE.registerBCETag("ATKD",  EffectsManagerBCE.aBCEDefaultOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKR",  EffectsManagerBCE.aBCERemoveOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKD",  EffectsManagerBCE.aBCEDeactivateOptionsAE)
 		EffectsManagerBCE.registerBCETag("ATKA",  EffectsManagerBCE.aBCEActivateOptionsAE)
-		EffectsManagerBCE.registerBCETag("ATKADD",  EffectsManagerBCE.aBCEActivateOptionsAE)
+		EffectsManagerBCE.registerBCETag("ATKADD",  EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("TATKHDMGS",  EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("TATKMDMGS",  EffectsManagerBCE.aBCEDefaultOptionsAE)
 
@@ -693,6 +702,7 @@ function customApplyModifiers(rSource, rTarget, rRoll, bSkipModStack)
 			rRoll.aDice[2] = nil
 		end
 	end
+
 	return unpack(results)
 end
 
@@ -727,7 +737,6 @@ function customOnAttack(rSource, rTarget, rRoll)
 end
 
 function customOnPostAttackResolve(rSource, rTarget, rRoll, rMessage)
-
 	local tMatch
 	local aTags = {}
 	local aRange =  {}
@@ -737,9 +746,18 @@ function customOnPostAttackResolve(rSource, rTarget, rRoll, rMessage)
 		table.insert(aRange, "ranged")
 	end
 	if rRoll.sResult == "hit" or rRoll.sResult == "crit" then
-		table.insert(aTags,"TATKHDMGS")
+		aTags = {"TATKHDMGS"}
 	elseif rRoll.sResult == "miss" or rRoll.sResult == "fumble" then
-		table.insert(aTags,"TATKMDMGS")
+		aTags = {"TATKMDMGS"}
+	end
+	if rSource then
+		rSource.tADVDIS = {}
+		if rRoll.sDesc:match("%[ADV]") then
+			rSource.tADVDIS.bADV = true
+		end
+		if rRoll.sDesc:match("%[DIS]") then
+			rSource.tADVDIS.bDIS = true
+		end
 	end
 
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aRange)
@@ -748,6 +766,42 @@ function customOnPostAttackResolve(rSource, rTarget, rRoll, rMessage)
 			EffectsManagerBCEDND.applyOngoingDamage(rTarget, rSource, tEffect.rEffectComp, false, "Return Damage")
 		end
 	end
+	if rRoll.sResult == "hit" or rRoll.sResult == "crit" then
+		aTags = {"ATKHA", "ATKHD","ATKHR", "ATKHADD"}
+	elseif rRoll.sResult == "miss" or rRoll.sResult == "fumble" then
+		aTags = {"ATKMA", "ATKMD","ATKMR", "ATKMADD"}
+	end
+	if  rRoll.sResult == "fumble" then
+		table.insert(aTags,"ATKFADD")
+	end
+
+	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rTarget, nil, nil, aRange)
+	for _,tEffect in pairs(tMatch) do
+		if tEffect.sTag == "ATKHA" or tEffect.sTag == "ATKMA" then
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Activate")
+		elseif tEffect.sTag == "ATKHD" or tEffect.sTag == "ATKMD" then
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Deactivate")
+		elseif tEffect.sTag  == "ATKHR" or tEffect.sTag == "ATKMR" then
+			EffectsManagerBCE.modifyEffect(tEffect.nodeCT, "Remove")
+		elseif tEffect.sTag  == "ATKHADD" or tEffect.sTag == "ATKMADD" or tEffect.sTag == "ATKFADD" then
+			local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
+			if next(rEffect) then
+				rEffect.sSource = rRoll.sSource
+				rEffect.nGMOnly = false --nGMOnly -- If the parent is secret then we should be too.
+				rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
+				local nodeSource = ActorManager.getCTNode(rSource)
+				if Session.IsHost then
+					EffectManager.addEffect("", "", nodeSource, rEffect, true)
+				else
+					EffectsManagerBCE.notifyAddEffect(nodeSource, rEffect, tEffect.rEffectComp.remainder[1])
+				end
+			end
+		end
+	end
+	if rSource then
+		rSource.tADVDIS = nil
+	end
+
 	return onPostAttackResolve(rSource, rTarget, rRoll, rMessage)
 end
 

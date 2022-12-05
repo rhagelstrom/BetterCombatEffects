@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.31
-**Updated:** 12/04/22
+**Current Version:** 3.32
+**Updated:** 12/05/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -22,6 +22,15 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |ATKA|(-)| | ACTIVATE effect when the Actor takes the attack action|
 |ATKADD|(-)|[effect] or [condition] | Add effect or condition when the Actor takes the attack action|
 |ATKD|(-)| | DEACTIVATE effect when the Actor takes the attack action|
+|ATKFADD|(-)|[effect] or [condition] | Add effect or condition when the Actor's attack is fumble (critical fail)|
+|ATKHA|(-)| | ACTIVATE effect when the Actor's attack is successful|
+|ATKHADD|(-)|[effect] or [condition] | Add effect or condition when the Actor's attack is successful|
+|ATKHD|(-)| | DEACTIVATE effect when the Actor's attack is successful|
+|ATKHR|(-)| | REMOVE effect when the Actor's attack is successful|
+|ATKMA|(-)| | ACTIVATE effect when the Actor's attack is unsuccessful|
+|ATKMADD|(-)|[effect] or [condition] | Add effect or condition when the Actor's attack is unsuccessful|
+|ATKMD|(-)| | DEACTIVATE effect when the Actor's attack is unsuccessful|
+|ATKMR|(-)| | REMOVE effect when the Actor's attack is unsuccessful|
 |ATKR|(-)| | REMOVE effect when the Actor takes the attack action|
 |TATKHDMGS|(D)|[damage type]__*__,all,[Range]__*__| Target damages source on successful hit|
 |TATKMDMGS|(D)|[damage type]__*__,all,[Range]__*__| Target damages source on miss|
@@ -117,19 +126,22 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 
 | Operator |  Notes |
 | --- | ---|
+|ADV|True if the the attack roll has advantage|
 |CRITICAL|True if the actor has wounds that are >=75% and <100% of hit point maximum.|
+|DIS|True if the the attack roll has disadvantage|
 |DYING|True if the actor is dying or dead.|
 |HEALTHY|True if the actor has no wounds.|
 |HEAVY|True if the actor has wounds that are >=50% and <75% of hit point maximum.|
 |LIGHT|True if the actor has wounds that are >=0% and <25% of hit point maximum.|
 |MODERATE|True if the actor has wounds that are >=25% and <50% of hit point maximum.|
-|RANGE( (N) , ![faction]* , ![creature type]* , ![creature name]* )|True if the actor is within the specified range (N) of at least one other actor that is not incapacitated. Filters can be applied to match only specified.|
+|RANGE( (N) , ![faction]* , ![creature type]* , ![creature name]*, ![target] )|True if the actor is within the specified range (N) of at least one other actor that is not incapacitated. Filters can be applied to match only specified.|
 |TEMPHP or TEMPHP( [operation] , (N))|True if the actor has any temporary hit points or temporary hit points are greater/less than the operation.|
 |WOUNDS( [operation] , (.N) )|True if the actor's wounds, as a decimal percent of their hit point maximum, is greater/less than the operation.|
 * **[creature name]** = creature name to match. E.g. skeleton will match skeleton, skeleton 1, and giant skeleton
 *  **[faction]** = friend, foe, neutral, enemy (different faction than this actor but not neutral), ally (same faction as this actor)
 * **[operation]** =>, <=, >, <, =
 * **[creature type]** = aberration, beast, celestial, construct, dragon, elemental, fey, fiend, giant, humanoid, monstrosity, ooze, plant, undead, aarakocra, bullywug, demon, devil, dragonborn, dwarf, elf, gith, gnoll, gnome, goblinoid, grimlock, halfling, human, kenku, kuo-toa, kobold, lizardfolk, living construct, merfolk, orc, quaggoth, sahuagin, shapechanger, thri-kreen, titan, troglodyte, yuan-ti, yugoloth
+* **[target]** = target - the targets of this actor
 * __*__ = Multiple entries of this descriptor type allowed.
 * A special tag **!** can be used as a kind of logical NOT.
 
@@ -150,15 +162,19 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | Heavy Armor Master [Feat]|Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic| Targeting=Self| |
 | Interception Fighting Style [Class - Fighter]|Interception Fighting Style; DMGR: 1d10 [PRF],all| | |
 | Pack Tactics [NPC] |Pack Tactics; IFT: RANGE(5,enemy); ADVATK| Targeting=Self| |
-| Turn Undead [Class - Cleric]|Turn Undead; Turned; DMGRT|Duration=1 Min| |
+| Rakish Audacity [NPC] |Rakish Audacity; ATURN; IFN: DIS; IFN: ADV; IF:CUSTOM(Sneak Attack Advantage); IF:CUSTOM(Sneak Attack Range); IF:RANGE(5,target); IFTN: RANGE(5,enemy); IFN: RANGE(5,!target); ATKHADD: Sneak Attack Damage;  DUSE; | Targeting=Self|Requires If NOT Untrue Effects extension. Will need to add IF: CUSTOM(Rakish Audacity) to sneak attack code.|
 | Shadow [NPC] |Shadow; SDMGADDT: Strength Drain|Target=Self|Strength Drain is an effect in the custom effects list|
 | Shadow [NPC] |Strength Drain; STR: -1d4; STACK; RESTL| | |
 | Shield of the 300 [Item]| Shield of the 300; TDMGADDT: Shield of the 300 Bonus| Targeting=self|Shield of the 300 Bonus is an effect in the custom effects list|
 | Shield of the 300 [Item]| Shield of the 300 Bonus; AC: 1; TURNRS; STACK| ||
 | Shield Wall [NPC] |Shield Wall; IF: RANGE(5,drauger guardian); GRANTDISATK;| Targeting=Self| |
+| Sneak Attack [Trait] |Sneak Attack Range; ATURN; IFT: RANGE(5,enemy); IF:CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse|
+| Sneak Attack [Trait] |Sneak Attack Advantage; ATURN; IF: ADV; IF: CUSTOM(Sneak Attack Range); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse|
+| Sneak Attack [Trait] |Sneak Attack Damage; DMG: 3d6 piercing| Expend=OnRoll |Will have to adjust for Rogue Level|
 | Sleep [Spell]|Sleep; Unconscious; DMGRT|Duration=1 Min| |
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
 | Stunning Strike [Class - Monk]|Stunning Strike; Stunned; STURNRE | Duration=1 Rnd | |
+| Turn Undead [Class - Cleric]|Turn Undead; Turned; DMGRT|Duration=1 Min| |
 | Vitriolic Sphere [Spell]|Vitriolic Sphere; DMGOE: 5d4 acid| Duration=2 Rnd | |
 | Wall of Thorns [Spell]|Wall of Thorns; SAVEE: [SDC] DEX (H)(C); SAVEDMG: 7d8 slashing| | |
 | Water Elemental [NPC]|Water Elemental Whelm; grappled; restrained; SDMGOS: 2d8+4 bludgeoning| | |
@@ -213,3 +229,8 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * ELUSIVE - No attack roll has advantage against this Actor
   * UNFLANKABLE - Attack rolls do not gain flanking bonuses agaist this Actor - Requires Flanking and Range extension
   * Additional conditional operators (see conditional operators section)
+  * ATKHA,ATKHD,ATKHR, - Activate,Deactivate,Remove effect when the attack is successful
+  * ATKMA,ATKMD,ATKMR, - Activate,Deactivate,Remove effect when the attack is unsuccessful
+  * ATKHADD - Add custom effect when the attack is successful
+  * ATKMADD - Add custom effect when the attack is unsuccessful
+  * ATKFADD - Add custom effect when the attack is fumble (critical miss)

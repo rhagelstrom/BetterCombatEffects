@@ -582,7 +582,29 @@ function customCheckConditional(rActor, nodeEffect, aConditions, rTarget, aIgnor
 					break;
 				end
 			end
+			if sLower == "adv" then
+				if not EffectsManagerBCEDND.isADVDIS(rActor, sADV, rTarget) then
+					bReturn = false;
+					break;
+				end
+			end
+			if sLower == "dis" then
+				if not EffectsManagerBCEDND.isADVDIS(rActor, sDIS, rTarget) then
+					bReturn = false;
+					break;
+				end
+			end
+
 		end
+	end
+	return bReturn;
+end
+function isADVDIS(rActor, sAdvDis)
+	local bReturn = false;
+	if sAdvDis == "adv" and rActor.tADVDIS and rActor.tADVDIS.bADV then
+		bReturn = true;
+	elseif sAdvDis == "dis" and rActor.tADVDIS and rActor.tADVDIS.bDIS then
+		bReturn = true;
 	end
 	return bReturn;
 end
@@ -668,22 +690,26 @@ function isRange(rActor, sRange, rActorIgnore)
 	local nodeCTActor = ActorManager.getCTNode(rActor);
 	local tokenActor = CombatManager.getTokenFromCT(nodeCTActor);
 	local aSearchTokens = {};
+	local aTargets = {};
+	if tRange.sTarget then
+		aTargets = TargetingManager.getFullTargets(rActor);
+	end
 	if tRange.nRange and tokenActor then
 		aSearchTokens = Token.getTokensWithinDistance(tokenActor, tRange.nRange);
 		tRange.sFaction = CombatManager.getFactionFromCT(nodeCTActor);
-	end
-	if rActorIgnore then
-		nodeCTActorIgnore = ActorManager.getCTNode(rActorIgnore);
-	end
-	for _, tokenCT in pairs(aSearchTokens) do
-		local nodeCT = CombatManager.getCTFromToken(tokenCT);
-		if nodeCT and (nodeCTActor ~= nodeCT) and (nodeCTActorIgnore ~= nodeCT) and EffectsManagerBCEDND.filterRange(nodeCT, tRange) then
-			local rActorCT = ActorManager.resolveActor(nodeCT);
-			if not (EffectManager.hasCondition(rActorCT, "Stunned" or EffectManager.hasCondition(rActorCT, "Unconscious"))
-					or EffectManager.hasCondition(rActorCT, "Paralyzed") or EffectManager.hasCondition(rActorCT, "Incapacitated")
-					or EffectManager.hasCondition(rActorCT, "Petrified")) then
-				bReturn = true;
-				break;
+		if rActorIgnore then
+			nodeCTActorIgnore = ActorManager.getCTNode(rActorIgnore);
+		end
+		for _, tokenCT in pairs(aSearchTokens) do
+			local nodeCT = CombatManager.getCTFromToken(tokenCT);
+			if nodeCT and (nodeCTActor ~= nodeCT) and (nodeCTActorIgnore ~= nodeCT) and EffectsManagerBCEDND.filterRange(nodeCT, tRange, aTargets) then
+				local rActorCT = ActorManager.resolveActor(nodeCT);
+				if not (EffectManager.hasCondition(rActorCT, "Stunned" or EffectManager.hasCondition(rActorCT, "Unconscious"))
+						or EffectManager.hasCondition(rActorCT, "Paralyzed") or EffectManager.hasCondition(rActorCT, "Incapacitated")
+						or EffectManager.hasCondition(rActorCT, "Petrified")) then
+					bReturn = true;
+					break;
+				end
 			end
 		end
 	end
@@ -704,7 +730,7 @@ function parseOperator(sInput)
 end
 
 function parseRange(sRange)
-	local tRange = {nRange = nil, aFaction = {}, aNamed = {}, aType = {}};
+	local tRange = {nRange = nil, sTarget = nil, aFaction = {}, aNamed = {}, aType = {}};
 	local aRange = StringManager.splitByPattern(sRange, "%s*,%s*", true);
 
 	for _, sWord in pairs(aRange) do
@@ -717,6 +743,8 @@ function parseRange(sRange)
 			tRange.nRange = nRange;
 		elseif sCleanWord == "friend" or sCleanWord == "foe" or sCleanWord == "neutral" or sCleanWord == "ally" or sCleanWord == "enemy" then
 			table.insert(tRange.aFaction, sWord);
+		elseif sCleanWord == "target" then
+			tRange.sTarget = sWord;
 		elseif StringManager.contains(DataCommon.creaturetype, sCleanWord) or StringManager.contains(DataCommon.creaturesubtype, sCleanWord) then
 			table.insert(tRange.aType, sWord);
 		else
@@ -726,7 +754,7 @@ function parseRange(sRange)
 	return tRange;
 end
 
-function filterRange(nodeCT, tRange)
+function filterRange(nodeCT, tRange, aTargets)
 	if next(tRange.aFaction) and not EffectsManagerBCEDND.filterFaction(nodeCT, tRange) then
 		return false;
 	end
@@ -736,6 +764,13 @@ function filterRange(nodeCT, tRange)
 	if next(tRange.aType) and not EffectsManagerBCEDND.filterCreatureType(nodeCT, tRange) then
 		return false;
 	end
+	if next(tRange.aType) and not EffectsManagerBCEDND.filterCreatureType(nodeCT, tRange, aTargets) then
+		return false;
+	end
+	if tRange.sTarget and next(aTargets) and not EffectsManagerBCEDND.filterTargets(nodeCT, tRange, aTargets) then
+		return false;
+	end
+
 	return true;
 end
 
@@ -798,23 +833,20 @@ function filterCreatureName(nodeCT, tRange)
 	return bReturn;
 end
 
-function filterCreatureType(nodeCT, tRange)
+function filterTargets(nodeCT, tRange, aTarget)
 	local bReturn = false;
-	if next(tRange.aType) then
-		local rActorCT = ActorManager.resolveActor(nodeCT);
-		for _, sType in pairs(tRange.aType) do
-			local bInvert = false;
-			if StringManager.startsWith(sType, "!") then
-				sType = sType:sub(2);
-				bInvert = true;
-			end
-			if bInvert and not ActorCommonManager.isCreatureTypeDnD(rActorCT, sType) then
-				bReturn = true;
-				break;
-			elseif not bInvert and ActorCommonManager.isCreatureTypeDnD(rActorCT, sType) then
-			 	bReturn = true;
-			 	break;
-			end
+	for _, rTarget in pairs(aTarget) do
+		local bInvert = false;
+		local nodeTarget = ActorManager.getCTNode(rTarget);
+		if StringManager.startsWith(tRange.sTarget, "!") then
+			bInvert = true;
+		end
+		if bInvert and nodeCT ~= nodeTarget then
+			bReturn = true;
+			break;
+		elseif not bInvert and nodeCT == nodeTarget then
+			bReturn = true;
+			break;
 		end
 	end
 	return bReturn;
