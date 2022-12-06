@@ -295,8 +295,8 @@ function customEvalAction(rActor, nodePower, rAction)
 		local rSave = {saveMod = 0, saveBase = "", saveStat = "", saveProf = 0}
 		local nDC = 0
 		for _,nodeChild in pairs(aNodeActionChild) do
-			local sSaveType = DB.getValue(nodeChild, "savetype", "");
-			if sSaveType ~= "" then
+			local sSaveType = DB.getValue(nodeChild, "type", "");
+			if sSaveType == "cast" then
 				rSave.saveMod = DB.getValue(nodeChild, "savedcmod", 0);
 				rSave.saveBase = DB.getValue(nodeChild, "savedcbase", "group");
 				if rSave.saveBase == "ability" then
@@ -321,6 +321,8 @@ function customEvalAction(rActor, nodePower, rAction)
 			if rSave.saveProf == 1 then
 				nDC = nDC + ActorManager5E.getAbilityBonus(rActor, "prf")
 			end
+		else
+			rAction = replaceSaveDC(rAction, rActor);
 		end
 		rAction.sName =  rAction.sName:gsub("%[SDC]", tostring(nDC))
 		rAction.sName =  rAction.sName:gsub("%(SDC%)", tostring(nDC))
