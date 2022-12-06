@@ -583,13 +583,13 @@ function customCheckConditional(rActor, nodeEffect, aConditions, rTarget, aIgnor
 				end
 			end
 			if sLower == "adv" then
-				if not EffectsManagerBCEDND.isADVDIS(rActor, sADV, rTarget) then
+				if not EffectsManagerBCEDND.isADVDIS(rActor, sLower, rTarget) then
 					bReturn = false;
 					break;
 				end
 			end
 			if sLower == "dis" then
-				if not EffectsManagerBCEDND.isADVDIS(rActor, sDIS, rTarget) then
+				if not EffectsManagerBCEDND.isADVDIS(rActor, sLower, rTarget) then
 					bReturn = false;
 					break;
 				end

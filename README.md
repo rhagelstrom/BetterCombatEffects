@@ -162,15 +162,15 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | Heavy Armor Master [Feat]|Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic| Targeting=Self| |
 | Interception Fighting Style [Class - Fighter]|Interception Fighting Style; DMGR: 1d10 [PRF],all| | |
 | Pack Tactics [NPC] |Pack Tactics; IFT: RANGE(5,enemy); ADVATK| Targeting=Self| |
-| Rakish Audacity [NPC] |Rakish Audacity; ATURN; IFN: DIS; IFN: ADV; IF:CUSTOM(Sneak Attack Advantage); IF:CUSTOM(Sneak Attack Range); IF:RANGE(5,target); IFTN: RANGE(5,enemy); IFN: RANGE(5,!target); ATKHADD: Sneak Attack Damage;  DUSE; | Targeting=Self|Requires If NOT Untrue Effects extension. Will need to add IF: CUSTOM(Rakish Audacity) to sneak attack code.|
+| Rakish Audacity [Class - Rogue/Swashbuckler] |Rakish Audacity; ATURN; IFN: DIS; IFN: ADV; IF:CUSTOM(Sneak Attack Advantage); IF:CUSTOM(Sneak Attack Range); IF:RANGE(5,target); IFTN: RANGE(5,enemy); IFN: RANGE(5,!target); ATKHADD: Sneak Attack Damage;  DUSE; | Targeting=Self|Requires If NOT Untrue Effects extension. Will need to add IF: CUSTOM(Rakish Audacity) to sneak attack code.|
 | Shadow [NPC] |Shadow; SDMGADDT: Strength Drain|Target=Self|Strength Drain is an effect in the custom effects list|
 | Shadow [NPC] |Strength Drain; STR: -1d4; STACK; RESTL| | |
 | Shield of the 300 [Item]| Shield of the 300; TDMGADDT: Shield of the 300 Bonus| Targeting=self|Shield of the 300 Bonus is an effect in the custom effects list|
 | Shield of the 300 [Item]| Shield of the 300 Bonus; AC: 1; TURNRS; STACK| ||
 | Shield Wall [NPC] |Shield Wall; IF: RANGE(5,drauger guardian); GRANTDISATK;| Targeting=Self| |
-| Sneak Attack [Trait] |Sneak Attack Range; ATURN; IFT: RANGE(5,enemy); IF:CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse|
-| Sneak Attack [Trait] |Sneak Attack Advantage; ATURN; IF: ADV; IF: CUSTOM(Sneak Attack Range); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse|
-| Sneak Attack [Trait] |Sneak Attack Damage; DMG: 3d6 piercing| Expend=OnRoll |Will have to adjust for Rogue Level|
+| Sneak Attack [Class - Rogue] |Sneak Attack Range; ATURN; IFT: RANGE(5,enemy); IF:CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse|
+| Sneak Attack [Class - Rogue] |Sneak Attack Advantage; ATURN; IF: ADV; IF: CUSTOM(Sneak Attack Range); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse|
+| Sneak Attack [Class - Rogue] |Sneak Attack Damage; DMG: 3d6 piercing| Expend=OnRoll |Will have to adjust for Rogue Level|
 | Sleep [Spell]|Sleep; Unconscious; DMGRT|Duration=1 Min| |
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
 | Stunning Strike [Class - Monk]|Stunning Strike; Stunned; STURNRE | Duration=1 Rnd | |
@@ -227,7 +227,7 @@ The Shadow has strength drain so we put the above effect on the shadow. When the
   * SDC - Can be written as [SDC] or (SDC)
   * (E) - Will remove the effect when the source of the effect drops to 0 HP
   * ELUSIVE - No attack roll has advantage against this Actor
-  * UNFLANKABLE - Attack rolls do not gain flanking bonuses agaist this Actor - Requires Flanking and Range extension
+  * UNFLANKABLE - Attack rolls do not gain flanking bonuses against this Actor - Requires Flanking and Range extension
   * Additional conditional operators (see conditional operators section)
   * ATKHA,ATKHD,ATKHR, - Activate,Deactivate,Remove effect when the attack is successful
   * ATKMA,ATKMD,ATKMR, - Activate,Deactivate,Remove effect when the attack is unsuccessful
