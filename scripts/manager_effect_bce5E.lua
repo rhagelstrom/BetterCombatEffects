@@ -787,7 +787,7 @@ function customOnPostAttackResolve(rSource, rTarget, rRoll, rMessage)
 			local rEffect = EffectsManagerBCE.matchEffect(tEffect.rEffectComp.remainder[1])
 			if next(rEffect) then
 				rEffect.sSource = rRoll.sSource
-				rEffect.nGMOnly = false --nGMOnly -- If the parent is secret then we should be too.
+				rEffect.nGMOnly = tEffect.nGMOnly
 				rEffect.nInit  = DB.getValue(rEffect.sSource, "initresult", 0)
 				local nodeSource = ActorManager.getCTNode(rSource)
 				if Session.IsHost then
@@ -1065,7 +1065,7 @@ function customEvalAction(rActor, nodePower, rAction)
 				nDC = nDC + ActorManager5E.getAbilityBonus(rActor, "prf")
 			end
 		else
-			rAction = replaceSaveDC(rAction, rActor);
+			rAction = replaceSaveDC(rAction, rActor)
 		end
 		rAction.sName =  rAction.sName:gsub("%[SDC]", tostring(nDC))
 		rAction.sName =  rAction.sName:gsub("%(SDC%)", tostring(nDC))

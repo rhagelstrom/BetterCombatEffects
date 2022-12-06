@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
 **Current Version:** 3.32
-**Updated:** 12/05/22
+**Updated:** 12/06/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -127,13 +127,13 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | Operator |  Notes |
 | --- | ---|
 |ADV|True if the the attack roll has advantage|
-|CRITICAL|True if the actor has wounds that are >=75% and <100% of hit point maximum.|
 |DIS|True if the the attack roll has disadvantage|
-|DYING|True if the actor is dying or dead.|
 |HEALTHY|True if the actor has no wounds.|
-|HEAVY|True if the actor has wounds that are >=50% and <75% of hit point maximum.|
 |LIGHT|True if the actor has wounds that are >=0% and <25% of hit point maximum.|
 |MODERATE|True if the actor has wounds that are >=25% and <50% of hit point maximum.|
+|HEAVY|True if the actor has wounds that are >=50% and <75% of hit point maximum.|
+|CRITICAL|True if the actor has wounds that are >=75% and <100% of hit point maximum.|
+|DYING|True if the actor is dying or dead.|
 |RANGE( (N) , ![faction]* , ![creature type]* , ![creature name]*, ![target] )|True if the actor is within the specified range (N) of at least one other actor that is not incapacitated. Filters can be applied to match only specified.|
 |TEMPHP or TEMPHP( [operation] , (N))|True if the actor has any temporary hit points or temporary hit points are greater/less than the operation.|
 |WOUNDS( [operation] , (.N) )|True if the actor's wounds, as a decimal percent of their hit point maximum, is greater/less than the operation.|
@@ -150,6 +150,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |Power [Source]| Effect Code | Duration/Target/Expend|Notes|
 |---|---|---|---|
 | Armor of Agathys [Spell] |Armor of Agathys;  IF: TEMPHP; TATKHDMGS: 5 cold,melee| Targeting=Self| |
+| Blindsense [Class - Rogue] | Blindsense; IFT: CUSTOM(Invisible); IF: RANGE(10,target); ADVATK|Targeting=Self |A better option is making Invisible a targeted effect|
 | Belt of Frost Giant Strength [Item] |Belt of Frost Giant Strength; STR: 19-X| Targeting=Self| |
 | Cloak of Displacement [Item], Displacer Beast [NPC]| Displacement; GRANTDISATK; TURNAS; DMGDT: all|Targeting=Self| |
 | Deflect Missiles [Class - Monk] |Deflect Missiles; DMGR: 1d10 [MONK],[DEX],ranged,bludgeoning,piercing|Targeting=Self||
@@ -168,8 +169,8 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | Shield of the 300 [Item]| Shield of the 300; TDMGADDT: Shield of the 300 Bonus| Targeting=self|Shield of the 300 Bonus is an effect in the custom effects list|
 | Shield of the 300 [Item]| Shield of the 300 Bonus; AC: 1; TURNRS; STACK| ||
 | Shield Wall [NPC] |Shield Wall; IF: RANGE(5,drauger guardian); GRANTDISATK;| Targeting=Self| |
-| Sneak Attack [Class - Rogue] |Sneak Attack Range; ATURN; IFT: RANGE(5,enemy); IF:CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse|
-| Sneak Attack [Class - Rogue] |Sneak Attack Advantage; ATURN; IF: ADV; IF: CUSTOM(Sneak Attack Range); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse|
+| Sneak Attack [Class - Rogue] |Sneak Attack Range; ATURN; IFN: ADV; IFN: DIS; IFT: RANGE(5,enemy); IF: CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE |Doesn't check finesse. Will trigger with spell attack. Requires If NOT Untrue Effects extension.|
+| Sneak Attack [Class - Rogue] |Sneak Attack Advantage; ATURN; IF: ADV; IF: CUSTOM(Sneak Attack Range); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse. Will trigger with spell attack|
 | Sneak Attack [Class - Rogue] |Sneak Attack Damage; DMG: 3d6 piercing| Expend=OnRoll |Will have to adjust for Rogue Level|
 | Sleep [Spell]|Sleep; Unconscious; DMGRT|Duration=1 Min| |
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
