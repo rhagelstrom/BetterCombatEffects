@@ -72,8 +72,8 @@ function customEvalAction(rActor, nodePower, rAction)
 		local rSave = {saveMod = 0, saveBase = "", saveStat = "", saveProf = 0}
 		local nDC = 0
 		for _,nodeChild in pairs(aNodeActionChild) do
-			local sSaveType = DB.getValue(nodeChild, "savetype", "");
-			if sSaveType ~= "" then
+			local sSaveType = DB.getValue(nodeChild, "type", "");
+			if sSaveType == "cast" then
 				rSave.saveMod = DB.getValue(nodeChild, "savedcmod", 0);
 				rSave.saveBase = DB.getValue(nodeChild, "savedcbase", "group");
 				if rSave.saveBase == "ability" then
@@ -98,6 +98,8 @@ function customEvalAction(rActor, nodePower, rAction)
 			if rSave.saveProf == 1 then
 				nDC = nDC + ActorManager35E.getAbilityBonus(rActor, "prf")
 			end
+		else
+			rAction = replaceSaveDC(rAction, rActor);
 		end
 		rAction.sName =  rAction.sName:gsub("%[SDC]", tostring(nDC))
 		rAction.sName =  rAction.sName:gsub("%(SDC%)", tostring(nDC))
@@ -162,6 +164,7 @@ end
 
 function replaceSaveDC(rNewEffect, rActor)
 	-- TODO
+	return rNewEffect
 end
 
 function processEffectTurnStart35E(rSource)
@@ -209,7 +212,7 @@ function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 	end
 	if  not rNewEffect.sName:upper():find("FROMAURA;") then
 		rNewEffect = moveModtoMod(rNewEffect) -- Eventually we can get rid of this. Used to replace old format with New
-		rNewEffect = EffectsManagerBCE5E.replaceSaveDC(rNewEffect, rSource)
+		rNewEffect = EffectsManagerBCE35E.replaceSaveDC(rNewEffect, rSource)
 		rNewEffect.sName = EffectManager35E.evalEffect(rSource, rNewEffect.sName)
 	end
 	return true
