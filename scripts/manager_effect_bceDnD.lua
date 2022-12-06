@@ -601,9 +601,9 @@ function customCheckConditional(rActor, nodeEffect, aConditions, rTarget, aIgnor
 end
 function isADVDIS(rActor, sAdvDis)
 	local bReturn = false;
-	if sAdvDis == "adv" and rActor.tADVDIS and rActor.tADVDIS.bADV then
+	if sAdvDis == "adv" and rActor.tADVDIS and rActor.tADVDIS.bADV  and (rActor.tADVDIS.bADV ~= rActor.tADVDIS.bDIS) then
 		bReturn = true;
-	elseif sAdvDis == "dis" and rActor.tADVDIS and rActor.tADVDIS.bDIS then
+	elseif sAdvDis == "dis" and rActor.tADVDIS and rActor.tADVDIS.bDIS and (rActor.tADVDIS.bDIS ~= rActor.tADVDIS.bADV) then
 		bReturn = true;
 	end
 	return bReturn;
