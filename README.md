@@ -169,7 +169,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | Shield of the 300 [Item]| Shield of the 300; TDMGADDT: Shield of the 300 Bonus| Targeting=self|Shield of the 300 Bonus is an effect in the custom effects list|
 | Shield of the 300 [Item]| Shield of the 300 Bonus; AC: 1; TURNRS; STACK| ||
 | Shield Wall [NPC] |Shield Wall; IF: RANGE(5,drauger guardian); GRANTDISATK;| Targeting=Self| |
-| Sneak Attack [Class - Rogue] |Sneak Attack Range; ATURN; IFN: ADV; IFN: DIS; IFT: RANGE(5,enemy); IF: CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE |Doesn't check finesse. Will trigger with spell attack. Requires If NOT Untrue Effects extension.|
+| Sneak Attack [Class - Rogue] |Sneak Attack Range; ATURN; IFN: ADV; IFN: DIS; IFT: RANGE(5,enemy); IF: CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE |Targeting=Self | Doesn't check finesse. Will trigger with spell attack. Requires If NOT Untrue Effects extension.|
 | Sneak Attack [Class - Rogue] |Sneak Attack Advantage; ATURN; IF: ADV; IF: CUSTOM(Sneak Attack Range); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse. Will trigger with spell attack|
 | Sneak Attack [Class - Rogue] |Sneak Attack Damage; DMG: 3d6 piercing| Expend=OnRoll |Will have to adjust for Rogue Level|
 | Sleep [Spell]|Sleep; Unconscious; DMGRT|Duration=1 Min| |
