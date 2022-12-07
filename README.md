@@ -129,7 +129,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |ADV|True if the the attack roll has advantage|
 |DIS|True if the the attack roll has disadvantage|
 |HEALTHY|True if the actor has no wounds.|
-|LIGHT|True if the actor has wounds that are >=0% and <25% of hit point maximum.|
+|LIGHT|True if the actor has wounds that are >0% and <25% of hit point maximum.|
 |MODERATE|True if the actor has wounds that are >=25% and <50% of hit point maximum.|
 |HEAVY|True if the actor has wounds that are >=50% and <75% of hit point maximum.|
 |CRITICAL|True if the actor has wounds that are >=75% and <100% of hit point maximum.|
@@ -168,9 +168,9 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | Shadow [NPC] |Strength Drain; STR: -1d4; STACK; RESTL| | |
 | Shield of the 300 [Item]| Shield of the 300; TDMGADDT: Shield of the 300 Bonus| Targeting=self|Shield of the 300 Bonus is an effect in the custom effects list|
 | Shield of the 300 [Item]| Shield of the 300 Bonus; AC: 1; TURNRS; STACK| ||
-| Shield Wall [NPC] |Shield Wall; IF: RANGE(5,drauger guardian); GRANTDISATK;| Targeting=Self| |
+| Shield Wall [NPC] |Shield Wall; IF: RANGE(5,draugr guardian); GRANTDISATK;| Targeting=Self| |
 | Sneak Attack [Class - Rogue] |Sneak Attack Range; ATURN; IFN: ADV; IFN: DIS; IFT: RANGE(5,enemy); IF: CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE |Targeting=Self | Doesn't check finesse. Will trigger with spell attack. Requires If NOT Untrue Effects extension.|
-| Sneak Attack [Class - Rogue] |Sneak Attack Advantage; ATURN; IF: ADV; IF: CUSTOM(Sneak Attack Range); ATKHADD: Sneak Attack Damage; DUSE;|Targeting=Self|Doesn't check finesse. Will trigger with spell attack|
+| Sneak Attack [Class - Rogue] |Sneak Attack Advantage; ATURN; IF: ADV; IF: CUSTOM(Sneak Attack Range); ATKHADD: Sneak Attack Damage; DUSE;| Targeting=Self | Doesn't check finesse. Will trigger with spell attack|
 | Sneak Attack [Class - Rogue] |Sneak Attack Damage; DMG: 3d6 piercing| Expend=OnRoll |Will have to adjust for Rogue Level|
 | Sleep [Spell]|Sleep; Unconscious; DMGRT|Duration=1 Min| |
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
