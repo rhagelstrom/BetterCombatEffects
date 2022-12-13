@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.32
-**Updated:** 12/06/22
+**Current Version:** 3.33
+**Updated:** 12/13/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -123,6 +123,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 
 ## Conditional Operators
 * Not case-sensitive
+* **!** can be prepended to any of the below to provide a logical not
 
 | Operator |  Notes |
 | --- | ---|
@@ -163,15 +164,15 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 | Heavy Armor Master [Feat]|Heavy Armor Master; DMGR: 3 slashing, bludgeoning, piercing, !magic| Targeting=Self| |
 | Interception Fighting Style [Class - Fighter]|Interception Fighting Style; DMGR: 1d10 [PRF],all| | |
 | Pack Tactics [NPC] |Pack Tactics; IFT: RANGE(5,enemy); ADVATK| Targeting=Self| |
-| Rakish Audacity [Class - Rogue/Swashbuckler] |Rakish Audacity; ATURN; IFN: DIS; IFN: ADV; IF:CUSTOM(Sneak Attack Advantage); IF:CUSTOM(Sneak Attack Range); IF:RANGE(5,target); IFTN: RANGE(5,enemy); IFN: RANGE(5,!target); ATKHADD: Sneak Attack Damage;  DUSE; | Targeting=Self|Requires If NOT Untrue Effects extension. Will need to add IF: CUSTOM(Rakish Audacity) to sneak attack code.|
+| Rakish Audacity [Class - Rogue/Swashbuckler] |Rakish Audacity; ATURN; IF: !DIS; IF: !ADV; IF:CUSTOM(Sneak Attack Advantage); IF:CUSTOM(Sneak Attack Range); IF:RANGE(5,target); IFT: !RANGE(5,enemy); IF: !RANGE(5,!target); ATKHADD: Sneak Attack Damage;  DUSE; | Targeting=Self|Will need to add IF: CUSTOM(Rakish Audacity) to sneak attack code.|
 | Shadow [NPC] |Shadow; SDMGADDT: Strength Drain|Target=Self|Strength Drain is an effect in the custom effects list|
 | Shadow [NPC] |Strength Drain; STR: -1d4; STACK; RESTL| | |
 | Shield of the 300 [Item]| Shield of the 300; TDMGADDT: Shield of the 300 Bonus| Targeting=self|Shield of the 300 Bonus is an effect in the custom effects list|
 | Shield of the 300 [Item]| Shield of the 300 Bonus; AC: 1; TURNRS; STACK| ||
 | Shield Wall [NPC] |Shield Wall; IF: RANGE(5,draugr guardian); GRANTDISATK;| Targeting=Self| |
-| Sneak Attack [Class - Rogue] |Sneak Attack Range; ATURN; IFN: ADV; IFN: DIS; IFT: RANGE(5,enemy); IF: CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE |Targeting=Self | Doesn't check finesse. Will trigger with spell attack. Requires If NOT Untrue Effects extension.|
+| Sneak Attack [Class - Rogue] |Sneak Attack Range; ATURN; IF: !ADV; IF: !DIS; IFT: RANGE(5,enemy); IF: CUSTOM(Sneak Attack Advantage); ATKHADD: Sneak Attack Damage; DUSE |Targeting=Self | Doesn't check finesse. Will trigger with spell attack.|
 | Sneak Attack [Class - Rogue] |Sneak Attack Advantage; ATURN; IF: ADV; IF: CUSTOM(Sneak Attack Range); ATKHADD: Sneak Attack Damage; DUSE;| Targeting=Self | Doesn't check finesse. Will trigger with spell attack|
-| Sneak Attack [Class - Rogue] |Sneak Attack Damage; DMG: 3d6 piercing| Expend=OnRoll |Will have to adjust for Rogue Level|
+| Sneak Attack [Class - Rogue] |Sneak Attack Damage; DMG: 3d6 | Expend=OnRoll |Will have to adjust for Rogue Level|
 | Sleep [Spell]|Sleep; Unconscious; DMGRT|Duration=1 Min| |
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
 | Stunning Strike [Class - Monk]|Stunning Strike; Stunned; STURNRE | Duration=1 Rnd | |
