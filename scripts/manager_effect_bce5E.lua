@@ -13,6 +13,7 @@ local onPostAttackResolve = nil
 local modSave = nil
 local getEffectsByType = nil
 local hasEffect = nil
+local parseWords = nil
 
 -- Save vs condition
 local decodeActors = nil
@@ -146,6 +147,8 @@ function onInit()
 		CombatManager.addNPC = addNPCtoCT
 		CombatManager.addPC = addPCtoCT
 		-- End Save vs Condiition
+		parseWords = StringManager.parseWords
+		StringManager.parseWords = customParseWords
 
 		modSave = ActionSave.modSave
 		ActionSave.modSave = onModSaveHandler
@@ -222,6 +225,7 @@ function onClose()
 		ActionPower.performSaveVsRoll = performSaveVsRoll
 		ActionsManager.applyModifiers = applyModifiers
 		ActionAttack.onPostAttackResolve = onPostAttackResolve
+		StringManager.parseWords = parseWords
 
 		if bAdvancedEffects then
 		 	ActionsManager.performMultiAction = performMultiAction
@@ -709,6 +713,15 @@ end
 function customOnAttack(rSource, rTarget, rRoll)
 	local tMatch
 	local aTags = {"ATKD","ATKA","ATKR","ATKADD"}
+	if rSource then
+		rSource.tADVDIS = {}
+		if rRoll.sDesc:match("%[ADV]") then
+			rSource.tADVDIS.bADV = true
+		end
+		if rRoll.sDesc:match("%[DIS]") then
+			rSource.tADVDIS.bDIS = true
+		end
+	end
 
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
@@ -733,6 +746,7 @@ function customOnAttack(rSource, rTarget, rRoll)
 			end
 		end
 	end
+	rSource.tADVDIS = nil
 	return onAttack(rSource, rTarget, rRoll)
 end
 
@@ -1677,6 +1691,18 @@ function customCheckFlanking(rSource, rTarget)
 		return checkFlanking(rSource, rTarget)
 	end
 end
+
+
+---******* Conflict potential*****
+-- Added ! to match in front of a word
+function customParseWords(s, extra_delimiters)
+	local delim = "^%w%+%-%!'’";
+	if extra_delimiters then
+		delim = delim .. extra_delimiters;
+	end
+	return StringManager.split(s, delim, true);
+end
+
 
 function customParseEffects(sPowerName, aWords)
 	if OptionsManager.isOption("AUTOPARSE_EFFECTS", "off") then

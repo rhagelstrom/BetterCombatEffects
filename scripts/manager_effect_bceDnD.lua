@@ -548,53 +548,51 @@ function customCheckConditional(rActor, nodeEffect, aConditions, rTarget, aIgnor
 	if bReturn then
 		for _,v in ipairs(aConditions) do
 			local sLower = v:lower();
+			local bInvert = false
+			if StringManager.startsWith(sLower, "!") then
+				sLower = sLower:sub(2);
+				bInvert = true
+			end
 			local sTempHP = (sLower == "temphp" or sLower:match("^temphp%s*%(([^)]+)%)$"));
 			local sRange =  sLower:match("^range%s*%(([^)]+)%)$");
 			local sWounds = sLower:match("^wounds%s*%(([^)]+)%)$");
 
 			if sTempHP then
-				if not EffectsManagerBCEDND.hasTempHP(rActor, sTempHP) then
+				if (not bInvert and not EffectsManagerBCEDND.hasTempHP(rActor, sTempHP)) or (bInvert and EffectsManagerBCEDND.hasTempHP(rActor, sTempHP)) then
 					bReturn = false;
 					break;
 				end
 			end
 			if sLower == "healthy" or sLower == "light" or sLower == "moderate" or sLower == "heavy" or sLower == "critical" then
-				if not EffectsManagerBCEDND.isWounded(rActor, sLower) then
+				if (not bInvert and not EffectsManagerBCEDND.isWounded(rActor, sLower)) or (bInvert and EffectsManagerBCEDND.isWounded(rActor, sLower)) then
 					bReturn = false;
 					break;
 				end
 			end
 			if sLower == "dying" then
-				if ActorHealthManager.isDyingOrDead(rActor) then
+				if (not bInvert and ActorHealthManager.isDyingOrDead(rActor)) or (bInvert and not ActorHealthManager.isDyingOrDead(rActor)) then
 					bReturn = false;
 					break;
 				end
 			end
 			if sWounds then
-				if not EffectsManagerBCEDND.isWoundsPercent(rActor, sWounds) then
+				if (not bInvert and not EffectsManagerBCEDND.isWoundsPercent(rActor, sWounds)) or (bInvert and EffectsManagerBCEDND.isWoundsPercent(rActor, sWounds)) then
 					bReturn = false;
 					break;
 				end
 			end
 			if sRange then
-				if not EffectsManagerBCEDND.isRange(rActor, sRange, rTarget) then
+				if (not bInvert and not EffectsManagerBCEDND.isRange(rActor, sRange, rTarget)) or (bInvert and EffectsManagerBCEDND.isRange(rActor, sRange, rTarget)) then
 					bReturn = false;
 					break;
 				end
 			end
-			if sLower == "adv" then
-				if not EffectsManagerBCEDND.isADVDIS(rActor, sLower, rTarget) then
+			if sLower == "adv" or sLower == "dis" then
+				if (not bInvert and not EffectsManagerBCEDND.isADVDIS(rActor, sLower, rTarget)) or (bInvert and EffectsManagerBCEDND.isADVDIS(rActor, sLower, rTarget)) then
 					bReturn = false;
 					break;
 				end
 			end
-			if sLower == "dis" then
-				if not EffectsManagerBCEDND.isADVDIS(rActor, sLower, rTarget) then
-					bReturn = false;
-					break;
-				end
-			end
-
 		end
 	end
 	return bReturn;
