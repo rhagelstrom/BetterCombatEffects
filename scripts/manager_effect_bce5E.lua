@@ -45,7 +45,7 @@ function onInit()
 		EffectsManagerBCE.registerBCETag("SAVEE", EffectsManagerBCE.aBCEDefaultOptions)
 		EffectsManagerBCE.registerBCETag("SAVEADD", EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("SAVEADDP", EffectsManagerBCE.aBCEDefaultOptionsAE)
-		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEDefaultOptions)
+		EffectsManagerBCE.registerBCETag("SAVEDMG", EffectsManagerBCE.aBCEActivateOptionsAE)
 		EffectsManagerBCE.registerBCETag("SAVEONDMG", EffectsManagerBCE.aBCEDefaultOptionsAE)
 		EffectsManagerBCE.registerBCETag("DC",  EffectsManagerBCE.aBCEDefaultOptions)
 
