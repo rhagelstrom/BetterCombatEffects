@@ -556,6 +556,7 @@ function customCheckConditional(rActor, nodeEffect, aConditions, rTarget, aIgnor
 			local sTempHP = (sLower == "temphp" or sLower:match("^temphp%s*%(([^)]+)%)$"));
 			local sRange =  sLower:match("^range%s*%(([^)]+)%)$");
 			local sWounds = sLower:match("^wounds%s*%(([^)]+)%)$");
+			local sSource = sLower:match("^source%s*%(([^)]+)%)$");
 
 			if sTempHP then
 				if (not bInvert and not EffectsManagerBCEDND.hasTempHP(rActor, sTempHP)) or (bInvert and EffectsManagerBCEDND.hasTempHP(rActor, sTempHP)) then
@@ -563,14 +564,8 @@ function customCheckConditional(rActor, nodeEffect, aConditions, rTarget, aIgnor
 					break;
 				end
 			end
-			if sLower == "healthy" or sLower == "light" or sLower == "moderate" or sLower == "heavy" or sLower == "critical" then
+			if sLower == "healthy" or sLower == "light" or sLower == "moderate" or sLower == "heavy" or sLower == "critical" or sLower == "dying" then
 				if (not bInvert and not EffectsManagerBCEDND.isWounded(rActor, sLower)) or (bInvert and EffectsManagerBCEDND.isWounded(rActor, sLower)) then
-					bReturn = false;
-					break;
-				end
-			end
-			if sLower == "dying" then
-				if (not bInvert and ActorHealthManager.isDyingOrDead(rActor)) or (bInvert and not ActorHealthManager.isDyingOrDead(rActor)) then
 					bReturn = false;
 					break;
 				end
@@ -593,15 +588,21 @@ function customCheckConditional(rActor, nodeEffect, aConditions, rTarget, aIgnor
 					break;
 				end
 			end
+			if sSource then
+				if (not bInvert and not EffectsManagerBCEDND.isSourceAttack(rActor, sSource, rTarget)) or (bInvert and EffectsManagerBCEDND.isSourceAttack(rActor, sSource, rTarget)) then
+					bReturn = false;
+					break;
+				end
+			end
 		end
 	end
 	return bReturn;
 end
 function isADVDIS(rActor, sAdvDis)
 	local bReturn = false;
-	if sAdvDis == "adv" and rActor.tADVDIS and rActor.tADVDIS.bADV  and (rActor.tADVDIS.bADV ~= rActor.tADVDIS.bDIS) then
+	if sAdvDis == "adv" and rActor.tBCEG and rActor.tBCEG.bADV  and (rActor.tBCEG.bADV ~= rActor.tBCEG.bDIS) then
 		bReturn = true;
-	elseif sAdvDis == "dis" and rActor.tADVDIS and rActor.tADVDIS.bDIS and (rActor.tADVDIS.bDIS ~= rActor.tADVDIS.bADV) then
+	elseif sAdvDis == "dis" and rActor.tBCEG and rActor.tBCEG.bDIS and (rActor.tBCEG.bDIS ~= rActor.tBCEG.bADV) then
 		bReturn = true;
 	end
 	return bReturn;
@@ -654,6 +655,8 @@ function isWounded(rActor, sOperator)
 		bReturn = true;
 	elseif sOperator == "critical" and nPercentWounded > .75 and nPercentWounded < 1 then
 		bReturn = true;
+	elseif sOperator == "dying" and nPercentWounded >= 1 then
+		bReturn = true;
 	end
 	return bReturn;
 end
@@ -681,26 +684,38 @@ function isWoundsPercent(rActor, sClause)
 	return bReturn;
 end
 
+function isSourceAttack(rActor, sSource)
+	local bReturn = false;
+	if rActor.tBCEG and rActor.tBCEG.sSourcePath then
+		local tFilter = EffectsManagerBCEDND.parseFilter(sSource);
+		local nodeSourceCT = DB.findNode(rActor.tBCEG.sSourcePath);
+		if nodeSourceCT then
+			bReturn = EffectsManagerBCEDND.filterActor(nodeSourceCT, tFilter);
+		end
+	end
+	return bReturn;
+end
+
 function isRange(rActor, sRange, rActorIgnore)
 	local bReturn = false;
 	local nodeCTActorIgnore = nil;
-	local tRange = EffectsManagerBCEDND.parseRange(sRange);
+	local tFilter = EffectsManagerBCEDND.parseFilter(sRange);
 	local nodeCTActor = ActorManager.getCTNode(rActor);
 	local tokenActor = CombatManager.getTokenFromCT(nodeCTActor);
 	local aSearchTokens = {};
 	local aTargets = {};
-	if tRange.sTarget then
+	if tFilter.sTarget then
 		aTargets = TargetingManager.getFullTargets(rActor);
 	end
-	if tRange.nRange and tokenActor then
-		aSearchTokens = Token.getTokensWithinDistance(tokenActor, tRange.nRange);
-		tRange.sFaction = CombatManager.getFactionFromCT(nodeCTActor);
+	if tFilter.nRange and tokenActor then
+		aSearchTokens = Token.getTokensWithinDistance(tokenActor, tFilter.nRange);
+		tFilter.sFaction = CombatManager.getFactionFromCT(nodeCTActor);
 		if rActorIgnore then
 			nodeCTActorIgnore = ActorManager.getCTNode(rActorIgnore);
 		end
 		for _, tokenCT in pairs(aSearchTokens) do
 			local nodeCT = CombatManager.getCTFromToken(tokenCT);
-			if nodeCT and (nodeCTActor ~= nodeCT) and (nodeCTActorIgnore ~= nodeCT) and EffectsManagerBCEDND.filterRange(nodeCT, tRange, aTargets) then
+			if nodeCT and (nodeCTActor ~= nodeCT) and (nodeCTActorIgnore ~= nodeCT) and EffectsManagerBCEDND.filterActor(nodeCT, tFilter, aTargets) then
 				local rActorCT = ActorManager.resolveActor(nodeCT);
 				if not (EffectManager.hasCondition(rActorCT, "Stunned" or EffectManager.hasCondition(rActorCT, "Unconscious"))
 						or EffectManager.hasCondition(rActorCT, "Paralyzed") or EffectManager.hasCondition(rActorCT, "Incapacitated")
@@ -727,65 +742,65 @@ function parseOperator(sInput)
 	return sOperator, StringManager.combine(",",unpack(aClause));
 end
 
-function parseRange(sRange)
-	local tRange = {nRange = nil, sTarget = nil, aFaction = {}, aNamed = {}, aType = {}};
-	local aRange = StringManager.splitByPattern(sRange, "%s*,%s*", true);
+function parseFilter(sFilter)
+	local tFilter = {nRange = nil, sTarget = nil, aFaction = {}, aNamed = {}, aType = {}};
+	local aFilter = StringManager.splitByPattern(sFilter, "%s*,%s*", true);
 
-	for _, sWord in pairs(aRange) do
+	for _, sWord in pairs(aFilter) do
 		local sCleanWord = sWord;
 		if StringManager.startsWith(sWord, "!") then
 			sCleanWord = sWord:sub(2);
 		end
 		local nRange = tonumber(sWord);
 		if nRange then
-			tRange.nRange = nRange;
+			tFilter.nRange = nRange;
 		elseif sCleanWord == "friend" or sCleanWord == "foe" or sCleanWord == "neutral" or sCleanWord == "ally" or sCleanWord == "enemy" then
-			table.insert(tRange.aFaction, sWord);
+			table.insert(tFilter.aFaction, sWord);
 		elseif sCleanWord == "target" then
-			tRange.sTarget = sWord;
+			tFilter.sTarget = sWord;
 		elseif StringManager.contains(DataCommon.creaturetype, sCleanWord) or StringManager.contains(DataCommon.creaturesubtype, sCleanWord) then
-			table.insert(tRange.aType, sWord);
+			table.insert(tFilter.aType, sWord);
 		else
-			table.insert(tRange.aNamed, sWord);
+			table.insert(tFilter.aNamed, sWord);
 		end
 	end
-	return tRange;
+	return tFilter;
 end
 
-function filterRange(nodeCT, tRange, aTargets)
-	if next(tRange.aFaction) and not EffectsManagerBCEDND.filterFaction(nodeCT, tRange) then
+function filterActor(nodeCT, tFilter, aTargets)
+	if next(tFilter.aFaction) and not EffectsManagerBCEDND.filterFaction(nodeCT, tFilter) then
 		return false;
 	end
-	if next(tRange.aNamed) and not EffectsManagerBCEDND.filterCreatureName(nodeCT, tRange) then
+	if next(tFilter.aNamed) and not EffectsManagerBCEDND.filterCreatureName(nodeCT, tFilter) then
 		return false;
 	end
-	if next(tRange.aType) and not EffectsManagerBCEDND.filterCreatureType(nodeCT, tRange) then
+	if next(tFilter.aType) and not EffectsManagerBCEDND.filterCreatureType(nodeCT, tFilter) then
 		return false;
 	end
-	if next(tRange.aType) and not EffectsManagerBCEDND.filterCreatureType(nodeCT, tRange, aTargets) then
+	if next(tFilter.aType) and next(aTargets) and not EffectsManagerBCEDND.filterCreatureType(nodeCT, tFilter, aTargets) then
 		return false;
 	end
-	if tRange.sTarget and next(aTargets) and not EffectsManagerBCEDND.filterTargets(nodeCT, tRange, aTargets) then
+	if tFilter.sTarget and next(aTargets) and not EffectsManagerBCEDND.filterTargets(nodeCT, tFilter, aTargets) then
 		return false;
 	end
 
 	return true;
 end
 
-function filterFaction(nodeCT, tRange)
+function filterFaction(nodeCT, tFilter)
 	local bReturn = false;
 	local sFaction = CombatManager.getFactionFromCT(nodeCT);
-	for _, sFactionFilter in pairs(tRange.aFaction) do
+	for _, sFactionFilter in pairs(tFilter.aFaction) do
 		local bInvert = false;
 		if StringManager.startsWith(sFactionFilter, "!") then
 			sFactionFilter = sFactionFilter:sub(2);
 			bInvert = true;
 		end
 		if bInvert then
-			if sFactionFilter == "enemy" and sFaction == tRange.sFaction then
+			if sFactionFilter == "enemy" and sFaction == tFilter.sFaction then
 				bReturn = true;
 				break;
-			elseif sFactionFilter == "ally" and ((sFaction == "foe" and tRange.sFaction == "friend") or (sFaction == "friend" and tRange.sFaction == "foe")) then
+			elseif sFactionFilter == "ally" and ((sFaction == "foe" and tFilter.sFaction == "friend") or (sFaction == "friend" and tFilter.sFaction == "foe")) then
 				bReturn = true;
 				break;
 			elseif (sFactionFilter ~= "ally" and sFactionFilter ~= "enemy") and sFaction ~= sFactionFilter  then
@@ -793,10 +808,10 @@ function filterFaction(nodeCT, tRange)
 				break;
 			end
 		else
-			if sFactionFilter == "ally" and sFaction == tRange.sFaction then
+			if sFactionFilter == "ally" and sFaction == tFilter.sFaction then
 				bReturn = true;
 				break;
-			elseif sFactionFilter == "enemy" and ((sFaction == "foe" and tRange.sFaction == "friend") or (sFaction == "friend" and tRange.sFaction == "foe")) then
+			elseif sFactionFilter == "enemy" and ((sFaction == "foe" and tFilter.sFaction == "friend") or (sFaction == "friend" and tFilter.sFaction == "foe")) then
 				bReturn = true;
 				break;
 			elseif (sFaction == sFactionFilter) then
@@ -808,12 +823,12 @@ function filterFaction(nodeCT, tRange)
 	return bReturn;
 end
 
-function filterCreatureName(nodeCT, tRange)
+function filterCreatureName(nodeCT, tFilter)
 	local bReturn = false;
-	if next(tRange.aNamed) then
+	if next(tFilter.aNamed) then
 		local rActorCT = ActorManager.resolveActor(nodeCT);
 		local sNameLower = rActorCT.sName:lower();
-		for _, sName in pairs(tRange.aNamed) do
+		for _, sName in pairs(tFilter.aNamed) do
 			local bInvert = false;
 			if StringManager.startsWith(sName, "!") then
 				sName = sName:sub(2);
@@ -831,12 +846,12 @@ function filterCreatureName(nodeCT, tRange)
 	return bReturn;
 end
 
-function filterTargets(nodeCT, tRange, aTarget)
+function filterTargets(nodeCT, tFilter, aTarget)
 	local bReturn = false;
 	for _, rTarget in pairs(aTarget) do
 		local bInvert = false;
 		local nodeTarget = ActorManager.getCTNode(rTarget);
-		if StringManager.startsWith(tRange.sTarget, "!") then
+		if StringManager.startsWith(tFilter.sTarget, "!") then
 			bInvert = true;
 		end
 		if bInvert and nodeCT ~= nodeTarget then

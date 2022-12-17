@@ -8,9 +8,11 @@ local parseEffects = nil
 local evalAction = nil
 local performMultiAction = nil
 local onPostAttackResolve = nil
+local applyDamage = nil
 --local bAutomaticShieldMaster = nil
 --local bMadNomadCharSheetEffectDisplay = nil
 local modSave = nil
+local modAttack = nil
 local getEffectsByType = nil
 local hasEffect = nil
 local parseWords = nil
@@ -89,6 +91,7 @@ function onInit()
 		ActionsManager.registerResultHandler("save", onSaveRollHandler5E)
 		ActionsManager.registerModHandler("save", onModSaveHandler)
 		ActionsManager.registerResultHandler("attack", customOnAttack)
+		ActionsManager.registerModHandler("attack", customModAttack)
 
 		--4E/5E
 		EffectsManagerBCE.registerBCETag("DMGR",EffectsManagerBCE.aBCEDefaultOptions)
@@ -164,9 +167,14 @@ function onInit()
 		ActionAttack.onAttack = customOnAttack
 		onPostAttackResolve =ActionAttack.onPostAttackResolve
 		ActionAttack.onPostAttackResolve = customOnPostAttackResolve
+		modAttack = ActionAttack.modAttack
+		ActionAttack.modAttack = customModAttack
 
 		applyModifiers =	ActionsManager.applyModifiers
 		ActionsManager.applyModifiers = customApplyModifiers
+
+		applyDamage = ActionDamage.applyDamage
+		ActionDamage.applyDamage = customApplyDamage
 
 		onSave = ActionSave.onSave
 		ActionSave.onSave = onSaveRollHandler5E
@@ -205,6 +213,7 @@ function onClose()
 		CombatManager2.resetHealth = resetHealth
 		ActionDamage.getDamageAdjust = getDamageAdjust
 		PowerManager.parseEffects = parseEffects
+		ActionDamage.applyDamage = applyDamage
 
 		ActionsManager.unregisterResultHandler("save")
 		ActionSave.onSave = onSave
@@ -226,7 +235,7 @@ function onClose()
 		ActionsManager.applyModifiers = applyModifiers
 		ActionAttack.onPostAttackResolve = onPostAttackResolve
 		StringManager.parseWords = parseWords
-
+		ActionAttack.modAttack = modAttack
 		if bAdvancedEffects then
 		 	ActionsManager.performMultiAction = performMultiAction
 		end
@@ -710,18 +719,23 @@ function customApplyModifiers(rSource, rTarget, rRoll, bSkipModStack)
 	return unpack(results)
 end
 
+function customModAttack(rSource, rTarget, rRoll)
+	addConditionalHelper(rSource, rTarget, rRoll);
+	modAttack(rSource, rTarget, rRoll);
+	removeConditionalHelper(rSource, rTarget, rRoll);
+end
+
+function customApplyDamage(rSource, rTarget, rRoll)
+	addConditionalHelper(rSource, rTarget, rRoll);
+	applyDamage(rSource, rTarget, rRoll);
+	removeConditionalHelper(rSource, rTarget, rRoll);
+end
+
 function customOnAttack(rSource, rTarget, rRoll)
 	local tMatch
 	local aTags = {"ATKD","ATKA","ATKR","ATKADD"}
-	if rSource then
-		rSource.tADVDIS = {}
-		if rRoll.sDesc:match("%[ADV]") then
-			rSource.tADVDIS.bADV = true
-		end
-		if rRoll.sDesc:match("%[DIS]") then
-			rSource.tADVDIS.bDIS = true
-		end
-	end
+
+	addConditionalHelper(rSource, rTarget, rRoll);
 
 	tMatch = EffectsManagerBCE.getEffects(rSource, aTags, rSource)
 	for _,tEffect in pairs(tMatch) do
@@ -746,8 +760,8 @@ function customOnAttack(rSource, rTarget, rRoll)
 			end
 		end
 	end
-	rSource.tADVDIS = nil
-	return onAttack(rSource, rTarget, rRoll)
+	onAttack(rSource, rTarget, rRoll)
+	removeConditionalHelper(rSource, rTarget, rRoll);
 end
 
 function customOnPostAttackResolve(rSource, rTarget, rRoll, rMessage)
@@ -764,15 +778,7 @@ function customOnPostAttackResolve(rSource, rTarget, rRoll, rMessage)
 	elseif rRoll.sResult == "miss" or rRoll.sResult == "fumble" then
 		aTags = {"TATKMDMGS"}
 	end
-	if rSource then
-		rSource.tADVDIS = {}
-		if rRoll.sDesc:match("%[ADV]") then
-			rSource.tADVDIS.bADV = true
-		end
-		if rRoll.sDesc:match("%[DIS]") then
-			rSource.tADVDIS.bDIS = true
-		end
-	end
+	addConditionalHelper(rSource, rTarget, rRoll);
 
 	tMatch = EffectsManagerBCE.getEffects(rTarget, aTags, rTarget, nil, nil, aRange)
 	for _,tEffect in pairs(tMatch) do
@@ -812,14 +818,34 @@ function customOnPostAttackResolve(rSource, rTarget, rRoll, rMessage)
 			end
 		end
 	end
-	if rSource then
-		rSource.tADVDIS = nil
-	end
-
-	return onPostAttackResolve(rSource, rTarget, rRoll, rMessage)
+	onPostAttackResolve(rSource, rTarget, rRoll, rMessage)
+	removeConditionalHelper(rSource, rTarget, rRoll);
 end
 
-
+function addConditionalHelper(rSource, rTarget, rRoll)
+	if rSource then
+		rSource.tBCEG = {}
+		if rRoll.sDesc:match("%[ADV]") then
+			rSource.tBCEG.bADV = true
+		end
+		if rRoll.sDesc:match("%[DIS]") then
+			rSource.tBCEG.bDIS = true
+		end
+	end
+	if rTarget then
+		rTarget.tBCEG = {}
+		rTarget.tBCEG.sTargetPath = DB.getPath(ActorManager.getCTNode(rTarget))
+		rTarget.tBCEG.sSourcePath = DB.getPath(ActorManager.getCTNode(rSource))
+	end
+end
+function removeConditionalHelper(rSource, rTarget, rRoll)
+	if rSource then
+		rSource.tBCEG = nil
+	end
+	if rTarget then
+		rTarget.tBCEG = nil
+	end
+end
 
 -- For NPC
 function customResetHealth (nodeCT, bLong)
@@ -1483,7 +1509,9 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 			end
 		end
 	end
-	return modSave(rSource, rTarget, rRoll)
+	addConditionalHelper(rSource, rTarget, rRoll);
+	modSave(rSource, rTarget, rRoll)
+	removeConditionalHelper(rSource, rTarget, rRoll);
 end
 
 function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)

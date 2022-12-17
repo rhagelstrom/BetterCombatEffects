@@ -1,7 +1,7 @@
 # Better Combat Effects Gold
 
-**Current Version:** 3.33
-**Updated:** 12/13/22
+**Current Version:** 3.34
+**Updated:** 12/17/22
 
 Better Combat Effects Gold is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Better Combat Effects Gold is specifically tuned to support 5eAE effects package.
 
@@ -136,6 +136,7 @@ Better Combat Effects Gold supports Effect Builder, a GUI for building effects
 |CRITICAL|True if the actor has wounds that are >=75% and <100% of hit point maximum.|
 |DYING|True if the actor is dying or dead.|
 |RANGE( (N) , ![faction]* , ![creature type]* , ![creature name]*, ![target] )|True if the actor is within the specified range (N) of at least one other actor that is not incapacitated. Filters can be applied to match only specified.|
+|SOURCE( ![faction]* , ![creature type]* , ![creature name]*)|True if the source of the attack, damage, save matches. Useful for defensive advantages against specific creatures|
 |TEMPHP or TEMPHP( [operation] , (N))|True if the actor has any temporary hit points or temporary hit points are greater/less than the operation.|
 |WOUNDS( [operation] , (.N) )|True if the actor's wounds, as a decimal percent of their hit point maximum, is greater/less than the operation.|
 * **[creature name]** = creature name to match. E.g. skeleton will match skeleton, skeleton 1, and giant skeleton
