@@ -1512,7 +1512,6 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 		end
 	end
 
-	local rActorCT = ActorManager.resolveActor(nodeSourceCT);
 	addConditionalHelper(rSource, rTarget, rRoll);
 	if rRoll.sSource and rRoll.sSource:match("effects-id") then
 		local nodeEffect = DB.findNode(rRoll.sSource);
