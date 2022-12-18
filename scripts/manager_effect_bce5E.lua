@@ -831,6 +831,8 @@ function addConditionalHelper(rSource, rTarget, rRoll)
 		if rRoll.sDesc:match("%[DIS]") then
 			rSource.tBCEG.bDIS = true
 		end
+		rSource.tBCEG.sTargetPath = DB.getPath(ActorManager.getCTNode(rTarget))
+		rSource.tBCEG.sSourcePath = DB.getPath(ActorManager.getCTNode(rSource))
 	end
 	if rTarget then
 		rTarget.tBCEG = {}
@@ -1509,7 +1511,17 @@ function onModSaveHandler(rSource, rTarget, rRoll)
 			end
 		end
 	end
+
+	local rActorCT = ActorManager.resolveActor(nodeSourceCT);
 	addConditionalHelper(rSource, rTarget, rRoll);
+	if rRoll.sSource and rRoll.sSource:match("effects-id") then
+		local nodeEffect = DB.findNode(rRoll.sSource);
+		if nodeEffect then
+			rSource.tBCEG.sSourcePath = nodeEffect.getParent().getPath();
+		end
+	else
+		rSource.tBCEG.sSourcePath = rRoll.sSource;
+	end
 	modSave(rSource, rTarget, rRoll)
 	removeConditionalHelper(rSource, rTarget, rRoll);
 end

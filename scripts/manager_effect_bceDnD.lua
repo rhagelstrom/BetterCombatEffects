@@ -768,23 +768,51 @@ function parseFilter(sFilter)
 end
 
 function filterActor(nodeCT, tFilter, aTargets)
-	if next(tFilter.aFaction) and not EffectsManagerBCEDND.filterFaction(nodeCT, tFilter) then
-		return false;
+	local bReturn = false
+	if next(tFilter.aFaction) and EffectsManagerBCEDND.filterFaction(nodeCT, tFilter) then
+		bReturn = true;
 	end
-	if next(tFilter.aNamed) and not EffectsManagerBCEDND.filterCreatureName(nodeCT, tFilter) then
-		return false;
+	if not bReturn and next(tFilter.aNamed) and EffectsManagerBCEDND.filterCreatureName(nodeCT, tFilter) then
+		bReturn = true;
 	end
-	if next(tFilter.aType) and not EffectsManagerBCEDND.filterCreatureType(nodeCT, tFilter) then
-		return false;
+	if not bReturn and next(tFilter.aType) and EffectsManagerBCEDND.filterCreatureType(nodeCT, tFilter, aTargets) then
+		bReturn = true;
 	end
-	if next(tFilter.aType) and next(aTargets) and not EffectsManagerBCEDND.filterCreatureType(nodeCT, tFilter, aTargets) then
-		return false;
-	end
-	if tFilter.sTarget and next(aTargets) and not EffectsManagerBCEDND.filterTargets(nodeCT, tFilter, aTargets) then
-		return false;
+	if not bReturn and tFilter.sTarget and next(aTargets) and EffectsManagerBCEDND.filterTargets(nodeCT, tFilter, aTargets) then
+		bReturn = true;
 	end
 
-	return true;
+	return bReturn;
+end
+
+function filterCreatureType(nodeCT, tFilter, aTargets)
+	local bReturn = false;
+	for _, sCreatureFilter in pairs(tFilter.aType) do
+		local bInvert = false;
+		if StringManager.startsWith(sCreatureFilter, "!") then
+			sCreatureFilter = sCreatureFilter:sub(2);
+			bInvert = true;
+		end
+		if aTargets and next(aTargets) then
+			for _, rTarget in pairs(aTargets) do
+				if (not bInvert and ActorCommonManager.isCreatureTypeDnD(rTarget, sCreatureFilter)) or
+						(bInvert and not ActorCommonManager.isCreatureTypeDnD(rTarget, sCreatureFilter)) then
+					bReturn = true;
+					break;
+				end
+			end
+		else
+			local rActorCT = ActorManager.resolveActor(nodeCT);
+			if (not bInvert and ActorCommonManager.isCreatureTypeDnD(rActorCT, sCreatureFilter)) or
+					(bInvert and not ActorCommonManager.isCreatureTypeDnD(rActorCT, sCreatureFilter)) then
+				bReturn = true;
+			end
+		end
+		if bReturn then
+			break;
+		end
+	end
+	return bReturn;
 end
 
 function filterFaction(nodeCT, tFilter)
