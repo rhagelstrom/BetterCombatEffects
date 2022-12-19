@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <root release="3.0" version="3">
-	<announcement text="Better Combat Effects v2.64\rby Ryan Hagelstrom\rContribution MeAndUnique 2021-2022" font="emotefont" icon="BetterCombatEffects"/>
+	<announcement text="Better Combat Effects v4.0-rc1\rby Ryan Hagelstrom\rContribution MeAndUnique 2021-2023" font="emotefont" icon="BetterCombatEffects"/>
 	<properties>
     	<loadorder>120</loadorder>
 		<name>Feature: Better Combat Effects</name>
-		<version>2.64</version>
+		<version>4.0-rc1</version>
 		<author>Ryan Hagelstrom Contribution: MeAndUnique</author>
 		<description>Better Combat Effects, Automatically enable/disable/add/remove effects on the start of turn, end of turn, or when damage is taken</description>
 	</properties>
@@ -12,11 +12,13 @@
     		<icon name="BetterCombatEffects" file="graphics/icons/bce.png"></icon>
     		<icon name="bce_save" file="graphics/icons/bce_save.png"></icon>
     		<includefile source="strings/strings_bce.xml" />
+			<includefile source="scripts/core/loader_core.xml" />
+			<includefile source="scripts/dnd/loader_dnd.xml"	ruleset="5E" />
+			<includefile source="scripts/dnd/loader_dnd.xml"	ruleset="4E" />
+			<includefile source="scripts/dnd/loader_dnd.xml"	ruleset="3.5E" />
+			<includefile source="scripts/5e/loader_5e.xml"		ruleset="5E" />
+			<includefile source="scripts/4e/loader_4e.xml"		ruleset="4E" />
+			<includefile source="scripts/35e/loader_35e.xml"	ruleset="3.5E" />
 			<includefile source="effect_builder/editor_loader.xml" />
-    		<script name="EffectsManagerBCE" file="scripts/manager_effect_bce.lua" />
-    		<script name="EffectsManagerBCEDND" file="scripts/manager_effect_bceDND.lua" />
-    		<script name="EffectsManagerBCE5E" file="scripts/manager_effect_bce5E.lua" />
-    		<script name="EffectsManagerBCE4E" file="scripts/manager_effect_bce4E.lua" />
-    		<script name="EffectsManagerBCE35E" file="scripts/manager_effect_bce35E.lua" />
   	</base>
 </root>

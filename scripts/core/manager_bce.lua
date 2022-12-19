@@ -1,0 +1,411 @@
+--  	Author: Ryan Hagelstrom
+--	  	Copyright © 2021-2023
+--	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+--	  	https://creativecommons.org/licenses/by-sa/4.0/
+
+OOB_MSGTYPE_BCEACTIVATE = "activateeffect";
+OOB_MSGTYPE_BCEDEACTIVATE = "deactivateeffect";
+OOB_MSGTYPE_BCEREMOVE = "removeeffect";
+OOB_MSGTYPE_BCEUPDATE = "updateeffect";
+OOB_MSGTYPE_BCEADD = "addeffectbce";
+
+local tExtensions = {};
+local tGlobalEffects = {};
+local tEffectsLookup = {};
+
+local bDebug = false;
+
+function onInit()
+    if Session.IsHost then
+    	OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEACTIVATE, handleActivateEffect);
+	    OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect);
+	    OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect);
+	    OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect);
+	    OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEADD, handleAddEffect);
+
+		BCEManager.initGlobalEffects();
+		DB.addHandler("effects", "onChildAdded", effectAdded);
+		Module.onModuleLoad = onModuleLoad;
+		Module.onModuleUnload = onModuleUnload;
+    end
+	tExtensions = BCEManager.getExtensions();
+end
+
+function onClose()
+	if Session.IsHost then
+		BCEManager.removeEffectHandlers();
+		CombatManager.removeCustomDeleteCombatantEffectHandler(expireAdd)
+	end
+end
+
+------------------ DEBUG ------------------
+function chat(...)
+	if bDebug then
+		Debug.chat(...)
+	end
+end
+
+function console(...)
+	if bDebug then
+		Debug.console(...)
+	end
+end
+------------------ END DEBUG ------------------
+
+------------------ EXTENSION HELPERS ------------------
+function getExtensions()
+	local tReturn = {};
+	for _, sName in pairs(Extension.getExtensions()) do
+		tReturn[sName] = Extension.getExtensionInfo(sName);
+	end
+	return tReturn;
+end
+
+--Matches on the filname minus the .ext or on the name in defined in the extension.xml
+function hasExtension(sName)
+	local bReturn = false;
+
+	if tExtensions[sName] then
+		bReturn = true;
+	else
+		for _,tExtension in pairs(tExtensions) do
+			if tExtension.name == sName then
+				bReturn = true;
+				break;
+			end
+		end
+	end
+	return bReturn;
+end
+------------------ END EXTENSION HELPERS ------------------
+
+------------------ BINARY SEARCH ------------------
+function getEffectName(sLabel)
+	local aEffectComps = EffectManager.parseEffect(sLabel:lower());
+	if next(aEffectComps) then
+		return aEffectComps[1];
+	else
+		return "";
+	end
+end
+function effectAdded(nodeRoot, nodeEffect)
+	local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect,"label", "")), "insert", nodeEffect.getPath());
+	tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
+	if not tSearchEffect then
+		BCEManager.chat("Problem added effect: " .. DB.getValue(nodeEffect,"label", ""));
+	else
+		addNodeHandlers(tSearchEffect.sPath, tSearchEffect.sName);
+	end
+end
+
+function effectDeleted(nodeEffect)
+	DB.getValue(nodeEffect,"label", "");
+	local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect,"label", "")), "remove", nodeEffect.getPath());
+	tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
+	if not tSearchEffect then
+		BCEManager.chat("Problem deleting effect: " .. DB.getValue(nodeEffect,"label", ""));
+	else
+		tEffectsLookup[tSearchEffect.sPath] = nil;
+		BCEManager.removeNodeHandlers(tSearchEffect.sPath);
+	end
+end
+
+function effectIntegrityChange(nodeEffect)
+	BCEManager.chat("Integrity Change for: ", DB.getChild(nodeEffect, "label"));
+	BCEManager.effectUpdated(DB.getChild(nodeEffect, "label"));
+end
+
+-- Updates need a lookup table because we dont' know what the label of the node was prior to change
+function effectUpdated(nodeLabel)
+	local nodeEffect = nodeLabel.getParent();
+	local sPath = nodeEffect.getPath();
+	local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(tEffectsLookup[sPath]), "update", sPath);
+	tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
+	if not tSearchEffect then
+		BCEManager.chat("Problem updating effect: " .. tEffectsLookup[sPath]);
+	else
+		tEffectsLookup[sPath] = DB.getValue(nodeEffect,"label", "");
+	end
+end
+
+function matchEffect(sEffect)
+    local rEffect = {};
+	local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(sEffect), "search");
+    tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
+	BCEManager.chat("MatchEffect: ",tSearchEffect)
+	if tSearchEffect then
+		local nodeEffect = DB.findNode(tSearchEffect.sPath);
+		if nodeEffect then
+			rEffect = EffectManager.getEffect(nodeEffect);
+		end
+	end
+    return rEffect;
+end
+
+function onModuleLoad(sModule)
+	local nodeRoot = DB.getRoot(sModule);
+	if nodeRoot then
+		BCEManager.chat("Module Load: " .. sModule)
+		for _,nodeEffect in pairs(DB.getChildren(nodeRoot, ".effects")) do
+			BCEManager.effectAdded(nodeRoot, nodeEffect);
+		 end
+	end
+end
+
+function onModuleUnload(sModule)
+	local nodeRoot = DB.getRoot(sModule);
+	if nodeRoot then
+		BCEManager.chat("Module Unload: " .. sModule)
+		for _,nodeEffect in pairs(DB.getChildren(nodeRoot, ".effects")) do
+			BCEManager.effectDeleted(nodeEffect);
+		 end
+	end
+end
+
+function initGlobalEffects()
+	for _,nodeEffect in pairs(DB.getChildrenGlobal("effects")) do
+		local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect,"label", "")), "insert", DB.getPath(nodeEffect));
+		BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
+	end
+	BCEManager.printGlobalEffects();
+end
+
+function printGlobalEffects()
+	local sOutput = "";
+	for _,tSearchEffect in pairs(tGlobalEffects) do
+		sOutput = sOutput .." | " .. tSearchEffect.sName;
+	end
+	BCEManager.chat(sOutput);
+end
+
+function removeEffectHandlers()
+	for _,tSearchEffect in pairs(tGlobalEffects) do
+		BCEManager.removeNodeHandlers(tSearchEffect.sPath);
+	end
+end
+
+function addNodeHandlers(sPath, sName)
+	local node = DB.findNode(sPath);
+	tEffectsLookup[sPath] = sName;
+	if node then
+		local nodeLabel = DB.getChild(node, ".label");
+		if nodeLabel then
+			local sLabelPath = DB.getChild(node, ".label").getPath();
+			DB.addHandler(sLabelPath, "onUpdate", effectUpdated);
+			DB.addHandler(sLabelPath, "onIntegrityChange", effectUpdated);
+		else
+			DB.addHandler(sPath, "onChildAdded", addNodeLabelHandlers);
+		end
+	end
+	DB.addHandler(sPath, "onDelete", effectDeleted);
+end
+
+function addNodeLabelHandlers(root, child)
+	local nodeLabel = DB.getChild(root.getPath() ..".label")
+	if nodeLabel then
+		local sLabelPath = DB.getChild(root, ".label").getPath();
+		DB.removeHandler(root.getPath(), "onChildAdded", addNodeLabelHandlers);
+		DB.addHandler(sLabelPath, "onUpdate", effectUpdated);
+		DB.addHandler(sLabelPath, "onIntegrityChange", effectUpdated);
+	end
+end
+
+function removeNodeHandlers(sPath)
+	local nodeEffect = DB.findNode(sPath);
+	if nodeEffect then
+		local sLabelPath = DB.getChild(nodeEffect, ".label").getPath();
+		DB.removeHandler(sLabelPath, "onUpdate", effectUpdated);
+		DB.removeHandler(sLabelPath, "onIntegrityChange", effectUpdated);
+	end
+	DB.removeHandler(sPath, "onDelete", effectDeleted);
+end
+------------------ END BINARY SEARCH ------------------
+
+------------------ RULESET MANAGERS ------------------
+function getRulesetActorManager()
+    local Manager = nil
+    if User.getRulesetName() == "5E" then
+		Manager = ActorManager5E;
+	elseif User.getRulesetName() == "4E" then
+		Manager = ActorManager4E;
+	elseif User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
+		Manager = ActorManager35E;
+	else
+		Manager = ActorManager;
+	end
+    return Manager;
+end
+
+function getRulesetEffectManager()
+    local Manager = nil
+    if User.getRulesetName() == "5E" then
+		Manager = EffectManager5E;
+	elseif User.getRulesetName() == "4E" then
+		Manager = EffectManager4E;
+	elseif User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
+		Manager = EffectManager35E;
+	else
+		Manager = EffectManager;
+	end
+    return Manager;
+end
+------------------ END RULESET MANAGERS ------------------
+
+------------------ EFFECT STATE CHANGE OOB ------------------
+
+function notifyAddEffect(nodeSource, rEffect, sLabel)
+	local msgOOB = {};
+	msgOOB.type = OOB_MSGTYPE_BCEADD;
+	msgOOB.sSource = rEffect.sSource;
+	msgOOB.sTarget =  nodeSource.getPath();
+	if sLabel then
+		msgOOB.sShortLabel = sLabel;
+	end
+	msgOOB.sLabel = rEffect.sName;
+	msgOOB.sInit = tostring(rEffect.nInit);
+	msgOOB.sGMOnly = tostring(rEffect.nGMOnly);
+	msgOOB.sDuration = tostring(rEffect.nDuration);
+
+	Comm.deliverOOBMessage(msgOOB, "");
+end
+
+function modifyEffect(sNodeEffect, sAction, sEffect)
+	-- Must be database node, if not it is probably marked for deletion from one-shot
+	local nodeEffect = DB.findNode(sNodeEffect);
+	if type(nodeEffect) ~= "databasenode" then
+		return;
+	end
+    local sOOB =  "";
+	local nActive = DB.getValue(nodeEffect, "isactive", 0);
+
+	if sAction == "Activate" and nActive ~= 1 then
+        sOOB = OOB_MSGTYPE_BCEACTIVATE;
+    elseif sAction == "Deactivate" and nActive ~= 0 then
+            sOOB = OOB_MSGTYPE_BCEDEACTIVATE;
+	elseif sAction == "Remove" then
+        sOOB = OOB_MSGTYPE_BCEREMOVE;
+    elseif sAction == "Update" then
+        sOOB = OOB_MSGTYPE_BCEUPDATE;
+	end
+
+    if sOOB ~= "" then
+        BCEManager.sendOOB(nodeEffect, sOOB, sEffect);
+    end
+end
+
+-- CoreRPG has no function to activate effect. If it did it would likely look this this
+function activateEffect(nodeActor, nodeEffect)
+	if not nodeEffect then
+		return true;
+	end
+	local sEffect = DB.getValue(nodeEffect, "label", "");
+	local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect);
+	DB.setValue(nodeEffect, "isactive", "number", 1);
+	local sMessage = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), sEffect, Interface.getString("effect_status_activated"));
+	EffectManager.message(sMessage, nodeActor, bGMOnly);
+end
+
+function updateEffect(nodeActor, nodeEffect, sLabel)
+	if not nodeEffect then
+		return true;
+	end
+	local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect);
+	local sMessage = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), sLabel, Interface.getString("effect_status_updated"));
+	DB.setValue(nodeEffect, "label", "string", sLabel);
+	EffectManager.message(sMessage, nodeActor, bGMOnly);
+end
+
+function handleActivateEffect(msgOOB)
+	if not handlerCheck(msgOOB) then
+		local nodeActor = DB.findNode(msgOOB.sNodeActor);
+		local nodeEffect = DB.findNode(msgOOB.sNodeEffect);
+		BCEManager.activateEffect(nodeActor, nodeEffect);
+	end
+end
+
+function handleAddEffect(msgOOB)
+   -- if not handlerCheck(msgOOB) then
+        local rEffect;
+        if msgOOB.sShortLabel then
+            rEffect = BCEManager.matchEffect(msgOOB.sShortLabel);
+        else
+            rEffect = BCEManager.matchEffect(msgOOB.sLabel);
+        end
+        if next(rEffect) then
+            local nodeTarget = DB.findNode(msgOOB.sTarget);
+            rEffect.sSource = msgOOB.sSource;
+            rEffect.nDuration = tonumber(msgOOB.sDuration);
+            rEffect.nGMOnly = tonumber(msgOOB.sGMOnly);
+            rEffect.nInit = tonumber(msgOOB.sInit);
+            if nodeTarget then
+                EffectManager.addEffect("", "", nodeTarget, rEffect, true);
+            end
+        end
+    --end
+end
+
+function handleDeactivateEffect(msgOOB)
+	if not handlerCheck(msgOOB) then
+		local nodeActor = DB.findNode(msgOOB.sNodeActor);
+		local nodeEffect = DB.findNode(msgOOB.sNodeEffect);
+		EffectManager.deactivateEffect(nodeActor, nodeEffect);
+	end
+end
+
+function handleRemoveEffect(msgOOB)
+	if not handlerCheck(msgOOB) then
+		local nodeActor = DB.findNode(msgOOB.sNodeActor);
+		local nodeEffect = DB.findNode(msgOOB.sNodeEffect);
+		EffectManager.expireEffect(nodeActor, nodeEffect, 0);
+	end
+end
+
+function handleUpdateEffect(msgOOB)
+	if not handlerCheck(msgOOB) then
+		local nodeActor = DB.findNode(msgOOB.sNodeActor);
+		local nodeEffect = DB.findNode(msgOOB.sNodeEffect);
+		BCEManager.updateEffect(nodeActor, nodeEffect, msgOOB.sLabel);
+	end
+end
+
+function handlerCheck(msgOOB)
+	local nodeActor = DB.findNode(msgOOB.sNodeActor);
+	if not nodeActor then
+		ChatManager.SystemMessage(Interface.getString("ct_error_effectmissingactor") .. " (" .. msgOOB.sNodeActor .. ")");
+		return true;
+	end
+	local nodeEffect = DB.findNode(msgOOB.sNodeEffect);
+	if not nodeEffect then
+		ChatManager.SystemMessage(Interface.getString("ct_error_effectdeletefail") .. " (" .. msgOOB.sNodeEffect .. ")");
+		return true;
+	end
+	return false;
+end
+
+function sendOOB(nodeEffect,type, sEffect)
+	local msgOOB = {};
+
+	msgOOB.type = type;
+ 	msgOOB.sNodeActor = DB.getChild(nodeEffect, "...").getPath();
+	msgOOB.sNodeEffect = nodeEffect.getPath();
+	if type == OOB_MSGTYPE_BCEUPDATE then
+		msgOOB.sLabel = sEffect;
+	end
+	BCEManager.chat("Send OOB: ", msgOOB);
+    if Session.IsHost then
+        if msgOOB.type == OOB_MSGTYPE_BCEACTIVATE then
+            BCEManager.handleActivateEffect(msgOOB);
+        elseif msgOOB.type == OOB_MSGTYPE_BCEDEACTIVATE then
+            BCEManager.handleDeactivateEffect(msgOOB);
+        elseif msgOOB.type == OOB_MSGTYPE_BCEREMOVE then
+            BCEManager.handleRemoveEffect(msgOOB);
+        elseif msgOOB.type == OOB_MSGTYPE_BCEUPDATE then
+            BCEManager.handleUpdateEffect(msgOOB);
+        elseif msgOOB.type == OOB_MSGTYPE_BCEADD then
+            BCEManager.handleAddEffect(msgOOB);
+        end
+    else
+	    Comm.deliverOOBMessage(msgOOB, "");
+    end
+end
+------------------ END EFFECT STATE CHANGE OOB ------------------
