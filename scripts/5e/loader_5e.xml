@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root version="3.3">
+    <script name="EffectManager5EBCE"   file="scripts/5e/manager_effect5E_bce.lua" />
+    <script name="ActionDamage5EBCE"    file="scripts/5e/manager_action_damage5E_bce.lua" />
+    <script name="PowerManager5EBCE"    file="scripts/5e/manager_power5E_bce.lua" />
+</root>
