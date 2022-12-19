@@ -15,7 +15,7 @@
                 EditorManager.addEditor(
                     "category_bce_cs",
                     {
-                        value="DMG",
+                        value="DMGCS",
                         labelres="effect_dmgcs",
                         windowclass="effect_DMGCS"
                     }

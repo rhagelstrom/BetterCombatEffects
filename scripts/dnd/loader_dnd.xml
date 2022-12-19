@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root version="3.3">
+    <script name="BCEDnDManager"        file="scripts/dnd/manager_dnd_bce.lua" />
+    <script name="ActionManagerDnDBCE"  file="scripts/dnd/manager_action_dnd_bce.lua" />
+    <script name="ActionDamageDnDBCE"   file="scripts/dnd/manager_action_damage_dnd_bce.lua" />
+    <script name="ActionSaveDnDBCE"     file="scripts/dnd/manager_action_save_dnd_bce.lua" ruleset="5E|3.5E" />
+    <script name="CharManagerDnDBCE"    file="scripts/dnd/manager_char_dnd_bce.lua" />
+    <script name="CombatManagerDnDBCE"  file="scripts/dnd/manager_combat_dnd_bce.lua" />
+    <script name="DiceManagerDnDBCE"    file="scripts/dnd/manager_dice_dnd_bce.lua" />
+    <script name="EffectManagerDnDBCE"  file="scripts/dnd/manager_effect_dnd_bce.lua" />
+</root>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root version="3.3">
+    <script name="EffectManager4EBCE" file="scripts/4e/manager_effect4E_bce.lua" />
+    <script name="ActionDamage4EBCE" file="scripts/4ee/manager_action_damage4E_bce.lua" />
+</root>
