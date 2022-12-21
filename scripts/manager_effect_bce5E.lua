@@ -1102,7 +1102,7 @@ function customEvalAction(rActor, nodePower, rAction)
 		elseif rSave.saveBase == "fixed" then
 			nDC = rSave.saveMod
 		elseif rSave.saveBase == "ability" then
-			nDC = 8 + rSave.saveMod + ActorManager5E.getAbilityBonus(rActor, rSave.savestat)
+			nDC = 8 + rSave.saveMod + ActorManager5E.getAbilityBonus(rActor, rSave.saveStat)
 			if rSave.saveProf == 1 then
 				nDC = nDC + ActorManager5E.getAbilityBonus(rActor, "prf")
 			end
