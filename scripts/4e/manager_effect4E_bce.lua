@@ -129,7 +129,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                 table.insert(aOtherFilter, v);
             elseif StringManager.contains(DataCommon.rangetypes, v) then
                 table.insert(aRangeFilter, v);
-            else
+            elseif not tEffectCompParams.bIgnoreOtherFilter then
                 table.insert(aOtherFilter, v);
             end
         end
@@ -194,14 +194,14 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 -- Skip
                             elseif StringManager.contains(DataCommon.rangetypes, v2) then
                                 table.insert(aEffectRangeFilter, v2);
-                            else
+                            elseif not tEffectCompParams.bIgnoreOtherFilter then
                                 table.insert(aEffectOtherFilter, v2);
                             end
                         end
 
                         -- Check for match
                         local comp_match = false;
-                        if rEffectComp.type == sEffectType then
+                        if rEffectComp.type == sEffectType or rEffectComp.original == sEffectType then
 
                             -- Check effect targeting
                             if bTargetedOnly and not bTargeted then
@@ -252,7 +252,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                         -- Match!
                         if comp_match then
                             nMatch = kEffectComp;
-                            if nActive == 1 then
+                            if nActive == 1 or bActive then
                                 rEffectComp.node = v;
                                 table.insert(results, rEffectComp);
                             end
