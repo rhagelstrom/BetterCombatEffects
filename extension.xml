@@ -13,9 +13,7 @@
     		<icon name="bce_save" file="graphics/icons/bce_save.png"></icon>
     		<includefile source="strings/strings_bce.xml" />
 			<includefile source="scripts/core/loader_core.xml" />
-			<includefile source="scripts/dnd/loader_dnd.xml"	ruleset="5E" />
-			<includefile source="scripts/dnd/loader_dnd.xml"	ruleset="4E" />
-			<includefile source="scripts/dnd/loader_dnd.xml"	ruleset="3.5E" />
+			<includefile source="scripts/dnd/loader_dnd.xml"	ruleset="5E|4E|3.5E" />
 			<includefile source="scripts/5e/loader_5e.xml"		ruleset="5E" />
 			<includefile source="scripts/4e/loader_4e.xml"		ruleset="4E" />
 			<includefile source="scripts/35e/loader_35e.xml"	ruleset="3.5E" />
