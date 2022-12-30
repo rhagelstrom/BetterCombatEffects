@@ -20,16 +20,12 @@ function onInit()
     CombatManagerBCE.setCustomProcessTurnEnd(processEffectTurnEndSave);
     ActionDamageDnDBCE.setProcessEffectOnDamage(onDamage);
 
-    -- EffectManagerBCE.registerEffectCompType("SAVEADD",{bIgnoreOtherFilter = true});
-    -- EffectManagerBCE.registerEffectCompType("SAVEADDP",{bIgnoreOtherFilter = true});
-    -- EffectManagerBCE.registerEffectCompType("SAVEA",{bOneShot = true, bIgnoreOtherFilter = true});
-    -- EffectManagerBCE.registerEffectCompType("SAVES",{bIgnoreOtherFilter = true});
-    -- EffectManagerBCE.registerEffectCompType("SAVEE",{bIgnoreOtherFilter = true});
-    -- EffectManagerBCE.registerEffectCompType("SAVEONDMG",{bIgnoreOtherFilter = true});
-    EffectManagerBCE.registerEffectCompType("SAVEA", {
-        bOneShot = true
-    });
-
+    EffectManagerBCE.registerEffectCompType("SAVEADD",{bIgnoreOtherFilter = true});
+    EffectManagerBCE.registerEffectCompType("SAVEADDP",{bIgnoreOtherFilter = true});
+    EffectManagerBCE.registerEffectCompType("SAVEA",{bOneShot = true, bIgnoreOtherFilter = true});
+    EffectManagerBCE.registerEffectCompType("SAVES",{bIgnoreOtherFilter = true});
+    EffectManagerBCE.registerEffectCompType("SAVEE",{bIgnoreOtherFilter = true});
+    EffectManagerBCE.registerEffectCompType("SAVEONDMG",{bIgnoreOtherFilter = true});
 end
 
 function onClose()
