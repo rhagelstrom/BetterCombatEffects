@@ -60,7 +60,7 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectCompType);
     else
-        aEffects = DB.getChildren(sEffectCompType.getCTNode(rActor), "effects");
+        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), "effects");
     end
 
     for _, v in pairs(aEffects) do
