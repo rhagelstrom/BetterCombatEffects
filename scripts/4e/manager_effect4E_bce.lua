@@ -4,17 +4,25 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 local applyOngoingDamageBCE = nil
 local applyOngoingRegenBCE = nil
-local getEffectsByType = nil
+
+local getEffectsByType = nil;
+local hasEffect = nil;
+local hasEffectCondition = nil;
 
 function onInit()
-    EffectsManagerBCE.setCustomPreAddEffect(addEffectPre4E);
+    EffectManagerBCE.setCustomPreAddEffect(addEffectPre4E);
     ActionsManager.registerResultHandler("attack", onAttack4E);
 
-    getEffectsByType = EffectManager4E.getEffectsByType;
     applyOngoingDamageBCE = EffectManagerDnDBCE.applyOngoingDamage;
     applyOngoingRegenBCE = EffectManagerDnDBCE.applyOngoingRegen;
+	getEffectsByType = EffectManager4E.getEffectsByType;
+    hasEffect = EffectManager4E.hasEffect;
+    hasEffectCondition = EffectManager4E.hasEffectCondition;
 
     EffectManager4E.getEffectsByType = customGetEffectsByType;
+    EffectManager4E.hasEffect = customHasEffect;
+    EffectManager4E.hasEffectCondition = customHasEffectCondition;
+
     EffectManagerDnDBCE.applyOngoingDamage = applyOngoingDamage;
     EffectManagerDnDBCE.applyOngoingRegen = applyOngoingRegen;
 
@@ -23,8 +31,10 @@ end
 
 function onClose()
     EffectManager4E.getEffectsByType = getEffectsByType;
+    EffectManager4E.hasEffect = hasEffect;
+    EffectManager4E.hasEffectCondition = hasEffectCondition;
 
-    EffectsManagerBCE.removeCustomPreAddEffect(addEffectPre4E);
+    EffectManagerBCE.removeCustomPreAddEffect(addEffectPre4E);
     EffectManagerDnDBCE.applyOngoingDamage = applyOngoingDamageBCE
     EffectManagerDnDBCE.applyOngoingRegen = applyOngoingRegenBCE
 end
@@ -194,7 +204,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 -- Skip
                             elseif StringManager.contains(DataCommon.rangetypes, v2) then
                                 table.insert(aEffectRangeFilter, v2);
-                            elseif not tEffectCompParams.bIgnoreOtherFilter then
+							elseif rEffectComp.type ~= "" then
                                 table.insert(aEffectOtherFilter, v2);
                             end
                         end
@@ -202,7 +212,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                         -- Check for match
                         local comp_match = false;
                         if rEffectComp.type == sEffectType or rEffectComp.original == sEffectType then
-
+							BCEManager.chat("Tag Match", sEffectType);
                             -- Check effect targeting
                             if bTargetedOnly and not bTargeted then
                                 comp_match = false;
@@ -224,6 +234,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 end
                             end
                             if #aEffectOtherFilter > 0 then
+								BCEManager.chat("Other Filter", aEffectOtherFilter);
                                 local bOtherMatch = false;
                                 for _, v2 in pairs(aOtherFilter) do
                                     if type(v2) == "table" then
@@ -251,7 +262,9 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 
                         -- Match!
                         if comp_match then
+							BCEManager.chat("Match: ", rEffectComp);
                             nMatch = kEffectComp;
+							rEffectComp.sEffectNode = v.getPath();
                             if nActive == 1 or bActive then
                                 rEffectComp.node = v;
                                 table.insert(results, rEffectComp);
@@ -278,4 +291,104 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
         end -- END ACTIVE CHECK
     end -- END EFFECT LOOP
     return results;
+end
+
+function customHasEffectCondition(rActor, sEffect)
+	return EffectManager4E.hasEffect(rActor, sEffect, nil, false, true);
+end
+
+function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
+	if not sEffect or not rActor then
+		return false;
+	end
+	local tEffectCompParams = EffectManagerBCE.getEffectCompType(sEffectType);
+
+	local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+	(not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+	(tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
+
+	-- Handle bloodied special case
+	local sLowerEffect = sEffect:lower();
+	if sLowerEffect == "bloodied" then
+		local nPercentWounded = ActorHealthManager.getWoundPercent(rActor);
+		if nPercentWounded >= .5 then
+			return true;
+		end
+		return false;
+	end
+
+	local aEffects = {};
+    if TurboManager then
+        aEffects = TurboManager.getMatchedEffects(rActor, sEffect);
+    else
+        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), "effects");
+    end
+
+	-- Iterate through each effect
+	local aMatch = {};
+	for _,v in pairs(aEffects) do
+		local nActive = DB.getValue(v, "isactive", 0);
+		if nActive ~= 0 or bActive then
+			-- Parse each effect label
+			local sLabel = DB.getValue(v, "label", "");
+			local bTargeted = EffectManager.isTargetedEffect(v);
+			local aEffectComps = EffectManager.parseEffect(sLabel);
+
+			-- Iterate through each effect component looking for a type match
+			local nMatch = 0;
+			for kEffectComp, sEffectComp in ipairs(aEffectComps) do
+				local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
+				-- Check follow on effect tags, and ignore the rest
+				if rEffectComp.type == "AFTER" or rEffectComp.type == "FAIL" then
+					break;
+
+				-- Check conditionals
+				elseif rEffectComp.type == "IF" then
+					if not EffectManager4E.checkConditional(rActor, v, rEffectComp) then
+						break;
+					end
+				elseif rEffectComp.type == "IFT" then
+					if not rTarget then
+						break;
+					end
+					if not  EffectManager4E.checkConditional(rTarget, v, rEffectComp, rActor) then
+						break;
+					end
+
+				-- Check for match
+				elseif rEffectComp.original:lower() == sLowerEffect then
+					if bTargeted and not bIgnoreEffectTargets then
+						if EffectManager.isEffectTarget(v, rTarget) then
+							nMatch = kEffectComp;
+						end
+					elseif not bTargetedOnly then
+						nMatch = kEffectComp;
+					end
+				end
+
+			end
+
+			-- If matched, then remove one-off effects
+			if nMatch > 0 then
+				if nActive == 2 then
+					DB.setValue(v, "isactive", "number", 1);
+				else
+					table.insert(aMatch, v);
+					local sApply = DB.getValue(v, "apply", "");
+					if sApply == "action" then
+						EffectManager.notifyExpire(v, 0);
+					elseif sApply == "roll" then
+						EffectManager.notifyExpire(v, 0, true);
+					elseif sApply == "single" then
+						EffectManager.notifyExpire(v, nMatch, true);
+					end
+				end
+			end
+		end
+	end
+
+	if #aMatch > 0 then
+		return true;
+	end
+	return false;
 end
