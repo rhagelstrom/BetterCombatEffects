@@ -216,9 +216,14 @@ end
 function removeNodeHandlers(sPath)
     local nodeEffect = DB.findNode(sPath);
     if nodeEffect then
-        local sLabelPath = DB.getChild(nodeEffect, ".label").getPath();
-        DB.removeHandler(sLabelPath, "onUpdate", effectUpdated);
-        DB.removeHandler(sLabelPath, "onIntegrityChange", effectUpdated);
+        local nodeLabel = DB.getChild(nodeEffect, ".label");
+        if nodeLabel then
+            local sLabelPath = nodeLabel.getPath();
+            DB.removeHandler(sLabelPath, "onUpdate", effectUpdated);
+            DB.removeHandler(sLabelPath, "onIntegrityChange", effectUpdated);
+        else
+            BCEManager.chat("Custom Effect with no label: " .. sPath);
+        end
     end
     DB.removeHandler(sPath, "onDelete", effectDeleted);
 end
