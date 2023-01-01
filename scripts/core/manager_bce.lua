@@ -273,8 +273,11 @@ function notifyAddEffect(nodeSource, rEffect, sLabel)
     msgOOB.sInit = tostring(rEffect.nInit);
     msgOOB.sGMOnly = tostring(rEffect.nGMOnly);
     msgOOB.sDuration = tostring(rEffect.nDuration);
-
-    Comm.deliverOOBMessage(msgOOB, "");
+    if Session.IsHost then
+        BCEManager.handleAddEffect(msgOOB);
+    else
+        Comm.deliverOOBMessage(msgOOB, "");
+    end
 end
 
 function modifyEffect(sNodeEffect, sAction, sEffect)
