@@ -11,10 +11,10 @@ function onInit()
     RulesetActorManager = BCEManager.getRulesetActorManager();
 
     ActionsManager.registerResultHandler("save", onSaveRollHandler);
-    EffectManagerBCE.setCustomPostAddEffect(addEffectPost)
+    EffectManagerBCE.setCustomPostAddEffect(addEffectPost);
 
-    onSave = ActionSave.onSave
-    ActionSave.onSave = onSaveRollHandler
+    onSave = ActionSave.onSave;
+    ActionSave.onSave = onSaveRollHandler;
 
     CombatManagerBCE.setCustomProcessTurnStart(processEffectTurnStartSave);
     CombatManagerBCE.setCustomProcessTurnEnd(processEffectTurnEndSave);
@@ -29,7 +29,7 @@ function onInit()
 end
 
 function onClose()
-    ActionsManager.unregisterResultHandler("save")
+    ActionsManager.unregisterResultHandler("save");
     ActionSave.onSave = onSave;
 
     CombatManagerBCE.removeCustomProcessTurnStart(processEffectTurnStartSave);
@@ -173,11 +173,8 @@ function saveAddEffect(nodeSource, nodeTarget, rEffectComp)
         rEffect.sSource = rEffectComp.sSource;
         rEffect.nGMOnly = nGMOnly; -- If the parent is secret then we should be too.
         rEffect.nInit = DB.getValue(nodeTarget, "initresult", 0);
-        if Session.IsHost then
-            EffectManager.addEffect("", "", nodeSource, rEffect, true);
-        else
-            BCEManager.notifyAddEffect(nodeSource, rEffect, rEffectComp.remainder[1]);
-        end
+
+        BCEManager.notifyAddEffect(nodeSource, rEffect, rEffectComp.remainder[1]);
     end
 end
 
@@ -194,7 +191,7 @@ function saveEffect(rTarget, rEffectComp)
     end
 
     local aParsedRemiander = StringManager.parseWords(rEffectComp.remainder[1]);
-    local sAbility = ""
+    local sAbility = "";
     if User.getRulesetName() == "5E" then
         sAbility = DataCommon.ability_stol[aParsedRemiander[1]];
     else
@@ -216,8 +213,7 @@ function saveEffect(rTarget, rEffectComp)
         if rEffectComp.original:match("%(H%)") then
             rAction.onmissdamage = "half";
         end
-        local rSaveVsRoll
-
+        local rSaveVsRoll;
         if User.getRulesetName() == "5E" then
             rSaveVsRoll = ActionPower.getSaveVsRoll(rSource, rAction);
         else
@@ -315,8 +311,8 @@ function moveModtoMod(rEffect)
     local aEffectComps = EffectManager.parseEffect(rEffect.sName);
     for i, sEffectComp in ipairs(aEffectComps) do
         local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
-        if rEffectComp.type == "SAVEE" or rEffectComp.type == "SAVES" or rEffectComp.type == "SAVEA" or rEffectComp.type ==
-            "SAVEONDMG" then
+        if rEffectComp.type == "SAVEE" or rEffectComp.type == "SAVES" or rEffectComp.type == "SAVEA" or
+            rEffectComp.type == "SAVEONDMG" then
             local aSplitString = StringManager.splitTokens(sEffectComp);
             if StringManager.contains(aMatch, aSplitString[2]) then
                 table.insert(aSplitString, 2, aSplitString[3]);
@@ -375,5 +371,5 @@ function replaceSaveDC(rNewEffect, rActor)
         end
         rNewEffect.sName = rNewEffect.sName:gsub("%[SDC]", tostring(nSpellcastingDC));
     end
-    return rNewEffect
+    return rNewEffect;
 end
