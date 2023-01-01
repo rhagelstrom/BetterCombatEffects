@@ -20,6 +20,7 @@ end
 
 -- Replace SDC when applied from a power
 function customEvalAction(rActor, nodePower, rAction)
+    BCEManager.chat("customEvalAction : ");
     if rAction.type == "effect" and (rAction.sName:match("%[SDC]") or rAction.sName:match("%(SDC%)")) then
         local aNodeActionChild = DB.getChildren(nodePower.getChild("actions"));
         local rSave = {

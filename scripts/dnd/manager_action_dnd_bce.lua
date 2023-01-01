@@ -28,6 +28,7 @@ function onClose()
 end
 
 function customOutputResult(bTower, rSource, rTarget, rMessageGM, rMessagePlayer)
+    BCEManager.chat("customOutputResult : ");
     if rMessageGM.text:gmatch("%w+")() == "Save" then
         rMessageGM.icon = "bce_save";
     end
@@ -39,6 +40,7 @@ end
 
 -- Advanced Effects
 function customPerformMultiAction(draginfo, rActor, sType, rRolls)
+    BCEManager.chat("customPerformMultiAction : ");
     if rActor then
         rRolls[1].itemPath = rActor.itemPath;
         rRolls[1].ammoPath = rActor.ammoPath;

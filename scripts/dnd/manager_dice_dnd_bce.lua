@@ -14,6 +14,7 @@ function onClose()
 end
 
 function customConvertStringToDice(s)
+    BCEManager.chat("customConvertStringToDice : ");
     local tDice = {};
     local nMod = 0;
     local tTerms = DiceManager.convertDiceStringToTerms(s);
@@ -37,6 +38,7 @@ end
 
 -- TODO This probably needs some love or removal
 function isDie(sEffect)
+    BCEManager.chat("isDie : ");
     local rRoll = {};
     local tEffectComps = EffectManager.parseEffect(sEffect);
     for _, sEffectComp in ipairs(tEffectComps) do

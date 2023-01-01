@@ -48,7 +48,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
 end
 
 function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
-    BCEManager.chat("customGetDamageAdjust : ");
+    BCEManager.chat("getReductionType : ");
     local tEffects = EffectManager5E.getEffectsByType(rTarget, sEffectType, rDamageOutput.aDamageFilter, rSource);
     local aFinal = {};
     for _, v in pairs(tEffects) do

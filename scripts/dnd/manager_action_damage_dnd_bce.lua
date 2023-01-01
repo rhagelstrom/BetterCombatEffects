@@ -56,6 +56,7 @@ end
 -- 3.5E  function applyDamage(rSource, rTarget, bSecret, sRollType, sDamage, nTotal)
 -- 5E   function customApplyDamage(rSource, rTarget, rRoll, ...)
 function customApplyDamage(rSource, rTarget, rRoll, ...)
+    BCEManager.chat("customApplyDamage : ");
     local nodeTarget = ActorManager.getCTNode(rTarget);
     local nodeSource = ActorManager.getCTNode(rSource);
     if User.getRulesetName() == "5E" then
@@ -145,6 +146,7 @@ function customApplyDamage(rSource, rTarget, rRoll, ...)
 end
 
 function getTempHPAndWounds(rTarget)
+    BCEManager.chat("getTempHPAndWounds : ");
     local sTargetNodeType, nodeTarget = ActorManager.getTypeAndNode(rTarget);
     local nTempHP = 0;
     local nWounds = 0;

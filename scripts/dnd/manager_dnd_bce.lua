@@ -14,6 +14,7 @@ end
 -- Any effect that modifies ability score and is coded with -X
 -- has the -X replaced with the targets ability score and then calculated
 function replaceAbilityScores(rNewEffect, rActor)
+    BCEManager.chat("replaceAbilityScores : ");
     -- check contains -X to see if this is interesting enough to continue
     if rNewEffect.sName:match("%-X") then
         local tEffectComps = EffectManager.parseEffect(rNewEffect.sName);
