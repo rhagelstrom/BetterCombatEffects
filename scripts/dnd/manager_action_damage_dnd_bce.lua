@@ -57,6 +57,9 @@ end
 -- 5E   function customApplyDamage(rSource, rTarget, rRoll, ...)
 function customApplyDamage(rSource, rTarget, rRoll, ...)
     BCEManager.chat("customApplyDamage : ");
+    if rRoll.sType ~= "damage" then
+        return applyDamage(rSource, rTarget, rRoll, ...);
+    end
     local nodeTarget = ActorManager.getCTNode(rTarget);
     local nodeSource = ActorManager.getCTNode(rSource);
     if User.getRulesetName() == "5E" then
