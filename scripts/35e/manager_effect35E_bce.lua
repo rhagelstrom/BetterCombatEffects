@@ -98,7 +98,8 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 
         -- Check effect is from used weapon.
         if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or
-            (bAdvancedEffects and (bActive or AdvancedEffects.isValidCheckEffect(rActor, v))) then
+            (bAdvancedEffects and ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or
+            AdvancedEffects.isValidCheckEffect(rActor, v))) then
             -- Check targeting
             local bTargeted = EffectManager.isTargetedEffect(v)
             if not bTargeted or EffectManager.isEffectTarget(v, rFilterActor) then
@@ -334,8 +335,9 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
         -- COMPATIBILITY FOR ADVANCED EFFECTS
         -- to add support for AE in other extensions, make this change
         -- original line: if nActive ~= 0 then
-        if (not bAdvancedEffects and (bActive or nActive ~= 0)) or
-            (bAdvancedEffects and AdvancedEffects.isValidCheckEffect(rActor, v)) then
+        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or
+            (bAdvancedEffects and ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or
+            AdvancedEffects.isValidCheckEffect(rActor, v))) then
             -- END COMPATIBILITY FOR ADVANCED EFFECTS
 
             -- Parse each effect label
