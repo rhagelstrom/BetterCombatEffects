@@ -128,7 +128,9 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
     if not nodeCT or not rNewEffect or not rNewEffect.sName then
         return addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg);
     end
-    EffectManagerBCE.onCustomPreAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+    if EffectManagerBCE.onCustomPreAddEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg) then
+        return true;
+    end
     addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg);
     local nodeEffect;
     for _, v in pairs(DB.getChildren(nodeCT, "effects")) do
