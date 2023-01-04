@@ -271,6 +271,14 @@ function notifyAddEffect(nodeSource, rEffect, sLabel)
     end
     msgOOB.sLabel = rEffect.sName;
     msgOOB.sInit = tostring(rEffect.nInit);
+    if not rEffect.nGMOnly then
+        local rActor = ActorManager.resolveActor(nodeSource);
+        if ActorManager.isPC(rActor) then
+            rEffect.nGMOnly = 0;
+        else
+            rEffect.nGMOnly = 1;
+        end
+    end
     msgOOB.sGMOnly = tostring(rEffect.nGMOnly);
     msgOOB.sDuration = tostring(rEffect.nDuration);
     if Session.IsHost then
