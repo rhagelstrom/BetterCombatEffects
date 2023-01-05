@@ -51,7 +51,7 @@ function processEffectTurnStartDND(rSource)
         local rActor = ActorManager.resolveActor(nodeCT);
         if rActor ~= rSource then
             for _, sTag in pairs(aTags) do
-                tMatch = RulesetEffectManager.getEffectsByType(rActor, sTag);
+                tMatch = RulesetEffectManager.getEffectsByType(rActor, sTag, nil, rSource);
                 for _, tEffect in pairs(tMatch) do
                     local sLabel = EffectManagerBCE.getLabelShort(tEffect.sEffectNode)
                     BCEManager.chat(sTag .. "  : ");
@@ -94,7 +94,7 @@ function processEffectTurnEndDND(rSource)
         local rActor = ActorManager.resolveActor(nodeCT);
         if rActor ~= rSource then
             for _, sTag in pairs(aTags) do
-                local tMatch = RulesetEffectManager.getEffectsByType(rActor, sTag);
+                local tMatch = RulesetEffectManager.getEffectsByType(rActor, sTag, nil, rSource);
                 for _, tEffect in pairs(tMatch) do
                     local sLabel = EffectManagerBCE.getLabelShort(tEffect.sEffectNode)
                     BCEManager.chat(sTag .. "  : ");

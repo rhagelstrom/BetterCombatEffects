@@ -86,7 +86,7 @@ function addEffectPost(nodeActor, nodeEffect)
 
     local aTags = {"REGENA", "TREGENA", "DMGA"};
     for _, sTag in pairs(aTags) do
-        local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag);
+        local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
             if sTag == "REGENA" then
                 BCEManager.chat("REGENA: ");

@@ -118,9 +118,9 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
         end
         for _, sTag in pairs(aTags) do
             if User.getRulesetName() == "5E" then
-                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.ability_ltos);
+                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.ability_ltos, rTarget);
             else
-                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.save_ltos);
+                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.save_ltos, rTarget);
             end
             for _, tEffect in pairs(tMatch) do
                 if tEffect.sEffectNode == sPath then
@@ -143,9 +143,9 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
         aTags = {"SAVEADD", "SAVEDMG"};
         for _, sTag in pairs(aTags) do
             if User.getRulesetName() == "5E" then
-                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.ability_ltos);
+                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.ability_ltos, rTarget);
             else
-                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.save_ltos);
+                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.save_ltos, rTarget);
             end
             for _, tEffect in pairs(tMatch) do
                 if tEffect.sEffectNode == sPath then
@@ -259,9 +259,9 @@ function onDamage(rSource, rTarget, rRoll)
     local tMatch = {};
 
     if User.getRulesetName() == "5E" then
-        tMatch = RulesetEffectManager.getEffectsByType(rSource, "SAVEONDMG", DataCommon.ability_ltos);
+        tMatch = RulesetEffectManager.getEffectsByType(rSource, "SAVEONDMG", DataCommon.ability_ltos, rTarget);
     else
-        tMatch = RulesetEffectManager.getEffectsByType(rSource, "SAVEONDMG", DataCommon.save_ltos);
+        tMatch = RulesetEffectManager.getEffectsByType(rSource, "SAVEONDMG", DataCommon.save_ltos, rTarget);
     end
     for _, tEffect in pairs(tMatch) do
         BCEManager.chat("SAVEONDMG : ", tEffect);

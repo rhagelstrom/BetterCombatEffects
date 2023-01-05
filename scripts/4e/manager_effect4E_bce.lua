@@ -52,7 +52,7 @@ function onAttack4E(rSource, rTarget, rRoll)
     local tMatch = {};
 
     -- Only process these if on the source node
-    tMatch = EffectManager4E.getEffectsByType(rSource, "ATKDS");
+    tMatch = EffectManager4E.getEffectsByType(rSource, "ATKDS", nil, rTarget);
     for _, tEffect in pairs(tMatch) do
         BCEManager.modifyEffect(tEffect.sEffectNode, "Deactivate")
     end
