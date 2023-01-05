@@ -90,7 +90,7 @@ function customApplyDamage(rSource, rTarget, rRoll, ...)
     -- We need to do the activate, deactivate and remove first as a single action in order to get the rest
     -- of the tags to be applied as expected
     for _, sTag in pairs(aTags) do
-        local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag);
+        local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
             if sTag == "DMGAT" then
                 BCEManager.chat("ACTIVATE: ");
@@ -110,7 +110,7 @@ function customApplyDamage(rSource, rTarget, rRoll, ...)
 
     aTags = {"TDMGADDT", "TDMGADDS"};
     for _, sTag in pairs(aTags) do
-        local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag);
+        local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
             local rEffect = BCEManager.matchEffect(tEffect.remainder[1]);
             if next(rEffect) then
@@ -129,7 +129,7 @@ function customApplyDamage(rSource, rTarget, rRoll, ...)
     end
     aTags = {"SDMGADDT", "SDMGADDS"};
     for _, sTag in pairs(aTags) do
-        local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag);
+        local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, nil, rTarget);
         for _, tEffect in pairs(tMatch) do
             local rEffect = BCEManager.matchEffect(tEffect.remainder[1]);
             if next(rEffect) then
