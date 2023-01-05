@@ -270,7 +270,7 @@ function isValidCheckEffect(rActor, nodeEffect)
         -- setting then we set it.
         local node = DB.findNode(sSource)
         if node then
-            local nodeItem = node.getChild('...')
+            local nodeItem = DB.getChild(node, '...')
             if nodeItem then
                 sItemPath = nodeItem.getPath()
                 bActionOnly = (DB.getValue(node, 'actiononly', 0) ~= 0)
