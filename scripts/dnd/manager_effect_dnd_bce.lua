@@ -71,7 +71,7 @@ function addEffectPost(nodeActor, nodeEffect)
     local rEffect = EffectManager.getEffect(nodeEffect);
     local rTarget = ActorManager.resolveActor(nodeActor);
     local rSource;
-    local rRoll = DiceManagerDnDBCE.isDie(nodeEffect.sName);
+    local rRoll = DiceManagerDnDBCE.isDie(rEffect.sName);
     if next(rRoll) and next(rRoll.aDice) then
         rRoll.rActor = rTarget;
         if rEffect.nGMOnly then
