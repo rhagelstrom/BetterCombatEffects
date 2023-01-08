@@ -30,29 +30,25 @@ end
 
 function onEffectRollHandler(rSource, rTarget, rRoll)
     BCEManager.chat("onEffectRollHandler DND: ");
-    local nodeSource = ActorManager.getCTNode(rSource);
+    local nodeEffect = DB.findNode(rRoll.sNodeCT)
     local sEffect = "";
-    for _, nodeEffect in pairs(DB.getChildren(nodeSource, "effects")) do
-        sEffect = DB.getValue(nodeEffect, "label", "");
-        if sEffect == rRoll.sEffect then
-            local nResult = tonumber(ActionsManager.total(rRoll));
-            local sResult = tostring(nResult);
-            local sValue = rRoll.sValue;
-            local sReverseValue = string.reverse(sValue);
-            ---Needed to get creative with patern matching - to correctly process
-            -- if the negative is to total, or do we have a negative modifier
-            if sValue:match("%+%d+") then
-                sValue = sValue:gsub("%+%d+", "") .. "%+%d+";
-            elseif (sReverseValue:match("%d+%-") and rRoll.nMod ~= 0) then
-                sReverseValue = sReverseValue:gsub("%d+%-", "", 1);
-                sValue = "%-?" .. string.reverse(sReverseValue) .. "%-*%d?"
-            elseif (sReverseValue:match("%d+%-") and rRoll.nMod == 0) then
-                sValue = "%-*" .. sValue:gsub("%-", "");
-            end
-            sEffect = sEffect:gsub(sValue, sResult);
-            DB.setValue(nodeEffect, "label", "string", sEffect);
-            break;
+    if nodeEffect then
+        local nResult = tonumber(ActionsManager.total(rRoll));
+        local sResult = tostring(nResult);
+        local sValue = rRoll.sValue;
+        local sReverseValue = string.reverse(sValue);
+        ---Needed to get creative with patern matching - to correctly process
+        -- if the negative is to total, or do we have a negative modifier
+        if sValue:match("%+%d+") then
+            sValue = sValue:gsub("%+%d+", "") .. "%+%d+";
+        elseif (sReverseValue:match("%d+%-") and rRoll.nMod ~= 0) then
+            sReverseValue = sReverseValue:gsub("%d+%-", "", 1);
+            sValue = "%-?" .. string.reverse(sReverseValue) .. "%-*%d?"
+        elseif (sReverseValue:match("%d+%-") and rRoll.nMod == 0) then
+            sValue = "%-*" .. sValue:gsub("%-", "");
         end
+        sEffect = sEffect:gsub(sValue, sResult);
+        DB.setValue(nodeEffect, "label", "string", sEffect);
     end
 end
 
