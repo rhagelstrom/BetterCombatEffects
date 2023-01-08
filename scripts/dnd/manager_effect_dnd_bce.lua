@@ -51,7 +51,7 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
             end
             sEffect = sEffect:gsub(sValue, sResult);
             DB.setValue(nodeEffect, "label", "string", sEffect);
-            break
+            break;
         end
     end
 end
