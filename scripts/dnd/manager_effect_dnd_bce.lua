@@ -75,6 +75,9 @@ end
 
 function addEffectPost(nodeActor, nodeEffect)
     BCEManager.chat("addEffectPost DND: ");
+    if not nodeEffect or type(nodeEffect) ~= "databasenode" then
+        return false;
+    end
     local rEffect = EffectManager.getEffect(nodeEffect);
     local rTarget = ActorManager.resolveActor(nodeActor);
     local rSource;
