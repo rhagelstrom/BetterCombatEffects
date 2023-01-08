@@ -16,6 +16,8 @@ local addEffect = nil;
 --		bIgnoreDisabledCheck = true/false (default = false)
 --      bIgnoreOtherFilter = true/false (default = false)
 -- 		bOneShot = true/false (default = false)
+-- 		bDamageFilter = true/false (default = false)
+-- 		bConditionFilter = true/false (default = false)
 
 local _tEffectCompTypes = {};
 
@@ -156,7 +158,8 @@ end
 --		bIgnoreDisabledCheck = true/false (default = false)
 -- 		bIgnoreOtherFilter = true/false (default = false)
 -- 		bOneShot = true/false (default = false)
---
+--      bDamageFilter = true/false (default = false)
+--      bConditionFilter = true/false (default = false)
 
 function registerEffectCompType(sEffectCompType, tParams)
     _tEffectCompTypes[sEffectCompType] = tParams;

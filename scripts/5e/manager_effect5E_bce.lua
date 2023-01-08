@@ -174,12 +174,18 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     -- Set up filters
     local aRangeFilter = {};
     local aOtherFilter = {};
+    local aConditionFilter = {};
+    local aDamageFilter = {};
     if aFilter then
         for _, v in pairs(aFilter) do
             if type(v) ~= "string" then
                 table.insert(aOtherFilter, v);
             elseif StringManager.contains(DataCommon.rangetypes, v) then
                 table.insert(aRangeFilter, v);
+            elseif StringManager.contains(DataCommon.conditions, v) then
+                table.insert(aConditionFilter, v);
+            elseif StringManager.contains(DataCommon.dmgtypes, v) or v == "all" then
+                table.insert(aDamageFilter, v);
             elseif not tEffectCompParams.bIgnoreOtherFilter then
                 table.insert(aOtherFilter, v);
             end
@@ -247,17 +253,22 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                         -- Strip energy/bonus types for subtype comparison
                         local aEffectRangeFilter = {};
                         local aEffectOtherFilter = {};
+                        local aEffectConditionFilter = {};
+                        local aEffectDamageFilter  = {};
                         local j = 1;
                         while rEffectComp.remainder[j] and rEffectComp.type == sEffectType do
                             local s = rEffectComp.remainder[j];
                             if #s > 0 and ((s:sub(1, 1) == "!") or (s:sub(1, 1) == "~")) then
                                 s = s:sub(2);
                             end
-                            if StringManager.contains(DataCommon.dmgtypes, s) or s == "all" or
+                            if
                                 StringManager.contains(DataCommon.bonustypes, s) or
-                                StringManager.contains(DataCommon.conditions, s) or
                                 StringManager.contains(DataCommon.connectors, s) then
                                 -- SKIP
+                            elseif StringManager.contains(DataCommon.conditions, s) then
+                                table.insert(aEffectConditionFilter, s);
+                            elseif StringManager.contains(DataCommon.dmgtypes, s) or s == "all" then
+                                table.insert(aEffectDamageFilter, s);
                             elseif StringManager.contains(DataCommon.rangetypes, s) then
                                 table.insert(aEffectRangeFilter, s);
                             elseif not tEffectCompParams.bIgnoreOtherFilter then
@@ -315,6 +326,32 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                     end
                                 end
                                 if not bOtherMatch then
+                                    comp_match = false;
+                                end
+                            end
+                            if tEffectCompParams.bConditionFilter and #aEffectConditionFilter > 0 then
+                                BCEManager.chat("Condition Filter:", #aEffectConditionFilter)
+                                local bConditionMatch = false;
+                                for _, v2 in pairs(aConditionFilter) do
+                                    if StringManager.contains(aEffectConditionFilter, v2) then
+                                        bConditionMatch = true;
+                                        break;
+                                    end
+                                end
+                                if not bConditionMatch then
+                                    comp_match = false;
+                                end
+                            end
+                            if tEffectCompParams.bDamageFilter and #aEffectDamageFilter > 0 then
+                                BCEManager.chat("Damage Filter:", #aEffectDamageFilter)
+                                local bDamageMatch = false;
+                                for _, v2 in pairs(aDamageFilter) do
+                                    if StringManager.contains(aEffectDamageFilter, v2) then
+                                        bDamageMatch = true;
+                                        break;
+                                    end
+                                end
+                                if not bDamageMatch then
                                     comp_match = false;
                                 end
                             end
