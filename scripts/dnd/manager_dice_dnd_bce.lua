@@ -65,6 +65,7 @@ function isDie(sEffect)
                     rRoll.sType = "effectbce";
                     rRoll.sDesc = "[EFFECT " .. sEffect .. "] ";
                     rRoll.aDice = aDice;
+                    rRoll.sSubType = sType;
                     rRoll.nMod = nMod;
                     rRoll.sEffect = sEffect;
                     rRoll.sValue = sValueCheck;

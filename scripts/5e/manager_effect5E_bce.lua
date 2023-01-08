@@ -158,7 +158,7 @@ function dropConcentration(rNewEffect, nDuration)
                 if (sEffect:match("%(C%)") and (DB.getValue(nodeEffect, "source_name", "") == sSource)) and
                     (sEffectTag ~= sNewEffectTag) or
                     ((sEffectTag == sNewEffectTag and (DB.getValue(nodeEffect, "duration", 0) ~= nDuration))) then
-                    EffectsManagerBCE.modifyEffect(nodeEffect.getPath(), "Remove", sEffect);
+                    BCEManager.modifyEffect(nodeEffect, "Remove", sEffect);
                 end
             end
         end

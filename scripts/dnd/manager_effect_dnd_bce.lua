@@ -60,16 +60,6 @@ function addEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
     BCEManager.chat("addEffectPre DND: ");
     local rActor = ActorManager.resolveActor(nodeCT)
     BCEDnDManager.replaceAbilityScores(rNewEffect, rActor);
-    local rRoll = DiceManagerDnDBCE.isDie(rNewEffect.sName);
-    if next(rRoll) and next(rRoll.aDice) then
-        rRoll.rActor = rActor;
-        if rNewEffect.nGMOnly then
-            rRoll.bSecret = true;
-        else
-            rRoll.bSecret = false;
-        end
-        ActionsManager.performAction(nil, rActor, rRoll);
-    end
     return false;
 end
 
@@ -81,6 +71,17 @@ function addEffectPost(nodeActor, nodeEffect)
     local rEffect = EffectManager.getEffect(nodeEffect);
     local rTarget = ActorManager.resolveActor(nodeActor);
     local rSource;
+    local rRoll = DiceManagerDnDBCE.isDie(nodeEffect.sName);
+    if next(rRoll) and next(rRoll.aDice) then
+        rRoll.rActor = rTarget;
+        if rEffect.nGMOnly then
+            rRoll.bSecret = true;
+            rRoll.sNodeCT = nodeEffect.getPath();
+        else
+            rRoll.bSecret = false;
+        end
+        ActionsManager.performAction(nil, rTarget, rRoll);
+    end
     if rEffect.sSource == "" then
         rSource = rTarget;
     else
