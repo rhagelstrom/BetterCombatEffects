@@ -259,9 +259,9 @@ function onDamage(rSource, rTarget, rRoll)
     local tMatch = {};
 
     if User.getRulesetName() == "5E" then
-        tMatch = RulesetEffectManager.getEffectsByType(rSource, "SAVEONDMG", DataCommon.ability_ltos, rTarget);
+        tMatch = RulesetEffectManager.getEffectsByType(rTarget, "SAVEONDMG", DataCommon.ability_ltos, rSource);
     else
-        tMatch = RulesetEffectManager.getEffectsByType(rSource, "SAVEONDMG", DataCommon.save_ltos, rTarget);
+        tMatch = RulesetEffectManager.getEffectsByType(rTarget, "SAVEONDMG", DataCommon.save_ltos, rSource);
     end
     for _, tEffect in pairs(tMatch) do
         BCEManager.chat("SAVEONDMG : ", tEffect);
