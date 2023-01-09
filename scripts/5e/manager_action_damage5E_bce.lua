@@ -67,6 +67,9 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
         for _, vType in pairs(v.remainder) do
             if vType ~= "untyped" and vType ~= "" and vType:sub(1, 1) ~= "!" and vType:sub(1, 1) ~= "~" then
                 if StringManager.contains(DataCommon.dmgtypes, vType) or vType == "all" then
+                    if aFinal[vType] then
+                        rReduction.mod = rReduction.mod + aFinal[vType].mod;
+                    end
                     aFinal[vType] = rReduction;
                 end
             end
