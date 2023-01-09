@@ -289,11 +289,17 @@ function notifyAddEffect(nodeSource, rEffect, sLabel)
 end
 
 function modifyEffect(sNodeEffect, sAction, sEffect)
-    -- Must be database node, if not it is probably marked for deletion from one-shot
-    local nodeEffect = DB.findNode(sNodeEffect);
-    if type(nodeEffect) ~= "databasenode" then
-        return;
-    end
+     -- Must be database node, if not it is probably marked for deletion from one-shot
+     local nodeEffect;
+     if type(sNodeEffect) == "databasenode" then
+         nodeEffect = sNodeEffect;
+     else
+         nodeEffect = DB.findNode(sNodeEffect);
+     end
+     if not nodeEffect or type(nodeEffect) ~= "databasenode" then
+         return;
+     end
+
     local sOOB = "";
     local nActive = DB.getValue(nodeEffect, "isactive", 0);
 
