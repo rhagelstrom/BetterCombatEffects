@@ -30,23 +30,19 @@ local getEffectsByType = nil;
 ------------------ END CUSTOM BCE FUNTION HOOKS ------------------
 
 function onInit()
-    if Session.IsHost then
-        addEffect = EffectManager.addEffect;
-        getEffectsByType = EffectManager.getEffectsByType;
+    addEffect = EffectManager.addEffect;
+    getEffectsByType = EffectManager.getEffectsByType;
 
-        EffectManager.addEffect = EffectManagerBCE.customAddEffectPre;
-        EffectManager.getEffectsByType = customGetEffectsByType;
+    EffectManager.addEffect = EffectManagerBCE.customAddEffectPre;
+    EffectManager.getEffectsByType = customGetEffectsByType;
 
-        EffectManagerBCE.initEffectHandlers();
-    end
+    EffectManagerBCE.initEffectHandlers();
 end
 
 function onClose()
-    if Session.IsHost then
-        EffectManager.addEffect = addEffect;
-        EffectManagerBCE.deleteEffectHandlers();
-        EffectManager.getEffectsByType = getEffectsByType;
-    end
+    EffectManager.addEffect = addEffect;
+    EffectManagerBCE.deleteEffectHandlers();
+    EffectManager.getEffectsByType = getEffectsByType;
 end
 
 ------------------ OVERRIDES ------------------
