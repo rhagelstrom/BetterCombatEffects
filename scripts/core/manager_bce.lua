@@ -21,20 +21,18 @@ function onInit()
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect);
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect);
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEADD, handleAddEffect);
-
-        BCEManager.initGlobalEffects();
-        DB.addHandler("effects", "onChildAdded", effectAdded);
-        Module.onModuleLoad = onModuleLoad;
-        Module.onModuleUnload = onModuleUnload;
     end
+    BCEManager.initGlobalEffects();
+    DB.addHandler("effects", "onChildAdded", effectAdded);
+    Module.onModuleLoad = onModuleLoad;
+    Module.onModuleUnload = onModuleUnload;
+
     tExtensions = BCEManager.getExtensions();
 end
 
 function onClose()
-    if Session.IsHost then
-        BCEManager.removeEffectHandlers();
-        CombatManager.removeCustomDeleteCombatantEffectHandler(expireAdd)
-    end
+    BCEManager.removeEffectHandlers();
+    CombatManager.removeCustomDeleteCombatantEffectHandler(expireAdd)
 end
 
 ------------------ DEBUG ------------------
