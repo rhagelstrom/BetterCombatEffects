@@ -36,13 +36,17 @@ function onInit()
     EffectManager.addEffect = EffectManagerBCE.customAddEffectPre;
     EffectManager.getEffectsByType = customGetEffectsByType;
 
-    EffectManagerBCE.initEffectHandlers();
+    if Session.IsHost then
+        EffectManagerBCE.initEffectHandlers();
+    end
 end
 
 function onClose()
     EffectManager.addEffect = addEffect;
-    EffectManagerBCE.deleteEffectHandlers();
     EffectManager.getEffectsByType = getEffectsByType;
+    if Session.IsHost then
+        EffectManagerBCE.deleteEffectHandlers();
+    end
 end
 
 ------------------ OVERRIDES ------------------

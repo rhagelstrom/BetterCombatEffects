@@ -21,30 +21,33 @@ function onInit()
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEREMOVE, handleRemoveEffect);
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEUPDATE, handleUpdateEffect);
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEADD, handleAddEffect);
+
+        BCEManager.initGlobalEffects();
+        DB.addHandler("effects", "onChildAdded", effectAdded);
+        Module.onModuleLoad = onModuleLoad;
+        Module.onModuleUnload = onModuleUnload;
     end
-    BCEManager.initGlobalEffects();
-    DB.addHandler("effects", "onChildAdded", effectAdded);
-    Module.onModuleLoad = onModuleLoad;
-    Module.onModuleUnload = onModuleUnload;
 
     tExtensions = BCEManager.getExtensions();
 end
 
 function onClose()
-    BCEManager.removeEffectHandlers();
-    CombatManager.removeCustomDeleteCombatantEffectHandler(expireAdd)
+    if Session.IsHost then
+        BCEManager.removeEffectHandlers();
+        CombatManager.removeCustomDeleteCombatantEffectHandler(expireAdd);
+    end
 end
 
 ------------------ DEBUG ------------------
 function chat(...)
     if bDebug then
-        Debug.chat(...)
+        Debug.chat(...);
     end
 end
 
 function console(...)
     if bDebug then
-        Debug.console(...)
+        Debug.console(...);
     end
 end
 ------------------ END DEBUG ------------------
@@ -68,7 +71,7 @@ function hasExtension(sName)
         for _, tExtension in pairs(tExtensions) do
             if tExtension.name == sName then
                 bReturn = true;
-                break
+                break;
             end
         end
     end
@@ -259,26 +262,12 @@ end
 
 ------------------ EFFECT STATE CHANGE OOB ------------------
 
-function notifyAddEffect(nodeSource, rEffect, sLabel)
+function notifyAddEffect(nodeTarget, nodeSource, sLabel)
     local msgOOB = {};
     msgOOB.type = OOB_MSGTYPE_BCEADD;
-    msgOOB.sSource = rEffect.sSource;
-    msgOOB.sTarget = nodeSource.getPath();
-    if sLabel then
-        msgOOB.sShortLabel = sLabel;
-    end
-    msgOOB.sLabel = rEffect.sName;
-    msgOOB.sInit = tostring(rEffect.nInit);
-    if not rEffect.nGMOnly then
-        local rActor = ActorManager.resolveActor(nodeSource);
-        if ActorManager.isPC(rActor) then
-            rEffect.nGMOnly = 0;
-        else
-            rEffect.nGMOnly = 1;
-        end
-    end
-    msgOOB.sGMOnly = tostring(rEffect.nGMOnly);
-    msgOOB.sDuration = tostring(rEffect.nDuration);
+    msgOOB.sSource = nodeSource.getPath();
+    msgOOB.sTarget = nodeTarget.getPath();
+    msgOOB.sLabel = sLabel;
     if Session.IsHost then
         BCEManager.handleAddEffect(msgOOB);
     else
@@ -349,24 +338,20 @@ function handleActivateEffect(msgOOB)
 end
 
 function handleAddEffect(msgOOB)
-    -- if not handlerCheck(msgOOB) then
-    local rEffect;
-    if msgOOB.sShortLabel then
-        rEffect = BCEManager.matchEffect(msgOOB.sShortLabel);
-    else
-        rEffect = BCEManager.matchEffect(msgOOB.sLabel);
-    end
+    local rEffect = BCEManager.matchEffect(msgOOB.sLabel);
     if next(rEffect) then
         local nodeTarget = DB.findNode(msgOOB.sTarget);
-        rEffect.sSource = msgOOB.sSource;
-        rEffect.nDuration = tonumber(msgOOB.sDuration);
-        rEffect.nGMOnly = tonumber(msgOOB.sGMOnly);
-        rEffect.nInit = tonumber(msgOOB.sInit);
+        local nodeSource = DB.findNode(msgOOB.sSource);
+        if msgOOB.sTarget ~= msgOOB.sSource then
+            rEffect.sSource = msgOOB.sSource;
+            rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
+        else
+            rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
+        end
         if nodeTarget then
             EffectManager.addEffect("", "", nodeTarget, rEffect, true);
         end
     end
-    -- end
 end
 
 function handleDeactivateEffect(msgOOB)

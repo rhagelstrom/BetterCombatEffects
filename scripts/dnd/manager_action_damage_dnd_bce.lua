@@ -112,18 +112,12 @@ function customApplyDamage(rSource, rTarget, rRoll, ...)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
-            local rEffect = BCEManager.matchEffect(tEffect.remainder[1]);
-            if next(rEffect) then
-                -- rEffect.sSource = DB.getValue(nodeTarget,"source_name", rTarget.sCTNode);
-                rEffect.sSource = nodeTarget.getPath();
-                rEffect.nInit = DB.getValue(nodeTarget, "initresult", 0);
-                if sTag == "TDMGADDT" then
-                    BCEManager.chat("TDMGADDT: ");
-                    BCEManager.notifyAddEffect(nodeTarget, rEffect, tEffect.remainder[1]);
-                elseif sTag == "TDMGADDS" then
-                    BCEManager.chat("TDMGADDs: ");
-                    BCEManager.notifyAddEffect(nodeSource, rEffect, tEffect.remainder[1]);
-                end
+            if sTag == "TDMGADDT" then
+                BCEManager.chat("TDMGADDT: ");
+                BCEManager.notifyAddEffect(nodeTarget, nodeTarget, tEffect.remainder[1]);
+            elseif sTag == "TDMGADDS" then
+                BCEManager.chat("TDMGADDS: ");
+                BCEManager.notifyAddEffect(nodeSource, nodeTarget, tEffect.remainder[1]);
             end
         end
     end
@@ -131,18 +125,13 @@ function customApplyDamage(rSource, rTarget, rRoll, ...)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, nil, rTarget);
         for _, tEffect in pairs(tMatch) do
-            local rEffect = BCEManager.matchEffect(tEffect.remainder[1]);
-            if next(rEffect) then
-                rEffect.sSource = nodeSource.getPath();
-                rEffect.nInit = DB.getValue(nodeSource, "initresult", 0);
-                if sTag == "SDMGADDT" then
-                    BCEManager.chat("SDMGADDT: ");
+            if sTag == "SDMGADDT" then
+                BCEManager.chat("SDMGADDT: ");
 
-                    BCEManager.notifyAddEffect(nodeTarget, rEffect, tEffect.remainder[1]);
-                elseif sTag == "SDMGADDS" then
-                    BCEManager.chat("SDMGADDS: ");
-                    BCEManager.notifyAddEffect(nodeSource, rEffect, tEffect.remainder[1]);
-                end
+                BCEManager.notifyAddEffect(nodeTarget, nodeSource, tEffect.remainder[1]);
+            elseif sTag == "SDMGADDS" then
+                BCEManager.chat("SDMGADDS: ");
+                BCEManager.notifyAddEffect(nodeSource, nodeSource, tEffect.remainder[1]);
             end
         end
     end

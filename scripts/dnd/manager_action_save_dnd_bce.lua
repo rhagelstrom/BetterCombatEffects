@@ -164,18 +164,7 @@ end
 
 function saveAddEffect(nodeSource, nodeTarget, rEffectComp)
     BCEManager.chat("saveAddEffect : ");
-    local rEffect = BCEManager.matchEffect(rEffectComp.remainder[1]);
-    if next(rEffect) then
-        local nodeEffect = DB.findNode(rEffectComp.sEffectNode);
-        -- local sEffectLabel = DB.getValue(nodeEffect, "label", "");
-        local nGMOnly = DB.getValue(nodeEffect, "isgmonly", 0);
-
-        rEffect.sSource = rEffectComp.sSource;
-        rEffect.nGMOnly = nGMOnly; -- If the parent is secret then we should be too.
-        rEffect.nInit = DB.getValue(nodeTarget, "initresult", 0);
-
-        BCEManager.notifyAddEffect(nodeSource, rEffect, rEffectComp.remainder[1]);
-    end
+    BCEManager.notifyAddEffect(nodeSource, nodeTarget, rEffectComp.remainder[1]);
 end
 
 function saveEffect(rTarget, rEffectComp)
