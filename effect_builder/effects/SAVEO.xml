@@ -49,7 +49,7 @@
                 EditorManager.addEditor(
                     "category_bce_ongoingsave",
                     {
-                        value="SAVE",
+                        value="SAVEO",
                         labelres="effect_saveo",
                         windowclass="effect_SAVEO"
                     }
