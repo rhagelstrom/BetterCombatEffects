@@ -3,17 +3,18 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 local RulesetEffectManager = nil;
-local applyDamage = nil;
-
+local RulesetActionDamageManager = nil
 local fProcessEffectOnDamage;
 
 function onInit()
-    -- bAdvancedEffects = BCEManager.hasExtension("AdvancedEffects") or BCEManager.hasExtension("FG-PFRPG-Advanced-Effects");
-
     RulesetEffectManager = BCEManager.getRulesetEffectManager();
-
-    applyDamage = ActionDamage.applyDamage;
-    ActionDamage.applyDamage = customApplyDamage;
+    if User.getRulesetName() == "5E" then
+        RulesetActionDamageManager = ActionDamage5EBCE;
+    elseif User.getRulesetName() == "4E" then
+        RulesetActionDamageManager = ActionDamage4EBCE;
+    elseif User.getRulesetName() == "3.5E" or User.getRulesetName() == "PFRPG" then
+        RulesetActionDamageManager = ActionDamage35EBCE;
+    end
 
     OptionsManager.registerOption2("TEMP_IS_DAMAGE", false, "option_Better_Combat_Effects", "option_Temp_Is_Damage",
         "option_entry_cycler", {
@@ -26,9 +27,6 @@ function onInit()
 end
 
 function onClose()
-    if Session.IsHost then
-        ActionDamage.applyDamage = applyDamage;
-    end
 end
 
 function onTabletopInit()
@@ -54,11 +52,12 @@ function setProcessEffectOnDamage(ProcessEffectOnDamage)
 end
 
 -- 3.5E  function applyDamage(rSource, rTarget, bSecret, sRollType, sDamage, nTotal)
+-- 4E   function applyDamage(rSource, rTarget, bSecret, sRollType, sDamage, nTotal, sFocusBaseDice)
 -- 5E   function customApplyDamage(rSource, rTarget, rRoll, ...)
-function customApplyDamage(rSource, rTarget, rRoll, ...)
-    BCEManager.chat("customApplyDamage : ");
+function applyDamageBCE(rSource, rTarget, rRoll, ...)
+    BCEManager.chat("applyDamageBCE : ");
     if rRoll.sType ~= "damage" then
-        return applyDamage(rSource, rTarget, rRoll, ...);
+        return RulesetActionDamageManager.applyDamage(rSource, rTarget, rRoll, ...);
     end
     local nodeTarget = ActorManager.getCTNode(rTarget);
     local nodeSource = ActorManager.getCTNode(rSource);
@@ -71,7 +70,7 @@ function customApplyDamage(rSource, rTarget, rRoll, ...)
     end
     -- save off temp hp and wounds before damage
     local nTempHPPrev, nWoundsPrev = ActionDamageDnDBCE.getTempHPAndWounds(rTarget);
-    applyDamage(rSource, rTarget, rRoll, ...);
+    RulesetActionDamageManager.applyDamage(rSource, rTarget, rRoll, ...);
 
     -- get temp hp and wounds after damage
     local nTempHP, nWounds = ActionDamageDnDBCE.getTempHPAndWounds(rTarget);

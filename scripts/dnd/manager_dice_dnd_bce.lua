@@ -14,7 +14,7 @@ function onClose()
 end
 
 function customConvertStringToDice(s)
-    BCEManager.chat("customConvertStringToDice : ");
+    --BCEManager.chat("customConvertStringToDice : ");
     local tDice = {};
     local nMod = 0;
     local tTerms = DiceManager.convertDiceStringToTerms(s);
@@ -36,11 +36,10 @@ function customConvertStringToDice(s)
     return tDice, nMod;
 end
 
--- TODO This probably needs some love or removal
-function isDie(sEffect)
-    BCEManager.chat("isDie : ");
-    local rRoll = {};
-    local tEffectComps = EffectManager.parseEffect(sEffect);
+function isDie(rTarget, rEffect, sNodeEffect)
+    BCEManager.chat("isDie : ", rEffect);
+
+    local tEffectComps = EffectManager.parseEffect(rEffect.sName);
     for _, sEffectComp in ipairs(tEffectComps) do
         local aWords = StringManager.parseWords(sEffectComp, "%.%[%]%(%):");
         if #aWords > 0 then
@@ -61,17 +60,26 @@ function isDie(sEffect)
                     sValueCheck = sValueCheck:gsub("%-", "", 1);
                 end
                 if sValueCheck ~= "" and not StringManager.isNumberString(sValueCheck) and StringManager.isDiceString(sValueCheck) then
+                    local rRoll = {};
                     local aDice, nMod = StringManager.convertStringToDice(sValueCheck);
                     rRoll.sType = "effectbce";
-                    rRoll.sDesc = "[EFFECT " .. sEffect .. "] ";
+                    rRoll.sDesc = "[EFFECT " .. rEffect.sName .. "] ";
                     rRoll.aDice = aDice;
                     rRoll.sSubType = sType;
                     rRoll.nMod = nMod;
-                    rRoll.sEffect = sEffect;
+                    rRoll.sEffect = rEffect.sName;
                     rRoll.sValue = sValueCheck;
+                    rRoll.rActor = rTarget;
+                    rRoll.sNodeCT = sNodeEffect;
+                    if rEffect.nGMOnly then
+                        rRoll.bSecret = true;
+                    else
+                        rRoll.bSecret = false;
+                    end
+                    BCEManager.chat("Roll : ", rRoll);
+                    ActionsManager.performAction(nil, rTarget, rRoll);
                 end
             end
         end
     end
-    return rRoll
 end

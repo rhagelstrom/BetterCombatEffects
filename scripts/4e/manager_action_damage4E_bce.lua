@@ -3,14 +3,33 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 local getDamageAdjust = nil;
+local applyDamageOriginal = nil;
 
 function onInit()
     getDamageAdjust = ActionDamage.getDamageAdjust;
+    applyDamageOriginal = ActionDamage.applyDamage;
     ActionDamage.getDamageAdjust = customGetDamageAdjust;
+    ActionDamage.applyDamage = customApplyDamage;
 end
 
 function onClose()
     ActionDamage.getDamageAdjust = getDamageAdjust;
+    ActionDamage.applyDamage = applyDamageOriginal;
+end
+
+-- 4E   function applyDamage(rSource, rTarget, bSecret, sRollType, sDamage, nTotal, sFocusBaseDice)
+function customApplyDamage(rSource, rTarget, bSecret, sRollType, sDamage, nTotal, sFocusBaseDice, ...)
+    local rRoll = {};
+    rRoll.sType = sRollType;
+    rRoll.sDesc = sDamage;
+    rRoll.nTotal = nTotal;
+    rRoll.bSecret = bSecret;
+    rRoll.sFocusBaseDice = sFocusBaseDice;
+    ActionDamageDnDBCE.applyDamageBCE(rSource, rTarget, rRoll, ...);
+end
+
+function applyDamage(rSource, rTarget, rRoll, ...)
+    applyDamageOriginal(rSource, rTarget, rRoll.bSecret, rRoll.sType, rRoll.sDesc, rRoll.nTotal, rRoll.sFocusBaseDice, ...);
 end
 
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)

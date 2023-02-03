@@ -3,14 +3,23 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 local getDamageAdjust = nil;
+applyDamage = nil;
 
 function onInit()
     getDamageAdjust = ActionDamage.getDamageAdjust;
+    applyDamage = ActionDamage.applyDamage;
     ActionDamage.getDamageAdjust = customGetDamageAdjust;
+    ActionDamage.applyDamage = customApplyDamage;
 end
 
 function onClose()
     ActionDamage.getDamageAdjust = getDamageAdjust;
+    ActionDamage.applyDamage = applyDamage;
+
+end
+
+function customApplyDamage(rSource, rTarget, rRoll, ...)
+    ActionDamageDnDBCE.applyDamageBCE(rSource, rTarget, rRoll, ...)
 end
 
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)

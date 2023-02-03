@@ -67,17 +67,7 @@ function addEffectPost(nodeActor, nodeEffect)
     local rEffect = EffectManager.getEffect(nodeEffect);
     local rTarget = ActorManager.resolveActor(nodeActor);
     local rSource;
-    local rRoll = DiceManagerDnDBCE.isDie(rEffect.sName);
-    if next(rRoll) and next(rRoll.aDice) then
-        rRoll.rActor = rTarget;
-        if rEffect.nGMOnly then
-            rRoll.bSecret = true;
-            rRoll.sNodeCT = nodeEffect.getPath();
-        else
-            rRoll.bSecret = false;
-        end
-        ActionsManager.performAction(nil, rTarget, rRoll);
-    end
+    DiceManagerDnDBCE.isDie(rTarget, rEffect, nodeEffect.getPath());
     if rEffect.sSource == "" then
         rSource = rTarget;
     else

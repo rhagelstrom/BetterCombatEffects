@@ -215,13 +215,17 @@ function expireAdd(nodeEffect)
     if sLabel:match("EXPIREADD") then
         local sActor = DB.getChild(nodeEffect, "...").getPath();
         local nodeCT = DB.findNode(sActor);
+        local sSource = DB.getValue(nodeEffect, 'source_name', '')
+        local sourceNode = nodeCT;
+        if sSource ~= "" then
+            sourceNode = DB.findNode(sSource);
+        end
         local aEffectComps = EffectManager.parseEffect(sLabel);
         for _, sEffectComp in ipairs(aEffectComps) do
             local tEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
             if tEffectComp.type == "EXPIREADD" then
-                local rEffect = BCEManager.matchEffect(tEffectComp.remainder[1]);
-                EffectManager.addEffect("", "", nodeCT, rEffect, true);
-                break
+                BCEManager.notifyAddEffect(nodeCT, sourceNode,StringManager.combine(" ", unpack(tEffectComp.remainder)));
+                break;
             end
         end
     end
