@@ -240,7 +240,6 @@ function saveEffect(rTarget, rEffectComp)
             rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [DIS]";
         end
         rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. " [PATH]" .. rEffectComp.sEffectNode .. "[!PATH] [BCE]";
-
         ActionSave.performVsRoll(nil, rTarget, sAbility, rSaveVsRoll.nMod, bSecret, rSource, false, rSaveVsRoll.sDesc);
     end
 end
