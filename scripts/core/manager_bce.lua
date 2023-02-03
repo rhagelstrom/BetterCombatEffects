@@ -276,16 +276,17 @@ function notifyAddEffect(nodeTarget, nodeSource, sLabel)
 end
 
 function modifyEffect(sNodeEffect, sAction, sEffect)
-     -- Must be database node, if not it is probably marked for deletion from one-shot
-     local nodeEffect;
-     if type(sNodeEffect) == "databasenode" then
-         nodeEffect = sNodeEffect;
-     else
-         nodeEffect = DB.findNode(sNodeEffect);
-     end
-     if not nodeEffect or type(nodeEffect) ~= "databasenode" then
-         return;
-     end
+    -- Must be database node, if not it is probably marked for deletion from one-shot
+    local nodeEffect;
+    if type(sNodeEffect) == "databasenode" then
+        nodeEffect = sNodeEffect;
+    else
+        nodeEffect = DB.findNode(sNodeEffect);
+    end
+
+    if not nodeEffect or type(nodeEffect) ~= "databasenode" then
+        return;
+    end
 
     local sOOB = "";
     local nActive = DB.getValue(nodeEffect, "isactive", 0);
@@ -347,6 +348,9 @@ function handleAddEffect(msgOOB)
             rEffect.nInit  = DB.getValue(nodeSource, "initresult", 0)
         else
             rEffect.nInit  = DB.getValue(nodeTarget, "initresult", 0)
+        end
+        if not ActorManager.isPC(nodeSource) then
+            rEffect.nGMOnly = 1;
         end
         if nodeTarget then
             EffectManager.addEffect("", "", nodeTarget, rEffect, true);

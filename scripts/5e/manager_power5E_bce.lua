@@ -329,7 +329,7 @@ function customParseEffects(sPowerName, aWords)
                 end
                 rCurrent.startindex = nConditionStart;
                 rCurrent.endindex = i;
-                -- TODO: looks like a bug but dealing with it now.
+                -- TODO: looks like a bug but not dealing with it now.
                 if sRemoveTurn ~= "" then
                     rCurrent.sName = rCurrent.sName .. "; " .. sTurnModifier
                 end

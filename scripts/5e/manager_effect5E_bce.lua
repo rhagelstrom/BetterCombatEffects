@@ -49,7 +49,7 @@ function onInit()
     EffectManagerBCE.setCustomPreAddEffect(EffectManager5EBCE.addEffectPre5E)
     EffectManager.setCustomOnEffectAddIgnoreCheck(EffectManager5EBCE.customOnEffectAddIgnoreCheck)
 
-    -- bExpandedNPC = EffectsManagerBCE.hasExtension( "5E - Expanded NPCs")
+    -- bExpandedNPC = BCEManager.hasExtension( "5E - Expanded NPCs")
     bAdvancedEffects = BCEManager.hasExtension("AdvancedEffects");
     bUntrueEffects = BCEManager.hasExtension("IF_NOT_untrue_effects_berwind");
 
@@ -88,7 +88,7 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
             end
         end
     end
-    return sDuplicateMsg
+    return sDuplicateMsg;
 end
 
 function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
@@ -128,7 +128,7 @@ function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
         EffectManager5EBCE.dropConcentration(rNewEffect, nDuration);
     end
 
-    return false
+    return false;
 end
 
 -- 5E Only - Check if this effect has concentration and drop all previous effects of concentration from the source
@@ -203,7 +203,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     for _, v in pairs(aEffects) do
         -- Check active
         local nActive = DB.getValue(v, "isactive", 0);
-        BCEManager.chat(v)
+        --BCEManager.chat(v)
         local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
                             (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
@@ -272,7 +272,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                             elseif StringManager.contains(DataCommon.rangetypes, s) then
                                 table.insert(aEffectRangeFilter, s);
                             elseif not tEffectCompParams.bIgnoreOtherFilter then
-                                table.insert(aEffectOtherFilter, s);
+                                table.insert(aEffectOtherFilter, s:lower());
                             end
 
                             j = j + 1;

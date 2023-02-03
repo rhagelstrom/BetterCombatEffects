@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <root version="3.3">
+    <script name="ActionDamage35EBCE"   file="scripts/35e/manager_action_damage35E_bce.lua" />
     <script name="EffectManager35EBCE"  file="scripts/35e/manager_effect35E_bce.lua" />
 </root>
