@@ -1,6 +1,6 @@
 # Better Combat Effects
 
-**Current Version:** 4.0
+**Current Version:** 4.1
 **Updated:** 02/04/23
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
@@ -92,7 +92,7 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 **[condition]** = Any condition as noted above except exhaustion. Note [condition] must be all lower case
 **[SDC]** = (5E only) [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF]
 **(R)** will remove the save effect on a successful save.
-**(R)** will remove the save effect on any save.
+**(RA)** will remove the save effect on any save.
 **(D)** will disable the save effect on a successful save.
 **(H)** will deal half damage on a successful ongoing save.
 **(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save

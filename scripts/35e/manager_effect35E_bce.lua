@@ -167,7 +167,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 -- Skip
                             elseif StringManager.contains(DataCommon.rangetypes, aComponents[j]) then
                                 table.insert(aEffectRangeFilter, aComponents[j])
-                            elseif rEffectComp.type ~= "" then
+                            elseif rEffectComp.type ~= "" and not tEffectCompParams.bIgnoreOtherFilter then
                                 table.insert(aEffectOtherFilter, aComponents[j])
                             end
 
