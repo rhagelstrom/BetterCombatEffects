@@ -161,7 +161,7 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
             end
         end
     end
-    ActionSaveDnDBCE.saveRemoveDisable(sPath, nil, not bAct, rRoll);
+    ActionSaveDnDBCE.saveRemoveDisable(sPath, nil, (not bAct), rRoll);
 end
 
 function saveAddEffect(nodeSource, nodeTarget, rEffectComp)
@@ -245,11 +245,12 @@ function saveEffect(rTarget, rEffectComp)
 end
 
 function saveRemoveDisable(sNodeEffect, rEffectComp, bRAOnly, rRoll)
-    if not bRAOnly and (rEffectComp and rEffectComp.original:match("%(R%)")) or (rRoll and rRoll.sSaveDesc:match("%[REMOVE ON SAVE%]")) then
+
+    if not bRAOnly and ((rEffectComp and rEffectComp.original:match("%(R%)")) or (rRoll and rRoll.sSaveDesc:match("%[REMOVE ON SAVE%]"))) then
         BCEManager.modifyEffect(sNodeEffect, "Remove");
-    elseif not bRAOnly and rEffectComp and rEffectComp.original:match("%(D%)") or (rRoll and rRoll.sSaveDesc:match("%[DISABLE ON SAVE%]")) then
+    elseif not bRAOnly and ((rEffectComp and rEffectComp.original:match("%(D%)")) or (rRoll and rRoll.sSaveDesc:match("%[DISABLE ON SAVE%]"))) then
         BCEManager.modifyEffect(sNodeEffect, "Deactivate");
-    elseif rEffectComp and rEffectComp.original:match("%(RA%)") or (rRoll and rRoll.sSaveDesc:match("%[REMOVE ANY SAVE%]"))then
+    elseif rEffectComp and (rEffectComp.original:match("%(RA%)") or (rRoll and rRoll.sSaveDesc:match("%[REMOVE ANY SAVE%]")))then
         BCEManager.modifyEffect(sNodeEffect, "Remove");
     end
 end
