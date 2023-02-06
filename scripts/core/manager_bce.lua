@@ -141,6 +141,13 @@ function matchEffect(sEffect)
         if nodeEffect then
             rEffect = EffectManager.getEffect(nodeEffect);
         end
+    elseif StringManager.contains(DataCommon.conditions, sEffect:lower()) then
+        rEffect.sName = sEffect;
+        rEffect.nDuration = 0;
+        rEffect.nGMOnly = 0;
+        rEffect.sUnits = "";
+        rEffect.sApply = "";
+
     end
     return rEffect;
 end
