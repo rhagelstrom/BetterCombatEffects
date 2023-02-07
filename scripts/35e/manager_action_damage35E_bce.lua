@@ -10,18 +10,18 @@ function onInit()
     applyDamageOriginal = ActionDamage.applyDamage;
     ActionDamage.applyDamage = customApplyDamage;
     bAdvancedEffects = BCEManager.hasExtension("FG-PFRPG-Advanced-Effects");
-    if bAdvancedEffects then
-        OOBManager.registerOOBMsgHandler(ActionDamage.OOB_MSGTYPE_APPLYDMG, handleApplyDamage);
-        notifyApplyDamage = ActionDamage.notifyApplyDamage;
-        ActionDamage.notifyApplyDamage = customNotifyApplyDamage;
-    end
+    -- if bAdvancedEffects then
+    --     OOBManager.registerOOBMsgHandler(ActionDamage.OOB_MSGTYPE_APPLYDMG, handleApplyDamage);
+    --     notifyApplyDamage = ActionDamage.notifyApplyDamage;
+    --     ActionDamage.notifyApplyDamage = customNotifyApplyDamage;
+    -- end
 end
 
 function onClose()
     ActionDamage.applyDamage = applyDamageOriginal;
-    if bAdvancedEffects then
-        ActionDamage.notifyApplyDamage = notifyApplyDamage;
-    end
+    -- if bAdvancedEffects then
+    --     ActionDamage.notifyApplyDamage = notifyApplyDamage;
+    -- end
 end
 
 function customApplyDamage(rSource, rTarget, bSecret, sRollType, sDamage, nTotal, ...)
