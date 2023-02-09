@@ -125,12 +125,12 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
             end
             for _, tEffect in pairs(tMatch) do
                 if tEffect.sEffectNode == sPath then
-                    if sTag == "SAVEADDP" then
+                    if tEffect.type  == "SAVEADDP" then
                         BCEManager.chat("SAVEADDP : ", tEffect);
                         ActionSaveDnDBCE.saveAddEffect(nodeSource, nodeTarget, tEffect);
                         ActionSaveDnDBCE.saveRemoveDisable(tEffect.sEffectNode, tEffect, true);
 
-                    elseif sTag == "SAVEDMG" then
+                    elseif tEffect.type  == "SAVEDMG" then
                         BCEManager.chat("SAVEDMG : ", tEffect);
                         EffectManagerDnDBCE.applyOngoingDamage(rTarget, rSource, tEffect, true);
                         ActionSaveDnDBCE.saveRemoveDisable(tEffect.sEffectNode, tEffect, true);
@@ -148,11 +148,11 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
             end
             for _, tEffect in pairs(tMatch) do
                 if tEffect.sEffectNode == sPath then
-                    if sTag == "SAVEADD" then
+                    if tEffect.type  == "SAVEADD" then
                         BCEManager.chat("SAVEADD : ", tEffect);
                         ActionSaveDnDBCE.saveAddEffect(nodeSource, nodeTarget, tEffect);
                         ActionSaveDnDBCE.saveRemoveDisable(tEffect.sEffectNode, tEffect);
-                    elseif sTag == "SAVEDMG" then
+                    elseif tEffect.type  == "SAVEDMG" then
                         BCEManager.chat("SAVEDMG : ", tEffect);
                         EffectManagerDnDBCE.applyOngoingDamage(rTarget, rSource, tEffect, false);
                         ActionSaveDnDBCE.saveRemoveDisable(tEffect.sEffectNode, tEffect);
