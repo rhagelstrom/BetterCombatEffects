@@ -1,7 +1,7 @@
 # Better Combat Effects
 
-**Current Version:** 4.2
-**Updated:** 02/07/23
+**Current Version:** 4.3
+**Updated:** 02/09/23
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 

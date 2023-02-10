@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <root release="3.0" version="3">
-	<announcement text="Better Combat Effects v4.2\rby Ryan Hagelstrom\rContribution MeAndUnique,bmos 2021-2023" font="emotefont" icon="BetterCombatEffects" />
+	<announcement text="Better Combat Effects v4.3\rby Ryan Hagelstrom\rContribution MeAndUnique,bmos 2021-2023" font="emotefont" icon="BetterCombatEffects" />
 	<properties>
 		<loadorder>
 			120
@@ -9,7 +9,7 @@
 			Feature: Better Combat Effects
 		</name>
 		<version>
-			4.2
+			4.3
 		</version>
 		<author>
 			Ryan Hagelstrom Contribution: MeAndUnique,bmos
