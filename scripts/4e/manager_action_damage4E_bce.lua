@@ -36,14 +36,14 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
     local nDamageAdjust = 0;
     local nReduce = 0;
     local bVulnerable, bResist, nHalf;
-    local aReduce = getReductionType(rSource, rTarget, "DMGR", rDamageOutput);
+    local aReduce = getReductionType(rSource, rTarget, 'DMGR', rDamageOutput);
 
     for k, v in pairs(rDamageOutput.aDamageTypes) do
         -- Get individual damage types for each damage clause
         local aSrcDmgClauseTypes = {};
-        local aTemp = StringManager.split(k, ",", true);
+        local aTemp = StringManager.split(k, ',', true);
         for _, vType in ipairs(aTemp) do
-            if vType ~= "untyped" and vType ~= "" then
+            if vType ~= 'untyped' and vType ~= '' then
                 table.insert(aSrcDmgClauseTypes, vType);
             end
         end
@@ -57,7 +57,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
         nReduce = nReduce + nLocalReduce;
     end
     if (nReduce > 0) then
-        table.insert(rDamageOutput.tNotifications, "[REDUCED]");
+        table.insert(rDamageOutput.tNotifications, '[REDUCED]');
     end
     nDamageAdjust, bVulnerable, bResist, nHalf = getDamageAdjust(rSource, rTarget, nDamage, rDamageOutput);
     nDamageAdjust = nDamageAdjust - nReduce;
@@ -71,12 +71,11 @@ function checkNumericalReductionType(aReduction, aDmgType, nLimit)
         if nLimit then
             local nSpecificAdjust = checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType, nLimit);
             nAdjust = nAdjust + nSpecificAdjust;
-            local nGlobalAdjust = checkNumericalReductionTypeHelper(aReduction["all"], aDmgType,
-                nLimit - nSpecificAdjust);
+            local nGlobalAdjust = checkNumericalReductionTypeHelper(aReduction['all'], aDmgType, nLimit - nSpecificAdjust);
             nAdjust = nAdjust + nGlobalAdjust;
         else
             nAdjust = nAdjust + checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType);
-            nAdjust = nAdjust + checkNumericalReductionTypeHelper(aReduction["all"], aDmgType);
+            nAdjust = nAdjust + checkNumericalReductionTypeHelper(aReduction['all'], aDmgType);
         end
     end
 
@@ -125,7 +124,7 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
         rReduction.mod = v.mod;
         rReduction.aNegatives = {};
         for _, vType in pairs(v.remainder) do
-            if #vType > 1 and ((vType:sub(1, 1) == "!") or (vType:sub(1, 1) == "~")) then
+            if #vType > 1 and ((vType:sub(1, 1) == '!') or (vType:sub(1, 1) == '~')) then
                 if StringManager.contains(DataCommon.dmgtypes, vType:sub(2)) then
                     table.insert(rReduction.aNegatives, vType:sub(2));
                 end
@@ -133,8 +132,8 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
         end
 
         for _, vType in pairs(v.remainder) do
-            if vType ~= "untyped" and vType ~= "" and vType:sub(1, 1) ~= "!" and vType:sub(1, 1) ~= "~" then
-                if StringManager.contains(DataCommon.dmgtypes, vType) or vType == "all" then
+            if vType ~= 'untyped' and vType ~= '' and vType:sub(1, 1) ~= '!' and vType:sub(1, 1) ~= '~' then
+                if StringManager.contains(DataCommon.dmgtypes, vType) or vType == 'all' then
                     if aFinal[vType] then
                         rReduction.mod = rReduction.mod + aFinal[vType].mod;
                     end

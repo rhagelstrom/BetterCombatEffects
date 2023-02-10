@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_DMGCS">
-        <script file="effect_builder/effects/scripts/DMGCS.lua" />
+	<windowclass name="effect_DMGCS">
+		<script file="effect_builder/effects/scripts/DMGCS.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <cycler_eb_effect_state />
-        </sheetdata>
-    </windowclass>
-    <script name="loader_DMGCS">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_bce_cs",
-                    {
-                        value="DMGCS",
-                        labelres="effect_dmgcs",
-                        windowclass="effect_DMGCS"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<cycler_eb_effect_state />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_DMGCS">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_bce_cs",
+		            {
+		                value="DMGCS",
+		                labelres="effect_dmgcs",
+		                windowclass="effect_DMGCS"
+		            })
+		    end
+		end
+	</script>
 </root>

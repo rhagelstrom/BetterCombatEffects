@@ -1,29 +1,27 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_REST">
-        <script file="effect_builder/effects/scripts/REST.lua" />
+	<windowclass name="effect_REST">
+		<script file="effect_builder/effects/scripts/REST.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <label_eb>
-                <static textres="effect_shortrest"/>
-            </label_eb>
-            <checkbox_eb_valueholder name="effect_removerest"/>
-        </sheetdata>
-    </windowclass>
-    <script name="loader_REST">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_bce_rest",
-                    {
-                        value="REST",
-                        labelres="effect_rest",
-                        windowclass="effect_REST"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<label_eb>
+				<static textres="effect_shortrest" />
+			</label_eb>
+			<checkbox_eb_valueholder name="effect_removerest" />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_REST">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_bce_rest",
+		            {
+		                value="REST",
+		                labelres="effect_rest",
+		                windowclass="effect_REST"
+		            })
+		    end
+		end
+	</script>
 </root>

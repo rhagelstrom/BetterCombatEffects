@@ -62,14 +62,13 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectCompType);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), "effects");
+        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
     end
 
     for _, v in pairs(aEffects) do
         -- Check active
-        local nActive = DB.getValue(v, "isactive", 0);
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
-                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        local nActive = DB.getValue(v, 'isactive', 0);
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
         if bActive or nActive ~= 0 then
             -- If effect type we are looking for supports targets, then check targeting
@@ -86,7 +85,7 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
             end
 
             if bTargetMatch then
-                local sLabel = DB.getValue(v, "label", "");
+                local sLabel = DB.getValue(v, 'label', '');
                 local aEffectComps = EffectManager.parseEffect(sLabel);
 
                 -- Look for type/subtype match
@@ -105,14 +104,14 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
                 -- Remove one shot effects
                 if (nMatch > 0) and not tEffectCompParams.bIgnoreExpire then
                     if nActive == 2 then
-                        DB.setValue(v, "isactive", "number", 1);
+                        DB.setValue(v, 'isactive', 'number', 1);
                     else
-                        local sApply = DB.getValue(v, "apply", "");
-                        if sApply == "action" then
+                        local sApply = DB.getValue(v, 'apply', '');
+                        if sApply == 'action' then
                             EffectManager.notifyExpire(v, 0);
-                        elseif sApply == "roll" then
+                        elseif sApply == 'roll' then
                             EffectManager.notifyExpire(v, 0, true);
-                        elseif sApply == "single" or tEffectCompParams.bOneShot then
+                        elseif sApply == 'single' or tEffectCompParams.bOneShot then
                             EffectManager.notifyExpire(v, nMatch, true);
                         end
                     end
@@ -126,7 +125,7 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
 end
 
 function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
-    BCEManager.chat("Add Effect Pre: ", rNewEffect.sName);
+    BCEManager.chat('Add Effect Pre: ', rNewEffect.sName);
     if not nodeCT or not rNewEffect or not rNewEffect.sName then
         return addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg);
     end
@@ -135,14 +134,13 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
     end
     addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg);
     local nodeEffect;
-    for _, v in pairs(DB.getChildren(nodeCT, "effects")) do
-        if (DB.getValue(v, "label", "") == rNewEffect.sName) and (DB.getValue(v, "init", 0) == rNewEffect.nInit) and
-            (DB.getValue(v, "duration", 0) == rNewEffect.nDuration) and
-            (DB.getValue(v, "source_name", "") == rNewEffect.sSource) then
+    for _, v in pairs(DB.getChildren(nodeCT, 'effects')) do
+        if (DB.getValue(v, 'label', '') == rNewEffect.sName) and (DB.getValue(v, 'init', 0) == rNewEffect.nInit) and
+            (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) then
             nodeEffect = v;
-            DB.addHandler(nodeEffect.getPath(), "onDelete", expireAdd);
+            DB.addHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
             EffectManagerBCE.onCustomPostAddEffect(nodeCT, nodeEffect);
-            break;
+            break
         end
     end
 end
@@ -176,10 +174,10 @@ end
 
 -- accepts database path or databasenode
 function getLabelShort(nodeEffect)
-    if type(nodeEffect) == "string" then
+    if type(nodeEffect) == 'string' then
         nodeEffect = DB.findNode(nodeEffect);
     end
-    local sLabel = DB.getValue(nodeEffect, "label", "");
+    local sLabel = DB.getValue(nodeEffect, 'label', '');
     local tParseEffect = EffectManager.parseEffect(sLabel);
     return StringManager.trim(tParseEffect[1]);
 end
@@ -187,49 +185,49 @@ end
 function initEffectHandlers()
     local ctEntries = CombatManager.getCombatantNodes();
     for _, nodeCT in pairs(ctEntries) do
-        for _, nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
-            DB.addHandler(nodeEffect.getPath(), "onDelete", expireAdd);
+        for _, nodeEffect in pairs(DB.getChildren(nodeCT, 'effects')) do
+            DB.addHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
         end
-        DB.addHandler(nodeCT.getPath() .. ".effects.*.label", "onAdd", expireAddHelper);
+        DB.addHandler(nodeCT.getPath() .. '.effects.*.label', 'onAdd', expireAddHelper);
     end
 end
 
 function deleteEffectHandlers()
     local ctEntries = CombatManager.getCombatantNodes();
     for _, nodeCT in pairs(ctEntries) do
-        for _, nodeEffect in pairs(DB.getChildren(nodeCT, "effects")) do
-            DB.removeHandler(nodeEffect.getPath(), "onDelete", expireAdd);
+        for _, nodeEffect in pairs(DB.getChildren(nodeCT, 'effects')) do
+            DB.removeHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
         end
-        DB.removeHandler(nodeCT.getPath() .. ".effects.*.label", "onAdd", expireAdd);
+        DB.removeHandler(nodeCT.getPath() .. '.effects.*.label', 'onAdd', expireAdd);
     end
 end
 
 function expireAddHelper(nodeLabel)
-    DB.removeHandler(nodeLabel.getPath(), "onAdd", expireAddHelper);
-    DB.addHandler(DB.getChild(nodeLabel, "..").getPath(), "onDelete", expireAdd);
+    DB.removeHandler(nodeLabel.getPath(), 'onAdd', expireAddHelper);
+    DB.addHandler(DB.getChild(nodeLabel, '..').getPath(), 'onDelete', expireAdd);
 end
 
 function expireAdd(nodeEffect)
-    BCEManager.chat("expireAdd: ");
-    local sLabel = DB.getValue(nodeEffect, "label", "", "");
-    if sLabel:match("EXPIREADD") then
-        local sActor = DB.getChild(nodeEffect, "...").getPath();
+    BCEManager.chat('expireAdd: ');
+    local sLabel = DB.getValue(nodeEffect, 'label', '', '');
+    if sLabel:match('EXPIREADD') then
+        local sActor = DB.getChild(nodeEffect, '...').getPath();
         local nodeCT = DB.findNode(sActor);
         local sSource = DB.getValue(nodeEffect, 'source_name', '')
         local sourceNode = nodeCT;
-        if sSource ~= "" then
+        if sSource ~= '' then
             sourceNode = DB.findNode(sSource);
         end
         local aEffectComps = EffectManager.parseEffect(sLabel);
         for _, sEffectComp in ipairs(aEffectComps) do
             local tEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
-            if tEffectComp.type == "EXPIREADD" then
-                BCEManager.notifyAddEffect(nodeCT, sourceNode,StringManager.combine(" ", unpack(tEffectComp.remainder)));
-                break;
+            if tEffectComp.type == 'EXPIREADD' then
+                BCEManager.notifyAddEffect(nodeCT, sourceNode, StringManager.combine(' ', unpack(tEffectComp.remainder)));
+                break
             end
         end
     end
-    DB.removeHandler(nodeEffect.getPath(), "onDelete", expireAdd);
+    DB.removeHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
 end
 
 ------------------ CUSTOM BCE FUNTION HOOKS ------------------

@@ -1,33 +1,28 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_REGENA">
-        <script file="effect_builder/effects/scripts/REGENA.lua" />
+	<windowclass name="effect_REGENA">
+		<script file="effect_builder/effects/scripts/REGENA.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-
-            <label_eb>
-                <static textres="effect_temphp"/>
-            </label_eb>
-            <checkbox_eb_valueholder name="effect_temphp"/>
-
-            <subwindow_eb_dice_value />
-
-        </sheetdata>
-    </windowclass>
-    <script name="loader_REGENA">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_heal",
-                    {
-                        value="REGENA",
-                        labelres="effect_regena",
-                        windowclass="effect_REGENA"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<label_eb>
+				<static textres="effect_temphp" />
+			</label_eb>
+			<checkbox_eb_valueholder name="effect_temphp" />
+			<subwindow_eb_dice_value />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_REGENA">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_heal",
+		            {
+		                value="REGENA",
+		                labelres="effect_regena",
+		                windowclass="effect_REGENA"
+                    })
+		    end
+		end
+	</script>
 </root>

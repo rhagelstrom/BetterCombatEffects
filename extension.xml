@@ -1,22 +1,34 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <root release="3.0" version="3">
-	<announcement text="Better Combat Effects v4.2\rby Ryan Hagelstrom\rContribution MeAndUnique,bmos 2021-2023" font="emotefont" icon="BetterCombatEffects"/>
+	<announcement text="Better Combat Effects v4.2\rby Ryan Hagelstrom\rContribution MeAndUnique,bmos 2021-2023" font="emotefont" icon="BetterCombatEffects" />
 	<properties>
-    	<loadorder>120</loadorder>
-		<name>Feature: Better Combat Effects</name>
-		<version>4.2</version>
-		<author>Ryan Hagelstrom Contribution: MeAndUnique,bmos</author>
-		<description>Better Combat Effects Gold, Automatically enable/disable/add/remove effects on the start of turn, end of turn, or when damage is taken</description>
+		<loadorder>
+			120
+		</loadorder>
+		<name>
+			Feature: Better Combat Effects
+		</name>
+		<version>
+			4.2
+		</version>
+		<author>
+			Ryan Hagelstrom Contribution: MeAndUnique,bmos
+		</author>
+		<description>
+			Better Combat Effects Gold, Automatically enable/disable/add/remove effects on the start of turn, end of turn, or when damage is taken
+		</description>
 	</properties>
 	<base>
-    		<icon name="BetterCombatEffects" file="graphics/icons/bce.png"></icon>
-    		<icon name="bce_save" file="graphics/icons/bce_save.png"></icon>
-    		<includefile source="strings/strings_bce.xml" />
-			<includefile source="scripts/core/loader_core.xml" />
-			<includefile source="scripts/dnd/loader_dnd.xml"	ruleset="5E|4E|3.5E|PFRPG" />
-			<includefile source="scripts/5e/loader_5e.xml"		ruleset="5E" />
-			<includefile source="scripts/4e/loader_4e.xml"		ruleset="4E" />
-			<includefile source="scripts/35e/loader_35e.xml"	ruleset="3.5E|PFRPG" />
-			<includefile source="effect_builder/editor_loader.xml" />
-  	</base>
+		<icon name="BetterCombatEffects" file="graphics/icons/bce.png">
+		</icon>
+		<icon name="bce_save" file="graphics/icons/bce_save.png">
+		</icon>
+		<includefile source="strings/strings_bce.xml" />
+		<includefile source="scripts/core/loader_core.xml" />
+		<includefile source="scripts/dnd/loader_dnd.xml" ruleset="5E|4E|3.5E|PFRPG" />
+		<includefile source="scripts/5e/loader_5e.xml" ruleset="5E" />
+		<includefile source="scripts/4e/loader_4e.xml" ruleset="4E" />
+		<includefile source="scripts/35e/loader_35e.xml" ruleset="3.5E|PFRPG" />
+		<includefile source="effect_builder/editor_loader.xml" />
+	</base>
 </root>

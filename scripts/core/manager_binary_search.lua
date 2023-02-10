@@ -14,7 +14,7 @@
 -- multiple names are equal it will secondary order the records based on database path.
 local function binarySearchGuarded(tSortedSearch, tSearch, nLowValue, nHighValue)
     if nHighValue < nLowValue then
-        if tSearch.sOperation == "insert" then
+        if tSearch.sOperation == 'insert' then
             tSearch.sOperation = nil;
             table.insert(tSortedSearch, nLowValue, tSearch);
             tSortedSearch[nLowValue].nPosition = nLowValue;
@@ -26,7 +26,7 @@ local function binarySearchGuarded(tSortedSearch, tSearch, nLowValue, nHighValue
     local nMidValue = math.floor((nLowValue + nHighValue) / 2);
     local tEffect = tSortedSearch[nMidValue];
 
-    if tSearch.sOperation == "search" then
+    if tSearch.sOperation == 'search' then
         if tEffect.sName > tSearch.sName then
             return binarySearchGuarded(tSortedSearch, tSearch, nLowValue, nMidValue - 1);
         elseif tEffect.sName < tSearch.sName then
@@ -41,12 +41,12 @@ local function binarySearchGuarded(tSortedSearch, tSearch, nLowValue, nHighValue
         elseif tEffect.sName < tSearch.sName or (tEffect.sName == tSearch.sName) and (tEffect.sPath < tSearch.sPath) then
             return binarySearchGuarded(tSortedSearch, tSearch, nMidValue + 1, nHighValue);
         else
-            if tSearch.sOperation == "update" then
+            if tSearch.sOperation == 'update' then
                 tSearch.sOperation = nil;
                 tSortedSearch[nMidValue] = tSearch;
                 tSortedSearch[nMidValue].nPosition = nMidValue;
                 return tSortedSearch[nMidValue];
-            elseif tSearch.sOperation == "remove" then
+            elseif tSearch.sOperation == 'remove' then
                 tSortedSearch[nMidValue].nPosition = nMidValue;
                 local tRet = tSortedSearch[nMidValue];
                 table.remove(tSortedSearch, nMidValue);
@@ -68,18 +68,12 @@ end
 --			as more records get inserted/deleted
 -- }
 local function initSearch(sName, sOperation, sPath)
-    if not sName or
-        not (sOperation == "insert" or sOperation == "search" or sOperation == "remove" or sOperation == "update") then
+    if not sName or not (sOperation == 'insert' or sOperation == 'search' or sOperation == 'remove' or sOperation == 'update') then
         return;
     end
-    local tSearch = {
-        sName = sName,
-        sOperation = sOperation,
-        sPath = sPath,
-        nPostition = 0
-    };
+    local tSearch = {sName = sName, sOperation = sOperation, sPath = sPath, nPostition = 0};
     if not sPath then
-        tSearch.sPath = "";
+        tSearch.sPath = '';
     end
     return tSearch;
 end

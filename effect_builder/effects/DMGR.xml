@@ -1,35 +1,30 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_DMGR">
-        <script file="effect_builder/effects/scripts/DMGR.lua" />
+	<windowclass name="effect_DMGR">
+		<script file="effect_builder/effects/scripts/DMGR.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <subwindow_eb_dice_value />
-
-            <subwindow_eb_damage_types />
-
-            <cycler_eb_range>
-                <anchored>
-                    <left offset="5" />
-                </anchored>
-            </cycler_eb_range>
-
-        </sheetdata>
-    </windowclass>
-    <script name="loader_DMGA">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_susceptibility",
-                    {
-                        value="DMGR",
-                        labelres="effect_dmgr",
-                        windowclass="effect_DMGR"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<subwindow_eb_dice_value />
+			<subwindow_eb_damage_types />
+			<cycler_eb_range>
+				<anchored>
+					<left offset="5" />
+				</anchored>
+			</cycler_eb_range>
+		</sheetdata>
+	</windowclass>
+	<script name="loader_DMGA">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_susceptibility",
+		            {
+		                value="DMGR",
+		                labelres="effect_dmgr",
+		                windowclass="effect_DMGR"
+		            })
+		    end
+		end
+	</script>
 </root>

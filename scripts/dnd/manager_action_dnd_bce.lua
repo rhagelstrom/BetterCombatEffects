@@ -7,8 +7,7 @@ local bAdvancedEffects = nil;
 local performMultiAction = nil;
 
 function onInit()
-    bAdvancedEffects = BCEManager.hasExtension("AdvancedEffects") or
-                           BCEManager.hasExtension("FG-PFRPG-Advanced-Effects");
+    bAdvancedEffects = BCEManager.hasExtension('AdvancedEffects') or BCEManager.hasExtension('FG-PFRPG-Advanced-Effects');
 
     outputResult = ActionsManager.outputResult;
     ActionsManager.outputResult = customOutputResult;
@@ -28,19 +27,19 @@ function onClose()
 end
 
 function customOutputResult(bTower, rSource, rTarget, rMessageGM, rMessagePlayer)
-    BCEManager.chat("customOutputResult : ");
-    if rMessageGM.text:gmatch("%w+")() == "Save" then
-        rMessageGM.icon = "bce_save";
+    BCEManager.chat('customOutputResult : ');
+    if rMessageGM.text:gmatch('%w+')() == 'Save' then
+        rMessageGM.icon = 'bce_save';
     end
-    if rMessagePlayer.text:gmatch("%w+")() == "Save" then
-        rMessagePlayer.icon = "bce_save";
+    if rMessagePlayer.text:gmatch('%w+')() == 'Save' then
+        rMessagePlayer.icon = 'bce_save';
     end
     outputResult(bTower, rSource, rTarget, rMessageGM, rMessagePlayer);
 end
 
 -- Advanced Effects
 function customPerformMultiAction(draginfo, rActor, sType, rRolls)
-    BCEManager.chat("customPerformMultiAction : ");
+    BCEManager.chat('customPerformMultiAction : ');
     if rActor then
         rRolls[1].itemPath = rActor.itemPath;
         rRolls[1].ammoPath = rActor.ammoPath;

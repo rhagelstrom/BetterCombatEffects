@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <root version="3.3">
-    <script name="BCEManager"           file="scripts/core/manager_bce.lua" />
-    <script name="BinarySearchManager"  file="scripts/core/manager_binary_search.lua" />
-    <script name="EffectManagerBCE"     file="scripts/core/manager_effect_bce.lua" />
-    <script name="CombatManagerBCE"     file="scripts/core/manager_combat_bce.lua" />
+	<script name="BCEManager" file="scripts/core/manager_bce.lua" />
+	<script name="BinarySearchManager" file="scripts/core/manager_binary_search.lua" />
+	<script name="EffectManagerBCE" file="scripts/core/manager_effect_bce.lua" />
+	<script name="CombatManagerBCE" file="scripts/core/manager_combat_bce.lua" />
 </root>

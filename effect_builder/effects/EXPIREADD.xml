@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_EXPIREADD">
-        <script file="effect_builder/effects/scripts/EXPIREADD.lua" />
+	<windowclass name="effect_EXPIREADD">
+		<script file="effect_builder/effects/scripts/EXPIREADD.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-             <bce_stringfield_eb_valueholder name="bce_stringfield_valueholder" />
-        </sheetdata>
-    </windowclass>
-    <script name="loader_EXPIREADD">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_misc",
-                    {
-                        value="EXPIREADD",
-                        labelres="effect_expireadd",
-                        windowclass="effect_EXPIREADD"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<bce_stringfield_eb_valueholder name="bce_stringfield_valueholder" />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_EXPIREADD">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_misc",
+		            {
+		                value="EXPIREADD",
+		                labelres="effect_expireadd",
+		                windowclass="effect_EXPIREADD"
+		            })
+		    end
+		end
+	</script>
 </root>

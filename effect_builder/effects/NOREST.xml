@@ -1,29 +1,27 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_NOREST">
-        <script file="effect_builder/effects/scripts/NOREST.lua" />
+	<windowclass name="effect_NOREST">
+		<script file="effect_builder/effects/scripts/NOREST.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <label_eb>
-                <static textres="effect_shortrest"/>
-            </label_eb>
-            <checkbox_eb_valueholder name="effect_norestlong"/>
-        </sheetdata>
-    </windowclass>
-    <script name="loader_NOREST">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_bce_rest",
-                    {
-                        value="NOREST",
-                        labelres="effect_norest",
-                        windowclass="effect_NOREST"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<label_eb>
+				<static textres="effect_shortrest" />
+			</label_eb>
+			<checkbox_eb_valueholder name="effect_norestlong" />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_NOREST">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_bce_rest",
+		            {
+		                value="NOREST",
+		                labelres="effect_norest",
+		                windowclass="effect_NOREST"
+		            })
+		    end
+		end
+	</script>
 </root>

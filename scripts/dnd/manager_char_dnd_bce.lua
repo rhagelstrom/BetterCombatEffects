@@ -17,18 +17,18 @@ function onClose()
 end
 
 function customRest(nodeActor, bLong, bMilestone)
-    BCEManager.chat("customRest : ");
+    BCEManager.chat('customRest : ');
     local rSource = ActorManager.resolveActor(nodeActor);
 
-    local aTags = {"RESTS"};
+    local aTags = {'RESTS'};
     if bLong == true then
-        table.insert(aTags, "RESTL");
+        table.insert(aTags, 'RESTL');
     end
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag);
         for _, tEffect in pairs(tMatch) do
-            BCEManager.chat(sTag .. "  : ");
-            BCEManager.modifyEffect(tEffect.sEffectNode, "Remove");
+            BCEManager.chat(sTag .. '  : ');
+            BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
         end
     end
     rest(nodeActor, bLong, bMilestone);

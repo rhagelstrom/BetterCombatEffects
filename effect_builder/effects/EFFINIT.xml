@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_EFFINIT">
-        <script file="effect_builder/effects/scripts/EFFINIT.lua" />
+	<windowclass name="effect_EFFINIT">
+		<script file="effect_builder/effects/scripts/EFFINIT.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <subwindow_eb_dice_value />
-        </sheetdata>
-    </windowclass>
-    <script name="loader_EFFINIT">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_misc",
-                    {
-                        value="EFFINIT",
-                        labelres="effect_effinit",
-                        windowclass="effect_EFFINIT"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<subwindow_eb_dice_value />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_EFFINIT">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_misc",
+		            {
+		                value="EFFINIT",
+		                labelres="effect_effinit",
+		                windowclass="effect_EFFINIT"
+		            })
+		    end
+		end
+	</script>
 </root>

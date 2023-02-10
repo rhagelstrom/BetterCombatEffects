@@ -14,7 +14,7 @@ function onClose()
 end
 
 function customConvertStringToDice(s)
-    --BCEManager.chat("customConvertStringToDice : ");
+    -- BCEManager.chat("customConvertStringToDice : ");
     local tDice = {};
     local nMod = 0;
     local tTerms = DiceManager.convertDiceStringToTerms(s);
@@ -28,7 +28,7 @@ function customConvertStringToDice(s)
                     table.insert(tDice, sDieType);
                 end
                 -- next two lines enable "-X" ability replacement
-            elseif vTerm and vTerm == "-X" then
+            elseif vTerm and vTerm == '-X' then
                 nMod = 0;
             end
         end
@@ -37,33 +37,31 @@ function customConvertStringToDice(s)
 end
 
 function isDie(rTarget, rEffect, sNodeEffect)
-    BCEManager.chat("isDie : ", rEffect);
+    BCEManager.chat('isDie : ', rEffect);
 
     local tEffectComps = EffectManager.parseEffect(rEffect.sName);
     for _, sEffectComp in ipairs(tEffectComps) do
-        local aWords = StringManager.parseWords(sEffectComp, "%.%[%]%(%):");
+        local aWords = StringManager.parseWords(sEffectComp, '%.%[%]%(%):');
         if #aWords > 0 then
-            local sType = aWords[1]:match("^([^:]+):");
+            local sType = aWords[1]:match('^([^:]+):');
             -- Only roll dice for ability score mods
-            if sType and
-                (sType == "STR" or sType == "DEX" or sType == "CON" or sType == "INT" or sType == "WIS" or sType ==
-                    "CHA" or sType == "DMGR") then
+            if sType and (sType == 'STR' or sType == 'DEX' or sType == 'CON' or sType == 'INT' or sType == 'WIS' or sType == 'CHA' or sType == 'DMGR') then
                 local sValueCheck;
                 local sTypeRemainder = aWords[1]:sub(#sType + 2);
-                if sTypeRemainder == "" then
-                    sValueCheck = aWords[2] or "";
+                if sTypeRemainder == '' then
+                    sValueCheck = aWords[2] or '';
                 else
                     sValueCheck = sTypeRemainder;
                 end
                 -- Check to see if negative
-                if sValueCheck:match("%-^[d%.%dF%+%-]+$") then
-                    sValueCheck = sValueCheck:gsub("%-", "", 1);
+                if sValueCheck:match('%-^[d%.%dF%+%-]+$') then
+                    sValueCheck = sValueCheck:gsub('%-', '', 1);
                 end
-                if sValueCheck ~= "" and not StringManager.isNumberString(sValueCheck) and StringManager.isDiceString(sValueCheck) then
+                if sValueCheck ~= '' and not StringManager.isNumberString(sValueCheck) and StringManager.isDiceString(sValueCheck) then
                     local rRoll = {};
                     local aDice, nMod = StringManager.convertStringToDice(sValueCheck);
-                    rRoll.sType = "effectbce";
-                    rRoll.sDesc = "[EFFECT " .. rEffect.sName .. "] ";
+                    rRoll.sType = 'effectbce';
+                    rRoll.sDesc = '[EFFECT ' .. rEffect.sName .. '] ';
                     rRoll.aDice = aDice;
                     rRoll.sSubType = sType;
                     rRoll.nMod = nMod;
@@ -76,7 +74,7 @@ function isDie(rTarget, rEffect, sNodeEffect)
                     else
                         rRoll.bSecret = false;
                     end
-                    BCEManager.chat("Roll : ", rRoll);
+                    BCEManager.chat('Roll : ', rRoll);
                     ActionsManager.performAction(nil, rTarget, rRoll);
                 end
             end

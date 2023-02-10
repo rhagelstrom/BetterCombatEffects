@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_ATKCS">
-        <script file="effect_builder/effects/scripts/ATKCS.lua" />
+	<windowclass name="effect_ATKCS">
+		<script file="effect_builder/effects/scripts/ATKCS.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <cycler_eb_effect_state />
-        </sheetdata>
-    </windowclass>
-    <script name="loader_ATKCS">
-        function onInit()
+		<sheetdata>
+			<leftanchor_eb />
+			<cycler_eb_effect_state />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_ATKCS">
+		function onInit()
             if ExtensionBCE.shouldLoadEffects() then
                 EditorManager.addEditor(
                     "category_bce_cs",
@@ -18,9 +17,8 @@
                         value="ATK",
                         labelres="effect_atkcs",
                         windowclass="effect_ATKCS"
-                    }
-                )
+                    })
             end
-        end
-    </script>
+		end
+	</script>
 </root>

@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_DUR">
-        <script file="effect_builder/effects/scripts/DUR.lua" />
+	<windowclass name="effect_DUR">
+		<script file="effect_builder/effects/scripts/DUR.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <subwindow_eb_dice_value />
-        </sheetdata>
-    </windowclass>
-    <script name="loader_DUR">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_misc",
-                    {
-                        value="DUR",
-                        labelres="effect_dur",
-                        windowclass="effect_DUR"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<subwindow_eb_dice_value />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_DUR">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_misc",
+		            {
+		                value="DUR",
+		                labelres="effect_dur",
+		                windowclass="effect_DUR"
+		            })
+		    end
+		end
+	</script>
 </root>

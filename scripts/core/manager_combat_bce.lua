@@ -18,16 +18,12 @@ end
 
 function onTabletopInit()
     RulesetEffectManager = BCEManager.getRulesetEffectManager();
-    EffectManagerBCE.registerEffectCompType("TURNAS", {
-        bIgnoreDisabledCheck = true
-    });
-    EffectManagerBCE.registerEffectCompType("TURNAE", {
-        bIgnoreDisabledCheck = true
-    });
+    EffectManagerBCE.registerEffectCompType('TURNAS', {bIgnoreDisabledCheck = true});
+    EffectManagerBCE.registerEffectCompType('TURNAE', {bIgnoreDisabledCheck = true});
 end
 
 function turnStart(sourceNodeCT)
-    BCEManager.chat("Turn Start: ", sourceNodeCT);
+    BCEManager.chat('Turn Start: ', sourceNodeCT);
     if not sourceNodeCT then
         return;
     end
@@ -35,21 +31,21 @@ function turnStart(sourceNodeCT)
 
     if not onCustomProcessTurnStart(rSource) then
         local ctEntries = CombatManager.getCombatantNodes();
-        local aTags = {"TURNAS", "TURNDS", "TURNRS"};
+        local aTags = {'TURNAS', 'TURNDS', 'TURNRS'};
         for _, sTag in pairs(aTags) do
             local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag);
             for _, tEffect in pairs(tMatch) do
-                if tEffect.type  == "TURNAS" then
-                    BCEManager.chat("ACTIVATE: ");
-                    BCEManager.modifyEffect(tEffect.sEffectNode, "Activate");
-                elseif tEffect.type  == "TURNDS" then
-                    BCEManager.chat("DEACTIVATE: ");
-                    BCEManager.modifyEffect(tEffect.sEffectNode, "Deactivate");
-                elseif tEffect.type  == "TURNRS" then
-                    BCEManager.chat("REMOVE: ");
-                    local nDuration = DB.getValue(tEffect.sEffectNode .. ".duration", 0);
+                if tEffect.type == 'TURNAS' then
+                    BCEManager.chat('ACTIVATE: ');
+                    BCEManager.modifyEffect(tEffect.sEffectNode, 'Activate');
+                elseif tEffect.type == 'TURNDS' then
+                    BCEManager.chat('DEACTIVATE: ');
+                    BCEManager.modifyEffect(tEffect.sEffectNode, 'Deactivate');
+                elseif tEffect.type == 'TURNRS' then
+                    BCEManager.chat('REMOVE: ');
+                    local nDuration = DB.getValue(tEffect.sEffectNode .. '.duration', 0);
                     if nDuration == 1 then
-                        BCEManager.modifyEffect(tEffect.sEffectNode, "Remove");
+                        BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                     end
                 end
             end
@@ -58,12 +54,12 @@ function turnStart(sourceNodeCT)
         for _, nodeCT in pairs(ctEntries) do
             local rActor = ActorManager.resolveActor(nodeCT);
             if rActor.sCTNode ~= rSource.sCTNode then
-                local tMatch = RulesetEffectManager.getEffectsByType(rActor, "STURNRS");
+                local tMatch = RulesetEffectManager.getEffectsByType(rActor, 'STURNRS');
                 for _, tEffect in pairs(tMatch) do
-                    BCEManager.chat("REMOVE: ");
-                    local nDuration = DB.getValue(tEffect.sEffectNode .. ".duration", 0);
+                    BCEManager.chat('REMOVE: ');
+                    local nDuration = DB.getValue(tEffect.sEffectNode .. '.duration', 0);
                     if nDuration == 1 then
-                        BCEManager.modifyEffect(tEffect.sEffectNode, "Remove");
+                        BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                     end
                 end
             end
@@ -72,7 +68,7 @@ function turnStart(sourceNodeCT)
 end
 
 function turnEnd(sourceNodeCT)
-    BCEManager.chat("Turn End: ", sourceNodeCT);
+    BCEManager.chat('Turn End: ', sourceNodeCT);
 
     if not sourceNodeCT then
         return;
@@ -80,36 +76,36 @@ function turnEnd(sourceNodeCT)
     local rSource = ActorManager.resolveActor(sourceNodeCT);
     local ctEntries = CombatManager.getCombatantNodes();
     if not onCustomProcessTurnEnd(rSource) then
-        local aTags = {"TURNAE", "TURNDE", "TURNRE"};
+        local aTags = {'TURNAE', 'TURNDE', 'TURNRE'};
         for _, sTag in pairs(aTags) do
             local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag);
             for _, tEffect in pairs(tMatch) do
-                if tEffect.type  == "TURNAE" then
-                    BCEManager.chat("ACTIVATE: ");
-                    BCEManager.modifyEffect(tEffect.sEffectNode, "Activate");
-                elseif tEffect.type  == "TURNDE" then
-                    BCEManager.chat("DEACTIVATE: ");
-                    BCEManager.modifyEffect(tEffect.sEffectNode, "Deactivate");
-                elseif tEffect.type  == "TURNRE" then
-                    BCEManager.chat("REMOVE: ");
-                    local nDuration = DB.getValue(tEffect.sEffectNode .. ".duration", 0);
+                if tEffect.type == 'TURNAE' then
+                    BCEManager.chat('ACTIVATE: ');
+                    BCEManager.modifyEffect(tEffect.sEffectNode, 'Activate');
+                elseif tEffect.type == 'TURNDE' then
+                    BCEManager.chat('DEACTIVATE: ');
+                    BCEManager.modifyEffect(tEffect.sEffectNode, 'Deactivate');
+                elseif tEffect.type == 'TURNRE' then
+                    BCEManager.chat('REMOVE: ');
+                    local nDuration = DB.getValue(tEffect.sEffectNode .. '.duration', 0);
                     if nDuration == 1 then
-                        BCEManager.modifyEffect(tEffect.sEffectNode, "Remove");
+                        BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                     end
                 end
             end
         end
 
-        aTags = {"STURNRE"};
+        aTags = {'STURNRE'};
         for _, nodeCT in pairs(ctEntries) do
             local rActor = ActorManager.resolveActor(nodeCT);
             if rActor.sCTNode ~= rSource.sCTNode then
-                local tMatch = RulesetEffectManager.getEffectsByType(rActor, "STURNRE");
+                local tMatch = RulesetEffectManager.getEffectsByType(rActor, 'STURNRE');
                 for _, tEffect in pairs(tMatch) do
-                    BCEManager.chat("REMOVE: ");
-                    local nDuration = DB.getValue(tEffect.sEffectNode .. ".duration", 0);
+                    BCEManager.chat('REMOVE: ');
+                    local nDuration = DB.getValue(tEffect.sEffectNode .. '.duration', 0);
                     if nDuration == 1 then
-                        BCEManager.modifyEffect(tEffect.sEffectNode, "Remove");
+                        BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                     end
                 end
             end

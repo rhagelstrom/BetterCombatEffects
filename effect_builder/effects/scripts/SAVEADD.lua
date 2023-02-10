@@ -3,8 +3,8 @@ function createEffectString()
     if cycler_save_add.getStringValue() ~= true then
         effectString = effectString .. cycler_save_add.getStringValue()
     end
-    if bce_stringfield_valueholder.getValue() ~= Interface.getString("effect_draganddrop") then
-        effectString = effectString .. ": "  .. bce_stringfield_valueholder.getValue()
+    if bce_stringfield_valueholder.getValue() ~= Interface.getString('effect_draganddrop') then
+        effectString = effectString .. ': ' .. bce_stringfield_valueholder.getValue()
     end
     return effectString
 end

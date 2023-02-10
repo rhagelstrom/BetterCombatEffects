@@ -15,7 +15,6 @@ end
 function onClose()
     ActionDamage.getDamageAdjust = getDamageAdjust;
     ActionDamage.applyDamage = applyDamage;
-
 end
 
 function customApplyDamage(rSource, rTarget, rRoll, ...)
@@ -23,16 +22,16 @@ function customApplyDamage(rSource, rTarget, rRoll, ...)
 end
 
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
-    BCEManager.chat("customGetDamageAdjust : ");
+    BCEManager.chat('customGetDamageAdjust : ');
     local nReduce = 0;
-    local aReduce = getReductionType(rSource, rTarget, "DMGR", rDamageOutput);
+    local aReduce = getReductionType(rSource, rTarget, 'DMGR', rDamageOutput);
 
     for k, v in pairs(rDamageOutput.aDamageTypes) do
         -- Get individual damage types for each damage clause
         local aSrcDmgClauseTypes = {};
-        local aTemp = StringManager.split(k, ",", true);
+        local aTemp = StringManager.split(k, ',', true);
         for _, vType in ipairs(aTemp) do
-            if vType ~= "untyped" and vType ~= "" then
+            if vType ~= 'untyped' and vType ~= '' then
                 table.insert(aSrcDmgClauseTypes, vType);
             end
         end
@@ -45,7 +44,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
         nReduce = nReduce + nLocalReduce;
     end
     if (nReduce > 0) then
-        table.insert(rDamageOutput.tNotifications, "[REDUCED]");
+        table.insert(rDamageOutput.tNotifications, '[REDUCED]');
     end
     local results = {getDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)};
     -- By default FG returns the following values with anything else being another extension
@@ -57,7 +56,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
 end
 
 function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
-    BCEManager.chat("getReductionType : ");
+    BCEManager.chat('getReductionType : ');
     local tEffects = EffectManager5E.getEffectsByType(rTarget, sEffectType, rDamageOutput.aDamageFilter, rSource);
     local aFinal = {};
     for _, v in pairs(tEffects) do
@@ -66,7 +65,7 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
         rReduction.mod = v.mod;
         rReduction.aNegatives = {};
         for _, vType in pairs(v.remainder) do
-            if #vType > 1 and ((vType:sub(1, 1) == "!") or (vType:sub(1, 1) == "~")) then
+            if #vType > 1 and ((vType:sub(1, 1) == '!') or (vType:sub(1, 1) == '~')) then
                 if StringManager.contains(DataCommon.dmgtypes, vType:sub(2)) then
                     table.insert(rReduction.aNegatives, vType:sub(2));
                 end
@@ -74,8 +73,8 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
         end
 
         for _, vType in pairs(v.remainder) do
-            if vType ~= "untyped" and vType ~= "" and vType:sub(1, 1) ~= "!" and vType:sub(1, 1) ~= "~" then
-                if StringManager.contains(DataCommon.dmgtypes, vType) or vType == "all" then
+            if vType ~= 'untyped' and vType ~= '' and vType:sub(1, 1) ~= '!' and vType:sub(1, 1) ~= '~' then
+                if StringManager.contains(DataCommon.dmgtypes, vType) or vType == 'all' then
                     if aFinal[vType] then
                         rReduction.mod = rReduction.mod + aFinal[vType].mod;
                     end

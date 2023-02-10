@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_E">
-        <script file="effect_builder/effects/scripts/E.lua" />
+	<windowclass name="effect_E">
+		<script file="effect_builder/effects/scripts/E.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-        </sheetdata>
-    </windowclass>
-    <script name="loader_E">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_bce_cs",
-                    {
-                        value="(E)",
-                        labelres="effect_e",
-                        windowclass="effect_E"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_E">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_bce_cs",
+		            {
+		                value="(E)",
+		                labelres="effect_e",
+		                windowclass="effect_E"
+                    })
+		    end
+		end
+	</script>
 </root>

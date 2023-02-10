@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_SAVEADD">
-        <script file="effect_builder/effects/scripts/SAVEADD.lua" />
+	<windowclass name="effect_SAVEADD">
+		<script file="effect_builder/effects/scripts/SAVEADD.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <cycler_eb_save_add />
-            <bce_stringfield_eb_valueholder name="bce_stringfield_valueholder" />
-        </sheetdata>
-    </windowclass>
-    <script name="loader_SAVEADD">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_bce_ongoingsave",
-                    {
-                        value="SAVEADD",
-                        labelres="effect_saveadd",
-                        windowclass="effect_SAVEADD"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<cycler_eb_save_add />
+			<bce_stringfield_eb_valueholder name="bce_stringfield_valueholder" />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_SAVEADD">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_bce_ongoingsave",
+		            {
+		                value="SAVEADD",
+		                labelres="effect_saveadd",
+		                windowclass="effect_SAVEADD"
+		            })
+		    end
+		end
+	</script>
 </root>

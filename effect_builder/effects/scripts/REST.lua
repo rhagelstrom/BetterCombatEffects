@@ -1,9 +1,9 @@
 function createEffectString()
     local sRet = parentcontrol.window.effect.getStringValue()
     if effect_removerest.getValue() > 0 then
-        sRet = sRet .. "S"
+        sRet = sRet .. 'S'
     else
-        sRet = sRet .. "L"
+        sRet = sRet .. 'L'
     end
-    return  sRet
+    return sRet
 end

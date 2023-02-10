@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_BCE_IMMUNEEFFECT">
-        <script file="effect_builder/effects/scripts/IMMUNEEFFECT.lua" />
+	<windowclass name="effect_BCE_IMMUNEEFFECT">
+		<script file="effect_builder/effects/scripts/IMMUNEEFFECT.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <bce_stringfield_eb_valueholder name="bce_stringfield_valueholder" />
-
-        </sheetdata>
-    </windowclass>
-    <script name="loader_BCE_IMMUNEEFFECT">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_susceptibility",
-                    {
-                        value="BCEIMMUNE",
-                        labelres="effect_bce_immuneeffect",
-                        windowclass="effect_BCE_IMMUNEEFFECT"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<bce_stringfield_eb_valueholder name="bce_stringfield_valueholder" />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_BCE_IMMUNEEFFECT">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_susceptibility",
+		            {
+		                value="BCEIMMUNE",
+		                labelres="effect_bce_immuneeffect",
+		                windowclass="effect_BCE_IMMUNEEFFECT"
+		            })
+		    end
+		end
+	</script>
 </root>

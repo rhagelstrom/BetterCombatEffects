@@ -1,87 +1,133 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <template name="cycler_eb_actor">
-        <cycler_eb_valueholder name="cycler_actor">
-         <anchored width="70" />
-            <parameters mergerule="replace">
-                <defaultlabelres>effect_target</defaultlabelres>
-                <defaultvalue></defaultvalue>
-                <labelsres>effect_source</labelsres>
-                <values>S</values>
-            </parameters>
-        </cycler_eb_valueholder>
-    </template>
-
-  <template name="cycler_eb_dmgadd">
-        <cycler_eb_valueholder name="cycler_dmgadd">
-         <anchored width="105" />
-            <parameters mergerule="replace">
-                <defaultlabelres>effect_dmgadds</defaultlabelres>
-                <defaultvalue>S</defaultvalue>
-                <labelsres>effect_dmgaddt</labelsres>
-                <values>T</values>
-            </parameters>
-        </cycler_eb_valueholder>
-    </template>
-
-    <template name="cycler_eb_turn">
-        <cycler_eb_valueholder name="cycler_turn">
-            <anchored width="60" />
-            <parameters mergerule="replace">
-                <defaultlabelres>effect_start</defaultlabelres>
-                <defaultvalue>S</defaultvalue>
-                <labelsres>effect_end</labelsres>
-                <values>E</values>
-            </parameters>
-        </cycler_eb_valueholder>
-    </template>
-
-    <template name="cycler_eb_turn_add">
-        <cycler_eb_valueholder name="cycler_turn_add">
-            <anchored width="60" />
-            <parameters mergerule="replace">
-                <defaultlabelres>effect_start</defaultlabelres>
-                <defaultvalue>S</defaultvalue>
-                <labelsres>effect_end|effect_add</labelsres>
-                <values>E|A</values>
-            </parameters>
-        </cycler_eb_valueholder>
-    </template>
-
-    <template name="cycler_eb_save_adv">
-        <cycler_eb_valueholder name="cycler_save_adv">
-            <anchored width="80" />
-            <parameters mergerule="replace">
-                <defaultlabelres>effect_adv_none</defaultlabelres>
-                <defaultvalue></defaultvalue>
-                <labelsres>effect_save_adv|effect_save_dis</labelsres>
-                <values>(ADV)|(DIS)</values>
-            </parameters>
-        </cycler_eb_valueholder>
-    </template>
-
-    <template name="cycler_eb_save_add">
-        <cycler_eb_valueholder name="cycler_save_add">
-            <anchored width="90" />
-            <parameters mergerule="replace">
-                <defaultlabelres>effect_saveaddfail</defaultlabelres>
-                <defaultvalue> </defaultvalue>
-                <labelsres>effect_saveaddpass</labelsres>
-                <values>P</values>
-            </parameters>
-        </cycler_eb_valueholder>
-    </template>
-
-    <template name="cycler_eb_effect_state">
-        <cycler_eb_valueholder name="cycler_effect_state">
-            <anchored width="60" />
-            <parameters mergerule="replace">
-                <defaultlabelres>effect_activate</defaultlabelres>
-                <defaultvalue>A</defaultvalue>
-                <labelsres>effect_deactivate|effect_remove</labelsres>
-                <values>D|R</values>
-            </parameters>
-        </cycler_eb_valueholder>
-    </template>
+	<template name="cycler_eb_actor">
+		<cycler_eb_valueholder name="cycler_actor">
+			<anchored width="70" />
+			<parameters mergerule="replace">
+				<defaultlabelres>
+					effect_target
+				</defaultlabelres>
+				<defaultvalue>
+				</defaultvalue>
+				<labelsres>
+					effect_source
+				</labelsres>
+				<values>
+					S
+				</values>
+			</parameters>
+		</cycler_eb_valueholder>
+	</template>
+	<template name="cycler_eb_dmgadd">
+		<cycler_eb_valueholder name="cycler_dmgadd">
+			<anchored width="105" />
+			<parameters mergerule="replace">
+				<defaultlabelres>
+					effect_dmgadds
+				</defaultlabelres>
+				<defaultvalue>
+					S
+				</defaultvalue>
+				<labelsres>
+					effect_dmgaddt
+				</labelsres>
+				<values>
+					T
+				</values>
+			</parameters>
+		</cycler_eb_valueholder>
+	</template>
+	<template name="cycler_eb_turn">
+		<cycler_eb_valueholder name="cycler_turn">
+			<anchored width="60" />
+			<parameters mergerule="replace">
+				<defaultlabelres>
+					effect_start
+				</defaultlabelres>
+				<defaultvalue>
+					S
+				</defaultvalue>
+				<labelsres>
+					effect_end
+				</labelsres>
+				<values>
+					E
+				</values>
+			</parameters>
+		</cycler_eb_valueholder>
+	</template>
+	<template name="cycler_eb_turn_add">
+		<cycler_eb_valueholder name="cycler_turn_add">
+			<anchored width="60" />
+			<parameters mergerule="replace">
+				<defaultlabelres>
+					effect_start
+				</defaultlabelres>
+				<defaultvalue>
+					S
+				</defaultvalue>
+				<labelsres>
+					effect_end|effect_add
+				</labelsres>
+				<values>
+					E|A
+				</values>
+			</parameters>
+		</cycler_eb_valueholder>
+	</template>
+	<template name="cycler_eb_save_adv">
+		<cycler_eb_valueholder name="cycler_save_adv">
+			<anchored width="80" />
+			<parameters mergerule="replace">
+				<defaultlabelres>
+					effect_adv_none
+				</defaultlabelres>
+				<defaultvalue>
+				</defaultvalue>
+				<labelsres>
+					effect_save_adv|effect_save_dis
+				</labelsres>
+				<values>
+					(ADV)|(DIS)
+				</values>
+			</parameters>
+		</cycler_eb_valueholder>
+	</template>
+	<template name="cycler_eb_save_add">
+		<cycler_eb_valueholder name="cycler_save_add">
+			<anchored width="90" />
+			<parameters mergerule="replace">
+				<defaultlabelres>
+					effect_saveaddfail
+				</defaultlabelres>
+				<defaultvalue>
+				</defaultvalue>
+				<labelsres>
+					effect_saveaddpass
+				</labelsres>
+				<values>
+					P
+				</values>
+			</parameters>
+		</cycler_eb_valueholder>
+	</template>
+	<template name="cycler_eb_effect_state">
+		<cycler_eb_valueholder name="cycler_effect_state">
+			<anchored width="60" />
+			<parameters mergerule="replace">
+				<defaultlabelres>
+					effect_activate
+				</defaultlabelres>
+				<defaultvalue>
+					A
+				</defaultvalue>
+				<labelsres>
+					effect_deactivate|effect_remove
+				</labelsres>
+				<values>
+					D|R
+				</values>
+			</parameters>
+		</cycler_eb_valueholder>
+	</template>
 </root>

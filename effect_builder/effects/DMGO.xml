@@ -1,31 +1,27 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_DMGO">
-        <script file="effect_builder/effects/scripts/DMGO.lua" />
+	<windowclass name="effect_DMGO">
+		<script file="effect_builder/effects/scripts/DMGO.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-            <cycler_eb_turn />
-            <cycler_eb_actor />
-
-            <subwindow_eb_dice_value />
-
-            <subwindow_eb_damage_types />
-        </sheetdata>
-    </windowclass>
-    <script name="loader_DMGO">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_attack",
-                    {
-                        value="DMGO",
-                        labelres="effect_dmgo",
-                        windowclass="effect_DMGO"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+			<cycler_eb_turn />
+			<cycler_eb_actor />
+			<subwindow_eb_dice_value />
+			<subwindow_eb_damage_types />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_DMGO">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		        "category_attack",
+		        {
+		            value="DMGO",
+		            labelres="effect_dmgo",
+		            windowclass="effect_DMGO"
+                })
+		    end
+		end
+	</script>
 </root>

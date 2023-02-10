@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root>
-    <windowclass name="effect_DUSE">
-        <script file="effect_builder/effects/scripts/DUSE.lua" />
+	<windowclass name="effect_DUSE">
+		<script file="effect_builder/effects/scripts/DUSE.lua" />
 		<margins control="0,0,0,2" />
-        <sheetdata>
-            <leftanchor_eb />
-        </sheetdata>
-    </windowclass>
-    <script name="loader_DUSE">
-        function onInit()
-            if ExtensionBCE.shouldLoadEffects() then
-                EditorManager.addEditor(
-                    "category_bce_cs",
-                    {
-                        value="DUSE",
-                        labelres="effect_duse",
-                        windowclass="effect_DUSE"
-                    }
-                )
-            end
-        end
-    </script>
+		<sheetdata>
+			<leftanchor_eb />
+		</sheetdata>
+	</windowclass>
+	<script name="loader_DUSE">
+		function onInit()
+		    if ExtensionBCE.shouldLoadEffects() then
+		        EditorManager.addEditor(
+		            "category_bce_cs",
+		            {
+		                value="DUSE",
+		                labelres="effect_duse",
+		                windowclass="effect_DUSE"
+		            })
+		    end
+		end
+	</script>
 </root>
