@@ -2,5 +2,6 @@
     "Lua.diagnostics.globals": [
         "User"
     ],
-    "markdown-pdf.styles": [".css/torillic.css"]
+    "markdown-pdf.styles": [".css/torillic.css"],
+    "vscode-lua-format.configPath": "/Users/ryan/lua-config"
 }
