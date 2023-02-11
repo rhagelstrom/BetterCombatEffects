@@ -3,10 +3,12 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 -- luacheck: globals BCEDnDManager
-local bMadNomadCharSheetEffectDisplay = false
+local bMadNomadCharSheetEffectDisplay = false;
+local RulesetActorManager = nil;
 
 function onInit()
     bMadNomadCharSheetEffectDisplay = BCEManager.hasExtension('MNM Charsheet Effects Display');
+    RulesetActorManager = BCEManager.getRulesetActorManager();
 end
 
 function onClose()
