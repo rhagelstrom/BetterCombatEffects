@@ -2,6 +2,7 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+-- luacheck: globals EffectManagerBCE
 ------------------ ORIGINALS ------------------
 local addEffect = nil;
 ------------------ END ORIGINALS ------------------
@@ -58,7 +59,7 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
     local tEffectCompParams = EffectManagerBCE.getEffectCompType(sEffectCompType);
 
     -- Iterate through effects
-    local aEffects = {};
+    local aEffects;
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectCompType);
     else
@@ -72,7 +73,7 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
         if bActive or nActive ~= 0 then
             -- If effect type we are looking for supports targets, then check targeting
-            local bTargetMatch = false;
+            local bTargetMatch;
             if tEffectCompParams.bIgnoreTarget then
                 bTargetMatch = true;
             else
@@ -213,7 +214,7 @@ function expireAdd(nodeEffect)
     if sLabel:match('EXPIREADD') then
         local sActor = DB.getChild(nodeEffect, '...').getPath();
         local nodeCT = DB.findNode(sActor);
-        local sSource = DB.getValue(nodeEffect, 'source_name', '')
+        local sSource = DB.getValue(nodeEffect, 'source_name', '');
         local sourceNode = nodeCT;
         if sSource ~= '' then
             sourceNode = DB.findNode(sSource);

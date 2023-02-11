@@ -33,7 +33,7 @@ function applyDamage(rSource, rTarget, rRoll, ...)
 end
 
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
-    local nDamageAdjust = 0;
+    local nDamageAdjust;
     local nReduce = 0;
     local bVulnerable, bResist, nHalf;
     local aReduce = getReductionType(rSource, rTarget, 'DMGR', rDamageOutput);

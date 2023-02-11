@@ -40,7 +40,7 @@ function onClose()
 end
 
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
-    local sDuplicateMsg = nil;
+    local sDuplicateMsg;
     sDuplicateMsg = EffectManager4E.onEffectAddIgnoreCheck(nodeCT, rEffect);
     if sDuplicateMsg and rEffect.sName:match('STACK') and sDuplicateMsg:match('ALREADY EXISTS') then
         sDuplicateMsg = nil;
@@ -49,7 +49,7 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 end
 
 function onAttack4E(rSource, rTarget, rRoll)
-    local tMatch = {};
+    local tMatch;
 
     -- Only process these if on the source node
     tMatch = EffectManager4E.getEffectsByType(rSource, 'ATKDS', nil, rTarget);
@@ -61,67 +61,68 @@ end
 
 -- 4E is different enough that we need need to handle ongoing damage here
 function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf, sLabel)
-    local rAction = {}
-    local aClause = {}
-    rAction.clauses = {}
+    local rAction = {};
+    local aClause = {};
+    rAction.clauses = {};
 
     aClause.basedice = rEffectComp.dice;
     aClause.dicestr = StringManager.convertDiceToString(rEffectComp.dice, rEffectComp.mod, true);
-    aClause.mod = rEffectComp.mod
-    aClause.basemult = 0
-    aClause.stat = {}
+    aClause.mod = rEffectComp.mod;
+    aClause.basemult = 0;
+    aClause.stat = {};
     aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ','))
-    aClause.critdicestr = ''
+    aClause.critdicestr = '';
 
-    table.insert(rAction.clauses, aClause)
+    table.insert(rAction.clauses, aClause);
     if not sLabel then
-        sLabel = 'Ongoing Effect'
+        sLabel = 'Ongoing Effect';
     end
-    rAction.name = sLabel
+    rAction.name = sLabel;
 
-    local rRoll = ActionDamage.getRoll(rTarget, rAction)
+    local rRoll = ActionDamage.getRoll(rTarget, rAction);
     if bHalf then
-        rRoll.sDesc = rRoll.sDesc .. ' [HALF]'
+        rRoll.sDesc = rRoll.sDesc .. ' [HALF]';
     end
-    ActionsManager.actionDirect(rSource, 'damage', {rRoll}, {{rTarget}})
+    ActionsManager.actionDirect(rSource, 'damage', {rRoll}, {{rTarget}});
 end
 
 -- 4E is different enough that we need need to handle ongoing regen here
 function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp)
-    local rAction = {}
-    local aClause = {}
-    rAction.clauses = {}
+    local rAction = {};
+    local aClause = {};
+    rAction.clauses = {};
 
     aClause.dice = rEffectComp.dice;
     aClause.dicestr = StringManager.convertDiceToString(rEffectComp.dice, rEffectComp.mod, true);
-    aClause.mod = rEffectComp.mod
-    aClause.stat = {}
-    aClause.basemult = 0
-    aClause.cost = 0
+    aClause.mod = rEffectComp.mod;
+    aClause.stat = {};
+    aClause.basemult = 0;
+    aClause.cost = 0;
 
     if bTemp == true then
-        rAction.name = 'Ongoing Temporary Hitpoints'
-        aClause.subtype = 'temp'
+        rAction.name = 'Ongoing Temporary Hitpoints';
+        aClause.subtype = 'temp';
     else
-        rAction.name = 'Ongoing Regeneration'
+        rAction.name = 'Ongoing Regeneration';
     end
-    table.insert(rAction.clauses, aClause)
-    local rRoll = ActionHeal.getRoll(rTarget, rAction)
-    ActionsManager.actionDirect(rSource, 'heal', {rRoll}, {{rTarget}})
+    table.insert(rAction.clauses, aClause);
+    local rRoll = ActionHeal.getRoll(rTarget, rAction);
+    ActionsManager.actionDirect(rSource, 'heal', {rRoll}, {{rTarget}});
 end
 
-function addEffectPre4E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
-    local rActor = ActorManager.resolveActor(nodeCT)
-    local rSource = nil
+-- function addEffectPre4E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+function addEffectPre4E(_, _, nodeCT, rNewEffect, _)
+    local rActor = ActorManager.resolveActor(nodeCT);
+    local rSource;
     if not rNewEffect.sSource or rNewEffect.sSource == '' then
-        rSource = rActor
+        rSource = rActor;
     else
-        local nodeSource = DB.findNode(rNewEffect.sSource)
-        rSource = ActorManager.resolveActor(nodeSource)
+        local nodeSource = DB.findNode(rNewEffect.sSource);
+        rSource = ActorManager.resolveActor(nodeSource);
     end
-    rNewEffect.sName = EffectManager4E.evalEffect(rSource, rNewEffect.sName)
+    rNewEffect.sName = EffectManager4E.evalEffect(rSource, rNewEffect.sName);
 
-    return false
+    return false;
 end
 
 function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
@@ -146,9 +147,9 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     end
 
     -- Determine effect type targeting
-    local bTargetSupport = StringManager.isWord(sEffectType, DataCommon.targetableeffectcomps);
+    -- local bTargetSupport = StringManager.isWord(sEffectType, DataCommon.targetableeffectcomps);
 
-    local aEffects = {};
+    local aEffects;
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectType);
     else
@@ -176,16 +177,16 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                     local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
                     -- Check for follw on effects and ignore the rest
                     if StringManager.contains({'AFTER', 'FAIL'}, rEffectComp.type) then
-                        break
+                        break;
 
                         -- Handle conditionals
                     elseif rEffectComp.type == 'IF' then
                         if not EffectManager4E.checkConditional(rActor, v, rEffectComp) then
-                            break
+                            break;
                         end
                     elseif rEffectComp.type == 'IFT' then
                         if not rFilterActor then
-                            break
+                            break;
                         end
                         if not EffectManager4E.checkConditional(rFilterActor, v, rEffectComp, rActor) then
                             break
@@ -237,7 +238,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 for _, v2 in pairs(aOtherFilter) do
                                     if type(v2) == 'table' then
                                         local bOtherTableMatch = true;
-                                        for k3, v3 in pairs(v2) do
+                                        for _, v3 in pairs(v2) do
                                             if not StringManager.contains(aEffectOtherFilter, v3) then
                                                 bOtherTableMatch = false;
                                                 break
@@ -314,7 +315,7 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
         return false;
     end
 
-    local aEffects = {};
+    local aEffects;
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffect);
     else

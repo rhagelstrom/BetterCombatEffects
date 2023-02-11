@@ -36,7 +36,8 @@ function onClose()
     EffectManagerBCE.removeCustomPreAddEffect(addEffectPre35E);
 end
 
-function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+--function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+function addEffectPre35E(_, _, nodeCT, rNewEffect, _)
     BCEManager.chat('addEffectPre35E : ');
     local rActor = ActorManager.resolveActor(nodeCT);
     local rSource;
@@ -88,7 +89,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
             end
         end
     end
-    local aEffects = {};
+    local aEffects;
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectType);
     else
@@ -322,7 +323,7 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     local tEffectCompParams = EffectManagerBCE.getEffectCompType(sEffect);
     -- Iterate through each effect
     local aMatch = {}
-    local aEffects = {};
+    local aEffects;
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sLowerEffect);
     else
@@ -426,9 +427,9 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
     end
 
     -- Determine effect type targeting
-    local bTargetSupport = StringManager.isWord(sEffectType, DataCommon.targetableeffectcomps);
+    -- local bTargetSupport = StringManager.isWord(sEffectType, DataCommon.targetableeffectcomps);
 
-    local aEffects = {};
+    local aEffects;
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectType);
     else
@@ -578,7 +579,7 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                                 for _, v2 in pairs(aOtherFilter) do
                                     if type(v2) == 'table' then
                                         local bOtherTableMatch = true;
-                                        for k3, v3 in pairs(v2) do
+                                        for _, v3 in pairs(v2) do
                                             if not StringManager.contains(aEffectOtherFilter, v3) then
                                                 bOtherTableMatch = false;
                                                 break
@@ -646,7 +647,7 @@ function kelHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTarg
 
     -- Iterate through each effect
     local aMatch = {};
-    local aEffects = {};
+    local aEffects;
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sLowerEffect);
     else

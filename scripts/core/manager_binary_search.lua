@@ -12,6 +12,7 @@
 -- To search for returns nil on failure or the a tSearch on success minus the sOperation. If
 -- searching and multiple effects that have the same name, it will match the first. If
 -- multiple names are equal it will secondary order the records based on database path.
+-- luacheck: globals BinarySearchManager
 local function binarySearchGuarded(tSortedSearch, tSearch, nLowValue, nHighValue)
     if nHighValue < nLowValue then
         if tSearch.sOperation == 'insert' then

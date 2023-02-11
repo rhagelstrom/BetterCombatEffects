@@ -2,6 +2,7 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+-- luacheck: globals EffectManagerDnDBCE
 local RulesetEffectManager = nil;
 
 function onInit()
@@ -22,7 +23,8 @@ function onTabletopInit()
     EffectManagerBCE.registerEffectCompType('DMGA', {bOneShot = true});
 end
 
-function onEffectRollHandler(rSource, rTarget, rRoll)
+-- function onEffectRollHandler(rSource, rTarget, rRoll)
+function onEffectRollHandler(_, _, rRoll)
     BCEManager.chat('onEffectRollHandler DND: ');
     local nodeEffect = DB.findNode(rRoll.sNodeCT)
     local sEffect = DB.getValue(nodeEffect, 'label', '');
@@ -46,7 +48,8 @@ function onEffectRollHandler(rSource, rTarget, rRoll)
     end
 end
 
-function addEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+-- function addEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+function addEffectPre(_, _, nodeCT, rNewEffect, _)
     BCEManager.chat('addEffectPre DND: ');
     local rActor = ActorManager.resolveActor(nodeCT)
     BCEDnDManager.replaceAbilityScores(rNewEffect, rActor);

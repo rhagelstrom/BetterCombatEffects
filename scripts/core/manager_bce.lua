@@ -2,6 +2,7 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+-- luacheck: globals BCEManager
 OOB_MSGTYPE_BCEACTIVATE = "activateeffect";
 OOB_MSGTYPE_BCEDEACTIVATE = "deactivateeffect";
 OOB_MSGTYPE_BCEREMOVE = "removeeffect";
@@ -88,7 +89,9 @@ function getEffectName(sLabel)
         return "";
     end
 end
-function effectAdded(nodeRoot, nodeEffect)
+
+-- function effectAdded(nodeRoot, nodeEffect)
+function effectAdded(_, nodeEffect)
     local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(
         DB.getValue(nodeEffect, "label", "")), "insert", nodeEffect.getPath());
     tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
@@ -211,7 +214,8 @@ function addNodeHandlers(sPath, sName)
     DB.addHandler(sPath, "onDelete", effectDeleted);
 end
 
-function addNodeLabelHandlers(root, child)
+-- function addNodeLabelHandlers(root, child)
+function addNodeLabelHandlers(root, _)
     local nodeLabel = DB.getChild(root.getPath() .. ".label")
     if nodeLabel then
         local sLabelPath = DB.getChild(root, ".label").getPath();
@@ -238,8 +242,12 @@ end
 ------------------ END BINARY SEARCH ------------------
 
 ------------------ RULESET MANAGERS ------------------
+-- luacheck: globals ActorManager5E
+-- luacheck: globals ActorManager4E
+-- luacheck: globals ActorManager35E
+-- luacheck: globals ActorManager
 function getRulesetActorManager()
-    local Manager = nil
+    local Manager;
     if User.getRulesetName() == "5E" then
         Manager = ActorManager5E;
     elseif User.getRulesetName() == "4E" then
@@ -252,8 +260,12 @@ function getRulesetActorManager()
     return Manager;
 end
 
+-- luacheck: globals EffectManager5E
+-- luacheck: globals EffectManager4E
+-- luacheck: globals EffectManager35E
+-- luacheck: globals EffectManager
 function getRulesetEffectManager()
-    local Manager = nil
+    local Manager;
     if User.getRulesetName() == "5E" then
         Manager = EffectManager5E;
     elseif User.getRulesetName() == "4E" then

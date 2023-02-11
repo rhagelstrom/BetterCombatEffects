@@ -2,6 +2,7 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+-- luacheck: globals CombatManagerBCE
 ------------------ CUSTOM BCE FUNTION HOOKS ------------------
 local aCustomProcessTurnStartHandlers = {};
 local aCustomProcessTurnEndHandlers = {};
@@ -96,7 +97,6 @@ function turnEnd(sourceNodeCT)
             end
         end
 
-        aTags = {'STURNRE'};
         for _, nodeCT in pairs(ctEntries) do
             local rActor = ActorManager.resolveActor(nodeCT);
             if rActor.sCTNode ~= rSource.sCTNode then

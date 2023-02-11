@@ -67,7 +67,8 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
     return sDuplicateMsg;
 end
 
-function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+-- function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+function addEffectPre5E(_, _, nodeCT, rNewEffect, _)
     BCEManager.chat('addEffectPre5E : ');
     local rActor = ActorManager.resolveActor(nodeCT);
     local rSource;
@@ -167,7 +168,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
         end
     end
 
-    local aEffects = {};
+    local aEffects;
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectType);
     else
@@ -281,7 +282,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 for _, v2 in pairs(aOtherFilter) do
                                     if type(v2) == 'table' then
                                         local bOtherTableMatch = true;
-                                        for k3, v3 in pairs(v2) do
+                                        for _, v3 in pairs(v2) do
                                             if not StringManager.contains(aEffectOtherFilter, v3) then
                                                 bOtherTableMatch = false;
                                                 break
@@ -379,7 +380,7 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     -- Set up filters
     -- Iterate through each effect
     local aMatch = {};
-    local aEffects = {};
+    local aEffects;
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffect);
     else

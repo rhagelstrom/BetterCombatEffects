@@ -337,7 +337,7 @@ function customParseEffects(sPowerName, aWords)
     i = 1;
     while aWords[i] do
         if StringManager.isWord(aWords[i], 'duration') and StringManager.isWord(aWords[i + 1], ':') then
-            j = i + 2;
+            local j = i + 2;
             local bConc = false;
             if StringManager.isWord(aWords[j], 'concentration') and StringManager.isWord(aWords[j + 1], 'up') and StringManager.isWord(aWords[j + 2], 'to') then
                 bConc = true;

@@ -2,6 +2,7 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+-- luacheck: globals ActionSaveDnDBCE
 local onSave = nil;
 local RulesetEffectManager = nil;
 local RulesetActorManager = nil;
@@ -39,7 +40,7 @@ end
 
 function processEffectTurnStartSave(rSource)
     BCEManager.chat('processEffectTurnStartSave : ');
-    local tMatch = {};
+    local tMatch;
     if User.getRulesetName() == '5E' then
         tMatch = RulesetEffectManager.getEffectsByType(rSource, 'SAVES', DataCommon.ability_ltos);
     else
@@ -54,7 +55,7 @@ end
 
 function processEffectTurnEndSave(rSource)
     BCEManager.chat('processEffectTurnEndSave : ');
-    local tMatch = {};
+    local tMatch;
     if User.getRulesetName() == '5E' then
         tMatch = RulesetEffectManager.getEffectsByType(rSource, 'SAVEE', DataCommon.ability_ltos);
     else
@@ -182,7 +183,7 @@ function saveEffect(rTarget, rEffectComp)
     end
 
     local aParsedRemiander = StringManager.parseWords(rEffectComp.remainder[1]);
-    local sAbility = '';
+    local sAbility;
     if User.getRulesetName() == '5E' then
         sAbility = DataCommon.ability_stol[aParsedRemiander[1]];
     else
@@ -254,9 +255,10 @@ function saveRemoveDisable(sNodeEffect, rEffectComp, bRAOnly, rRoll)
     end
 end
 
-function onDamage(rSource, rTarget, rRoll)
+-- function onDamage(rSource, rTarget, rRoll)
+function onDamage(rSource, rTarget, _)
     BCEManager.chat('onDamage : ');
-    local tMatch = {};
+    local tMatch;
 
     if User.getRulesetName() == '5E' then
         tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEONDMG', DataCommon.ability_ltos, rSource);
@@ -270,10 +272,11 @@ function onDamage(rSource, rTarget, rRoll)
     return false;
 end
 
-function addEffectPost(nodeActor, nodeEffect)
+-- function addEffectPost(nodeActor, nodeEffect)
+function addEffectPost(nodeActor, _)
     BCEManager.chat('addEffectPost : ');
     local rTarget = ActorManager.resolveActor(nodeActor);
-    local tMatch = {};
+    local tMatch;
 
     if User.getRulesetName() == '5E' then
         tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEA', DataCommon.ability_ltos);
