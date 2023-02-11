@@ -41,7 +41,7 @@ end
 -- 5E   function customApplyDamage(rSource, rTarget, rRoll, ...)
 function applyDamageBCE(rSource, rTarget, rRoll, ...)
     BCEManager.chat('applyDamageBCE : ');
-    if rRoll.sType ~= 'damage' then
+    if rRoll.sType ~= 'damage'  or (rRoll.sType == 'damage' and rRoll.nTotal < 0) then
         return RulesetActionDamageManager.applyDamage(rSource, rTarget, rRoll, ...);
     end
     local nodeTarget = ActorManager.getCTNode(rTarget);
