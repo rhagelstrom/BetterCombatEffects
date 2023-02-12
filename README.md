@@ -1,7 +1,7 @@
 [![Build FG Extension](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml) [![Luacheckrc](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml)
 # Better Combat Effects
 
-**Current Version:** 4.4
+**Current Version:** 4.5
 **Updated:** 02/11/23
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
@@ -80,25 +80,25 @@ s
 |<span style="color:blue">STURNRS</span>|(-)| | REMOVE effect on the START of the Actor’s turn who applied the effect if current duration is 1|CoreRPG|
 |<span style="color:blue">STURNRE</span>|(-)| | REMOVE effect on the END of the Actor’s turn who applied the effect if current duration is 1|CoreRPG|
 
-**(D)** = Dice and numbers supported for value attribute
-**(N)** = Only numbers supported for value attribute
-**(-)** = Neither number nor dice supported for value attribute
-**(T)** = Effects can be targeted to only apply to modifiers against certain opponents
-**[range]** = melee, ranged
-**[damage type]** = acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, thunder, adamantine, bludgeoning, cold-forged iron, magic, piercing, silver, slashing
-**[stat]** = strength, constitution, dexterity, intelligence, wisdom, charisma
-**[ability]** = STR, CON, DEX, INT, WIS, CHA, (FORTITUDE, REFLEX, WILL) - 3.5E
-**[skill]** = any skill name
-**[effect]** = Any effect label in the custom effect list. Effect label is defined as anything before the first ; i.e. My Custom; ATKDS; "My Custom" would be the effect label
-**[condition]** = Any condition as noted above except exhaustion. Note [condition] must be all lower case
-**[SDC]** = (5E only) [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF]
-**(R)** will remove the save effect on a successful save.
-**(RA)** will remove the save effect on any save.
-**(D)** will disable the save effect on a successful save.
-**(H)** will deal half damage on a successful ongoing save.
-**(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save
-**(F)** will invert the roll. SAVEDMG, (R), (RA), (D), (H) will be performed on a failed save rather than successful one
-***** = Multiple entries of this descriptor type allowed
+**(D)** = Dice and numbers supported for value attribute  
+**(N)** = Only numbers supported for value attribute  
+**(-)** = Neither number nor dice supported for value attribute  
+**(T)** = Effects can be targeted to only apply to modifiers against certain opponents  
+**[range]** = melee, ranged  
+**[damage type]** = acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, thunder, adamantine, bludgeoning, cold-forged iron, magic, piercing, silver, slashing  
+**[stat]** = strength, constitution, dexterity, intelligence, wisdom, charisma  
+**[ability]** = STR, CON, DEX, INT, WIS, CHA, (FORTITUDE, REFLEX, WILL) - 3.5E  
+**[skill]** = any skill name  
+**[effect]** = Any effect label in the custom effect list. Effect label is defined as anything before the first ; i.e. My Custom; ATKDS; "My Custom" would be the effect label  
+**[condition]** = Any condition as noted above except exhaustion. Note [condition] must be all lower case  
+**[SDC]** = (5E only) [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF]  
+**(R)** will remove the save effect on a successful save.  
+**(RA)** will remove the save effect on any save.  
+**(D)** will disable the save effect on a successful save.  
+**(H)** will deal half damage on a successful ongoing save.  
+**(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save  
+**(F)** will invert the roll. SAVEDMG, (R), (RA), (D), (H) will be performed on a failed save rather than successful one  
+***** = Multiple entries of this descriptor type allowed  
 
 ## Examples
 

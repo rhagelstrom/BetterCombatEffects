@@ -3,5 +3,6 @@
         "User"
     ],
     "markdown-pdf.styles": [".css/torillic.css"],
-    "vscode-lua-format.configPath": "/Users/ryan/lua-config"
+    "vscode-lua-format.configPath": "/Users/ryan/lua-config",
+    "tws.trimOnSave" : "disable"
 }

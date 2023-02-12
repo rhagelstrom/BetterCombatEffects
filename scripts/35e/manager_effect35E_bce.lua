@@ -12,7 +12,10 @@ function onInit()
     EffectManagerBCE.setCustomPreAddEffect(addEffectPre5E)
 
     bAdvancedEffects = BCEManager.hasExtension('FG-PFRPG-Advanced-Effects');
-    bOverlays = BCEManager.hasExtension('Feature: Extended automation and overlays');
+    bOverlays = (BCEManager.hasExtension('Feature: Extended automation and overlays') or
+                BCEManager.hasExtension('Feature: StrainInjury plus extended automation and alternative overlays') or
+                BCEManager.hasExtension('Feature: StrainInjury plus extended automation and overlays') or
+                BCEManager.hasExtension('Feature: Extended automation and alternative overlays'));
 
     getEffectsByType = EffectManager35E.getEffectsByType;
     hasEffect = EffectManager35E.hasEffect;
@@ -309,10 +312,10 @@ function isValidCheckEffect(rActor, nodeEffect)
     end
 end
 
--- KEL Adding tags and IFTAG to
-function hasEffectCondition(rActor, sEffect, rEffectSpell)
-    return EffectManager35E.hasEffect(rActor, sEffect, nil, false, true, rEffectSpell);
+function customHasEffectCondition(rActor, sEffect)
+    return EffectManager35E.hasEffect(rActor, sEffect, nil, false, true);
 end
+
 
 --	replace 3.5E EffectManager35E manager_effect_35E.lua hasEffect() with this
 function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
@@ -635,7 +638,7 @@ end
 
 -- KEL Adding tags and IFTAG to
 function kelHasEffectCondition(rActor, sEffect, rEffectSpell)
-    return hasEffect(rActor, sEffect, nil, false, true, rEffectSpell);
+    return  kelHasEffect(rActor, sEffect, nil, false, true, rEffectSpell);
 end
 -- KEL add counter to hasEffect needed for dis/adv
 function kelHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets, rEffectSpell)
