@@ -59,11 +59,11 @@ function processEffectTurnStartDND(rSource)
                     if sSource == rSource.sCTNode then
                         local sLabel = EffectManagerBCE.getLabelShort(tEffect.sEffectNode)
                         BCEManager.chat(tEffect.type .. '  : ');
-                        if tEffect.type == 'SDMGOS' then
+                        if sTag =='SDMGOS' then
                             EffectManagerDnDBCE.applyOngoingDamage(rSource, rActor, tEffect, false, sLabel);
-                        elseif tEffect.type == 'SREGENS' then
+                        elseif sTag =='SREGENS' then
                             EffectManagerDnDBCE.applyOngoingRegen(rSource, rActor, tEffect, false);
-                        elseif tEffect.type == 'STREGENS' then
+                        elseif sTag =='STREGENS' then
                             EffectManagerDnDBCE.applyOngoingRegen(rSource, rActor, tEffect, true);
                         end
                     end
@@ -82,11 +82,11 @@ function processEffectTurnEndDND(rSource)
         for _, tEffect in pairs(tMatch) do
             local sLabel = EffectManagerBCE.getLabelShort(tEffect.sEffectNode)
             BCEManager.chat(tEffect.type .. '  : ');
-            if tEffect.type == 'DMGOE' then
+            if sTag =='DMGOE' then
                 EffectManagerDnDBCE.applyOngoingDamage(rSource, rSource, tEffect, false, sLabel);
-            elseif tEffect.type == 'REGENE' then
+            elseif sTag =='REGENE' then
                 EffectManagerDnDBCE.applyOngoingRegen(rSource, rSource, tEffect, false);
-            elseif tEffect.type == 'TREGENE' then
+            elseif sTag =='TREGENE' then
                 EffectManagerDnDBCE.applyOngoingRegen(rSource, rSource, tEffect, true);
             end
         end
@@ -106,11 +106,11 @@ function processEffectTurnEndDND(rSource)
                     if sSource == rSource.sCTNode then
                         BCEManager.chat(tEffect.type .. '  : ');
                         local sLabel = EffectManagerBCE.getLabelShort(tEffect.sEffectNode);
-                        if tEffect.type == 'SDMGOE' then
+                        if sTag =='SDMGOE' then
                             EffectManagerDnDBCE.applyOngoingDamage(rSource, rActor, tEffect, false, sLabel);
-                        elseif tEffect.type == 'SREGENE' then
+                        elseif sTag =='SREGENE' then
                             EffectManagerDnDBCE.applyOngoingRegen(rSource, rActor, tEffect, false);
-                        elseif tEffect.type == 'STREGENE' then
+                        elseif sTag =='STREGENE' then
                             EffectManagerDnDBCE.applyOngoingRegen(rSource, rActor, tEffect, true);
                         end
                     end

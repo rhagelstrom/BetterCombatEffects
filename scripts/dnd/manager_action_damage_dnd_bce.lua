@@ -76,13 +76,13 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
-            if tEffect.type == 'DMGAT' then
+            if sTag =='DMGAT' then
                 BCEManager.chat('ACTIVATE: ');
                 BCEManager.modifyEffect(tEffect.sEffectNode, 'Activate');
-            elseif tEffect.type == 'DMGDT' then
+            elseif sTag =='DMGDT' then
                 BCEManager.chat('DEACTIVATE: ');
                 BCEManager.modifyEffect(tEffect.sEffectNode, 'Deactivate');
-            elseif tEffect.type == 'DMGRT' then
+            elseif sTag =='DMGRT' then
                 BCEManager.chat('REMOVE: ');
                 BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
             end
@@ -96,10 +96,10 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
-            if tEffect.type == 'TDMGADDT' then
+            if sTag =='TDMGADDT' then
                 BCEManager.chat('TDMGADDT: ');
                 BCEManager.notifyAddEffect(nodeTarget, nodeTarget, tEffect.remainder[1]);
-            elseif tEffect.type == 'TDMGADDS' then
+            elseif sTag =='TDMGADDS' then
                 BCEManager.chat('TDMGADDS: ');
                 BCEManager.notifyAddEffect(nodeSource, nodeTarget, tEffect.remainder[1]);
             end
@@ -109,11 +109,11 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, nil, rTarget);
         for _, tEffect in pairs(tMatch) do
-            if tEffect.type == 'SDMGADDT' then
+            if sTag =='SDMGADDT' then
                 BCEManager.chat('SDMGADDT: ');
 
                 BCEManager.notifyAddEffect(nodeTarget, nodeSource, tEffect.remainder[1]);
-            elseif tEffect.type == 'SDMGADDS' then
+            elseif sTag =='SDMGADDS' then
                 BCEManager.chat('SDMGADDS: ');
                 BCEManager.notifyAddEffect(nodeSource, nodeSource, tEffect.remainder[1]);
             end

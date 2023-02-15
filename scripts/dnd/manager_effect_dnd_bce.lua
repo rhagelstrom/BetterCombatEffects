@@ -75,13 +75,13 @@ function addEffectPost(nodeActor, nodeEffect)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
-            if tEffect.type == 'REGENA' then
+            if sTag =='REGENA' then
                 BCEManager.chat('REGENA: ');
                 EffectManagerDnDBCE.applyOngoingRegen(rSource, rTarget, tEffect);
-            elseif tEffect.type == 'TREGENA' then
+            elseif sTag =='TREGENA' then
                 BCEManager.chat('TREGENA: ');
                 EffectManagerDnDBCE.applyOngoingRegen(rSource, rTarget, tEffect, true);
-            elseif tEffect.type == 'DMGA' then
+            elseif sTag =='DMGA' then
                 BCEManager.chat('DMGA: ');
                 EffectManagerDnDBCE.applyOngoingDamage(rSource, rTarget, tEffect);
             end
