@@ -159,7 +159,7 @@ function onModuleLoad(sModule)
     local nodeRoot = DB.getRoot(sModule);
     if nodeRoot then
         BCEManager.chat("Module Load: " .. sModule)
-        for _, nodeEffect in pairs(DB.getChildren(nodeRoot, ".effects")) do
+        for _, nodeEffect in ipairs(DB.getChildList(nodeRoot, ".effects")) do
             BCEManager.effectAdded(nodeRoot, nodeEffect);
         end
     end
@@ -169,7 +169,7 @@ function onModuleUnload(sModule)
     local nodeRoot = DB.getRoot(sModule);
     if nodeRoot then
         BCEManager.chat("Module Unload: " .. sModule)
-        for _, nodeEffect in pairs(DB.getChildren(nodeRoot, ".effects")) do
+        for _, nodeEffect in ipairs(DB.getChildList(nodeRoot, ".effects")) do
             BCEManager.effectDeleted(nodeEffect);
         end
     end

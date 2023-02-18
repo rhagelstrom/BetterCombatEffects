@@ -63,7 +63,7 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectCompType);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
+        aEffects = DB.getChildList(ActorManager.getCTNode(rActor), 'effects');
     end
 
     for _, v in pairs(aEffects) do
@@ -135,7 +135,7 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
     end
     addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg);
     local nodeEffect;
-    for _, v in pairs(DB.getChildren(nodeCT, 'effects')) do
+    for _, v in ipairs(DB.getChildList(nodeCT, 'effects')) do
         if (DB.getValue(v, 'label', '') == rNewEffect.sName) and (DB.getValue(v, 'init', 0) == rNewEffect.nInit) and
             (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) then
             nodeEffect = v;
@@ -186,7 +186,7 @@ end
 function initEffectHandlers()
     local ctEntries = CombatManager.getCombatantNodes();
     for _, nodeCT in pairs(ctEntries) do
-        for _, nodeEffect in pairs(DB.getChildren(nodeCT, 'effects')) do
+        for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
             DB.addHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
         end
         DB.addHandler(nodeCT.getPath() .. '.effects.*.label', 'onAdd', expireAddHelper);
@@ -196,7 +196,7 @@ end
 function deleteEffectHandlers()
     local ctEntries = CombatManager.getCombatantNodes();
     for _, nodeCT in pairs(ctEntries) do
-        for _, nodeEffect in pairs(DB.getChildren(nodeCT, 'effects')) do
+        for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
             DB.removeHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
         end
         DB.removeHandler(nodeCT.getPath() .. '.effects.*.label', 'onAdd', expireAdd);

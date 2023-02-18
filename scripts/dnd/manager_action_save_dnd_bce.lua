@@ -337,7 +337,7 @@ function replaceSaveDC(rNewEffect, rActor)
         local nDC = getDCEffectMod(rActor);
         if sNodeType == 'pc' then
             nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf') + nDC;
-            for _, nodeFeature in pairs(DB.getChildren(nodeActor, 'featurelist')) do
+            for _, nodeFeature in ipairs(DB.getChildList(nodeActor, 'featurelist')) do
                 local sFeatureName = StringManager.trim(DB.getValue(nodeFeature, 'name', ''):lower());
                 if sFeatureName == 'spellcasting' then
                     local sDesc = DB.getValue(nodeFeature, 'text', ''):lower();
@@ -349,7 +349,7 @@ function replaceSaveDC(rNewEffect, rActor)
             end
         elseif sNodeType == 'ct' or sNodeType == 'npc' then
             nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf') + nDC;
-            for _, nodeTrait in pairs(DB.getChildren(nodeActor, 'traits')) do
+            for _, nodeTrait in ipairs(DB.getChildList(nodeActor, 'traits')) do
                 local sTraitName = StringManager.trim(DB.getValue(nodeTrait, 'name', ''):lower());
                 if sTraitName == 'spellcasting' then
                     local sDesc = DB.getValue(nodeTrait, 'desc', ''):lower();
@@ -360,7 +360,7 @@ function replaceSaveDC(rNewEffect, rActor)
                 end
             end
             if bNewSpellcasting then
-                for _, nodeAction in pairs(DB.getChildren(nodeActor, 'actions')) do
+                for _, nodeAction in ipairs(DB.getChildList(nodeActor, 'actions')) do
                     local sActionName = StringManager.trim(DB.getValue(nodeAction, 'name', ''):lower());
                     if sActionName == 'spellcasting' then
                         local sDesc = DB.getValue(nodeAction, 'desc', ''):lower();

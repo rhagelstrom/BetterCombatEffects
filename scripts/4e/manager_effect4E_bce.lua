@@ -153,7 +153,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectType);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
+        aEffects = DB.getChildList(ActorManager.getCTNode(rActor), 'effects');
     end
 
     -- Iterate through effects
@@ -319,7 +319,7 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffect);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
+        aEffects = DB.getChildList(ActorManager.getCTNode(rActor), 'effects');
     end
 
     -- Iterate through each effect

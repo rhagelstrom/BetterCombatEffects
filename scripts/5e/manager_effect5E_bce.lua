@@ -53,7 +53,7 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
     local sDuplicateMsg = EffectManager5E.onEffectAddIgnoreCheck(nodeCT, rEffect);
     local bIgnoreDuration = OptionsManager.isOption('CONSIDER_DUPLICATE_DURATION', 'off');
     if OptionsManager.isOption('ALLOW_DUPLICATE_EFFECT', 'off') and not rEffect.sName:match('STACK') then
-        for _, nodeEffect in pairs(DB.getChildren(nodeCT, 'effects')) do
+        for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
             if (DB.getValue(nodeEffect, 'label', '') == rEffect.sName) and (DB.getValue(nodeEffect, 'init', 0) == rEffect.nInit) and
                 (bIgnoreDuration or (DB.getValue(nodeEffect, 'duration', 0) == rEffect.nDuration)) and
                 (DB.getValue(nodeEffect, 'source_name', '') == rEffect.sSource) then
@@ -128,7 +128,7 @@ function dropConcentration(rNewEffect, nDuration)
             else
                 sSource = sSourceName;
             end
-            for _, nodeEffect in pairs(DB.getChildren(nodeCTConcentration, 'effects')) do
+            for _, nodeEffect in ipairs(DB.getChildList(nodeCTConcentration, 'effects')) do
                 local sEffect = DB.getValue(nodeEffect, 'label', '');
                 tEffectComps = EffectManager.parseEffect(sEffect);
                 local sEffectTag = tEffectComps[1];
@@ -172,7 +172,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectType);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
+        aEffects = DB.getChildList(ActorManager.getCTNode(rActor), 'effects');
     end
 
     -- Iterate through effects
@@ -384,7 +384,7 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffect);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
+        aEffects = DB.getChildList(ActorManager.getCTNode(rActor), 'effects');
     end
     for _, v in pairs(aEffects) do
         local nActive = DB.getValue(v, 'isactive', 0);

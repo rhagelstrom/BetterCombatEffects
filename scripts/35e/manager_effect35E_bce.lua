@@ -96,7 +96,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectType);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
+        aEffects = DB.getChildList(ActorManager.getCTNode(rActor), 'effects');
     end
 
     -- Iterate through effects
@@ -330,7 +330,7 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sLowerEffect);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
+        aEffects = DB.getChildList(ActorManager.getCTNode(rActor), 'effects');
     end
 
     -- Iterate through effects
@@ -436,7 +436,7 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sEffectType);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
+        aEffects = DB.getChildList(ActorManager.getCTNode(rActor), 'effects');
     end
     -- Iterate through effects
     for _, v in pairs(aEffects) do
@@ -654,7 +654,7 @@ function kelHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTarg
     if TurboManager then
         aEffects = TurboManager.getMatchedEffects(rActor, sLowerEffect);
     else
-        aEffects = DB.getChildren(ActorManager.getCTNode(rActor), 'effects');
+        aEffects = DB.getChildList(ActorManager.getCTNode(rActor), 'effects');
     end
     for _, v in pairs(aEffects) do
         local nActive = DB.getValue(v, 'isactive', 0);
