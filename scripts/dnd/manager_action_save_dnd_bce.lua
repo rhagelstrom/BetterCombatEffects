@@ -334,7 +334,7 @@ function replaceSaveDC(rNewEffect, rActor)
         local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor);
         local nSpellcastingDC = 0;
         local bNewSpellcasting = true;
-        local nDC = getDCEffectMod(rActor);
+        local nDC = ActionSaveDnDBCE.getDCEffectMod(rActor);
         if sNodeType == 'pc' then
             nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf') + nDC;
             for _, nodeFeature in ipairs(DB.getChildList(nodeActor, 'featurelist')) do
