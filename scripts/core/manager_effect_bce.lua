@@ -34,8 +34,15 @@ function onInit()
     addEffect = EffectManager.addEffect;
     getEffectsByType = EffectManager.getEffectsByType;
 
-    EffectManager.addEffect = EffectManagerBCE.customAddEffectPre;
-    EffectManager.getEffectsByType = customGetEffectsByType;
+    -- for some reason in 5E, lights can't be turned off when we override this
+    -- LIGHT is run though  EffectManager.getEffectsbyType and if we override it, then we have problems
+    -- If we don't override it resolves and I don't think we care if it is overridden if we are running a
+    -- spported ruleset because we have a RulesetManager to select which version to call.
+    if  User.getRulesetName() ~= "5E" then
+        EffectManager.addEffect = EffectManagerBCE.customAddEffectPre;
+        EffectManager.getEffectsByType = customGetEffectsByType;
+    end
+
 
     if Session.IsHost then
         EffectManagerBCE.initEffectHandlers();
@@ -43,8 +50,10 @@ function onInit()
 end
 
 function onClose()
-    EffectManager.addEffect = addEffect;
-    EffectManager.getEffectsByType = getEffectsByType;
+    if  User.getRulesetName() ~= "5E" then
+        EffectManager.addEffect = addEffect;
+        EffectManager.getEffectsByType = getEffectsByType;
+    end
     if Session.IsHost then
         EffectManagerBCE.deleteEffectHandlers();
     end
