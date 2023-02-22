@@ -38,8 +38,8 @@ function onInit()
     -- LIGHT is run though  EffectManager.getEffectsbyType and if we override it, then we have problems
     -- If we don't override it resolves and I don't think we care if it is overridden if we are running a
     -- spported ruleset because we have a RulesetManager to select which version to call.
+    EffectManager.addEffect = EffectManagerBCE.customAddEffectPre;
     if  User.getRulesetName() ~= "5E" then
-        EffectManager.addEffect = EffectManagerBCE.customAddEffectPre;
         EffectManager.getEffectsByType = customGetEffectsByType;
     end
 
