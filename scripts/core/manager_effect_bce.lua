@@ -144,6 +144,9 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
     end
     addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg);
     local nodeEffect;
+    if( not rNewEffect.sSource) then
+        rNewEffect.sSource = '';
+    end
     for _, v in ipairs(DB.getChildList(nodeCT, 'effects')) do
         if (DB.getValue(v, 'label', '') == rNewEffect.sName) and (DB.getValue(v, 'init', 0) == rNewEffect.nInit) and
             (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) then
