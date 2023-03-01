@@ -20,6 +20,7 @@ function onInit()
     getEffectsByType = EffectManager35E.getEffectsByType;
     hasEffect = EffectManager35E.hasEffect;
     hasEffectCondition = EffectManager35E.hasEffectCondition;
+    EffectManager.setCustomOnEffectAddIgnoreCheck(customOnEffectAddIgnoreCheck)
     if bOverlays then
         EffectManager35E.getEffectsByType = kelGetEffectsByType;
         EffectManager35E.hasEffect = kelHasEffect;
@@ -37,6 +38,27 @@ function onClose()
     EffectManager35E.hasEffectCondition = hasEffectCondition;
 
     EffectManagerBCE.removeCustomPreAddEffect(addEffectPre35E);
+end
+
+-- This is likely where we will conflict with any other extensions
+function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
+	local sDuplicateMsg = nil
+	local nodeEffectsList = DB.getChild(nodeCT,"effects")
+	if not nodeEffectsList then
+		return sDuplicateMsg
+	end
+	if  not rEffect.sName:match("STACK") then
+		for _, nodeEffect in ipairs(DB.getChildList(nodeEffectsList)) do
+			if (DB.getValue(nodeEffect, "label", "") == rEffect.sName) and
+					(DB.getValue(nodeEffect, "init", 0) == rEffect.nInit) and
+					(DB.getValue(nodeEffect, "duration", 0) == rEffect.nDuration) and
+					(DB.getValue(nodeEffect,"source_name", "") == rEffect.sSource) then
+				sDuplicateMsg = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), rEffect.sName, Interface.getString("effect_status_exists"))
+				break
+			end
+		end
+	end
+	return sDuplicateMsg
 end
 
 --function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)

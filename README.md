@@ -1,8 +1,8 @@
 [![Build FG Extension](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml) [![Luacheckrc](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml)
 # Better Combat Effects
 
-**Current Version:** 4.6
-**Updated:** 02/14/23
+**Current Version:** 4.7
+**Updated:** 02/28/23
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
