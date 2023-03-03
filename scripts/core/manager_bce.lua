@@ -120,7 +120,7 @@ end
 
 -- Updates need a lookup table because we dont' know what the label of the node was prior to change
 function effectUpdated(nodeLabel)
-    local nodeEffect = nodeLabel.getParent();
+    local nodeEffect = DB.getParent(nodeLabel);
     local sPath = DB.getPath(nodeEffect);
     local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(tEffectsLookup[sPath]), 'update', sPath);
     tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
