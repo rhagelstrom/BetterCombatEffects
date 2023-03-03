@@ -334,7 +334,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 
                         if comp_match then
                             nMatch = kEffectComp;
-                            rEffectComp.sEffectNode = v.getPath();
+                            rEffectComp.sEffectNode = DB.getPath(v);
                             BCEManager.chat('Add: ', rEffectComp, sEffectType)
 
                             if nActive == 1 or bActive then

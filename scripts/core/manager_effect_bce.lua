@@ -104,7 +104,7 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
                     local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
                     if rEffectComp.type == sEffectCompType or rEffectComp.original == sEffectCompType then
                         nMatch = kEffectComp;
-                        rEffectComp.sEffectNode = v.getPath();
+                        rEffectComp.sEffectNode = DB.getPath(v);
                         if nActive == 1 or (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) then
                             table.insert(tResults, rEffectComp);
                         end
@@ -151,7 +151,7 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
         if (DB.getValue(v, 'label', '') == rNewEffect.sName) and (DB.getValue(v, 'init', 0) == rNewEffect.nInit) and
             (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) then
             nodeEffect = v;
-            DB.addHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
+            DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
             EffectManagerBCE.onCustomPostAddEffect(nodeCT, nodeEffect);
             break
         end
@@ -199,9 +199,9 @@ function initEffectHandlers()
     local ctEntries = CombatManager.getCombatantNodes();
     for _, nodeCT in pairs(ctEntries) do
         for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
-            DB.addHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
+            DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
         end
-        DB.addHandler(nodeCT.getPath() .. '.effects.*.label', 'onAdd', expireAddHelper);
+        DB.addHandler(DB.getPath(nodeCT, 'effects.*.label'), 'onAdd', expireAddHelper);
     end
 end
 
@@ -209,22 +209,22 @@ function deleteEffectHandlers()
     local ctEntries = CombatManager.getCombatantNodes();
     for _, nodeCT in pairs(ctEntries) do
         for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
-            DB.removeHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
+            DB.removeHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
         end
-        DB.removeHandler(nodeCT.getPath() .. '.effects.*.label', 'onAdd', expireAdd);
+        DB.removeHandler(DB.getPath(nodeCT, 'effects.*.label'), 'onAdd', expireAdd);
     end
 end
 
 function expireAddHelper(nodeLabel)
-    DB.removeHandler(nodeLabel.getPath(), 'onAdd', expireAddHelper);
-    DB.addHandler(DB.getChild(nodeLabel, '..').getPath(), 'onDelete', expireAdd);
+    DB.removeHandler(DB.getPath(nodeLabel), 'onAdd', expireAddHelper);
+    DB.addHandler(DB.getPath(DB.getChild(nodeLabel, '..')), 'onDelete', expireAdd);
 end
 
 function expireAdd(nodeEffect)
     BCEManager.chat('expireAdd: ');
     local sLabel = DB.getValue(nodeEffect, 'label', '', '');
     if sLabel:match('EXPIREADD') then
-        local sActor = DB.getChild(nodeEffect, '...').getPath();
+        local sActor = DB.getPath(DB.getChild(nodeEffect, '...'));
         local nodeCT = DB.findNode(sActor);
         local sSource = DB.getValue(nodeEffect, 'source_name', '');
         local sourceNode = nodeCT;
@@ -240,7 +240,7 @@ function expireAdd(nodeEffect)
             end
         end
     end
-    DB.removeHandler(nodeEffect.getPath(), 'onDelete', expireAdd);
+    DB.removeHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
 end
 
 ------------------ CUSTOM BCE FUNTION HOOKS ------------------

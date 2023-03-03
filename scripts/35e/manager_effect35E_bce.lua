@@ -256,7 +256,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 
                         -- Match!
                         if comp_match then
-                            rEffectComp.sEffectNode = v.getPath();
+                            rEffectComp.sEffectNode = DB.getPath(v);
                             nMatch = kEffectComp
                             if nActive == 1 or bActive then
                                 table.insert(results, rEffectComp)
@@ -301,7 +301,7 @@ function isValidCheckEffect(rActor, nodeEffect)
         if node then
             local nodeItem = DB.getChild(node, '...')
             if nodeItem then
-                sItemPath = nodeItem.getPath()
+                sItemPath = DB.getPath(nodeItem)
                 bActionOnly = (DB.getValue(node, 'actiononly', 0) ~= 0)
             end
         end
@@ -627,7 +627,7 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
 
                         -- Match!
                         if comp_match then
-                            rEffectComp.sEffectNode = v.getPath();
+                            rEffectComp.sEffectNode = DB.getPath(v);
                             nMatch = kEffectComp;
                             if nActive == 1 or bActive then
                                 table.insert(results, rEffectComp);

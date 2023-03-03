@@ -64,7 +64,7 @@ function addEffectPost(nodeActor, nodeEffect)
     local rEffect = EffectManager.getEffect(nodeEffect);
     local rTarget = ActorManager.resolveActor(nodeActor);
     local rSource;
-    DiceManagerDnDBCE.isDie(rTarget, rEffect, nodeEffect.getPath());
+    DiceManagerDnDBCE.isDie(rTarget, rEffect, DB.getPath(nodeEffect));
     if rEffect.sSource == '' then
         rSource = rTarget;
     else

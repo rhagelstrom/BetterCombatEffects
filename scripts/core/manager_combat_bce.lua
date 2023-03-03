@@ -60,7 +60,7 @@ function turnStart(sourceNodeCT)
                     BCEManager.chat('REMOVE: ');
                     local nDuration = DB.getValue(tEffect.sEffectNode .. '.duration', 0);
                     local sSource = DB.getValue(tEffect.sEffectNode .. '.source_name', 0);
-                    if nDuration == 1 and sSource == sourceNodeCT.getPath() then
+                    if nDuration == 1 and sSource == DB.getPath(sourceNodeCT) then
                         BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                     end
                 end
@@ -106,7 +106,7 @@ function turnEnd(sourceNodeCT)
                     BCEManager.chat('REMOVE: ');
                     local nDuration = DB.getValue(tEffect.sEffectNode .. '.duration', 0);
                     local sSource = DB.getValue(tEffect.sEffectNode .. '.source_name', 0);
-                    if nDuration == 1 and sSource == sourceNodeCT.getPath() then
+                    if nDuration == 1 and sSource == DB.getPath(sourceNodeCT) then
 
                         BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                     end

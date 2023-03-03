@@ -263,7 +263,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                         if comp_match then
                             BCEManager.chat('Match: ', rEffectComp);
                             nMatch = kEffectComp;
-                            rEffectComp.sEffectNode = v.getPath();
+                            rEffectComp.sEffectNode = DB.getPath(v);
                             if nActive == 1 or bActive then
                                 rEffectComp.node = v;
                                 table.insert(results, rEffectComp);
