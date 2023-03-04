@@ -41,20 +41,8 @@ end
 -- 5E   function customApplyDamage(rSource, rTarget, rRoll, ...)
 function applyDamageBCE(rSource, rTarget, rRoll, ...)
     BCEManager.chat('applyDamageBCE : ');
-    --Reported situation where rSource is nil which causes script errors
+    --Some situations can have nil source such as drag damage from chat
     if not rSource or not rTarget or not rRoll then
-        local sErrorString = "applyDamageBCE Warning:"
-        if not rSource then
-            sErrorString = sErrorString .. " rSource is nil";
-        end
-        if not rTarget then
-            sErrorString = sErrorString .. " rTarget is nil";
-        end
-        if not rRoll then
-            sErrorString = sErrorString .. " rRoll is nil";
-        end
-        Debug.console(sErrorString);
-        Debug.console("Silently Failing");
         return RulesetActionDamageManager.applyDamage(rSource, rTarget, rRoll, ...);
     end
 
