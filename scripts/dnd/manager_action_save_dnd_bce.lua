@@ -7,6 +7,8 @@ local onSave = nil;
 local RulesetEffectManager = nil;
 local RulesetActorManager = nil;
 
+local aSaveFilter = {}
+
 function onInit()
     RulesetEffectManager = BCEManager.getRulesetEffectManager();
     RulesetActorManager = BCEManager.getRulesetActorManager();
@@ -30,6 +32,17 @@ function onInit()
     EffectManagerBCE.registerEffectCompType('SAVEDMG', {bIgnoreOtherFilter = true});
 end
 
+function onTabletopInit()
+    if User.getRulesetName() == '5E' then
+        aSaveFilter = DataCommon.ability_ltos;
+    else
+        aSaveFilter = DataCommon.save_ltos;
+        for i,v in pairs(DataCommon.save_stol) do
+            aSaveFilter[i] = v;
+        end
+    end
+end
+
 function onClose()
     ActionsManager.unregisterResultHandler('save');
     ActionSave.onSave = onSave;
@@ -41,11 +54,7 @@ end
 function processEffectTurnStartSave(rSource)
     BCEManager.chat('processEffectTurnStartSave : ');
     local tMatch;
-    if User.getRulesetName() == '5E' then
-        tMatch = RulesetEffectManager.getEffectsByType(rSource, 'SAVES', DataCommon.ability_ltos);
-    else
-        tMatch = RulesetEffectManager.getEffectsByType(rSource, 'SAVES', DataCommon.save_ltos);
-    end
+    tMatch = RulesetEffectManager.getEffectsByType(rSource, 'SAVES', aSaveFilter);
     for _, tEffect in pairs(tMatch) do
         BCEManager.chat('SAVES : ', tEffect);
         ActionSaveDnDBCE.saveEffect(rSource, tEffect);
@@ -56,11 +65,8 @@ end
 function processEffectTurnEndSave(rSource)
     BCEManager.chat('processEffectTurnEndSave : ');
     local tMatch;
-    if User.getRulesetName() == '5E' then
-        tMatch = RulesetEffectManager.getEffectsByType(rSource, 'SAVEE', DataCommon.ability_ltos);
-    else
-        tMatch = RulesetEffectManager.getEffectsByType(rSource, 'SAVEE', DataCommon.save_ltos);
-    end
+
+    tMatch = RulesetEffectManager.getEffectsByType(rSource, 'SAVEE', aSaveFilter);
     for _, tEffect in pairs(tMatch) do
         BCEManager.chat('SAVEE : ', tEffect);
         ActionSaveDnDBCE.saveEffect(rSource, tEffect);
@@ -119,11 +125,8 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
             table.insert(aTags, 'SAVEDMG');
         end
         for _, sTag in pairs(aTags) do
-            if User.getRulesetName() == '5E' then
-                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.ability_ltos, rTarget);
-            else
-                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.save_ltos, rTarget);
-            end
+
+            tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, aSaveFilter, rTarget);
             for _, tEffect in pairs(tMatch) do
                 if tEffect.sEffectNode == sPath then
                     if sTag =='SAVEADDP' then
@@ -142,11 +145,7 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
     elseif nodeEffect then
         aTags = {'SAVEADD', 'SAVEDMG'};
         for _, sTag in pairs(aTags) do
-            if User.getRulesetName() == '5E' then
-                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.ability_ltos, rTarget);
-            else
-                tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, DataCommon.save_ltos, rTarget);
-            end
+            tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, aSaveFilter, rTarget);
             for _, tEffect in pairs(tMatch) do
                 if tEffect.sEffectNode == sPath then
                     if sTag =='SAVEADD' then
@@ -183,7 +182,7 @@ function saveEffect(rTarget, rEffectComp)
     end
 
     local aParsedRemiander = StringManager.parseWords(rEffectComp.remainder[1]);
-    local sAbility;
+    local sAbility = '';
     if User.getRulesetName() == '5E' then
         sAbility = DataCommon.ability_stol[aParsedRemiander[1]];
     else
@@ -260,11 +259,7 @@ function onDamage(rSource, rTarget, _)
     BCEManager.chat('onDamage : ');
     local tMatch;
 
-    if User.getRulesetName() == '5E' then
-        tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEONDMG', DataCommon.ability_ltos, rSource);
-    else
-        tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEONDMG', DataCommon.save_ltos, rSource);
-    end
+    tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEONDMG', aSaveFilter, rSource);
     for _, tEffect in pairs(tMatch) do
         BCEManager.chat('SAVEONDMG : ', tEffect);
         ActionSaveDnDBCE.saveEffect(rTarget, tEffect);
@@ -278,11 +273,7 @@ function addEffectPost(nodeActor, _)
     local rTarget = ActorManager.resolveActor(nodeActor);
     local tMatch;
 
-    if User.getRulesetName() == '5E' then
-        tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEA', DataCommon.ability_ltos);
-    else
-        tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEA', DataCommon.save_ltos);
-    end
+    tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEA', aSaveFilter);
     for _, tEffect in pairs(tMatch) do
         BCEManager.chat('SAVEA : ', tEffect);
         ActionSaveDnDBCE.saveEffect(rTarget, tEffect);
