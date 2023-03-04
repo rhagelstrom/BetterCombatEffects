@@ -38,6 +38,10 @@
 			</label_eb>
 			<checkbox_eb_valueholder name="effect_remove" />
 			<label_eb>
+				<static textres="effect_removeany" />
+			</label_eb>
+			<checkbox_eb_valueholder name="effect_removeany" />
+			<label_eb>
 				<static text="]" />
 			</label_eb>
 		</sheetdata>

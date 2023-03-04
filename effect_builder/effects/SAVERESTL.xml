@@ -5,12 +5,12 @@
 		<margins control="0,0,0,2" />
 		<sheetdata>
 			<leftanchor_eb />
-			<cycler_eb_stat_values name="stat_value" />
 			<subwindow_eb_number_value name="number_value" />
 			<label_eb>
 				<static textres="effect_savesdc" />
 			</label_eb>
 			<checkbox_eb_valueholder name="effect_savesdc" />
+			<cycler_eb_stat_values name="stat_value" />
 			<cycler_eb_save_adv />
 			<label_eb>
 				<static textres="effect_savemagic" />
@@ -35,6 +35,11 @@
 				<static textres="effect_remove" />
 			</label_eb>
 			<checkbox_eb_valueholder name="effect_remove" />
+			<label_eb>
+				<static textres="effect_removeany" />
+			</label_eb>
+			<checkbox_eb_valueholder name="effect_removeany" />
+
 			<label_eb>
 				<static text="]" />
 			</label_eb>

@@ -14,7 +14,7 @@
                 EditorManager.addEditor(
                     "category_bce_cs",
                     {
-                        value="ATK",
+                        value="ATKCS",
                         labelres="effect_atkcs",
                         windowclass="effect_ATKCS"
                     })

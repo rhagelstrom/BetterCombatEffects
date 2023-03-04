@@ -1,13 +1,18 @@
 function createEffectString()
-    local effectString = parentcontrol.window.effect.getStringValue() .. cycler_turn_add.getStringValue() .. ': '
+    local effectString = '';
     if cycler_actor.getStringValue() ~= true and cycler_turn_add.getStringValue() ~= 'A' then
-        effectString = cycler_actor.getStringValue() .. effectString
+        effectString = cycler_actor.getStringValue()
     end
+    effectString = effectString .. 'SAVE' .. cycler_turn_add.getStringValue() .. ': ';
 
     if effect_savesdc.getValue() > 0 then
         effectString = effectString .. ' [SDC]'
     else
         effectString = effectString .. number_value.getStringValue()
+    end
+
+    if cycler_save_adv.getStringValue() ~= true then
+        effectString = effectString .. ' ' .. cycler_save_adv.getStringValue()
     end
 
     effectString = effectString .. ' ' .. stat_value.getStringValue()
@@ -25,6 +30,9 @@ function createEffectString()
     end
     if effect_remove.getValue() > 0 then
         effectString = effectString .. ' (R)'
+    end
+    if effect_removeany.getValue() > 0 then
+        effectString = effectString .. ' (RA)'
     end
 
     return effectString

@@ -7,6 +7,7 @@
 	<string name="effect_activate">Activate</string>
 	<string name="effect_deactivate">Deactivate</string>
 	<string name="effect_remove">Remove</string>
+	<string name="effect_removeany">Remove Any</string>
 	<string name="effect_turncs">On Turn</string>
 	<string name="effect_dmgcs">On Damage</string>
 	<string name="effect_atkcs">On Attack</string>
