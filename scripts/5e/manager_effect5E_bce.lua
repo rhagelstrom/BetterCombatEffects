@@ -337,8 +337,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                             rEffectComp.sEffectNode = DB.getPath(v);
                             BCEManager.chat('Add: ', rEffectComp, sEffectType)
 
-                            if nActive == 1 or bActive then
-
+                            if nActive == 1 or (bActive and nActive ~= 2) then
                                 table.insert(results, rEffectComp);
                             end
                         end
