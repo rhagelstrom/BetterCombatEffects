@@ -21,6 +21,8 @@ function onTabletopInit()
     RulesetEffectManager = BCEManager.getRulesetEffectManager();
     EffectManagerBCE.registerEffectCompType('TURNAS', {bIgnoreDisabledCheck = true});
     EffectManagerBCE.registerEffectCompType('TURNAE', {bIgnoreDisabledCheck = true});
+    EffectManagerBCE.registerEffectCompType('TURNRS', {bIgnoreDisabledCheck = true});
+    EffectManagerBCE.registerEffectCompType('TURNRE', {bIgnoreDisabledCheck = true});
 end
 
 function turnStart(sourceNodeCT)
