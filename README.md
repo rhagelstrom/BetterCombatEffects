@@ -1,8 +1,8 @@
 [![Build FG Extension](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml) [![Luacheckrc](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml)
 # Better Combat Effects
 
-**Current Version:** 4.8
-**Updated:** 03/04/23
+**Current Version:** 4.9
+**Updated:** 03/07/23
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. Don't see a ruleset? Just ask for support.
 
@@ -47,6 +47,7 @@ s
 |<span style="color:blue">EXPIREADD</span>|(-)| [effect] or [condition] |Add effect or condition when this effect expires|CoreRPG|
 | **Misc** | | | | |
 |<span style="color:orange">DC</span>|(N)|  |(N) will be added  to the [SDC] when [SDC] is automatically replaced|5E|
+|<span style="color:green">DUR</span>|(N)|(-)|Sets this effects duration to (N) when applied|5E 4E 3.5E PFRPG|
 | **Ongoing Damage** | | | | |
 |<span style="color:green">DMGOE</span>|(D)|[damage type]* |Apply ongoing damage at the END of the Actor's turn|5E 4E 3.5E PFRPG|
 |<span style="color:green">SDMGOS</span>|(D)|[damage type]* |Apply ongoing damage at the START of the Actor's turn who applied the effect|5E 4E 3.5E PFRPG|

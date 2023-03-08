@@ -14,15 +14,18 @@ end
 function onClose()
 end
 
+
 -- Any effect that modifies ability score and is coded with -X
 -- has the -X replaced with the targets ability score and then calculated
 function replaceAbilityScores(rNewEffect, rActor)
     BCEManager.chat('replaceAbilityScores : ');
     -- check contains -X to see if this is interesting enough to continue
-    if rNewEffect.sName:match('%-X') then
-        local tEffectComps = EffectManager.parseEffect(rNewEffect.sName);
-        for _, sEffectComp in ipairs(tEffectComps) do
-            local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp)
+    local tEffectComps = EffectManager.parseEffect(rNewEffect.sName);
+    for _, sEffectComp in ipairs(tEffectComps) do
+        local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
+        if rEffectComp.type == 'DUR' and rEffectComp.mod > 0 then
+            rNewEffect.nDuration = rEffectComp.mod
+        elseif sEffectComp:match('%-X') then
             local nAbility = 0;
             if rEffectComp.type == 'STR' or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == 'STRMNM') then
                 nAbility = RulesetActorManager.getAbilityScore(rActor, 'strength');
@@ -37,7 +40,6 @@ function replaceAbilityScores(rNewEffect, rActor)
             elseif rEffectComp.type == 'CHA' or (bMadNomadCharSheetEffectDisplay and rEffectComp.type == 'CHAMNM') then
                 nAbility = RulesetActorManager.getAbilityScore(rActor, 'charisma');
             end
-
             if (rEffectComp.remainder[1]:match('%-X')) then
                 local sMod = rEffectComp.remainder[1]:gsub('%-X', '');
                 local nMod = tonumber(sMod);
