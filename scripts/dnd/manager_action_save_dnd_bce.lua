@@ -29,7 +29,7 @@ function onInit()
     EffectManagerBCE.registerEffectCompType('SAVES', {bIgnoreOtherFilter = true});
     EffectManagerBCE.registerEffectCompType('SAVEE', {bIgnoreOtherFilter = true});
     EffectManagerBCE.registerEffectCompType('SAVEONDMG', {bIgnoreOtherFilter = true});
-    EffectManagerBCE.registerEffectCompType('SAVEDMG', {bIgnoreOtherFilter = true});
+    EffectManagerBCE.registerEffectCompType('SAVEDMG', {bIgnoreOtherFilter = true, bIgnoreDisabledCheck = true});
 end
 
 function onTabletopInit()
