@@ -6,34 +6,37 @@
 		<name>Feature: Better Combat Effects</name>
 		<version>4.9</version>
 		<author>Ryan Hagelstrom Contribution: MeAndUnique,bmos</author>
-		<description>Better Combat Effects Gold, Automatically enable/disable/add/remove effects on the start of turn, end of turn, or when damage is taken</description>
+		<description>Better Combat Effects, Automatically enable/disable/add/remove effects on the start of turn, end of turn, or when damage is taken</description>
+		<ruleset><name>5E</name></ruleset>
+		<ruleset><name>4E</name></ruleset>
+		<ruleset><name>3.5E</name></ruleset>
+		<ruleset><name>PFRPG</name></ruleset>
 	</properties>
 	<base>
-		<icon name="BetterCombatEffects" file="graphics/icons/bce.png"/>
-		<icon name="bce_save" file="graphics/icons/bce_save.png"/>
 		<includefile source="strings/strings_bce.xml" />
+		<includefile source="graphics/loader.xml"  ruleset="5E|4E|3.5E|PFRPG" />
 		<!-- <includefile source="scripts/core/loader_core.xml" />
 		<includefile source="scripts/dnd/loader_dnd.xml" ruleset="5E|4E|3.5E|PFRPG" />
 		<includefile source="scripts/5e/loader_5e.xml" ruleset="5E" />
 		<includefile source="scripts/4e/loader_4e.xml" ruleset="4E" />
-		<includefile source="scripts/35e/loader_35e.xml" ruleset="3.5E|PFRPG" /> -->
-		<!-- <includefile source="effect_builder/editor_loader.xml" /> -->
+		<includefile source="scripts/35e/loader_35e.xml" ruleset="3.5E|PFRPG" />
+		<includefile source="effect_builder/editor_loader.xml" /> -->
 
 		<!-- Core -->
 		<script name="BCEManager" file="scripts/core/manager_bce.lua" />
 		<script name="BinarySearchManager" file="scripts/core/manager_binary_search.lua" />
 		<script name="EffectManagerBCE" file="scripts/core/manager_effect_bce.lua" />
 		<script name="CombatManagerBCE" file="scripts/core/manager_combat_bce.lua" />
-
 		<!-- DnD -->
 		<script name="BCEDnDManager" file="scripts/dnd/manager_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG" />
 		<script name="ActionManagerDnDBCE" file="scripts/dnd/manager_action_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG" />
 		<script name="ActionDamageDnDBCE" file="scripts/dnd/manager_action_damage_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG" />
 		<script name="ActionSaveDnDBCE" file="scripts/dnd/manager_action_save_dnd_bce.lua" ruleset="5E|3.5E|PFRPG" />
 		<script name="CharManagerDnDBCE" file="scripts/dnd/manager_char_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG" />
-		<script name="CombatManagerDnDBCE" file="scripts/dnd/manager_combat_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG" />
-		<script name="DiceManagerDnDBCE" file="scripts/dnd/manager_dice_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG" />
-		<script name="EffectManagerDnDBCE" file="scripts/dnd/manager_effect_dnd_bce.lua"  ruleset="5E|4E|3.5E|PFRPG" />
+		<script name="CombatManagerDnDBCE" file="scripts/dnd/manager_combat_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG"  />
+		<script name="DiceManagerDnDBCE" file="scripts/dnd/manager_dice_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG"/>
+		<script name="EffectManagerDnDBCE" file="scripts/dnd/manager_effect_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG" />
+		<script name="PowerActionManagerCoreDnDBCE" file="scripts/dnd/manager_power_action_core_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG"/>
 
 		<!-- 5E -->
 		<script name="EffectManager5EBCE"   file="scripts/5e/manager_effect5E_bce.lua" ruleset="5E" />
@@ -42,12 +45,21 @@
 
 		<!-- 4E -->
 		<script name="EffectManager4EBCE" file="scripts/4e/manager_effect4E_bce.lua" ruleset="4E" />
-		<script name="ActionDamage4EBCE" file="scripts/4ee/manager_action_damage4E_bce.lua" ruleset="4E" />
+		<script name="ActionDamage4EBCE" file="scripts/4e/manager_action_damage4E_bce.lua" ruleset="4E" />
+		<script name="CharManager4EBCE" file="scripts/4e/manager_char4E_bce.lua" ruleset="4E" />
 
 		<!-- 3.5E/PFRPG -->
 		<script name="ActionDamage35EBCE"   file="scripts/35e/manager_action_damage35E_bce.lua" ruleset="3.5E|PFRPG" />
 		<script name="EffectManager35EBCE"  file="scripts/35e/manager_effect35E_bce.lua" ruleset="3.5E|PFRPG" />
+		<script name="ManagerSpell35EBCE"  file="scripts/35e/manager_spell35E_bce.lua" ruleset="3.5E|PFRPG" />
 
+		<!-- Change State -->
+		<includefile source="ct/ct_host_entry_section.xml" />
+		<includefile source="ct/template_ct.xml" />
+		<includefile source="utility/utility_effects.xml"/>
+		<includefile source="utility/utility_effects_advanced.xml"/>
+		<includefile source="campaign/record_power_roll.xml"/>
+		<includefile source="campaign/record_power_action.xml"/>
 		<!-- Effect Builder Extenstion -->
 		<!-- Strings -->
 		<includefile source="effect_builder/strings/strings_effect_builder.xml" />
@@ -57,21 +69,12 @@
 		<includefile source="effect_builder/common/cyclers.xml" />
 		<includefile source="effect_builder/common/stringfield.xml" />
 		<!-- Effect Editors -->
-		<includefile source="effect_builder/effects/ATKCS.xml" />
-		<includefile source="effect_builder/effects/ATURNCS.xml" />
-		<includefile source="effect_builder/effects/DE.xml" />
 		<includefile source="effect_builder/effects/DMGA.xml" />
 		<includefile source="effect_builder/effects/DMGADD.xml" />
 		<includefile source="effect_builder/effects/DMGCS.xml" />
 		<includefile source="effect_builder/effects/DMGO.xml" />
 		<includefile source="effect_builder/effects/DMGR.xml" />
-		<includefile source="effect_builder/effects/DUR.xml" />
-		<includefile source="effect_builder/effects/DUSE.xml" />
-		<includefile source="effect_builder/effects/E.xml" />
-		<includefile source="effect_builder/effects/EFFINIT.xml" />
 		<includefile source="effect_builder/effects/EXPIREADD.xml" />
-		<includefile source="effect_builder/effects/IMMUNEEFFECT.xml" />
-		<includefile source="effect_builder/effects/NOREST.xml" />
 		<includefile source="effect_builder/effects/REGEN.xml" />
 		<includefile source="effect_builder/effects/REGENA.xml" />
 		<includefile source="effect_builder/effects/REST.xml" />
@@ -79,7 +82,6 @@
 		<includefile source="effect_builder/effects/SAVEDMG.xml" />
 		<includefile source="effect_builder/effects/SAVEO.xml" />
 		<includefile source="effect_builder/effects/SAVEONDMG.xml" />
-		<includefile source="effect_builder/effects/SAVERESTL.xml" />
 		<includefile source="effect_builder/effects/STACK.xml" />
 		<includefile source="effect_builder/effects/STURNR.xml" />
 		<includefile source="effect_builder/effects/TURNCS.xml" />

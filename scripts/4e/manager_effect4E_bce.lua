@@ -283,6 +283,8 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                             EffectManager.notifyExpire(v, 0, true);
                         elseif sApply == 'single' or tEffectCompParams.bOneShot then
                             EffectManager.notifyExpire(v, nMatch, true);
+                        elseif not tEffectCompParams.bNoDUSE and sApply == 'duse' then
+                            BCEManager.modifyEffect(DB.getPath(v), 'Deactivate');
                         end
                     end
                 end
@@ -379,6 +381,8 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
                         EffectManager.notifyExpire(v, 0, true);
                     elseif sApply == 'single' then
                         EffectManager.notifyExpire(v, nMatch, true);
+                    elseif not tEffectCompParams.bNoDUSE and sApply == 'duse' then
+                        BCEManager.modifyEffect(DB.getPath(v), 'Deactivate');
                     end
                 end
             end

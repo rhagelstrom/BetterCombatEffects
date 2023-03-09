@@ -4,6 +4,7 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 -- luacheck: globals EffectManagerBCE
 ------------------ ORIGINALS ------------------
+
 local addEffect = nil;
 ------------------ END ORIGINALS ------------------
 --
@@ -34,30 +35,41 @@ function onInit()
     addEffect = EffectManager.addEffect;
     getEffectsByType = EffectManager.getEffectsByType;
 
+    EffectManager.registerEffectVar('sChangeState', {sDBType = 'string', sDBField = 'changestate', sDisplay = '[%s]'})
+
     -- for some reason in 5E, lights can't be turned off when we override this
     -- LIGHT is run though  EffectManager.getEffectsbyType and if we override it, then we have problems
     -- If we don't override it resolves and I don't think we care if it is overridden if we are running a
     -- spported ruleset because we have a RulesetManager to select which version to call.
+
     EffectManager.addEffect = EffectManagerBCE.customAddEffectPre;
-    if  User.getRulesetName() ~= "5E" then
+    if User.getRulesetName() ~= '5E' then
         EffectManager.getEffectsByType = customGetEffectsByType;
     end
 
-
     if Session.IsHost then
         EffectManagerBCE.initEffectHandlers();
+        CombatManager.setCustomAddCombatantEffectHandler(addChangeStateHandler);
+        CombatManager.setCustomDeleteCombatantHandler(unregisterCombatant);
+        -- DB.addHandler("combattracker.list.*.effects.*.changestate", "onAdd", addState);
+        DB.addHandler('combattracker.list.*.effects.*.changestate', 'onUpdate', stateModified);
+        DB.addHandler('combattracker.list.*.effects.*.changestate', 'onDelete', deleteState);
     end
+    Comm.registerSlashHandler('state', printState, 'Prints State Tabels')
 end
 
 function onClose()
-    if  User.getRulesetName() ~= "5E" then
-        EffectManager.addEffect = addEffect;
+    EffectManager.addEffect = addEffect;
+    if User.getRulesetName() ~= '5E' then
         EffectManager.getEffectsByType = getEffectsByType;
     end
     if Session.IsHost then
         EffectManagerBCE.deleteEffectHandlers();
+        DB.removeHandler('combattracker.list.*.effects.*.changestate', 'onUpdate', stateModified);
+        DB.removeHandler('combattracker.list.*.effects.*.changestate', 'onDelete', deleteState);
     end
 end
+
 
 ------------------ OVERRIDES ------------------
 function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargetedOnly)
@@ -123,6 +135,8 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
                             EffectManager.notifyExpire(v, 0, true);
                         elseif sApply == 'single' or tEffectCompParams.bOneShot then
                             EffectManager.notifyExpire(v, nMatch, true);
+                        elseif bDisableUse and sApply == 'duse' then
+                            BCEManager.modifyEffect(v.sEffectNode, 'Deactivate');
                         end
                     end
                 end
@@ -144,7 +158,7 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
     end
     addEffect(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg);
     local nodeEffect;
-    if( not rNewEffect.sSource) then
+    if (not rNewEffect.sSource) then
         rNewEffect.sSource = '';
     end
     for _, v in ipairs(DB.getChildList(nodeCT, 'effects')) do
@@ -152,6 +166,7 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
             (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) then
             nodeEffect = v;
             DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
+            EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
             EffectManagerBCE.onCustomPostAddEffect(nodeCT, nodeEffect);
             break
         end
@@ -200,6 +215,7 @@ function initEffectHandlers()
     for _, nodeCT in pairs(ctEntries) do
         for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
             DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
+            EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
         end
         DB.addHandler(DB.getPath(nodeCT, 'effects.*.label'), 'onAdd', expireAddHelper);
     end
@@ -210,6 +226,7 @@ function deleteEffectHandlers()
     for _, nodeCT in pairs(ctEntries) do
         for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
             DB.removeHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
+            EffectManagerBCE.deleteChangeStateHandler(nodeCT, nodeEffect);
         end
         DB.removeHandler(DB.getPath(nodeCT, 'effects.*.label'), 'onAdd', expireAdd);
     end
@@ -312,3 +329,204 @@ function onCustomPostAddEffect(nodeActor, nodeEffect)
     end
 end
 ------------------ CUSTOM BCE FUNTION HOOKS ------------------
+-- nodeCTPath execute the change state on this nodes turn
+-- [nodeCTPath][state/operation][effectPath]
+local tChangeState = {};
+local tChangeStateLookup = {};
+-- as ={}, ds = {}, rs = {}, ae = {}, de = {}, re = {}, sas ={}, sds = {}, srs = {}, sae = {}, sde = {}, sre = {}
+-- [state/operation][effectPath]
+local tChangeStateAny = {ats = {}, dts = {}, rts = {}};
+local tChangeStateAnyLookup = {};
+------------------ CHANGE STATE ------------------
+
+function addChangeStateHandler(nodeCT, nodeEffect)
+    BCEManager.chat('addChangeStateHandler: ');
+    local sNode = DB.getPath(nodeCT);
+    if not tChangeState[sNode] then
+        tChangeState[sNode] = {};
+    end
+    local sChangeState = DB.getPath(nodeEffect, 'changestate');
+    EffectManagerBCE.stateModified(DB.findNode(sChangeState));
+end
+
+function deleteState(nodeCS)
+    BCEManager.chat('deleteState: ');
+    local sValue = DB.getValue(nodeCS, '', '');
+    local sEffect = DB.getPath(DB.getChild(nodeCS, '..'), '');
+    local sActor = DB.getPath(DB.getChild(nodeCS, '....'), '');
+    if tChangeStateLookup[sEffect] then
+        tChangeState[sActor][tChangeStateLookup[sEffect]][sEffect] = nil;
+    end
+    if tChangeStateAny[tChangeStateAnyLookup[sEffect]] then
+        tChangeStateAny[tChangeStateAnyLookup[sEffect]][sEffect] = nil;
+    end
+    if tChangeStateAnyLookup.sEffect then
+        tChangeStateAnyLookup.sEffect = nil;
+    end
+end
+
+function deleteChangeStateHandler(nodeCT, nodeEffect)
+    BCEManager.chat('deleteChangeStateHandler: ');
+    DB.removeHandler(DB.getPath(nodeEffect, 'changestate'), 'onUpdate', deleteStateModified);
+end
+
+function stateModified(nodeCS)
+    BCEManager.chat('stateModified: ');
+    if not nodeCS then
+        return;
+    end
+    local sValue = DB.getValue(nodeCS, '', '');
+    local sEffect = DB.getPath(DB.getChild(nodeCS, '..'), '');
+    local sActor = DB.getPath(DB.getChild(nodeCS, '....'), '');
+    if tChangeStateLookup[sEffect] then
+        tChangeState[sActor][tChangeStateLookup[sEffect]][sEffect] = nil;
+    end
+    if tChangeStateAnyLookup.sEffect then
+        tChangeStateAnyLookup.sEffect = nil;
+    end
+    if tChangeStateAny[tChangeStateAnyLookup[sEffect]] then
+        tChangeStateAny[tChangeStateAnyLookup[sEffect]][sEffect] = nil;
+    end
+    if sValue == 'ats' or sValue == 'dts' or sValue == 'rts' then
+        tChangeStateAny[sValue][sEffect] = true;
+        tChangeStateAnyLookup[sEffect] = sValue;
+    else
+        if not tChangeState[sActor] then
+            tChangeState[sActor] = {};
+        end
+        if sValue:match('^s') then
+            local sSourceActor = DB.getValue(sEffect .. 'source_name', '');
+            if sSourceActor ~= '' then
+                sActor = sSourceActor;
+            end
+        end
+        if sValue ~= '' and not tChangeState[sActor][sValue] then
+            tChangeState[sActor][sValue] = {};
+        end
+        if sActor ~= '' and tChangeState[sActor] and tChangeState[sActor][tChangeStateLookup[sEffect]] then
+            tChangeState[sActor][tChangeStateLookup[sEffect]][sEffect] = nil;
+        end
+        if sValue ~= '' then
+            tChangeState[sActor][sValue][sEffect] = true;
+            tChangeStateLookup[sEffect] = sValue;
+        end
+    end
+end
+
+function deleteStateModified(nodeCS)
+    BCEManager.chat('deleteStateModified: ');
+    local sValue = DB.getValue(nodeCS, '');
+    if sValue ~= '' then
+        local sEffect = DB.getPath(DB.getChild(nodeCS, '...'));
+        if sValue == 'ats' or sValue == 'dts' or sValue == 'rts' then
+            tChangeStateAny[sValue][sEffect] = nil;
+            tChangeStateAnyLookup[sEffect] = nil;
+        else
+            local sActor = DB.getPath(DB.getChild(nodeCS, '....'));
+            tChangeState[sActor][sValue][sEffect] = nil;
+            tChangeStateLookup[sEffect] = nil;
+        end
+    end
+end
+
+function changeState(nodeCT, bStart)
+    BCEManager.chat('changeState: ');
+    EffectManagerBCE.activateState(nodeCT, bStart);
+    EffectManagerBCE.deactivateState(nodeCT, bStart);
+    EffectManagerBCE.removeState(nodeCT, bStart);
+end
+
+local aActivateStates = {'as', 'ae', 'sas', 'sae'};
+local aDeactivateStates = {'ds', 'de', 'sds', 'sde'};
+local aRemoveStates = {'rs', 're', 'srs', 'sre'};
+
+function activateState(nodeCT, bStart)
+    BCEManager.chat('activateState: ');
+    local sPath = DB.getPath(nodeCT);
+    if bStart and next(tChangeStateAny.ats) then
+        for sEffect, _ in pairs(tChangeStateAny['ats']) do
+            if DB.getValue(sEffect .. '.isactive', 100) ~= 1 then
+                BCEManager.modifyEffect(sEffect, 'Activate');
+            end
+        end
+    end
+    for _, sState in ipairs(aActivateStates) do
+        if tChangeState[sPath] and tChangeState[sPath][sState] then
+            for sEffect, _ in pairs(tChangeState[sPath][sState]) do
+                if bStart and (sState == 'as' or 'sas') then
+                    if DB.getValue(sEffect .. '.isactive', 100) ~= 1 then
+                        BCEManager.modifyEffect(sEffect, 'Activate');
+                    end
+                else
+                    if DB.getValue(sEffect .. '.isactive', 100) ~= 1 then
+                        BCEManager.modifyEffect(sEffect, 'Activate');
+                    end
+                end
+            end
+        end
+    end
+end
+
+function deactivateState(nodeCT, bStart)
+    BCEManager.chat('deactivateState: ');
+    local sPath = DB.getPath(nodeCT);
+    if bStart and next(tChangeStateAny.dts) then
+        for sEffect, _ in pairs(tChangeStateAny['dts']) do
+            if DB.getValue(sEffect .. '.isactive', 100) ~= 0 then
+                BCEManager.modifyEffect(sEffect, 'Deactivate');
+            end
+        end
+    end
+    for _, sState in ipairs(aDeactivateStates) do
+        if tChangeState[sPath] and tChangeState[sPath][sState] then
+            for sEffect, _ in pairs(tChangeState[sPath][sState]) do
+                if bStart and (sState == 'ds' or 'sds') then
+                    if DB.getValue(sEffect .. '.isactive', 100) ~= 0 then
+                        BCEManager.modifyEffect(sEffect, 'Deactivate');
+                    end
+                else
+                    if DB.getValue(sEffect .. '.isactive', 100) ~= 0 then
+                        BCEManager.modifyEffect(sEffect, 'Deactivate');
+                    end
+                end
+            end
+        end
+    end
+end
+
+function removeState(nodeCT, bStart)
+    BCEManager.chat('removeState: ');
+    local sPath = DB.getPath(nodeCT);
+    if bStart and next(tChangeStateAny.rts) then
+        for sEffect, _ in pairs(tChangeStateAny['rts']) do
+            if DB.getValue(sEffect .. '.duration', 0) == 1 then
+                BCEManager.modifyEffect(sEffect, 'Remove');
+            end
+        end
+    end
+    for _, sState in ipairs(aRemoveStates) do
+        if tChangeState[sPath] and tChangeState[sPath][sState] then
+            for sEffect, _ in pairs(tChangeState[sPath][sState]) do
+                if bStart and (sState == 'rs' or 'srs') then
+                    if DB.getValue(sEffect .. '.duration', 0) == 1 then
+                        BCEManager.modifyEffect(sEffect, 'Remove');
+                    end
+                else
+                    if DB.getValue(sEffect .. '.duration', 0) == 1 then
+                        BCEManager.modifyEffect(sEffect, 'Remove');
+                    end
+                end
+            end
+        end
+    end
+end
+
+function printState()
+    Debug.chat(tChangeState);
+    Debug.chat(tChangeStateAny);
+end
+
+function unregisterCombatant(nodeCT)
+    BCEManager.chat('unregisterCombatant: ');
+    tChangeState[DB.getPath(nodeCT)] = nil;
+end

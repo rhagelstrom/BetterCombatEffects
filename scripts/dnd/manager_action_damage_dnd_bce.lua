@@ -25,7 +25,7 @@ function onClose()
 end
 
 function onTabletopInit()
-    EffectManagerBCE.registerEffectCompType('DMGAT', {bIgnoreDisabledCheck = true});
+    EffectManagerBCE.registerEffectCompType('DMGAT', {bIgnoreDisabledCheck = true, bNoDUSE = true});
     EffectManagerBCE.registerEffectCompType('TDMGADDT', {bIgnoreOtherFilter = true});
     EffectManagerBCE.registerEffectCompType('TDMGADDS', {bIgnoreOtherFilter = true});
     EffectManagerBCE.registerEffectCompType('SDMGADDT', {bIgnoreOtherFilter = true});

@@ -8,6 +8,8 @@ local bUntrueEffects = nil;
 local getEffectsByType = nil;
 local hasEffect = nil;
 local hasEffectCondition = nil;
+local encodeEffectForCT = nil;
+local decodeEffectFromCT = nil;
 
 function onInit()
     OptionsManager.registerOption2('ALLOW_DUPLICATE_EFFECT', false, 'option_Better_Combat_Effects', 'option_Allow_Duplicate', 'option_entry_cycler',
@@ -33,16 +35,22 @@ function onInit()
     getEffectsByType = EffectManager5E.getEffectsByType;
     hasEffect = EffectManager5E.hasEffect;
     hasEffectCondition = EffectManager5E.hasEffectCondition;
+    encodeEffectForCT = EffectManager5E.encodeEffectForCT;
+    decodeEffectFromCT = EffectManager5E.decodeEffectFromCT;
 
     EffectManager5E.getEffectsByType = customGetEffectsByType;
     EffectManager5E.hasEffect = customHasEffect;
     EffectManager5E.hasEffectCondition = customHasEffectCondition;
+    EffectManager5E.encodeEffectForCT = customEncodeEffectForCT;
+    EffectManager5E.decodeEffectFromCT = customDecodeEffectFromCT;
 end
 
 function onClose()
     EffectManager5E.getEffectsByType = getEffectsByType;
     EffectManager5E.hasEffect = hasEffect;
     EffectManager5E.hasEffectCondition = hasEffectCondition;
+    EffectManager5E.encodeEffectForCT = encodeEffectForCT;
+    EffectManager5E.decodeEffectFromCT = decodeEffectFromCT;
 
     EffectManagerBCE.removeCustomPreAddEffect(EffectManager5EBCE.addEffectPre5E);
     EffectManagerBCE.removeCustomPostAddEffect(EffectManager5EBCE.addEffectPost5E);
@@ -355,6 +363,8 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                             EffectManager.notifyExpire(v, 0, true);
                         elseif sApply == 'single' or tEffectCompParams.bOneShot then
                             EffectManager.notifyExpire(v, nMatch, true);
+                        elseif not tEffectCompParams.bNoDUSE and sApply == 'duse' then
+                            BCEManager.modifyEffect(DB.getPath(v), 'Deactivate');
                         end
                     end
                 end
@@ -450,6 +460,8 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
                         EffectManager.notifyExpire(v, 0, true);
                     elseif sApply == 'single' or tEffectCompParams.bOneShot then
                         EffectManager.notifyExpire(v, nMatch, true);
+                    elseif not tEffectCompParams.bNoDUSE and sApply == 'duse' then
+                        BCEManager.modifyEffect(DB.getPath(v), 'Deactivate');
                     end
                 end
             end
@@ -460,5 +472,41 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
         return true;
     end
     return false;
+end
+
+function customEncodeEffectForCT(rEffect)
+    BCEManager.chat('customEncodeEffectForCT : ', rEffect);
+    local sReturn = encodeEffectForCT(rEffect);
+
+    if rEffect.sChangeState and rEffect.sChangeState ~= '' then
+        sReturn:sub(-1);
+        sReturn = sReturn .. string.format('(S:%s)]', rEffect.sChangeState:upper());
+    end
+    return sReturn;
+end
+
+function customDecodeEffectFromCT(sEffect)
+    BCEManager.chat('customDecodeEffectFromCT : ', sEffect);
+    local sApply;
+    local sChangeState = '';
+    local sEffectName = sEffect:match('EFF: ?(.+)');
+    if sEffectName then
+        if sEffect:match('%(A:DUSE%)') then
+            sApply = 'duse';
+        end
+        local sCS = sEffect:match('%(S:%u+%)');
+        if sCS then
+            sCS = sCS:gsub('%(S:', ''):gsub('%)', '');
+            sChangeState = sCS:lower();
+            sEffect = sEffect:gsub('%(S:%u+%)', '')
+        end
+    end
+    local rEffect = decodeEffectFromCT(sEffect);
+    if sApply then
+        rEffect.sApply = sApply;
+    end
+    rEffect.sChangeState = sChangeState;
+
+    return rEffect;
 end
 

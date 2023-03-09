@@ -4,18 +4,22 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 local parseEffects = nil;
 local evalAction = nil;
+local getPCPowerAction = nil;
 
 function onInit()
     evalAction = PowerManager.evalAction;
     parseEffects = PowerManager.parseEffects;
+    getPCPowerAction = PowerManager.getPCPowerAction;
 
     PowerManager.evalAction = customEvalAction;
     PowerManager.parseEffects = customParseEffects;
+    PowerManager.getPCPowerAction = customGetPCPowerAction;
 end
 
 function onClose()
     PowerManager.evalAction = evalAction;
     PowerManager.parseEffects = parseEffects;
+    PowerManager.getPCPowerAction = getPCPowerAction;
 end
 
 -- Replace SDC when applied from a power
@@ -65,6 +69,16 @@ function customEvalAction(rActor, nodePower, rAction)
     end
 
     evalAction(rActor, nodePower, rAction);
+end
+
+
+function customGetPCPowerAction(nodeAction, sSubRoll)
+    BCEManager.chat('customGetPCPowerAction : ');
+    local rAction, rActor = getPCPowerAction(nodeAction, sSubRoll);
+    if rAction and rAction.type == "effect" then
+        rAction.sChangeState = DB.getValue(nodeAction, 'changestate', '');
+    end
+    return rAction, rActor;
 end
 
 function customParseEffects(sPowerName, aWords)

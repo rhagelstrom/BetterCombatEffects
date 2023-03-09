@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root>
+	<windowclass name="power_action_editor_effect" merge="join">
+		<sheetdata>
+			<button_stringcycler name="apply">
+			<parameters>
+					<labelsres>power_label_effect_applyaction|power_label_effect_applyroll|power_label_effect_applysingle|power_label_effect_duse</labelsres>
+					<values>action|roll|single|duse</values>
+				</parameters>
+			</button_stringcycler>
+            <label_column name="changestate_label">
+				<static textres="power_label_effect_changestate" />
+			</label_column>
+            <button_stringcycler name="changestate">
+                <anchored width="170" height="20">
+					<top parent="columnanchor" anchor="bottom" relation="relative" offset="7" />
+					<left offset="97" />
+				</anchored>
+                <parameters>
+                    <defaultlabelres>power_label_effect_never</defaultlabelres>
+                     <labelsres>power_label_effect_ats|power_label_effect_dts|power_label_effect_rts|power_label_effect_as|power_label_effect_ds|power_label_effect_rs|power_label_effect_ae|power_label_effect_de|power_label_effect_re|power_label_effect_sas|power_label_effect_sds|power_label_effect_srs|power_label_effect_sae|power_label_effect_sde|power_label_effect_sre|</labelsres>
+                     <values>ats|dts|rts|as|ds|rs|ae|de|re|sas|sds|sdr|sae|sde|sre</values>
+                 </parameters>
+             </button_stringcycler>
+		</sheetdata>
+	</windowclass>
+</root>

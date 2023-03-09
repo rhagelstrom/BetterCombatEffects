@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root version="3.3">
+	<icon name="BetterCombatEffects" file="graphics/icons/bce.png" />
+	<icon name="bce_save" file="graphics/icons/bce_save.png" />
+	<icon name="button_toggle_ae" file="graphics/icons/button_toggle_ae.png" />
+	<icon name="button_toggle_de" file="graphics/icons/button_toggle_de.png" />
+	<icon name="button_toggle_re" file="graphics/icons/button_toggle_re.png" />
+	<icon name="button_toggle_as" file="graphics/icons/button_toggle_as.png" />
+	<icon name="button_toggle_ds" file="graphics/icons/button_toggle_ds.png" />
+	<icon name="button_toggle_rs" file="graphics/icons/button_toggle_rs.png" />
+	<icon name="button_toggle_ae" file="graphics/icons/button_toggle_ae.png" />
+	<icon name="button_toggle_ats" file="graphics/icons/button_toggle_ats.png" />
+	<icon name="button_toggle_dts" file="graphics/icons/button_toggle_dts.png" />
+	<icon name="button_toggle_rts" file="graphics/icons/button_toggle_rts.png" />
+	<icon name="button_toggle_sae" file="graphics/icons/button_toggle_sae.png" />
+	<icon name="button_toggle_sde" file="graphics/icons/button_toggle_sde.png" />
+	<icon name="button_toggle_sre" file="graphics/icons/button_toggle_sre.png" />
+	<icon name="button_toggle_sas" file="graphics/icons/button_toggle_sas.png" />
+	<icon name="button_toggle_sds" file="graphics/icons/button_toggle_sds.png" />
+	<icon name="button_toggle_srs" file="graphics/icons/button_toggle_srs.png" />
+	<icon name="button_toggle_none" file="graphics/icons/button_toggle_none.png" />
+	<icon name="button_toggle_duse" file="graphics/icons/button_toggle_duse.png" />
+</root>

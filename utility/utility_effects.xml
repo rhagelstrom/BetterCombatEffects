@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root>
+	<windowclass name="effectsmall" merge="join">
+		<sheetdata>
+			<button_effect_apply name="apply" insertbefore="rightanchor">
+                <anchored to="leftanchor" width="24" height="10">
+					<top offset="0"/>
+					<left anchor="right" relation="relative" offset="2" />
+				</anchored>
+					<parameters>
+						<icons>button_toggle_action|button_toggle_roll|button_toggle_single|button_toggle_duse</icons>
+						<values>action|roll|single|duse</values>
+						<tooltipsres>effect_tooltip_applyone|effect_tooltip_applyroll|effect_tooltip_applysingle|effect_tooltip_disableuse</tooltipsres>
+					</parameters>
+			</button_effect_apply>
+            <button_ct_effect_changestate name="changestate"/>
+		</sheetdata>
+	</windowclass>
+	<windowclass name="effectlist" merge="join">
+		<placement>
+			<size  height="450" />
+		</placement>
+		<sizelimits>
+			<minimum  height="450" />
+		</sizelimits>
+	</windowclass>
+</root>

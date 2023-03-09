@@ -16,6 +16,8 @@ local tEffectsLookup = {};
 local bDebug = false;
 
 function onInit()
+    OptionsManager.registerOption2('DEPRECATE_CHANGE_STATE', false, 'option_Better_Combat_Effects', 'option_Deprecate_Change_State', 'option_entry_cycler',
+                                   {labels = 'option_val_on', values = 'on', baselabel = 'option_val_off', baseval = 'off', default = 'off'});
     if Session.IsHost then
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEACTIVATE, handleActivateEffect);
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect);

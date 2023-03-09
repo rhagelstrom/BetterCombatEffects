@@ -5,6 +5,9 @@
 -- luacheck: globals EffectManagerDnDBCE
 local RulesetEffectManager = nil;
 
+local onEffectTextDecode = nil;
+local onEffectTextEncode = nil;
+
 function onInit()
     RulesetEffectManager = BCEManager.getRulesetEffectManager();
 
@@ -12,9 +15,19 @@ function onInit()
 
     EffectManagerBCE.setCustomPreAddEffect(addEffectPre);
     EffectManagerBCE.setCustomPostAddEffect(addEffectPost);
+
+    onEffectTextDecode = RulesetEffectManager.onEffectTextDecode;
+    onEffectTextEncode = RulesetEffectManager.onEffectTextEncode;
+
+    RulesetEffectManager.onEffectTextDecode = customOnEffectTextDecode;
+    RulesetEffectManager.onEffectTextEncode = customOnEffectTextEncode;
+    EffectManager.setCustomOnEffectTextEncode(customOnEffectTextEncode);
+    EffectManager.setCustomOnEffectTextDecode(customOnEffectTextDecode);
 end
 
 function onClose()
+    RulesetEffectManager.onEffectTextDecode = onEffectTextDecode;
+    RulesetEffectManager.onEffectTextEncode = onEffectTextEncode;
 end
 
 function onTabletopInit()
@@ -75,13 +88,13 @@ function addEffectPost(nodeActor, nodeEffect)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
-            if sTag =='REGENA' then
+            if sTag == 'REGENA' then
                 BCEManager.chat('REGENA: ');
                 EffectManagerDnDBCE.applyOngoingRegen(rSource, rTarget, tEffect);
-            elseif sTag =='TREGENA' then
+            elseif sTag == 'TREGENA' then
                 BCEManager.chat('TREGENA: ');
                 EffectManagerDnDBCE.applyOngoingRegen(rSource, rTarget, tEffect, true);
-            elseif sTag =='DMGA' then
+            elseif sTag == 'DMGA' then
                 BCEManager.chat('DMGA: ');
                 EffectManagerDnDBCE.applyOngoingDamage(rSource, rTarget, tEffect);
             end
@@ -130,4 +143,69 @@ function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp)
 
     local rRoll = ActionHeal.getRoll(rTarget, rAction);
     ActionsManager.actionDirect(rSource, 'heal', {rRoll}, {{rTarget}});
+end
+
+function customOnEffectTextDecode(sEffect, rEffect)
+    BCEManager.chat('customOnEffectTextDecode : ');
+    local sReturn = onEffectTextDecode(sEffect, rEffect);
+    if sReturn ~= '' and sReturn:match('%[DUSE%]') then
+        sReturn = sReturn:gsub('%[DUSE%]', '');
+        rEffect.sApply = 'duse';
+    end
+    if sReturn ~= '' and sReturn:match('%[ATS%]') then
+        sReturn = sReturn:gsub('%[ATS%]', '');
+        rEffect.sChangeState = 'ats';
+    elseif sReturn:match('%[DTS%]') then
+        sReturn = sReturn:gsub('%[DTS%]', '');
+        rEffect.sChangeState = 'dts';
+    elseif sReturn:match('%[RTS%]') then
+        sReturn = sReturn:gsub('%[RTS%]', '');
+        rEffect.sChangeState = 'rts';
+    elseif sReturn:match('%[AS%]') then
+        sReturn = sReturn:gsub('%[AS%]', '');
+        rEffect.sChangeState = 'as';
+    elseif sReturn:match('%[DS%]') then
+        sReturn = sReturn:gsub('%[DS%]', '');
+        rEffect.sChangeState = 'ds';
+    elseif sReturn:match('%[RS%]') then
+        sReturn = sReturn:gsub('%[RS%]', '');
+        rEffect.sChangeState = 'rs';
+    elseif sReturn:match('%[AE%]') then
+        sReturn = sReturn:gsub('%[AE%]', '');
+        rEffect.sChangeState = 'ae';
+    elseif sReturn:match('%[DE%]') then
+        sReturn = sReturn:gsub('%[DE%]', '');
+        rEffect.sChangeState = 'de';
+    elseif sReturn:match('%[RE%]') then
+        sReturn = sReturn:gsub('%[RE%]', '');
+        rEffect.sChangeState = 're';
+    elseif sReturn:match('%[SAS%]') then
+        sReturn = sReturn:gsub('%[SAS%]', '');
+        rEffect.sChangeState = 'SAS';
+    elseif sReturn:match('%[SDS%]') then
+        sReturn = sReturn:gsub('%[SDS%]', '');
+        rEffect.sChangeState = 'sds';
+    elseif sReturn:match('%[SRS%]') then
+        sReturn = sReturn:gsub('%[SRS%]', '');
+        rEffect.sChangeState = 'srs';
+    elseif sReturn:match('%[SAE%]') then
+        sReturn = sReturn:gsub('%[SAE%]', '');
+        rEffect.sChangeState = 'sae';
+    elseif sReturn:match('%[SDE%]') then
+        sReturn = sReturn:gsub('%[SDE%]', '');
+        rEffect.sChangeState = 'sde';
+    elseif sReturn:match('%[SRE%]') then
+        sReturn = sReturn:gsub('%[SRE%]', '');
+        rEffect.sChangeState = 'sre';
+    end
+    return sReturn;
+end
+
+function customOnEffectTextEncode(rEffect)
+    BCEManager.chat('customOnEffectTextEncode : ', rEffect);
+    local sReturn = onEffectTextEncode(rEffect);
+    if rEffect.sChangeState and rEffect.sChangeState ~= '' then
+        sReturn = sReturn .. string.format(' [%s]', rEffect.sChangeState:upper());
+    end
+    return sReturn;
 end

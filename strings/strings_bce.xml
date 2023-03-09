@@ -12,7 +12,46 @@ https://creativecommons.org/licenses/by-sa/4.0/
 	<string name="option_Concentrate_Restrict">Restrict Concentration</string>
 	<string name="option_Temp_Is_Damage">TempHP Reduction is Damage</string>
 	<string name="option_Autoparse_Effects">Experimental: Autoparse NPC Powers</string>
+	<string name="option_Deprecate_Change_State">Deprecate Change State Tags</string>
 	<string name="effect_status_activated">ACTIVATED</string>
 	<string name="effect_status_updated">UPDATED</string>
 	<string name="ct_error_effectclient">EFFECT_ERROR</string>
+	<string name="effect_status_disableused">DISABLE USED</string>
+
+	<string name ="power_label_effect_duse">Disable when used</string>
+	<string name ="power_label_effect_never">No state change</string>
+	<string name ="power_label_effect_ats">Activate any turn</string>
+	<string name ="power_label_effect_dts">Deactivate any turn</string>
+	<string name ="power_label_effect_rts">Removed any turn</string>
+	<string name ="power_label_effect_as">Activate start of turn</string>
+	<string name ="power_label_effect_ds">Deactivate start of turn</string>
+	<string name ="power_label_effect_rs">Remove start of turn</string>
+	<string name ="power_label_effect_ae">Activate end of turn</string>
+	<string name ="power_label_effect_de">Deactivate end of turn</string>
+	<string name ="power_label_effect_re">Remove end of turn</string>
+	<string name ="power_label_effect_sas">Activate start of source turn</string>
+	<string name ="power_label_effect_sds">Deactivate start of source turn</string>
+	<string name ="power_label_effect_srs">Remove start of source turn</string>
+	<string name ="power_label_effect_sae">Activate end of source turn</string>
+	<string name ="power_label_effect_sde">Deactivate end of source turn</string>
+	<string name ="power_label_effect_sre">Remove end of source turn</string>
+	<string name ="power_label_effect_changestate">Change State?</string>
+
+	<string name="effect_tooltip_disableuse">Disable Used</string>
+	<string name="effect_tooltip_activateturn">Activate Any Turn</string>
+	<string name="effect_tooltip_deactivateturn">Deactivate Any Turn</string>
+	<string name="effect_tooltip_removeturn">Remove Any Turn</string>
+	<string name="effect_tooltip_activatestart">Activate Start Turn</string>
+	<string name="effect_tooltip_deactivatestart">Deactivate Start Turn</string>
+	<string name="effect_tooltip_removestart">Remove Start Turn</string>
+	<string name="effect_tooltip_activateend">Activate End Turn</string>
+	<string name="effect_tooltip_deactivateend">Deactivate End Turn</string>
+	<string name="effect_tooltip_removeend">Remove End Turn</string>
+	<string name="effect_tooltip_sourceactivatestart">Activate Start Source Turn</string>
+	<string name="effect_tooltip_sourcedeactivatestart">Deactivate Start Source Turn</string>
+	<string name="effect_tooltip_sourceremovestart">Remove Start Source Turn</string>
+	<string name="effect_tooltip_sourceactivateend">Activate End Source Turn</string>
+	<string name="effect_tooltip_sourcedeactivateend">Deactivate End Source Turn</string>
+	<string name="effect_tooltip_sourceremoveend">Remove End Source Turn</string>
+	<string name="effect_tooltip_changestate">Change State</string>
 </root>

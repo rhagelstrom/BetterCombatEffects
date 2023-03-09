@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root>
+	<template name="button_ct_effect_changestate">
+		<button_iconcycler name="apply">
+			<anchored to="apply" position="belowleft" width="24" height="10" />
+			<parameters>
+				<icons>button_toggle_ats|button_toggle_dts|button_toggle_rts|button_toggle_as|button_toggle_ds|button_toggle_rs|button_toggle_ae|button_toggle_de|button_toggle_re|button_toggle_sas|button_toggle_sds|button_toggle_srs|button_toggle_sae|button_toggle_sde|button_toggle_sre</icons>
+				<values>ats|dts|rts|as|ds|rs|ae|de|re|sas|sds|srs|sae|sde|sre|</values>
+				<tooltipsres>effect_tooltip_activateturn|effect_tooltip_deactivateturn|effect_tooltip_removeturn|effect_tooltip_activatestart|effect_tooltip_deactivatestart|effect_tooltip_removestart|effect_tooltip_activateend|effect_tooltip_deactivateend|effect_tooltip_removeend|effect_tooltip_sourceactivatestart|effect_tooltip_sourcedeactivatestart|effect_tooltip_sourceremovestart|effect_tooltip_sourceactivateend|effect_tooltip_sourcedeactivateend|effect_tooltip_sourceremoveend</tooltipsres>
+				<defaulticon>button_toggle_none</defaulticon>
+				<defaulttooltipres>effect_tooltip_changestate</defaulttooltipres>
+			</parameters>
+		</button_iconcycler>
+	</template>
+</root>
