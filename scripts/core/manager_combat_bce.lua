@@ -34,12 +34,11 @@ function turnStart(sourceNodeCT)
 
     local rSource = ActorManager.resolveActor(sourceNodeCT);
 
-    if OptionsManager.isOption('DEPRECATE_CHANGE_STATE', 'off') then
+    if OptionsManager.isOption('DEPRECATE_CHANGE_STATE', 'on') then
         onCustomProcessTurnStart(rSource);
     else
         local ctEntries = CombatManager.getCombatantNodes();
         if not onCustomProcessTurnStart(rSource) then
-            local ctEntries = CombatManager.getCombatantNodes();
             local aTags = {'TURNAS', 'TURNDS', 'TURNRS'};
             for _, sTag in pairs(aTags) do
                 local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag);
