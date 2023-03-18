@@ -330,12 +330,12 @@ function replaceSaveDC(rNewEffect, rActor)
             nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf') + nDC;
             for _, nodeFeature in ipairs(DB.getChildList(nodeActor, 'featurelist')) do
                 local sFeatureName = StringManager.trim(DB.getValue(nodeFeature, 'name', ''):lower());
-                if sFeatureName == 'spellcasting' then
+                if sFeatureName == 'spellcasting' or  sFeatureName == 'pact magic' then
                     local sDesc = DB.getValue(nodeFeature, 'text', ''):lower();
                     local sStat = sDesc:match('(%w+) is your spellcasting ability') or '';
                     nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat);
                     -- savemod is the db tag in the power group to get the power modifier
-                    break
+                    break;
                 end
             end
         elseif sNodeType == 'ct' or sNodeType == 'npc' then
@@ -360,6 +360,10 @@ function replaceSaveDC(rNewEffect, rActor)
                     end
                 end
             end
+        end
+        local tMatch = RulesetEffectManager.getEffectsByType(rActor, 'SDC');
+        for _, tEffect in pairs(tMatch) do
+            nSpellcastingDC = nSpellcastingDC + tEffect.mod;
         end
         rNewEffect.sName = rNewEffect.sName:gsub('%[SDC]', tostring(nSpellcastingDC));
     end

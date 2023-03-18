@@ -25,6 +25,11 @@ function customEvalAction(rActor, nodePower, rAction)
         local aNodeActionChild = DB.getChildList(DB.getChild(nodePower, 'actions'));
         local rSave = {saveMod = 0, saveBase = '', saveStat = '', saveProf = 0};
         local nDC = 0;
+        local tMatch = EffectManager5E.getEffectsByType(rActor, 'SDC');
+        local nSDCBonus = 0;
+        for _, tEffect in pairs(tMatch) do
+            nSDCBonus = nSDCBonus + tEffect.mod;
+        end
         for _, nodeChild in pairs(aNodeActionChild) do
             local sSaveType = DB.getValue(nodeChild, 'type', '');
             if sSaveType == 'cast' then
@@ -40,15 +45,15 @@ function customEvalAction(rActor, nodePower, rAction)
         if rSave.saveBase == 'group' then
             local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower);
             if aPowerGroup and aPowerGroup.sSaveDCStat then
-                nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sSaveDCStat) + rSave.saveMod;
+                nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sSaveDCStat) + rSave.saveMod + nSDCBonus;
                 if aPowerGroup.nSaveDCProf == 1 then
                     nDC = nDC + ActorManager5E.getAbilityBonus(rActor, 'prf');
                 end
             end
         elseif rSave.saveBase == 'fixed' then
-            nDC = rSave.saveMod;
+            nDC = rSave.saveMod + nSDCBonus;
         elseif rSave.saveBase == 'ability' then
-            nDC = 8 + rSave.saveMod + ActorManager5E.getAbilityBonus(rActor, rSave.saveStat);
+            nDC = 8 + rSave.saveMod + ActorManager5E.getAbilityBonus(rActor, rSave.saveStat)+ nSDCBonus;
             if rSave.saveProf == 1 then
                 nDC = nDC + ActorManager5E.getAbilityBonus(rActor, 'prf');
             end
