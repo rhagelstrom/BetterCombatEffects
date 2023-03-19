@@ -53,7 +53,6 @@ function onInit()
         DB.addHandler('combattracker.list.*.effects.*.changestate', 'onUpdate', stateModified);
         DB.addHandler('combattracker.list.*.effects.*.changestate', 'onDelete', deleteState);
     end
-    Comm.registerSlashHandler('state', printState, 'Prints State Tabels')
 end
 
 function onClose()
@@ -538,11 +537,6 @@ function removeState(nodeCT, bStart)
             end
         end
     end
-end
-
-function printState()
-    Debug.chat(tChangeState);
-    Debug.chat(tChangeStateAny);
 end
 
 function unregisterCombatant(nodeCT)
