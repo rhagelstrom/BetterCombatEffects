@@ -161,27 +161,12 @@ function customOnEffectTextDecode(sEffect, rEffect)
     elseif sReturn:match('%[RTS%]') then
         sReturn = sReturn:gsub('%[RTS%]', '');
         rEffect.sChangeState = 'rts';
-    elseif sReturn:match('%[AS%]') then
-        sReturn = sReturn:gsub('%[AS%]', '');
-        rEffect.sChangeState = 'as';
-    elseif sReturn:match('%[DS%]') then
-        sReturn = sReturn:gsub('%[DS%]', '');
-        rEffect.sChangeState = 'ds';
-    elseif sReturn:match('%[RS%]') then
-        sReturn = sReturn:gsub('%[RS%]', '');
-        rEffect.sChangeState = 'rs';
-    elseif sReturn:match('%[AE%]') then
-        sReturn = sReturn:gsub('%[AE%]', '');
-        rEffect.sChangeState = 'ae';
-    elseif sReturn:match('%[DE%]') then
-        sReturn = sReturn:gsub('%[DE%]', '');
-        rEffect.sChangeState = 'de';
     elseif sReturn:match('%[RE%]') then
         sReturn = sReturn:gsub('%[RE%]', '');
         rEffect.sChangeState = 're';
     elseif sReturn:match('%[SAS%]') then
         sReturn = sReturn:gsub('%[SAS%]', '');
-        rEffect.sChangeState = 'SAS';
+        rEffect.sChangeState = 'sas';
     elseif sReturn:match('%[SDS%]') then
         sReturn = sReturn:gsub('%[SDS%]', '');
         rEffect.sChangeState = 'sds';
@@ -197,6 +182,22 @@ function customOnEffectTextDecode(sEffect, rEffect)
     elseif sReturn:match('%[SRE%]') then
         sReturn = sReturn:gsub('%[SRE%]', '');
         rEffect.sChangeState = 'sre';
+    elseif sReturn:match('%[AS%]') then
+        sReturn = sReturn:gsub('%[AS%]', '');
+        rEffect.sChangeState = 'as';
+    elseif sReturn:match('%[DS%]') then
+        sReturn = sReturn:gsub('%[DS%]', '');
+        rEffect.sChangeState = 'ds';
+    elseif sReturn:match('%[RS%]') then
+        sReturn = sReturn:gsub('%[RS%]', '');
+        rEffect.sChangeState = 'rs';
+    elseif sReturn:match('%[AE%]') then
+        sReturn = sReturn:gsub('%[AE%]', '');
+        rEffect.sChangeState = 'ae';
+    elseif sReturn:match('%[DE%]') then
+        sReturn = sReturn:gsub('%[DE%]', '');
+        rEffect.sChangeState = 'de';
+
     end
     return sReturn;
 end

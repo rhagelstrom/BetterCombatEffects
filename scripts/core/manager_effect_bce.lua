@@ -49,9 +49,7 @@ function onInit()
 
     if Session.IsHost then
         EffectManagerBCE.initEffectHandlers();
-        CombatManager.setCustomAddCombatantEffectHandler(addChangeStateHandler);
         CombatManager.setCustomDeleteCombatantHandler(unregisterCombatant);
-        -- DB.addHandler("combattracker.list.*.effects.*.changestate", "onAdd", addState);
         DB.addHandler('combattracker.list.*.effects.*.changestate', 'onUpdate', stateModified);
         DB.addHandler('combattracker.list.*.effects.*.changestate', 'onDelete', deleteState);
     end
@@ -163,7 +161,8 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
     end
     for _, v in ipairs(DB.getChildList(nodeCT, 'effects')) do
         if (DB.getValue(v, 'label', '') == rNewEffect.sName) and (DB.getValue(v, 'init', 0) == rNewEffect.nInit) and
-            (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) then
+            (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource and
+            DB.getValue(v, 'apply', '') == rNewEffect.sApply and DB.getValue(v, 'changestate', '') == rNewEffect.sChangeState) then
             nodeEffect = v;
             DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
             EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
@@ -346,12 +345,19 @@ function addChangeStateHandler(nodeCT, nodeEffect)
         tChangeState[sNode] = {};
     end
     local sChangeState = DB.getPath(nodeEffect, 'changestate');
+    local sValue = DB.getValue(nodeEffect, 'changestate', '');
+    if sValue == '' or sValue == 'as' or sValue == 'ae' or sValue == 'sas' or sValue == 'sae' then
+        local nDuration = DB.getValue(nodeEffect, 'duration', 0);
+        if nDuration ~= 0 then
+            DB.setValue(nodeEffect, 'duration', 'number', nDuration+1);
+        end
+    end
+
     EffectManagerBCE.stateModified(DB.findNode(sChangeState));
 end
 
 function deleteState(nodeCS)
     BCEManager.chat('deleteState: ');
-    local sValue = DB.getValue(nodeCS, '', '');
     local sEffect = DB.getPath(DB.getChild(nodeCS, '..'), '');
     local sActor = DB.getPath(DB.getChild(nodeCS, '....'), '');
     if tChangeStateLookup[sEffect] then
@@ -376,8 +382,21 @@ function stateModified(nodeCS)
         return;
     end
     local sValue = DB.getValue(nodeCS, '', '');
-    local sEffect = DB.getPath(DB.getChild(nodeCS, '..'), '');
+    local nodeEffect = DB.getChild(nodeCS, '..')
+    local sEffect = DB.getPath(nodeEffect, '');
     local sActor = DB.getPath(DB.getChild(nodeCS, '....'), '');
+    if sValue == 'rts' or sValue == 'rs'or sValue == 're' or sValue == 'srs' or sValue == 'sre' then
+        local nDuration = DB.getValue(nodeEffect, 'duration', 0);
+        if nDuration ~= 0 then
+            DB.setValue(nodeEffect, 'duration', 'number', nDuration+1);
+        end
+    end
+    if sValue == '' or sValue == 'as' or sValue == 'ae' or sValue == 'sas' or sValue == 'sae' then
+        local nDuration = DB.getValue(nodeEffect, '.duration', 0);
+        if nDuration ~= 0 then
+            DB.setValue(nodeEffect, 'duration', 'number', nDuration-1);
+        end
+    end
     if tChangeStateLookup[sEffect] then
         tChangeState[sActor][tChangeStateLookup[sEffect]][sEffect] = nil;
     end
