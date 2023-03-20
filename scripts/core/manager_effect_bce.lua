@@ -471,11 +471,11 @@ function activateState(nodeCT, bStart)
     for _, sState in ipairs(aActivateStates) do
         if tChangeState[sPath] and tChangeState[sPath][sState] then
             for sEffect, _ in pairs(tChangeState[sPath][sState]) do
-                if bStart and (sState == 'as' or 'sas') then
+                if bStart and (sState == 'as' or sState == 'sas') then
                     if DB.getValue(sEffect .. '.isactive', 100) ~= 1 then
                         BCEManager.modifyEffect(sEffect, 'Activate');
                     end
-                else
+                elseif not bStart and (sState == 'ae' or sState == 'sae') then
                     if DB.getValue(sEffect .. '.isactive', 100) ~= 1 then
                         BCEManager.modifyEffect(sEffect, 'Activate');
                     end
@@ -498,11 +498,11 @@ function deactivateState(nodeCT, bStart)
     for _, sState in ipairs(aDeactivateStates) do
         if tChangeState[sPath] and tChangeState[sPath][sState] then
             for sEffect, _ in pairs(tChangeState[sPath][sState]) do
-                if bStart and (sState == 'ds' or 'sds') then
+                if bStart and (sState == 'ds' or sState == 'sds') then
                     if DB.getValue(sEffect .. '.isactive', 100) ~= 0 then
                         BCEManager.modifyEffect(sEffect, 'Deactivate');
                     end
-                else
+                elseif not bStart and (sState == 'de' or sState ==  'sde') then
                     if DB.getValue(sEffect .. '.isactive', 100) ~= 0 then
                         BCEManager.modifyEffect(sEffect, 'Deactivate');
                     end
@@ -529,7 +529,7 @@ function removeState(nodeCT, bStart)
                     if DB.getValue(sEffect .. '.duration', 0) == 1 then
                         BCEManager.modifyEffect(sEffect, 'Remove');
                     end
-                else
+                elseif not bStart and (sState == 're' or sState ==  'sre') then
                     if DB.getValue(sEffect .. '.duration', 0) == 1 then
                         BCEManager.modifyEffect(sEffect, 'Remove');
                     end
