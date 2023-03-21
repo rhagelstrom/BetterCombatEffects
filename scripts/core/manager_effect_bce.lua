@@ -390,13 +390,13 @@ function stateModified(nodeCS)
     local nodeEffect = DB.getChild(nodeCS, '..')
     local sEffect = DB.getPath(nodeEffect, '');
     local sActor = DB.getPath(DB.getChild(nodeCS, '....'), '');
-    if sValue == 'rts' or sValue == 'rs'or sValue == 're' or sValue == 'srs' or sValue == 'sre' then
+    if sValue == 'rs'or sValue == 're' or sValue == 'srs' or sValue == 'sre' then
         local nDuration = DB.getValue(nodeEffect, 'duration', 0);
         if nDuration ~= 0 then
             DB.setValue(nodeEffect, 'duration', 'number', nDuration+1);
         end
     end
-    if sValue == '' or sValue == 'as' or sValue == 'ae' or sValue == 'sas' or sValue == 'sae' then
+    if sValue == '' or sValue == 'ae' or sValue == 'sas' or sValue == 'sae' then
         local nDuration = DB.getValue(nodeEffect, '.duration', 0);
         if nDuration ~= 0 then
             DB.setValue(nodeEffect, 'duration', 'number', nDuration-1);
