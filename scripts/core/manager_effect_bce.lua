@@ -158,10 +158,16 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
     if (not rNewEffect.sSource) then
         rNewEffect.sSource = '';
     end
+    if (not rNewEffect.sChangeState) then
+        rNewEffect.sChangeState = '';
+    end
+    if (not rNewEffect.sApply) then
+        rNewEffect.sApply = '';
+    end
     for _, v in ipairs(DB.getChildList(nodeCT, 'effects')) do
         if (DB.getValue(v, 'label', '') == rNewEffect.sName) and (DB.getValue(v, 'init', 0) == rNewEffect.nInit) and
-            (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource and
-            DB.getValue(v, 'apply', '') == rNewEffect.sApply and DB.getValue(v, 'changestate', '') == rNewEffect.sChangeState) then
+            (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) and
+            (DB.getValue(v, 'apply', '') == rNewEffect.sApply) and (DB.getValue(v, 'changestate', '') == rNewEffect.sChangeState) then
             nodeEffect = v;
             DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
             EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
