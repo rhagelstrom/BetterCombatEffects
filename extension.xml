@@ -27,6 +27,10 @@
 		<script name="BinarySearchManager" file="scripts/core/manager_binary_search.lua" />
 		<script name="EffectManagerBCE" file="scripts/core/manager_effect_bce.lua" />
 		<script name="CombatManagerBCE" file="scripts/core/manager_combat_bce.lua" />
+		<script name="MigrationManagerBCE" file="scripts/core/manager_migration_bce.lua" />
+		<!-- 5E Need to load before DnD Conditional-->
+		<script name="EffectManager5EBCE" file="scripts/5e/manager_effect5E_bce.lua" ruleset="5E"/>
+
 		<!-- DnD -->
 		<script name="BCEDnDManager" file="scripts/dnd/manager_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG" />
 		<script name="ActionManagerDnDBCE" file="scripts/dnd/manager_action_dnd_bce.lua" ruleset="5E|4E|3.5E|PFRPG" />
@@ -60,6 +64,7 @@
 		<includefile source="utility/utility_effects_advanced.xml"/>
 		<includefile source="campaign/record_power_roll.xml"/>
 		<includefile source="campaign/record_power_action.xml"/>
+		<includefile source="utility/utility_migrate.xml" />
 		<!-- Effect Builder Extenstion -->
 		<!-- Strings -->
 		<includefile source="effect_builder/strings/strings_effect_builder.xml" />

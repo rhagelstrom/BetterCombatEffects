@@ -17,6 +17,8 @@ https://creativecommons.org/licenses/by-sa/4.0/
 	<string name="effect_status_updated">UPDATED</string>
 	<string name="ct_error_effectclient">EFFECT_ERROR</string>
 	<string name="effect_status_disableused">DISABLE USED</string>
+	<string name="migrate_effects">Migrate Better Combat Effects</string>
+	<string name="label_dont_show">Don't Show Again</string>
 
 	<string name ="power_label_effect_duse">Disable when used</string>
 	<string name ="power_label_effect_never">No state change</string>
