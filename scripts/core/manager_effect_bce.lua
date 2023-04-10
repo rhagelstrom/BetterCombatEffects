@@ -33,7 +33,6 @@ local getEffectsByType = nil;
 function onInit()
     addEffect = EffectManager.addEffect;
     getEffectsByType = EffectManager.getEffectsByType;
-    -- Comm.registerSlashHandler('print_t', printTables);
 
     EffectManager.registerEffectVar('sChangeState', {sDBType = 'string', sDBField = 'changestate', sDisplay = '[%s]'})
 
@@ -52,6 +51,10 @@ function onInit()
         CombatManager.setCustomDeleteCombatantHandler(unregisterCombatant);
         DB.addHandler('combattracker.list.*.effects.*.changestate', 'onUpdate', stateModified);
         DB.addHandler('combattracker.list.*.effects.*.changestate', 'onDelete', deleteState);
+
+        DB.addHandler('combattracker.list.*.effects.*.label', 'onUpdate', modSourceTurnHandler);
+        DB.addHandler('combattracker.list.*.effects.*.label', 'onDelete', deleteSourceTurnHandler);
+
     end
 end
 
@@ -64,6 +67,9 @@ function onClose()
         EffectManagerBCE.deleteEffectHandlers();
         DB.removeHandler('combattracker.list.*.effects.*.changestate', 'onUpdate', stateModified);
         DB.removeHandler('combattracker.list.*.effects.*.changestate', 'onDelete', deleteState);
+
+        DB.removeHandler('combattracker.list.*.effects.*.label', 'onUpdate', modSourceTurnHandler);
+        DB.removeHandler('combattracker.list.*.effects.*.label', 'onDelete', deleteSourceTurnHandler);
     end
 end
 
@@ -175,6 +181,7 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
             nodeEffect = v;
             DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
             EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
+            EffectManagerBCE.addSourceTurnHandler(nodeCT, nodeEffect);
             EffectManagerBCE.onCustomPostAddEffect(nodeCT, nodeEffect);
             break
         end
@@ -224,6 +231,7 @@ function initEffectHandlers()
         for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
             DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
             EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
+            EffectManagerBCE.addSourceTurnHandler(nodeCT, nodeEffect);
         end
         DB.addHandler(DB.getPath(nodeCT, 'effects.*.label'), 'onAdd', expireAddHelper);
     end
@@ -345,7 +353,152 @@ local tChangeStateLookup = {};
 -- [state/operation][effectPath]
 local tChangeStateAny = {ats = {}, dts = {}, rts = {}};
 local tChangeStateAnyLookup = {};
+
+local tSourceTurn = {};
+local tSourceTurnLookup = {};
+local aSourceTags = {'SDMGOS', 'SREGENS', 'STREGENS', 'SDMGOE', 'SREGENE', 'STREGENE'};
 ------------------ CHANGE STATE ------------------
+function addSourceTurnHandler(nodeCT, nodeEffect)
+    BCEManager.chat('addSourceTurnHandler: ');
+    local sNode = DB.getPath(nodeCT);
+    local sSource = DB.getValue(nodeEffect, 'source_name', '');
+    local sEffectPath = DB.getPath(nodeEffect);
+    local sLabel = DB.getValue(nodeEffect, 'label', '');
+    local aEffectComps = EffectManager.parseEffect(sLabel);
+    if sSource == '' then
+        sSource = sNode;
+    end
+
+    EffectManagerBCE.clearSourceTurnHandler(sSource, sEffectPath);
+
+    if not tSourceTurn[sSource] then
+        tSourceTurn[sSource] = {};
+    end
+    for kEffectComp, sEffectComp in ipairs(aEffectComps) do
+        local rEffect = EffectManager.parseEffectCompSimple(sEffectComp);
+        if StringManager.contains(aSourceTags, rEffect.type) then
+            if not tSourceTurn[sSource][rEffect.type] then
+                tSourceTurn[sSource][rEffect.type] = {};
+            end
+            tSourceTurn[sSource][rEffect.type][sEffectPath] = sNode;
+            if not tSourceTurnLookup[sEffectPath] then
+                tSourceTurnLookup[sEffectPath] = {};
+            end
+            tSourceTurnLookup[sEffectPath][rEffect.type] = true;
+        end
+    end
+end
+function modSourceTurnHandler(nodeEffectLabel)
+    local nodeEffect = DB.getParent(nodeEffectLabel);
+    local nodeCT = DB.getChild(nodeEffect, '...');
+    EffectManagerBCE.addSourceTurnHandler(nodeCT, nodeEffect);
+end
+
+function clearSourceTurnHandler(sSource, sEffectPath)
+    if tSourceTurnLookup[sEffectPath] then
+        for index, _ in pairs(tSourceTurnLookup[sEffectPath]) do
+            tSourceTurn[sSource][index][sEffectPath] = nil;
+        end
+        tSourceTurnLookup[sEffectPath] = nil;
+    end
+end
+
+function deleteSourceTurnHandler(nodeEffectLabel)
+    BCEManager.chat('deleteSourceTurnHandler: ');
+    local nodeEffect = DB.getParent(nodeEffectLabel);
+    local nodeCT = DB.getChild(nodeEffect, '...');
+    local sNode = DB.getPath(nodeCT);
+    local sSource = DB.getValue(nodeEffect, 'source_name', '');
+    if sSource == '' then
+        sSource = sNode;
+    end
+
+    EffectManagerBCE.clearSourceTurnHandler(sSource, DB.getPath(nodeEffect));
+end
+
+function processSourceTurn(sNodePath, bStart)
+    local nodeCT = DB.findNode(sNodePath);
+    if not tSourceTurn[sNodePath] then
+        return;
+    end
+    local rSource = ActorManager.resolveActor(nodeCT);
+    local aProcess = {};
+    if bStart then
+        if tSourceTurn[sNodePath]['SDMGOS'] and next(tSourceTurn[sNodePath]['SDMGOS']) then
+            local aEffects = tSourceTurn[sNodePath]['SDMGOS'];
+            for _, sTarget in pairs(aEffects) do
+                if not StringManager.contains(aProcess, sTarget) then
+                    table.insert(aProcess, sTarget);
+                end
+            end
+            for _, sTarget in ipairs(aProcess) do
+                local rTarget = ActorManager.resolveActor(sTarget);
+                CombatManagerDnDBCE.processSDMGO(rSource, rTarget, 'SDMGOS');
+            end
+        end
+        if tSourceTurn[sNodePath]['SREGENS'] and next(tSourceTurn[sNodePath]['SREGENS']) then
+            local aEffects = tSourceTurn[sNodePath]['SREGENS'];
+            for _, sTarget in pairs(aEffects) do
+                if not StringManager.contains(aProcess, sTarget) then
+                    table.insert(aProcess, sTarget);
+                end
+            end
+            for _, sTarget in ipairs(aProcess) do
+                local rTarget = ActorManager.resolveActor(sTarget);
+                CombatManagerDnDBCE.processSREGEN(rSource, rTarget, 'SREGENS');
+            end
+        end
+        if tSourceTurn[sNodePath]['STREGENS'] and next(tSourceTurn[sNodePath]['STREGENS']) then
+            local aEffects = tSourceTurn[sNodePath]['STREGENS'];
+            for _, sTarget in pairs(aEffects) do
+                if not StringManager.contains(aProcess, sTarget) then
+                    table.insert(aProcess, sTarget);
+                end
+            end
+            for _, sTarget in ipairs(aProcess) do
+                local rTarget = ActorManager.resolveActor(sTarget);
+                CombatManagerDnDBCE.processSTREGEN(rSource, rTarget, 'STREGENS');
+            end
+        end
+    else
+        if tSourceTurn[sNodePath]['SDMGOE'] and next(tSourceTurn[sNodePath]['SDMGOE']) then
+            local aEffects = tSourceTurn[sNodePath]['SDMGOE'];
+            for _, sTarget in pairs(aEffects) do
+                if not StringManager.contains(aProcess, sTarget) then
+                    table.insert(aProcess, sTarget);
+                end
+            end
+            for _, sTarget in ipairs(aProcess) do
+                local rTarget = ActorManager.resolveActor(sTarget);
+                CombatManagerDnDBCE.processSDMGO(rSource, rTarget, 'SDMGOE');
+            end
+        end
+        if tSourceTurn[sNodePath]['SREGENE'] and next(tSourceTurn[sNodePath]['SREGENE']) then
+            local aEffects = tSourceTurn[sNodePath]['SREGENE'];
+            for _, sTarget in pairs(aEffects) do
+                if not StringManager.contains(aProcess, sTarget) then
+                    table.insert(aProcess, sTarget);
+                end
+            end
+            for _, sTarget in ipairs(aProcess) do
+                local rTarget = ActorManager.resolveActor(sTarget);
+                CombatManagerDnDBCE.processSREGEN(rSource, rTarget, 'SREGENE');
+            end
+        end
+        if tSourceTurn[sNodePath]['STREGENE'] and next(tSourceTurn[sNodePath]['STREGENE']) then
+            local aEffects = tSourceTurn[sNodePath]['STREGENE'];
+            for _, sTarget in pairs(aEffects) do
+                if not StringManager.contains(aProcess, sTarget) then
+                    table.insert(aProcess, sTarget);
+                end
+            end
+            for _, sTarget in ipairs(aProcess) do
+                local rTarget = ActorManager.resolveActor(sTarget);
+                CombatManagerDnDBCE.processSTREGEN(rSource, rTarget, 'STREGENE');
+            end
+        end
+    end
+end
 
 function addChangeStateHandler(nodeCT, nodeEffect)
     BCEManager.chat('addChangeStateHandler: ');
@@ -578,13 +731,3 @@ function unregisterCombatant(nodeCT)
     BCEManager.chat('unregisterCombatant: ');
     tChangeState[DB.getPath(nodeCT)] = nil;
 end
-
--- function printTables()
---     Debug.chat('tChangeState: ', tChangeState);
---     Debug.chat('');
---     Debug.chat('tChangeStateLookup: ', tChangeStateLookup);
---     Debug.chat('');
---     Debug.chat('tChangeStateAny', tChangeStateAny);
---     Debug.chat('');
---     Debug.chat('tChangeStateAnyLookup', tChangeStateAnyLookup);
--- end
