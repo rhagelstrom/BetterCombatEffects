@@ -19,7 +19,7 @@
                 <parameters>
                     <defaultlabelres>power_label_effect_never</defaultlabelres>
                      <labelsres>power_label_effect_ats|power_label_effect_dts|power_label_effect_rts|power_label_effect_as|power_label_effect_ds|power_label_effect_rs|power_label_effect_ae|power_label_effect_de|power_label_effect_re|power_label_effect_sas|power_label_effect_sds|power_label_effect_srs|power_label_effect_sae|power_label_effect_sde|power_label_effect_sre|</labelsres>
-                     <values>ats|dts|rts|as|ds|rs|ae|de|re|sas|sds|sdr|sae|sde|sre</values>
+                     <values>ats|dts|rts|as|ds|rs|ae|de|re|sas|sds|srs|sae|sde|sre</values>
                  </parameters>
              </button_stringcycler>
 		</sheetdata>
