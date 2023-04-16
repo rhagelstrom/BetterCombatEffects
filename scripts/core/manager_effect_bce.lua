@@ -351,14 +351,15 @@ function addChangeStateHandler(nodeCT, nodeEffect)
     end
     local sChangeState = DB.getPath(nodeEffect, 'changestate');
     local sValue = DB.getValue(nodeEffect, 'changestate', '');
-    if sValue == '' or sValue == 'as' or sValue == 'ae' or sValue == 'sas' or sValue == 'sae' then
+    local nodeCS = DB.findNode(sChangeState)
+    if nodeCS and sValue == '' or sValue == 'as' or sValue == 'ae' or sValue == 'sas' or sValue == 'sae' then
         local nDuration = DB.getValue(nodeEffect, 'duration', 0);
         if nDuration ~= 0 then
             DB.setValue(nodeEffect, 'duration', 'number', nDuration+1);
         end
     end
 
-    EffectManagerBCE.stateModified(DB.findNode(sChangeState));
+    EffectManagerBCE.stateModified(nodeCS);
 end
 
 function deleteState(nodeCS)
@@ -382,7 +383,7 @@ function deleteChangeStateHandler(nodeCT, nodeEffect)
 end
 
 function stateModified(nodeCS)
-    BCEManager.chat('stateModified: ');
+    BCEManager.chat('stateModified: ',nodeCS);
     if not nodeCS then
         return;
     end
