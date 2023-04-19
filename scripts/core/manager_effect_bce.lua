@@ -4,7 +4,6 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 -- luacheck: globals EffectManagerBCE
 ------------------ ORIGINALS ------------------
-
 local addEffect = nil;
 ------------------ END ORIGINALS ------------------
 --
@@ -34,6 +33,7 @@ local getEffectsByType = nil;
 function onInit()
     addEffect = EffectManager.addEffect;
     getEffectsByType = EffectManager.getEffectsByType;
+    -- Comm.registerSlashHandler('print_t', printTables);
 
     EffectManager.registerEffectVar('sChangeState', {sDBType = 'string', sDBField = 'changestate', sDisplay = '[%s]'})
 
@@ -66,7 +66,6 @@ function onClose()
         DB.removeHandler('combattracker.list.*.effects.*.changestate', 'onDelete', deleteState);
     end
 end
-
 
 ------------------ OVERRIDES ------------------
 function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargetedOnly)
@@ -168,6 +167,11 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
         if (DB.getValue(v, 'label', '') == rNewEffect.sName) and (DB.getValue(v, 'init', 0) == rNewEffect.nInit) and
             (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) and
             (DB.getValue(v, 'apply', '') == rNewEffect.sApply) and (DB.getValue(v, 'changestate', '') == rNewEffect.sChangeState) then
+            if rNewEffect.nDuration ~= 0 and
+                (rNewEffect.sChangeState == 'rs' or rNewEffect.sChangeState == 'srs' or rNewEffect.sChangeState == 're' or rNewEffect.sChangeState == 'sre') and
+                DB.getValue(v, 'source_name', '') == '' then
+                DB.setValue(v, 'duration', 'number', rNewEffect.nDuration + 1);
+            end
             nodeEffect = v;
             DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
             EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
@@ -350,15 +354,7 @@ function addChangeStateHandler(nodeCT, nodeEffect)
         tChangeState[sNode] = {};
     end
     local sChangeState = DB.getPath(nodeEffect, 'changestate');
-    local sValue = DB.getValue(nodeEffect, 'changestate', '');
     local nodeCS = DB.findNode(sChangeState)
-    if nodeCS and sValue == '' or sValue == 'as' or sValue == 'ae' or sValue == 'sas' or sValue == 'sae' then
-        local nDuration = DB.getValue(nodeEffect, 'duration', 0);
-        if nDuration ~= 0 then
-            DB.setValue(nodeEffect, 'duration', 'number', nDuration+1);
-        end
-    end
-
     EffectManagerBCE.stateModified(nodeCS);
 end
 
@@ -366,14 +362,28 @@ function deleteState(nodeCS)
     BCEManager.chat('deleteState: ');
     local sEffect = DB.getPath(DB.getChild(nodeCS, '..'), '');
     local sActor = DB.getPath(DB.getChild(nodeCS, '....'), '');
-    if tChangeStateLookup[sEffect] then
+    local sValue = DB.getValue(nodeCS, '', '');
+
+    if sValue:match('^s') then
+        local sSourceActor = DB.getValue(sEffect .. '.source_name', '');
+        if sSourceActor ~= '' then
+            sActor = sSourceActor;
+        end
+    end
+    if not tChangeState[sActor] then
+        tChangeState[sActor] = {};
+    end
+    if tChangeStateLookup[sEffect] and tChangeState[sActor] and tChangeState[sActor][tChangeStateLookup[sEffect]] then
         tChangeState[sActor][tChangeStateLookup[sEffect]][sEffect] = nil;
     end
     if tChangeStateAny[tChangeStateAnyLookup[sEffect]] then
         tChangeStateAny[tChangeStateAnyLookup[sEffect]][sEffect] = nil;
     end
-    if tChangeStateAnyLookup.sEffect then
-        tChangeStateAnyLookup.sEffect = nil;
+    if tChangeStateAnyLookup[sEffect] then
+        tChangeStateAnyLookup[sEffect] = nil;
+    end
+    if tChangeStateLookup[sEffect] then
+        tChangeStateLookup[sEffect] = nil;
     end
 end
 
@@ -383,7 +393,7 @@ function deleteChangeStateHandler(nodeCT, nodeEffect)
 end
 
 function stateModified(nodeCS)
-    BCEManager.chat('stateModified: ',nodeCS);
+    BCEManager.chat('stateModified: ', nodeCS);
     if not nodeCS then
         return;
     end
@@ -391,41 +401,56 @@ function stateModified(nodeCS)
     local nodeEffect = DB.getChild(nodeCS, '..')
     local sEffect = DB.getPath(nodeEffect, '');
     local sActor = DB.getPath(DB.getChild(nodeCS, '....'), '');
-    if sValue == 'rs'or sValue == 're' or sValue == 'srs' or sValue == 'sre' then
-        local nDuration = DB.getValue(nodeEffect, 'duration', 0);
-        if nDuration ~= 0 then
-            DB.setValue(nodeEffect, 'duration', 'number', nDuration+1);
-        end
-    end
-    if sValue == '' or sValue == 'ae' or sValue == 'sas' or sValue == 'sae' then
-        local nDuration = DB.getValue(nodeEffect, '.duration', 0);
-        if nDuration ~= 0 then
-            DB.setValue(nodeEffect, 'duration', 'number', nDuration-1);
-        end
-    end
-    if tChangeStateLookup[sEffect] then
+    if tChangeStateLookup[sEffect] and tChangeState[sActor] and tChangeState[sActor][tChangeStateLookup[sEffect]] then
         tChangeState[sActor][tChangeStateLookup[sEffect]][sEffect] = nil;
-    end
-    if tChangeStateAnyLookup.sEffect then
-        tChangeStateAnyLookup.sEffect = nil;
     end
     if tChangeStateAny[tChangeStateAnyLookup[sEffect]] then
         tChangeStateAny[tChangeStateAnyLookup[sEffect]][sEffect] = nil;
     end
+
+    if tChangeStateAnyLookup[sEffect] then
+        tChangeStateAnyLookup[sEffect] = nil;
+    end
     if sValue == 'ats' or sValue == 'dts' or sValue == 'rts' then
         tChangeStateAny[sValue][sEffect] = true;
         tChangeStateAnyLookup[sEffect] = sValue;
+    elseif sValue:match('^s') or sValue == '' then
+        local sSourceActor = DB.getValue(sEffect .. '.source_name', '');
+        if sSourceActor ~= '' then
+            sActor = sSourceActor;
+        end
+        if not tChangeState[sActor] then
+            tChangeState[sActor] = {};
+        end
+        if tChangeStateLookup[sEffect] and tChangeState[sActor] and tChangeState[sActor][tChangeStateLookup[sEffect]] then
+            tChangeState[sActor][tChangeStateLookup[sEffect]][sEffect] = nil;
+        end
+        if tChangeStateAny[tChangeStateAnyLookup[sEffect]] then
+            tChangeStateAny[tChangeStateAnyLookup[sEffect]][sEffect] = nil;
+        end
+        if tChangeStateAnyLookup[sEffect] then
+            tChangeStateAnyLookup[sEffect] = nil;
+        end
+        if tChangeStateLookup[sEffect] then
+            tChangeStateLookup[sEffect] = nil;
+        end
+        if sValue ~= '' and not tChangeState[sActor][sValue] then
+            tChangeState[sActor][sValue] = {};
+        end
+        if sValue:match('^s') then
+            if sActor ~= '' and tChangeState[sActor] and tChangeState[sActor][tChangeStateLookup[sEffect]] then
+                tChangeState[sActor][tChangeStateLookup[sEffect]][sEffect] = nil;
+            end
+            if sValue ~= '' then
+                tChangeState[sActor][sValue][sEffect] = true;
+                tChangeStateLookup[sEffect] = sValue;
+            end
+        end
     else
         if not tChangeState[sActor] then
             tChangeState[sActor] = {};
         end
-        if sValue:match('^s') then
-            local sSourceActor = DB.getValue(sEffect .. 'source_name', '');
-            if sSourceActor ~= '' then
-                sActor = sSourceActor;
-            end
-        end
-        if sValue ~= '' and not tChangeState[sActor][sValue] then
+        if not tChangeState[sActor][sValue] then
             tChangeState[sActor][sValue] = {};
         end
         if sActor ~= '' and tChangeState[sActor] and tChangeState[sActor][tChangeStateLookup[sEffect]] then
@@ -447,7 +472,12 @@ function deleteStateModified(nodeCS)
             tChangeStateAny[sValue][sEffect] = nil;
             tChangeStateAnyLookup[sEffect] = nil;
         else
-            local sActor = DB.getPath(DB.getChild(nodeCS, '....'));
+            local sActor;
+            if sValue:match('^s') then
+                sActor = DB.getPath(DB.getChild(nodeCS, '...source_node', ''));
+            else
+                sActor = DB.getPath(DB.getChild(nodeCS, '....', ''));
+            end
             tChangeState[sActor][sValue][sEffect] = nil;
             tChangeStateLookup[sEffect] = nil;
         end
@@ -468,7 +498,7 @@ local aRemoveStates = {'rs', 're', 'srs', 'sre'};
 function activateState(nodeCT, bStart)
     BCEManager.chat('activateState: ');
     local sPath = DB.getPath(nodeCT);
-    if bStart and next(tChangeStateAny.ats) then
+    if bStart and next(tChangeStateAny['ats']) then
         for sEffect, _ in pairs(tChangeStateAny['ats']) do
             if DB.getValue(sEffect .. '.isactive', 100) ~= 1 then
                 BCEManager.modifyEffect(sEffect, 'Activate');
@@ -495,7 +525,7 @@ end
 function deactivateState(nodeCT, bStart)
     BCEManager.chat('deactivateState: ');
     local sPath = DB.getPath(nodeCT);
-    if bStart and next(tChangeStateAny.dts) then
+    if bStart and next(tChangeStateAny['dts']) then
         for sEffect, _ in pairs(tChangeStateAny['dts']) do
             if DB.getValue(sEffect .. '.isactive', 100) ~= 0 then
                 BCEManager.modifyEffect(sEffect, 'Deactivate');
@@ -506,10 +536,10 @@ function deactivateState(nodeCT, bStart)
         if tChangeState[sPath] and tChangeState[sPath][sState] then
             for sEffect, _ in pairs(tChangeState[sPath][sState]) do
                 if bStart and (sState == 'ds' or sState == 'sds') then
-                    if DB.getValue(sEffect .. '.isactive', 100) ~= 0 then
+                    if DB.getValue(sEffect .. 'isactive', 100) ~= 0 then
                         BCEManager.modifyEffect(sEffect, 'Deactivate');
                     end
-                elseif not bStart and (sState == 'de' or sState ==  'sde') then
+                elseif not bStart and (sState == 'de' or sState == 'sde') then
                     if DB.getValue(sEffect .. '.isactive', 100) ~= 0 then
                         BCEManager.modifyEffect(sEffect, 'Deactivate');
                     end
@@ -522,21 +552,19 @@ end
 function removeState(nodeCT, bStart)
     BCEManager.chat('removeState: ');
     local sPath = DB.getPath(nodeCT);
-    if bStart and next(tChangeStateAny.rts) then
+    if bStart and next(tChangeStateAny['rts']) then
         for sEffect, _ in pairs(tChangeStateAny['rts']) do
-            if DB.getValue(sEffect .. '.duration', 0) == 1 then
-                BCEManager.modifyEffect(sEffect, 'Remove');
-            end
+            BCEManager.modifyEffect(sEffect, 'Remove');
         end
     end
     for _, sState in ipairs(aRemoveStates) do
         if tChangeState[sPath] and tChangeState[sPath][sState] then
             for sEffect, _ in pairs(tChangeState[sPath][sState]) do
-                if bStart and (sState == 'rs' or 'srs') then
+                if bStart and (sState == 'rs' or sState == 'srs') then
                     if DB.getValue(sEffect .. '.duration', 0) == 1 then
                         BCEManager.modifyEffect(sEffect, 'Remove');
                     end
-                elseif not bStart and (sState == 're' or sState ==  'sre') then
+                elseif not bStart and (sState == 're' or sState == 'sre') then
                     if DB.getValue(sEffect .. '.duration', 0) == 1 then
                         BCEManager.modifyEffect(sEffect, 'Remove');
                     end
@@ -550,3 +578,13 @@ function unregisterCombatant(nodeCT)
     BCEManager.chat('unregisterCombatant: ');
     tChangeState[DB.getPath(nodeCT)] = nil;
 end
+
+-- function printTables()
+--     Debug.chat('tChangeState: ', tChangeState);
+--     Debug.chat('');
+--     Debug.chat('tChangeStateLookup: ', tChangeStateLookup);
+--     Debug.chat('');
+--     Debug.chat('tChangeStateAny', tChangeStateAny);
+--     Debug.chat('');
+--     Debug.chat('tChangeStateAnyLookup', tChangeStateAnyLookup);
+-- end
