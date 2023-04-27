@@ -113,8 +113,10 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf, sLabel)
     aClause.modifier = rEffectComp.mod;
     aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ','));
     table.insert(rAction.clauses, aClause);
-    if not sLabel then
-        sLabel = 'Ongoing Effect';
+    if not sLabel and rEffectComp.sEffectNode then
+        sLabel = DB.getValue(rEffectComp.sEffectNode .. ".label", 'Ongoing Damage');
+    elseif not sLabel then
+        sLabel = 'Ongoing Damage';
     end
     rAction.label = sLabel;
 
@@ -133,12 +135,11 @@ function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp)
 
     aClause.dice = rEffectComp.dice;
     aClause.modifier = rEffectComp.mod;
-    table.insert(rAction.clauses, aClause)
+    table.insert(rAction.clauses, aClause);
+
+    rAction.label = DB.getValue(rEffectComp.sEffectNode .. ".label", '')
     if bTemp == true then
-        rAction.label = 'Ongoing Temporary Hitpoints';
         rAction.subtype = 'temp';
-    else
-        rAction.label = 'Ongoing Regeneration';
     end
 
     local rRoll = ActionHeal.getRoll(rTarget, rAction);
