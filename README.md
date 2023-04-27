@@ -1,8 +1,8 @@
 [![Build FG Extension](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml) [![Luacheckrc](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml)
 # Better Combat Effects
 
-**Current Version:** 4.14
-**Updated:** 04/18/23
+**Current Version:** 4.15
+**Updated:** 04/27/23
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added.
 <a href="https://www.fantasygrounds.com/forums/showthread.php?68831-Better-Combat-Effects" target="_blank">Comments and Bug Reports</a>
@@ -125,6 +125,9 @@ Additionally, DUSE has been added to the APPLY cycler \
 |--|--|--|
 |![](.resource/../graphics/icons/button_toggle_duse.png)|DUSE|DEACTIVATE effect when the effect has been used|
 
+
+
+
 ## Examples
 
 |Power [Source]| Effect Code | Duration/Target/Expend|Notes|
@@ -153,6 +156,19 @@ Additionally, DUSE has been added to the APPLY cycler \
 | Water Elemental [NPC]|Water Elemental Whelm; grappled; restrained; SDMGOS: 2d8+4 bludgeoning| | |
 | Web [Spell]| Web; Restrained; SAVES: [SDC] DEX (C) | | |
 
+## Migrate Deprecated Effects
+Deprecated change state tags can be auto migrated for a campaign with the Effects Migrator. A popup box will appear when the table is started such as below.
+![](.resources/migrate.png)
+
+<u>It is highly recommended the campaign is backed up before performing migration.</u>
+
+Preview will produce a story entry of the migration changes without writing those changes to the database. Review these changes prior to migration. Some changes may be suggested to effects that do not change state and those changes are likely cleanup of extra whitespace or ;
+
+<img src=".resources/migrate_preview.png"  width="50%" height="90%">
+
+If the suggested changes are acceptable, use Migrate to migrate effects to the new change state cycyler. This will also create a story entry detailing the changes made to the database. You may want to delete these story entries after the migration, especially if you are creating a module for distribution.
+
+You can also bring up the migrate effects popup with the slash command: <b>/migrate_effects</b>
 ## Options
 
 | Name| Default | Options | Notes | Ruleset|

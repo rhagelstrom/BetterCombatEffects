@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <root release="3.0" version="3">
-	<announcement text="Better Combat Effects v4.14\rby Ryan Hagelstrom\rContribution MeAndUnique,bmos 2021-2023" font="emotefont" icon="BetterCombatEffects" />
+	<announcement text="Better Combat Effects v4.15\rby Ryan Hagelstrom\rContribution MeAndUnique,bmos 2021-2023" font="emotefont" icon="BetterCombatEffects" />
 	<properties>
 		<loadorder>120</loadorder>
 		<name>Feature: Better Combat Effects</name>
-		<version>4.14</version>
+		<version>4.15</version>
 		<author>Ryan Hagelstrom Contribution: MeAndUnique,bmos</author>
 		<description>Better Combat Effects, Automatically enable/disable/add/remove effects on the start of turn, end of turn, or when damage is taken</description>
 		<ruleset><name>5E</name></ruleset>
