@@ -25,7 +25,7 @@
 
             <migrate_message name="message" />
 
-            <button_preview name="preview" />
+            <button_preview_bce name="preview" />
             <button_migrate name="migrate" />
             <label name = "showlabel">
                 <anchored to="migrate" position="righthigh" offset="10,0"/>
@@ -53,7 +53,7 @@
         </formattedtextcontrol>
     </template>
 
-    <template name="button_preview">
+    <template name="button_preview_bce">
         <button_migration>
             <anchored>
                 <right anchor="center" offset="-15" />
