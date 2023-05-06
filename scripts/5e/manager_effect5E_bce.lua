@@ -338,7 +338,6 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                         end
 
                         -- Match!
-                        -- Debug.chat(rEffectComp ,sEffectType , comp_match, bTargetedOnly, bTargeted)
 
                         if comp_match then
                             nMatch = kEffectComp;
@@ -477,10 +476,8 @@ end
 function customEncodeEffectForCT(rEffect)
     BCEManager.chat('customEncodeEffectForCT : ', rEffect);
     local sReturn = encodeEffectForCT(rEffect);
-
     if rEffect.sChangeState and rEffect.sChangeState ~= '' then
-        sReturn:sub(-1);
-        sReturn = sReturn .. string.format('(S:%s)]', rEffect.sChangeState:upper());
+        sReturn = sReturn:sub(0,-2) .. string.format(' (S:%s)]', rEffect.sChangeState:upper());
     end
     return sReturn;
 end

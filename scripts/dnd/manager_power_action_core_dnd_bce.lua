@@ -7,7 +7,6 @@ local getActionEffectText = nil;
 function onInit()
     getActionEffectText = PowerActionManagerCore.getActionEffectText;
     PowerActionManagerCore.getActionEffectText = customGetActionEffectText;
-
 end
 
 function onClose()

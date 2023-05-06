@@ -1,8 +1,8 @@
 [![Build FG Extension](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml) [![Luacheckrc](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml)
 # Better Combat Effects
 
-**Current Version:** 4.15
-**Updated:** 04/27/23
+**Current Version:** 4.16
+**Updated:** 05/06/23
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added.
 <a href="https://www.fantasygrounds.com/forums/showthread.php?68831-Better-Combat-Effects" target="_blank">Comments and Bug Reports</a>

@@ -57,7 +57,7 @@ function customEvalAction(rActor, nodePower, rAction)
         elseif rSave.saveBase == 'fixed' then
             nDC = rSave.saveMod + nSDCBonus;
         elseif rSave.saveBase == 'ability' then
-            nDC = 8 + rSave.saveMod + ActorManager5E.getAbilityBonus(rActor, rSave.saveStat)+ nSDCBonus;
+            nDC = 8 + rSave.saveMod + ActorManager5E.getAbilityBonus(rActor, rSave.saveStat) + nSDCBonus;
             if rSave.saveProf == 1 then
                 nDC = nDC + ActorManager5E.getAbilityBonus(rActor, 'prf');
             end
@@ -71,11 +71,10 @@ function customEvalAction(rActor, nodePower, rAction)
     evalAction(rActor, nodePower, rAction);
 end
 
-
 function customGetPCPowerAction(nodeAction, sSubRoll)
     BCEManager.chat('customGetPCPowerAction : ');
     local rAction, rActor = getPCPowerAction(nodeAction, sSubRoll);
-    if rAction and rAction.type == "effect" then
+    if rAction and rAction.type == 'effect' then
         rAction.sChangeState = DB.getValue(nodeAction, 'changestate', '');
     end
     return rAction, rActor;
