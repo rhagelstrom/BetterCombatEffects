@@ -10,6 +10,7 @@ function onInit()
     applyDamage = ActionDamage.applyDamage;
     ActionDamage.getDamageAdjust = customGetDamageAdjust;
     ActionDamage.applyDamage = customApplyDamage;
+    -- ActionDamage.checkNumericalReductionType = checkNumericalReductionType;
 end
 
 function onClose()
@@ -21,11 +22,33 @@ function customApplyDamage(rSource, rTarget, rRoll, ...)
     ActionDamageDnDBCE.applyDamageBCE(rSource, rTarget, rRoll, ...)
 end
 
+-- Ruleset Bug but we will leave here dark for now incase SW decides it's not worth fixing.
+
+-- function checkNumericalReductionType(aReduction, aDmgType, nLimit)
+-- 	local nAdjust = 0;
+--     local  nSpecificAdjust;
+-- 	for _,sDmgType in pairs(aDmgType) do
+-- 		if nLimit then
+-- 			nSpecificAdjust = ActionDamage.checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType, nLimit);
+-- 			nAdjust = nAdjust + nSpecificAdjust;
+-- 		else
+-- 			nAdjust = nAdjust + ActionDamage.checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType);
+-- 		end
+-- 	end
+--     if nLimit then
+--         local nGlobalAdjust = ActionDamage.checkNumericalReductionTypeHelper(aReduction["all"], aDmgType, nLimit - nSpecificAdjust);
+--         nAdjust = nAdjust + nGlobalAdjust;
+--     else
+--         nAdjust = nAdjust + ActionDamage.checkNumericalReductionTypeHelper(aReduction["all"], aDmgType);
+--     end
+
+-- 	return nAdjust;
+-- end
+
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
     BCEManager.chat('customGetDamageAdjust : ');
     local nReduce = 0;
     local aReduce = getReductionType(rSource, rTarget, 'DMGR', rDamageOutput);
-
     for k, v in pairs(rDamageOutput.aDamageTypes) do
         -- Get individual damage types for each damage clause
         local aSrcDmgClauseTypes = {};
@@ -64,6 +87,10 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
 
         rReduction.mod = v.mod;
         rReduction.aNegatives = {};
+        if not next(v.remainder) then
+            table.insert(v.remainder, 'all');
+        end
+
         for _, vType in pairs(v.remainder) do
             if #vType > 1 and ((vType:sub(1, 1) == '!') or (vType:sub(1, 1) == '~')) then
                 if StringManager.contains(DataCommon.dmgtypes, vType:sub(2)) then
