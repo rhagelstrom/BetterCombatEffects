@@ -342,12 +342,12 @@ function replaceSaveDC(rNewEffect, rActor)
             nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf') + nDC;
             for _, nodeTrait in ipairs(DB.getChildList(nodeActor, 'traits')) do
                 local sTraitName = StringManager.trim(DB.getValue(nodeTrait, 'name', ''):lower());
-                if sTraitName == 'spellcasting' then
+                if sTraitName == 'spellcasting' or string.find(sTraitName,'innate spellcasting') then
                     local sDesc = DB.getValue(nodeTrait, 'desc', ''):lower();
-                    local sStat = sDesc:match('its spellcasting ability is (%w+)') or '';
+                    local sStat = sDesc:match('spellcasting ability is (%w+)') or '';
                     nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat);
                     bNewSpellcasting = false;
-                    break
+                    break;
                 end
             end
             if bNewSpellcasting then
@@ -356,7 +356,7 @@ function replaceSaveDC(rNewEffect, rActor)
                     if sActionName == 'spellcasting' then
                         local sDesc = DB.getValue(nodeAction, 'desc', ''):lower();
                         nSpellcastingDC = nDC + (tonumber(sDesc:match('spell save dc (%d+)')) or 0);
-                        break
+                        break;
                     end
                 end
             end
