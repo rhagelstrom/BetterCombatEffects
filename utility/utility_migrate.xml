@@ -1,103 +1,134 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-
 <root version="3.0">
-	<string name="string_migrate_title">Announcement</string>
-
-    <windowclass name="migrator">
-        <margins control="0,0,0,7" />
-        <frame>utilitybox3</frame>
-        <placement>
-            <size width="600" height="315" />
-        </placement>
+	<windowclass name="bce_migrator">
+		<frame>utilitybox</frame>
+		<placement>
+			<size width="575" height="315" />
+		</placement>
 		<sizelimits>
-			<minimum width="600" height="315" />
+			<minimum width="567" height="315" />
 			<dynamic />
 		</sizelimits>
-        <sheetdata>
-            <windowtitlebar name="title">
-                <resource>migrate_effects</resource>
-            </windowtitlebar>
-            <anchor_title_utilitybox3 name="contentanchor" />
+		<sheetdata>
+			<windowtitlebar name="title">
+				<resource>migrate_effects</resource>
+			</windowtitlebar>
+			<anchor_content_utilitybox_top />
+			<sub_content_framed_groupbox_top name="groupbox_top">
+				<class>bce_migrate_msg</class>
+			</sub_content_framed_groupbox_top>
+			<anchor_content_utilitybox_bottom />
+			<sub_content_framed_groupbox_bottom name="groupbox_bottom">
+			</sub_content_framed_groupbox_bottom>
+			<sub_content_framed_groupbox name="sub_buttons">
+				<class>bce_migrate_effects_bottom</class>
+			</sub_content_framed_groupbox>
+			<resize_utilitybox />
+			<close_utilitybox />
+		</sheetdata>
+	</windowclass>
 
-            <frame_utilitybox3 name="frame_migrator">
-				<anchored height="150" />
-            </frame_utilitybox3>
-
-            <migrate_message name="message" />
-
-            <button_preview_bce name="preview" />
-            <button_migrate name="migrate" />
-            <label name = "showlabel">
-                <anchored to="migrate" position="righthigh" offset="10,0"/>
-                <static textres="label_dont_show" />
-            </label>
-            <button_checkbox name="noshow">
-                <anchored  to="showlabel" position="righthigh" width="10" height="20" />
+	<windowclass name="bce_migrate_effects_bottom">
+		<sheetdata>
+			<anchor_content_top />
+			<button_preview_bce name="preview" />
+			<button_migrate_bce name="bce_migrate" />
+			<label name="bce_show_label">
+				<anchored to="bce_migrate" position="righthigh" offset="10,0" />
+				<static textres="label_dont_show" />
+			</label>
+			<button_checkbox name="noshow">
+				<anchored to="bce_show_label" position="righthigh" width="10" height="20" />
 			</button_checkbox>
+		</sheetdata>
+	</windowclass>
 
-            <helper_color />
-			<resize_utilitybox3 />
-            <close_utilitybox3 />
-        </sheetdata>
-    </windowclass>
+	<windowclass name="bce_migrate_warning_subwindow">
+		<!-- <backcolor >fb9e8e</backcolor> -->
+		<sheetdata>
+			<anchor_content_top />
+			<header_content_framed_headersimple name="header">
+				<static textres="migrate_effects_warning" />
+			</header_content_framed_headersimple>
+			<stringc_content_column_static_full>
+				<readonly />
+				<center />
+				<static textres="migrate_warning_msg" />
+			</stringc_content_column_static_full>
+			<fastinit />
+			<activate />
+		</sheetdata>
+	</windowclass>
 
-    <template name="migrate_message">
-        <formattedtextcontrol>
-            <anchored to="frame_migrator">
-                <top offset="20" />
-                <left offset="20" />
-                <right offset="-20" />
-            </anchored>
-            <readonly />
-            <script file="utility/scripts/utility_migrate.lua" />
-        </formattedtextcontrol>
-    </template>
+	<windowclass name="bce_migrate_msg">
+		<sheetdata>
+			<anchor_content_top />
+			<stringc_content_column_static_full>
+				<readonly />
+				<center />
+				<static textres="migrate_msg_1" />
+			</stringc_content_column_static_full>
+			<stringc_content_column_static_full>
+				<readonly />
+				<center />
+				<static textres="migrate_msg_2" />
+			</stringc_content_column_static_full>
+			<sub_content_top name="sub_system">
+				<anchored>
+					<right anchor="left" offset="100%" />
+				</anchored>
+				<class>bce_migrate_warning_subwindow</class>
+				<fastinit />
+				<activate />
+			</sub_content_top>
+		</sheetdata>
+	</windowclass>
 
-    <template name="button_preview_bce">
-        <button_migration>
-            <anchored>
-                <right anchor="center" offset="-15" />
-            </anchored>
-            <text>Preview</text>
-            <script>
-                function onButtonPress()
-                    MigrationManagerBCE.migration(false);
-                    if super and super.onButtonPress() then
-                        super.onButtonPress();
-                    end
-                end
-            </script>
-        </button_migration>
-    </template>
+	<template name="button_preview_bce">
+		<button_migration_bce>
+			<anchored>
+				<right anchor="center" offset="-15" />
+			</anchored>
+			<text>Preview</text>
+			<script>
+				function onButtonPress()
+				    MigrationManagerBCE.migration(false);
+				    if super and super.onButtonPress() then
+				        super.onButtonPress();
+				    end
+				end
+			</script>
+		</button_migration_bce>
+	</template>
 
-    <template name="button_migrate">
-        <button_migration>
-            <anchored>
-                <left anchor="center" offset="15" />
-            </anchored>
-            <text>Migrate</text>
-            <script>
-                function onButtonPress()
-                    MigrationManagerBCE.migration(true);
-                    window.noshow.setValue(1);
-                    if super and super.onButtonPress() then
-                        super.onButtonPress();
-                    end
-                end
-            </script>
-        </button_migration>
-    </template>
-    <template name="button_migration">
-        <buttoncontrol>
-            <anchored width="100" height="20">
-                <bottom offset="-30" />
-            </anchored>
-            <height>20</height>
-            <frame name="buttonup" offset="5,5,5,5" />
-            <stateframe>
-                <pressed name="buttondown" offset="5,5,5,5" />
-            </stateframe>
-            <font>button-white</font>
-        </buttoncontrol>
-    </template>
+	<template name="button_migrate_bce">
+		<button_migration_bce>
+			<anchored>
+				<left anchor="center" offset="15" />
+			</anchored>
+			<text>Migrate</text>
+			<script>
+				function onButtonPress()
+				    MigrationManagerBCE.migration(true);
+				    window.noshow.setValue(1);
+				    if super and super.onButtonPress() then
+				        super.onButtonPress();
+				    end
+				end
+			</script>
+		</button_migration_bce>
+	</template>
+
+	<template name="button_migration_bce">
+		<buttoncontrol>
+			<anchored width="100" height="20">
+				<bottom offset="-5" />
+			</anchored>
+			<frame name="buttonup" offset="5,5,5,5" />
+			<stateframe>
+				<pressed name="buttondown" offset="5,5,5,5" />
+			</stateframe>
+			<font>button-white</font>
+		</buttoncontrol>
+	</template>
 </root>

@@ -18,6 +18,10 @@ https://creativecommons.org/licenses/by-sa/4.0/
 	<string name="ct_error_effectclient">EFFECT_ERROR</string>
 	<string name="effect_status_disableused">DISABLE USED</string>
 	<string name="migrate_effects">Migrate Better Combat Effects</string>
+	<string name="migrate_effects_warning">WARNING</string>
+	<string name="migrate_warning_msg">This is a destructive operation with no undo. Back up your data before you proceed.</string>
+	<string name="migrate_msg_1">Migrate campaign effects to Better Combat Effects Change State format.</string>
+	<string name="migrate_msg_2">It is highly suggested you run a preview first to verify the proposed changes.</string>
 	<string name="label_dont_show">Don't Show Again</string>
 
 	<string name ="power_label_effect_duse">Disable when used</string>

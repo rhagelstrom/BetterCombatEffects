@@ -37,7 +37,7 @@ function onTabletopInit()
         local nodeMigrate = DB.getRoot().createChild('bce_migrate')
         local nodeNoShow = DB.getChild(nodeMigrate, 'noshow')
         if nodeMigrate and (not nodeNoShow or DB.getValue(nodeNoShow, '', 0) == 0) then
-            Interface.openWindow('migrator', nodeMigrate);
+            Interface.openWindow('bce_migrator', nodeMigrate);
         end
     end
 end
@@ -48,7 +48,7 @@ end
 function slashOpen()
     if Session.IsHost then
         local nodeMigrate = DB.getRoot().createChild('bce_migrate')
-        Interface.openWindow('migrator', nodeMigrate);
+        Interface.openWindow('bce_migrator', nodeMigrate);
     end
 end
 function migration(bShouldWrite)

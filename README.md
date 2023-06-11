@@ -2,7 +2,7 @@
 # Better Combat Effects
 
 **Current Version:** 4.17
-**Updated:** 05/25/23
+**Updated:** 06/11/23
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added.
 <a href="https://www.fantasygrounds.com/forums/showthread.php?68831-Better-Combat-Effects" target="_blank">Comments and Bug Reports</a>
