@@ -97,14 +97,13 @@ function effectAdded(_, nodeEffect)
     local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'insert', DB.getPath(nodeEffect));
     tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
     if not tSearchEffect then
-        BCEManager.chat('Problem added effect: ' .. DB.getValue(nodeEffect, 'label', ''));
+        BCEManager.console('Problem added effect: ' .. DB.getValue(nodeEffect, 'label', ''));
     else
-        addNodeHandlers(tSearchEffect.sPath, tSearchEffect.sName);
+        BCEManager.addNodeHandlers(tSearchEffect.sPath, tSearchEffect.sName);
     end
 end
 
 function effectDeleted(nodeEffect)
-    DB.getValue(nodeEffect, 'label', '');
     local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'remove', DB.getPath(nodeEffect));
     tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
     if not tSearchEffect then
@@ -124,7 +123,9 @@ end
 function effectUpdated(nodeLabel)
     local nodeEffect = DB.getParent(nodeLabel);
     local sPath = DB.getPath(nodeEffect);
-    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(tEffectsLookup[sPath]), 'update', sPath);
+
+    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(tEffectsLookup[sPath]), 'update', sPath,
+                                                              BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')));
     tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
     if not tSearchEffect then
         BCEManager.chat('Problem updating effect: ' .. tEffectsLookup[sPath]);
@@ -178,6 +179,8 @@ function initGlobalEffects()
     for _, nodeEffect in pairs(DB.getChildrenGlobal('effects')) do
         local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'insert',
                                                                   DB.getPath(nodeEffect));
+        tEffectsLookup[tSearchEffect.sPath] = tSearchEffect.sName;
+        BCEManager.addNodeHandlers(tSearchEffect.sPath, tSearchEffect.sName);
         BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
     end
     BCEManager.printGlobalEffects();

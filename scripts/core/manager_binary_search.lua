@@ -43,10 +43,11 @@ local function binarySearchGuarded(tSortedSearch, tSearch, nLowValue, nHighValue
             return binarySearchGuarded(tSortedSearch, tSearch, nMidValue + 1, nHighValue);
         else
             if tSearch.sOperation == 'update' then
-                tSearch.sOperation = nil;
-                tSortedSearch[nMidValue] = tSearch;
-                tSortedSearch[nMidValue].nPosition = nMidValue;
-                return tSortedSearch[nMidValue];
+                tSearch.sOperation = 'insert';
+                tSearch.sName = tSearch.sNewName;
+                tSearch.sNewName = nil;
+                table.remove(tSortedSearch, nMidValue);
+                return binarySearchGuarded(tSortedSearch, tSearch, 1, #tSortedSearch);
             elseif tSearch.sOperation == 'remove' then
                 tSortedSearch[nMidValue].nPosition = nMidValue;
                 local tRet = tSortedSearch[nMidValue];
@@ -68,11 +69,11 @@ end
 --      nPostion - On return, the current position of this record in the in the table being searched. This will change
 --			as more records get inserted/deleted
 -- }
-local function initSearch(sName, sOperation, sPath)
+local function initSearch(sName, sOperation, sPath, sNewName)
     if not sName or not (sOperation == 'insert' or sOperation == 'search' or sOperation == 'remove' or sOperation == 'update') then
         return;
     end
-    local tSearch = {sName = sName, sOperation = sOperation, sPath = sPath, nPostition = 0};
+    local tSearch = {sName = sName, sOperation = sOperation, sPath = sPath, nPostition = 0, sNewName = sNewName};
     if not sPath then
         tSearch.sPath = '';
     end
@@ -88,8 +89,8 @@ end
 --      nPostion - On return, the position of this record in the in the table being searched
 --
 --		Keep in mind you can add addtional elements to this if you want them stored/retrieved for quick reference
-function constructSearch(sName, sOperation, sPath)
-    return initSearch(sName, sOperation, sPath);
+function constructSearch(sName, sOperation, sPath, sNewName)
+    return initSearch(sName, sOperation, sPath, sNewName);
 end
 
 -- 		tSortedSearch - table that has been sorted or empty table
