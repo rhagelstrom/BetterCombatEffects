@@ -39,6 +39,9 @@ function customEvalAction(rActor, nodePower, rAction)
             if sSaveType == 'cast' then
                 rSave.saveMod = DB.getValue(nodeChild, 'savedcmod', 0);
                 rSave.saveBase = DB.getValue(nodeChild, 'savedcbase', 'group');
+                if rSave.saveBase == '' then
+                    rSave.saveBase = 'group';
+                end
                 if rSave.saveBase == 'ability' then
                     rSave.saveStat = DB.getValue(nodeChild, 'savedcstat', '');
                     rSave.saveProf = DB.getValue(nodeChild, 'savedcprof', 1);
