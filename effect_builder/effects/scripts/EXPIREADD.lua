@@ -1,3 +1,4 @@
+-- luacheck: globals createEffectString bce_stringfield_valueholder
 function createEffectString()
     local effectString = parentcontrol.window.effect.getStringValue()
     if bce_stringfield_valueholder.getValue() ~= Interface.getString('effect_draganddrop') then

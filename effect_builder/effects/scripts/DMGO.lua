@@ -1,3 +1,4 @@
+-- luacheck: globals createEffectString cycler_actor cycler_turn dice_value damage_types
 function createEffectString()
     local effectString = parentcontrol.window.effect.getStringValue()
     if cycler_actor.getStringValue() == 'S' then

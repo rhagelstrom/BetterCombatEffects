@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root version="3.3">
+	<includefile source="ct/ct_host_entry_section.xml" />
+	<includefile source="ct/template_ct.xml" />
+	<includefile source="utility/utility_effects.xml"/>
+	<includefile source="utility/utility_effects_advanced.xml"/>
+	<includefile source="campaign/record_power_roll.xml"/>
+	<includefile source="campaign/record_power_action.xml"/>
+	<includefile source="utility/utility_migrate.xml" />
+</root>

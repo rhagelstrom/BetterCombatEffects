@@ -2,7 +2,12 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals BCEManager
+--
+-- luacheck: globals BCEManager BinarySearchManager
+-- luacheck: globals chat console getExtensions hasExtension getEffectName effectAdded effectDeleted effectIntegrityChange effectUpdated matchEffect
+-- luacheck: globals sendOOB handlerCheck handleUpdateEffect handleRemoveEffect handleDeactivateEffect handleAddEffect handleActivateEffect updateEffect activateEffect modifyEffect
+-- luacheck: globals notifyAddEffect getRulesetEffectManager getRulesetActorManager removeNodeHandlers addNodeLabelHandlers addNodeHandlers removeEffectHandlers printGlobalEffects
+-- luacheck: globals initGlobalEffects onModuleLoad onModuleUnload onInit onClose
 OOB_MSGTYPE_BCEACTIVATE = 'activateeffect';
 OOB_MSGTYPE_BCEDEACTIVATE = 'deactivateeffect';
 OOB_MSGTYPE_BCEREMOVE = 'removeeffect';
@@ -37,7 +42,6 @@ end
 function onClose()
     if Session.IsHost then
         BCEManager.removeEffectHandlers();
-        CombatManager.removeCustomDeleteCombatantEffectHandler(expireAdd);
     end
 end
 

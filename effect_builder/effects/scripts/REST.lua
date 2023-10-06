@@ -1,3 +1,4 @@
+-- luacheck: globals createEffectString effect_removerest
 function createEffectString()
     local sRet = parentcontrol.window.effect.getStringValue()
     if effect_removerest.getValue() > 0 then

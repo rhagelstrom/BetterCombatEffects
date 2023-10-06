@@ -2,20 +2,22 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals DiceManagerDnDBCE
+--
+-- luacheck: globals DiceManagerDnDBCE BCEManager
+-- luacheck: globals onInit onClose moddedConvertStringToDice isDie
 local convertStringToDice = nil;
 
 function onInit()
     convertStringToDice = DiceManager.convertStringToDice;
-    DiceManager.convertStringToDice = customConvertStringToDice;
+    DiceManager.convertStringToDice = moddedConvertStringToDice;
 end
 
 function onClose()
     DiceManager.convertStringToDice = convertStringToDice;
 end
 
-function customConvertStringToDice(s)
-    -- BCEManager.chat("customConvertStringToDice : ");
+function moddedConvertStringToDice(s)
+    -- BCEManager.chat("moddedConvertStringToDice : ");
     local tDice = {};
     local nMod = 0;
     local tTerms = DiceManager.convertDiceStringToTerms(s);
@@ -25,8 +27,10 @@ function customConvertStringToDice(s)
         else
             local nDieCount, sDieType = DiceManager.parseDiceTerm(vTerm);
             if sDieType then
-                for i = 1, nDieCount do
+                local i = 1;
+                while i <= nDieCount do
                     table.insert(tDice, sDieType);
+                    i = i + 1;
                 end
                 -- next two lines enable "-X" ability replacement
             elseif vTerm and vTerm == '-X' then

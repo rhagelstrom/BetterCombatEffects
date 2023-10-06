@@ -2,6 +2,9 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+--
+-- luacheck: globals PowerManager5EBCE BCEManager ActionSaveDnDBCE
+-- luacheck: globals onInit onClose customEvalAction customGetPCPowerAction moddedParseEffects getTurnModifier
 local parseEffects = nil;
 local evalAction = nil;
 local getPCPowerAction = nil;
@@ -12,7 +15,7 @@ function onInit()
     getPCPowerAction = PowerManager.getPCPowerAction;
 
     PowerManager.evalAction = customEvalAction;
-    PowerManager.parseEffects = customParseEffects;
+    PowerManager.parseEffects = moddedParseEffects;
     PowerManager.getPCPowerAction = customGetPCPowerAction;
 end
 
@@ -83,7 +86,8 @@ function customGetPCPowerAction(nodeAction, sSubRoll)
     return rAction, rActor;
 end
 
-function customParseEffects(sPowerName, aWords)
+-- luacheck: push ignore 561
+function moddedParseEffects(sPowerName, aWords)
     if OptionsManager.isOption('AUTOPARSE_EFFECTS', 'off') then
         return parseEffects(sPowerName, aWords)
     end
@@ -215,7 +219,7 @@ function customParseEffects(sPowerName, aWords)
             local bValidCondition = false;
             local nConditionStart = i;
             local j = i - 1;
-            local sTurnModifier = PowerManager5EBCE.getTurnModifier(aWords, i);
+            -- local sTurnModifier = PowerManager5EBCE.getTurnModifier(aWords, i);
             while aWords[j] do
                 if StringManager.isWord(aWords[j], 'be') then
                     if StringManager.isWord(aWords[j - 1], 'or') then
@@ -335,9 +339,9 @@ function customParseEffects(sPowerName, aWords)
                 rCurrent.startindex = nConditionStart;
                 rCurrent.endindex = i;
                 -- TODO: looks like a bug but not dealing with it now.
-                if sRemoveTurn ~= '' then
-                    rCurrent.sName = rCurrent.sName .. '; ' .. sTurnModifier
-                end
+                -- if sRemoveTurn ~= '' then
+                --     rCurrent.sName = rCurrent.sName .. '; ' .. sTurnModifier
+                -- end
                 rPrevious = rCurrent
             end
         end
@@ -402,6 +406,7 @@ function customParseEffects(sPowerName, aWords)
 
     return effects;
 end
+-- luacheck: pop
 
 function getTurnModifier(aWords, i)
     local sRemoveTurn = '';

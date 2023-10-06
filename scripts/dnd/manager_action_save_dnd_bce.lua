@@ -2,7 +2,10 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals ActionSaveDnDBCE
+--
+-- luacheck: globals ActionSaveDnDBCE BCEManager EffectManagerBCE EffectManagerDnDBCE CombatManagerBCE ActionDamageDnDBCE
+-- luacheck: globals onInit onTabletopInit onClose processEffectTurnStartSave processEffectTurnEndSave onSaveRollHandler
+-- luacheck: globals saveAddEffect saveEffect saveRemoveDisable onDamage addEffectPost getDCEffectMod moveModtoMod replaceSaveDC
 local onSave = nil;
 local RulesetEffectManager = nil;
 local RulesetActorManager = nil;
@@ -37,7 +40,7 @@ function onTabletopInit()
         aSaveFilter = DataCommon.ability_ltos;
     else
         aSaveFilter = DataCommon.save_ltos;
-        for i,v in pairs(DataCommon.save_stol) do
+        for i, v in pairs(DataCommon.save_stol) do
             aSaveFilter[i] = v;
         end
     end
@@ -129,12 +132,12 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
             tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, aSaveFilter, rTarget);
             for _, tEffect in pairs(tMatch) do
                 if tEffect.sEffectNode == sPath then
-                    if sTag =='SAVEADDP' then
+                    if sTag == 'SAVEADDP' then
                         BCEManager.chat('SAVEADDP : ', tEffect);
                         ActionSaveDnDBCE.saveAddEffect(nodeSource, nodeTarget, tEffect);
                         ActionSaveDnDBCE.saveRemoveDisable(tEffect.sEffectNode, tEffect, true);
 
-                    elseif sTag =='SAVEDMG' then
+                    elseif sTag == 'SAVEDMG' then
                         BCEManager.chat('SAVEDMG : ', tEffect);
                         EffectManagerDnDBCE.applyOngoingDamage(rTarget, rSource, tEffect, true);
                         ActionSaveDnDBCE.saveRemoveDisable(tEffect.sEffectNode, tEffect, true);
@@ -148,11 +151,11 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
             tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, aSaveFilter, rTarget);
             for _, tEffect in pairs(tMatch) do
                 if tEffect.sEffectNode == sPath then
-                    if sTag =='SAVEADD' then
+                    if sTag == 'SAVEADD' then
                         BCEManager.chat('SAVEADD : ', tEffect);
                         ActionSaveDnDBCE.saveAddEffect(nodeSource, nodeTarget, tEffect);
                         ActionSaveDnDBCE.saveRemoveDisable(tEffect.sEffectNode, tEffect);
-                    elseif sTag =='SAVEDMG' then
+                    elseif sTag == 'SAVEDMG' then
                         BCEManager.chat('SAVEDMG : ', tEffect);
                         EffectManagerDnDBCE.applyOngoingDamage(rTarget, rSource, tEffect, false);
                         ActionSaveDnDBCE.saveRemoveDisable(tEffect.sEffectNode, tEffect);
@@ -182,7 +185,7 @@ function saveEffect(rTarget, rEffectComp)
     end
 
     local aParsedRemiander = StringManager.parseWords(rEffectComp.remainder[1]);
-    local sAbility = '';
+    local sAbility;
     if User.getRulesetName() == '5E' then
         sAbility = DataCommon.ability_stol[aParsedRemiander[1]];
     else
@@ -228,14 +231,14 @@ function saveEffect(rTarget, rEffectComp)
         if rEffectComp.original:match('%(F%)') then
             rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [FLIP]';
         end
-        local aSaveFilter = {};
-        table.insert(aSaveFilter, sAbility:lower());
+        local aSaveFilterAbility = {};
+        table.insert(aSaveFilterAbility, sAbility:lower());
 
         -- if we don't have a filter, modSave will figure out the other adv/dis later
-        if #(RulesetEffectManager.getEffectsByType(rTarget, 'ADVSAV', aSaveFilter, rSource)) > 0 then
+        if #(RulesetEffectManager.getEffectsByType(rTarget, 'ADVSAV', aSaveFilterAbility, rSource)) > 0 then
             rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [ADV]';
         end
-        if #(RulesetEffectManager.getEffectsByType(rTarget, 'DISSAV', aSaveFilter, rSource)) > 0 then
+        if #(RulesetEffectManager.getEffectsByType(rTarget, 'DISSAV', aSaveFilterAbility, rSource)) > 0 then
             rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [DIS]';
         end
         rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [PATH]' .. rEffectComp.sEffectNode .. '[!PATH] [BCE]';
@@ -244,7 +247,7 @@ function saveEffect(rTarget, rEffectComp)
 end
 
 function saveRemoveDisable(sNodeEffect, rEffectComp, bRAOnly, rRoll)
-    BCEManager.chat('saveRemoveDisable : ',rRoll);
+    BCEManager.chat('saveRemoveDisable : ', rRoll);
     if not bRAOnly and ((rEffectComp and rEffectComp.original:match('%(R%)')) or (rRoll and rRoll.sSaveDesc:match('%[REMOVE ON SAVE%]'))) then
         BCEManager.modifyEffect(sNodeEffect, 'Remove');
     elseif not bRAOnly and ((rEffectComp and rEffectComp.original:match('%(D%)')) or (rRoll and rRoll.sSaveDesc:match('%[DISABLE ON SAVE%]'))) then
@@ -330,24 +333,24 @@ function replaceSaveDC(rNewEffect, rActor)
             nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf') + nDC;
             for _, nodeFeature in ipairs(DB.getChildList(nodeActor, 'featurelist')) do
                 local sFeatureName = StringManager.trim(DB.getValue(nodeFeature, 'name', ''):lower());
-                if sFeatureName == 'spellcasting' or  sFeatureName == 'pact magic' then
+                if sFeatureName == 'spellcasting' or sFeatureName == 'pact magic' then
                     local sDesc = DB.getValue(nodeFeature, 'text', ''):lower();
                     local sStat = sDesc:match('(%w+) is your spellcasting ability') or '';
                     nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat);
                     -- savemod is the db tag in the power group to get the power modifier
-                    break;
+                    break
                 end
             end
         elseif sNodeType == 'ct' or sNodeType == 'npc' then
             nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf') + nDC;
             for _, nodeTrait in ipairs(DB.getChildList(nodeActor, 'traits')) do
                 local sTraitName = StringManager.trim(DB.getValue(nodeTrait, 'name', ''):lower());
-                if sTraitName == 'spellcasting' or string.find(sTraitName,'innate spellcasting') then
+                if sTraitName == 'spellcasting' or string.find(sTraitName, 'innate spellcasting') then
                     local sDesc = DB.getValue(nodeTrait, 'desc', ''):lower();
                     local sStat = sDesc:match('spellcasting ability is (%w+)') or '';
                     nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat);
                     bNewSpellcasting = false;
-                    break;
+                    break
                 end
             end
             if bNewSpellcasting then
@@ -356,7 +359,7 @@ function replaceSaveDC(rNewEffect, rActor)
                     if sActionName == 'spellcasting' then
                         local sDesc = DB.getValue(nodeAction, 'desc', ''):lower();
                         nSpellcastingDC = nDC + (tonumber(sDesc:match('spell save dc (%d+)')) or 0);
-                        break;
+                        break
                     end
                 end
             end

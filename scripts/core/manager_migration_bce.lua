@@ -2,7 +2,11 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals BCEManager
+--
+-- luacheck: globals MigrationManagerBCE BCEManager
+-- luacheck: globals migration migrateItems migrateSpells migrateCustomEffects migrateCombatTracker migrateCharSheet
+-- luacheck: globals migrateNPC migratePowers  migrateAdvancedEffects migrateKnK  migrationHelper migrateEffect
+-- luacheck: globals slashOpen onClose onTabletopInit onInit
 local aMigrate = {
     'DUSE',
     'ATURN',
@@ -122,7 +126,8 @@ function migrateSpells()
                         sDesc = sDesc .. '<link class="power" recordname=\"' .. DB.getPath(nodeSpell) .. '\"><b>' ..
                                     UtilityManager.encodeXML(DB.getValue(nodeSpell, 'name', '')) .. '</b></link>';
                         sDesc = sDesc ..
-                                    '<table><tr><td  colspan=\"2\"><b>Original</b></td><td  colspan=\"2\"><b>Modified</b></td><td><b>Apply</b></td><td><b>Change State</b></td></tr>';
+                                    '<table><tr><td  colspan=\"2\"><b>Original</b></td><td  colspan=\"2\"><b>Modified' ..
+                                    'end</b></td><td><b>Apply</b></td><td><b>Change State</b></td></tr>';
                         bFirst = false;
                     end
                     if bWrite then
@@ -444,8 +449,8 @@ function migrateEffect(nodeEffect, aEffectComps, index, rEffectComp)
         end
         sChangeState = 'sre';
         table.remove(aEffectComps, index);
-    elseif rEffectComp.type == 'SSAVEE' or rEffectComp.type == 'SSAVES' or rEffectComp.type == 'SAVEE' or rEffectComp.type == 'SAVES' or rEffectComp.type ==
-        'SAVEONDMG' or rEffectComp.type == 'SAVEA' or rEffectComp.type == 'SAVERESTL' then
+    -- elseif rEffectComp.type == 'SSAVEE' or rEffectComp.type == 'SSAVES' or rEffectComp.type == 'SAVEE' or rEffectComp.type == 'SAVES' or rEffectComp.type ==
+        -- 'SAVEONDMG' or rEffectComp.type == 'SAVEA' or rEffectComp.type == 'SAVERESTL' then
         -- if rEffectComp.mod == 0 and (isDiceString(rEffectComp.remainder[1]) or rEffectComp.remainder[1] == '[SDC]') then
 
         -- end

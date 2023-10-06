@@ -1,3 +1,4 @@
+-- luacheck: globals createEffectString dice_value damage_types
 function createEffectString()
     local effectString = parentcontrol.window.effect.getStringValue()
 

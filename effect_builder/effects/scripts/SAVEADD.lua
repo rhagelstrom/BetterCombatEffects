@@ -1,3 +1,4 @@
+-- luacheck: globals createEffectString cycler_save_add bce_stringfield_valueholder
 function createEffectString()
     local effectString = parentcontrol.window.effect.getStringValue()
     if cycler_save_add.getStringValue() ~= true then

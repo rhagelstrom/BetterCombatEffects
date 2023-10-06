@@ -4,4 +4,5 @@
 	<script name="BinarySearchManager" file="scripts/core/manager_binary_search.lua" />
 	<script name="EffectManagerBCE" file="scripts/core/manager_effect_bce.lua" />
 	<script name="CombatManagerBCE" file="scripts/core/manager_combat_bce.lua" />
+	<script name="MigrationManagerBCE" file="scripts/core/manager_migration_bce.lua" />
 </root>

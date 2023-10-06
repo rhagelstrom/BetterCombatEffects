@@ -2,6 +2,10 @@
 --	  	Copyright © 2021
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+--
+-- luacheck: globals EffectManager4EBCE BCEManager EffectManagerBCE EffectManagerDnDBCE
+-- luacheck: globals onInit onClose onAttack4E applyOngoingDamage applyOngoingRegen addEffectPre4E
+-- luacheck: globals moddedGetEffectsByType moddedHasEffectCondition moddedHasEffect customOnEffectAddIgnoreCheck
 local applyOngoingDamageBCE = nil
 local applyOngoingRegenBCE = nil
 
@@ -19,9 +23,9 @@ function onInit()
     hasEffect = EffectManager4E.hasEffect;
     hasEffectCondition = EffectManager4E.hasEffectCondition;
 
-    EffectManager4E.getEffectsByType = customGetEffectsByType;
-    EffectManager4E.hasEffect = customHasEffect;
-    EffectManager4E.hasEffectCondition = customHasEffectCondition;
+    EffectManager4E.getEffectsByType = moddedGetEffectsByType;
+    EffectManager4E.hasEffect = moddedHasEffect;
+    EffectManager4E.hasEffectCondition = moddedHasEffectCondition;
 
     EffectManagerDnDBCE.applyOngoingDamage = applyOngoingDamage;
     EffectManagerDnDBCE.applyOngoingRegen = applyOngoingRegen;
@@ -125,7 +129,7 @@ function addEffectPre4E(_, _, nodeCT, rNewEffect, _)
     return false;
 end
 
-function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
+function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
     if not rActor then
         return {};
     end
@@ -177,16 +181,16 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                     local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
                     -- Check for follw on effects and ignore the rest
                     if StringManager.contains({'AFTER', 'FAIL'}, rEffectComp.type) then
-                        break;
+                        break
 
                         -- Handle conditionals
                     elseif rEffectComp.type == 'IF' then
                         if not EffectManager4E.checkConditional(rActor, v, rEffectComp) then
-                            break;
+                            break
                         end
                     elseif rEffectComp.type == 'IFT' then
                         if not rFilterActor then
-                            break;
+                            break
                         end
                         if not EffectManager4E.checkConditional(rFilterActor, v, rEffectComp, rActor) then
                             break
@@ -199,12 +203,13 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                         local aEffectRangeFilter = {};
                         local aEffectOtherFilter = {};
                         for _, v2 in pairs(rEffectComp.remainder) do
-                            if StringManager.contains(DataCommon.dmgtypes, v2) or StringManager.contains(DataCommon.bonustypes, v2) or v2 == 'all' then
+                            if not (StringManager.contains(DataCommon.dmgtypes, v2) or StringManager.contains(DataCommon.bonustypes, v2) or v2 == 'all') then
                                 -- Skip
-                            elseif StringManager.contains(DataCommon.rangetypes, v2) then
-                                table.insert(aEffectRangeFilter, v2);
-                            elseif rEffectComp.type ~= '' then
-                                table.insert(aEffectOtherFilter, v2);
+                                if StringManager.contains(DataCommon.rangetypes, v2) then
+                                    table.insert(aEffectRangeFilter, v2);
+                                elseif rEffectComp.type ~= '' then
+                                    table.insert(aEffectOtherFilter, v2);
+                                end
                             end
                         end
 
@@ -294,18 +299,17 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     return results;
 end
 
-function customHasEffectCondition(rActor, sEffect)
+function moddedHasEffectCondition(rActor, sEffect)
     return EffectManager4E.hasEffect(rActor, sEffect, nil, false, true);
 end
 
-function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
+function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
     if not sEffect or not rActor then
         return false;
     end
-    local tEffectCompParams = EffectManagerBCE.getEffectCompType(sEffectType);
+    local tEffectCompParams = EffectManagerBCE.getEffectCompType(sEffect);
 
-    local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
-                        (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
+
 
     -- Handle bloodied special case
     local sLowerEffect = sEffect:lower();
@@ -328,6 +332,8 @@ function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     local aMatch = {};
     for _, v in pairs(aEffects) do
         local nActive = DB.getValue(v, 'isactive', 0);
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
         if nActive ~= 0 or bActive then
             -- Parse each effect label
             local sLabel = DB.getValue(v, 'label', '');

@@ -1,3 +1,4 @@
+-- luacheck: globals createEffectString effect_temphp cycler_actor cycler_turn dice_value damage_type_1 damage_type_2 and_or
 function createEffectString()
     local effectString = parentcontrol.window.effect.getStringValue()
     if effect_temphp.getValue() > 0 then

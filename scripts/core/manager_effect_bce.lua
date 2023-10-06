@@ -2,7 +2,14 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals EffectManagerBCE
+--
+-- luacheck: globals EffectManagerBCE BCEManager CombatManagerDnDBCE
+-- luacheck: globals onInit onClose moddedGetEffectsByType deleteStateModified
+-- luacheck: globals customAddEffectPre registerEffectCompType getEffectCompType getLabelShort initEffectHandlers deleteEffectHandlers
+-- luacheck: globals deleteEffectHandlers expireAddHelper expireAdd setCustomMatchEffect removeCustomMatchEffect onCustomMatchEffect
+-- luacheck: globals setCustomPreAddEffect removeCustomPreAddEffect onCustomPreAddEffect setCustomPostAddEffect removeCustomPostAddEffect onCustomPostAddEffect
+-- luacheck: globals addSourceTurnHandler modSourceTurnHandler clearSourceTurnHandler deleteSourceTurnHandler processSourceTurn addChangeStateHandler deleteState
+-- luacheck: globals deleteChangeStateHandler stateModified changeState activateState deactivateState removeState unregisterCombatant
 ------------------ ORIGINALS ------------------
 local addEffect = nil;
 ------------------ END ORIGINALS ------------------
@@ -43,7 +50,7 @@ function onInit()
 
     EffectManager.addEffect = EffectManagerBCE.customAddEffectPre;
     if User.getRulesetName() ~= '5E' then
-        EffectManager.getEffectsByType = customGetEffectsByType;
+        EffectManager.getEffectsByType = moddedGetEffectsByType;
     end
 
     if Session.IsHost then
@@ -74,7 +81,7 @@ function onClose()
 end
 
 ------------------ OVERRIDES ------------------
-function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargetedOnly)
+function moddedGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargetedOnly)
     if not rActor then
         return {};
     end
@@ -137,7 +144,7 @@ function customGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
                             EffectManager.notifyExpire(v, 0, true);
                         elseif sApply == 'single' or tEffectCompParams.bOneShot then
                             EffectManager.notifyExpire(v, nMatch, true);
-                        elseif bDisableUse and sApply == 'duse' then
+                        elseif tEffectCompParams.bNoDUSE and sApply == 'duse' then
                             BCEManager.modifyEffect(v.sEffectNode, 'Deactivate');
                         end
                     end
@@ -374,7 +381,7 @@ function addSourceTurnHandler(nodeCT, nodeEffect)
     if not tSourceTurn[sSource] then
         tSourceTurn[sSource] = {};
     end
-    for kEffectComp, sEffectComp in ipairs(aEffectComps) do
+    for _, sEffectComp in ipairs(aEffectComps) do
         local rEffect = EffectManager.parseEffectCompSimple(sEffectComp);
         if StringManager.contains(aSourceTags, rEffect.type) then
             if not tSourceTurn[sSource][rEffect.type] then
@@ -540,7 +547,7 @@ function deleteState(nodeCS)
     end
 end
 
-function deleteChangeStateHandler(nodeCT, nodeEffect)
+function deleteChangeStateHandler(_, nodeEffect)
     BCEManager.chat('deleteChangeStateHandler: ');
     DB.removeHandler(DB.getPath(nodeEffect, 'changestate'), 'onUpdate', deleteStateModified);
 end

@@ -1,3 +1,5 @@
+-- luacheck: globals createEffectString stat_value effect_savesdc number_value cycler_save_adv effect_savemagic
+-- luacheck: globals effect_saveinvert effect_saveonhalf effect_deactivate effect_remove
 function createEffectString()
     local effectString = parentcontrol.window.effect.getStringValue() .. ': ' .. stat_value.getStringValue()
     if effect_savesdc.getValue() > 0 then

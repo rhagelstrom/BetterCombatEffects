@@ -2,6 +2,10 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+--
+-- luacheck: globals ActionDamage4EBCE BCEManager ActionDamageDnDBCE
+-- luacheck: globals onInit onClose customApplyDamage applyDamage customGetDamageAdjust checkNumericalReductionType
+-- luacheck: globals checkNumericalReductionTypeHelper getReductionType
 local getDamageAdjust = nil;
 local applyDamageOriginal = nil;
 
@@ -36,7 +40,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
     local nDamageAdjust;
     local nReduce = 0;
     local bVulnerable, bResist, nHalf;
-    local aReduce = getReductionType(rSource, rTarget, 'DMGR', rDamageOutput);
+    local aReduce = ActionDamage4EBCE.getReductionType(rSource, rTarget, 'DMGR', rDamageOutput);
 
     for k, v in pairs(rDamageOutput.aDamageTypes) do
         -- Get individual damage types for each damage clause
@@ -47,7 +51,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
                 table.insert(aSrcDmgClauseTypes, vType);
             end
         end
-        local nLocalReduce = checkNumericalReductionType(aReduce, aSrcDmgClauseTypes, v);
+        local nLocalReduce = ActionDamage4EBCE.checkNumericalReductionType(aReduce, aSrcDmgClauseTypes, v);
 
         -- We need to do this nonsense because we need to reduce damagee before resist calculation
         if nLocalReduce > 0 then
@@ -69,13 +73,13 @@ function checkNumericalReductionType(aReduction, aDmgType, nLimit)
 
     for _, sDmgType in pairs(aDmgType) do
         if nLimit then
-            local nSpecificAdjust = checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType, nLimit);
+            local nSpecificAdjust = ActionDamage4EBCE.checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType, nLimit);
             nAdjust = nAdjust + nSpecificAdjust;
-            local nGlobalAdjust = checkNumericalReductionTypeHelper(aReduction['all'], aDmgType, nLimit - nSpecificAdjust);
+            local nGlobalAdjust = ActionDamage4EBCE.checkNumericalReductionTypeHelper(aReduction['all'], aDmgType, nLimit - nSpecificAdjust);
             nAdjust = nAdjust + nGlobalAdjust;
         else
-            nAdjust = nAdjust + checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType);
-            nAdjust = nAdjust + checkNumericalReductionTypeHelper(aReduction['all'], aDmgType);
+            nAdjust = nAdjust + ActionDamage4EBCE.checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType);
+            nAdjust = nAdjust + ActionDamage4EBCE.checkNumericalReductionTypeHelper(aReduction['all'], aDmgType);
         end
     end
 

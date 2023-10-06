@@ -2,7 +2,10 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals ActionDamageDnDBCE
+--
+-- luacheck: globals CombatManagerDnDBCE BCEManager CombatManagerBCE EffectManagerBCE EffectManagerDnDBCE
+-- luacheck: globals onInit onClose customResetHealth processEffectTurnStartDND processEffectTurnEndDND
+-- luacheck: globals processSDMGO processSREGEN processSTREGEN
 local RulesetEffectManager = nil;
 local resetHealth = nil;
 

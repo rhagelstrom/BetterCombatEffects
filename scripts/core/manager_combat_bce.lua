@@ -2,7 +2,11 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals CombatManagerBCE
+--
+-- luacheck: globals CombatManagerBCE BCEManager EffectManagerBCE
+-- luacheck: globals onInit onTabletopInit turnStart turnEnd
+-- luacheck: globals setCustomProcessTurnStart removeCustomProcessTurnStart onCustomProcessTurnStart
+-- luacheck: globals setCustomProcessTurnEnd removeCustomProcessTurnEnd onCustomProcessTurnEnd RulesetEffectManager
 ------------------ CUSTOM BCE FUNTION HOOKS ------------------
 local aCustomProcessTurnStartHandlers = {};
 local aCustomProcessTurnEndHandlers = {};

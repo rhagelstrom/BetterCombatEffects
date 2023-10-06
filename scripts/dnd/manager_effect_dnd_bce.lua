@@ -2,7 +2,10 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals EffectManagerDnDBCE
+--
+-- luacheck: globals EffectManagerDnDBCE BCEManager BCEDnDManager EffectManagerBCE DiceManagerDnDBCE
+-- luacheck: globals onInit onClose onTabletopInit onEffectRollHandler addEffectPre addEffectPost
+-- luacheck: globals applyOngoingDamage applyOngoingRegen customOnEffectTextDecode customOnEffectTextEncode
 local RulesetEffectManager = nil;
 
 local onEffectTextDecode = nil;

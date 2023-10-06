@@ -2,7 +2,9 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals CharManagerDnDBCE
+--
+-- luacheck: globals CharManagerDnDBCE BCEManager
+-- luacheck: globals onInit onClose customRest
 local rest = nil;
 local RulesetEffectManager = nil;
 

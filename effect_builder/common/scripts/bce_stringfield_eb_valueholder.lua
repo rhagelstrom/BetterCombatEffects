@@ -1,3 +1,5 @@
+-- luacheck: globals BCEManager
+-- luacheck: globals onInit onDrop setValue
 function onInit()
     if super and super.onInit then
         super.onInit()

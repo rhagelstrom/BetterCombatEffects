@@ -2,6 +2,10 @@
 --	  	Copyright © 2021
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+--
+-- luacheck: globals EffectManager5EBCE BCEManager ActionSaveDnDBCE EffectManagerBCE
+-- luacheck: globals onInit onClose customOnEffectAddIgnoreCheck addEffectPre5E dropConcentration
+-- luacheck: globals moddedGetEffectsByType moddedHasEffectCondition moddedHasEffect customEncodeEffectForCT customDecodeEffectFromCT
 local bAdvancedEffects = nil;
 local bUntrueEffects = nil;
 
@@ -38,9 +42,9 @@ function onInit()
     encodeEffectForCT = EffectManager5E.encodeEffectForCT;
     decodeEffectFromCT = EffectManager5E.decodeEffectFromCT;
 
-    EffectManager5E.getEffectsByType = customGetEffectsByType;
-    EffectManager5E.hasEffect = customHasEffect;
-    EffectManager5E.hasEffectCondition = customHasEffectCondition;
+    EffectManager5E.getEffectsByType = moddedGetEffectsByType;
+    EffectManager5E.hasEffect = moddedHasEffect;
+    EffectManager5E.hasEffectCondition = moddedHasEffectCondition;
     EffectManager5E.encodeEffectForCT = customEncodeEffectForCT;
     EffectManager5E.decodeEffectFromCT = customDecodeEffectFromCT;
 end
@@ -53,7 +57,6 @@ function onClose()
     EffectManager5E.decodeEffectFromCT = decodeEffectFromCT;
 
     EffectManagerBCE.removeCustomPreAddEffect(EffectManager5EBCE.addEffectPre5E);
-    EffectManagerBCE.removeCustomPostAddEffect(EffectManager5EBCE.addEffectPost5E);
 end
 
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
@@ -149,7 +152,8 @@ function dropConcentration(rNewEffect, nDuration)
     end
 end
 
-function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
+-- luacheck: push ignore 561
+function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
     if not rActor then
         return {};
     end
@@ -245,6 +249,7 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                             end
                             if StringManager.contains(DataCommon.bonustypes, s) or StringManager.contains(DataCommon.connectors, s) then
                                 -- SKIP
+                                j=j;
                             elseif StringManager.contains(DataCommon.conditions, s) then
                                 table.insert(aEffectConditionFilter, s);
                             elseif StringManager.contains(DataCommon.dmgtypes, s) or s == 'all' then
@@ -374,12 +379,13 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     -- RESULTS
     return results;
 end
+-- luacheck: pop
 
-function customHasEffectCondition(rActor, sEffect)
+function moddedHasEffectCondition(rActor, sEffect)
     return EffectManager5E.hasEffect(rActor, sEffect, nil, false, true);
 end
 
-function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
+function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
     if not sEffect or not rActor then
         return false;
     end
@@ -477,7 +483,7 @@ function customEncodeEffectForCT(rEffect)
     BCEManager.chat('customEncodeEffectForCT : ', rEffect);
     local sReturn = encodeEffectForCT(rEffect);
     if rEffect.sChangeState and rEffect.sChangeState ~= '' then
-        sReturn = sReturn:sub(0,-2) .. string.format(' (S:%s)]', rEffect.sChangeState:upper());
+        sReturn = sReturn:sub(0, -2) .. string.format(' (S:%s)]', rEffect.sChangeState:upper());
     end
     return sReturn;
 end

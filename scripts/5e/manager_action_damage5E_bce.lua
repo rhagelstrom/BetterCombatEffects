@@ -2,48 +2,31 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+--
+-- luacheck: globals ActionDamage5EBCE BCEManager ActionDamageDnDBCE
+-- luacheck: globals onInit onClose customApplyDamage customGetDamageAdjust getReductionType applyDamage
 local getDamageAdjust = nil;
-applyDamage = nil;
+local applyDamageOriginal = nil;
 
 function onInit()
     getDamageAdjust = ActionDamage.getDamageAdjust;
-    applyDamage = ActionDamage.applyDamage;
+    applyDamageOriginal = ActionDamage.applyDamage;
     ActionDamage.getDamageAdjust = customGetDamageAdjust;
     ActionDamage.applyDamage = customApplyDamage;
-    -- ActionDamage.checkNumericalReductionType = checkNumericalReductionType;
 end
 
 function onClose()
     ActionDamage.getDamageAdjust = getDamageAdjust;
-    ActionDamage.applyDamage = applyDamage;
+    ActionDamage.applyDamage = applyDamageOriginal;
 end
 
 function customApplyDamage(rSource, rTarget, rRoll, ...)
     ActionDamageDnDBCE.applyDamageBCE(rSource, rTarget, rRoll, ...)
 end
 
--- Ruleset Bug but we will leave here dark for now incase SW decides it's not worth fixing.
-
--- function checkNumericalReductionType(aReduction, aDmgType, nLimit)
--- 	local nAdjust = 0;
---     local  nSpecificAdjust;
--- 	for _,sDmgType in pairs(aDmgType) do
--- 		if nLimit then
--- 			nSpecificAdjust = ActionDamage.checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType, nLimit);
--- 			nAdjust = nAdjust + nSpecificAdjust;
--- 		else
--- 			nAdjust = nAdjust + ActionDamage.checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType);
--- 		end
--- 	end
---     if nLimit then
---         local nGlobalAdjust = ActionDamage.checkNumericalReductionTypeHelper(aReduction["all"], aDmgType, nLimit - nSpecificAdjust);
---         nAdjust = nAdjust + nGlobalAdjust;
---     else
---         nAdjust = nAdjust + ActionDamage.checkNumericalReductionTypeHelper(aReduction["all"], aDmgType);
---     end
-
--- 	return nAdjust;
--- end
+function applyDamage(rSource, rTarget, rRoll, ...)
+    applyDamageOriginal(rSource, rTarget, rRoll.bSecret, rRoll.sType, rRoll.sDesc, rRoll.nTotal, ...);
+end
 
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
     BCEManager.chat('customGetDamageAdjust : ');

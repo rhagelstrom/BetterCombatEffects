@@ -2,7 +2,9 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals ActionDamageDnDBCE
+--
+-- luacheck: globals ActionDamageDnDBCE BCEManager ActionDamage5EBCE ActionDamage4EBCE ActionDamage35EBCE EffectManagerBCE
+-- luacheck: globals onInit onClose onTabletopInit setProcessEffectOnDamage applyDamageBCE getTempHPAndWounds
 local RulesetEffectManager = nil;
 local RulesetActionDamageManager = nil
 local fProcessEffectOnDamage;
@@ -41,12 +43,12 @@ end
 -- 5E   function customApplyDamage(rSource, rTarget, rRoll, ...)
 function applyDamageBCE(rSource, rTarget, rRoll, ...)
     BCEManager.chat('applyDamageBCE : ');
-    --Some situations can have nil source such as drag damage from chat
+    -- Some situations can have nil source such as drag damage from chat
     if not rSource or not rTarget or not rRoll then
         return RulesetActionDamageManager.applyDamage(rSource, rTarget, rRoll, ...);
     end
 
-    if rRoll.sType ~= 'damage'  or (rRoll.sType == 'damage' and rRoll.nTotal < 0) then
+    if rRoll.sType ~= 'damage' or (rRoll.sType == 'damage' and rRoll.nTotal < 0) then
         return RulesetActionDamageManager.applyDamage(rSource, rTarget, rRoll, ...);
     end
     local nodeTarget = ActorManager.getCTNode(rTarget);
@@ -81,13 +83,13 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
-            if sTag =='DMGAT' then
+            if sTag == 'DMGAT' then
                 BCEManager.chat('ACTIVATE: ');
                 BCEManager.modifyEffect(tEffect.sEffectNode, 'Activate');
-            elseif sTag =='DMGDT' then
+            elseif sTag == 'DMGDT' then
                 BCEManager.chat('DEACTIVATE: ');
                 BCEManager.modifyEffect(tEffect.sEffectNode, 'Deactivate');
-            elseif sTag =='DMGRT' then
+            elseif sTag == 'DMGRT' then
                 BCEManager.chat('REMOVE: ');
                 BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
             end
@@ -101,10 +103,10 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
         for _, tEffect in pairs(tMatch) do
-            if sTag =='TDMGADDT' then
+            if sTag == 'TDMGADDT' then
                 BCEManager.chat('TDMGADDT: ');
                 BCEManager.notifyAddEffect(nodeTarget, nodeTarget, tEffect.remainder[1]);
-            elseif sTag =='TDMGADDS' then
+            elseif sTag == 'TDMGADDS' then
                 BCEManager.chat('TDMGADDS: ');
                 BCEManager.notifyAddEffect(nodeSource, nodeTarget, tEffect.remainder[1]);
             end
@@ -114,11 +116,11 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, nil, rTarget);
         for _, tEffect in pairs(tMatch) do
-            if sTag =='SDMGADDT' then
+            if sTag == 'SDMGADDT' then
                 BCEManager.chat('SDMGADDT: ');
 
                 BCEManager.notifyAddEffect(nodeTarget, nodeSource, tEffect.remainder[1]);
-            elseif sTag =='SDMGADDS' then
+            elseif sTag == 'SDMGADDS' then
                 BCEManager.chat('SDMGADDS: ');
                 BCEManager.notifyAddEffect(nodeSource, nodeSource, tEffect.remainder[1]);
             end

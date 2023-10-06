@@ -10,5 +10,4 @@
 	<script name="EffectManagerDnDBCE" file="scripts/dnd/manager_effect_dnd_bce.lua" />
 	<script name="EffectConditionalManagerDnDBCE" file="scripts/dnd/manager_effect_conditional_dnd_bce.lua" />
 	<script name="PowerActionManagerCoreDnDBCE" file="scripts/dnd/manager_power_action_core_dnd_bce.lua" />
-	<script name="StringManagerDnDBCE" file="scripts/dnd/manager_string_dnd_bce.lua" />
 </root>

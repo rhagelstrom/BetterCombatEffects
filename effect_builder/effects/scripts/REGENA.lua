@@ -1,3 +1,4 @@
+-- luacheck: globals createEffectString effect_temphp dice_value
 function createEffectString()
     local effectString = parentcontrol.window.effect.getStringValue()
     if effect_temphp.getValue() > 0 then

@@ -2,7 +2,9 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
--- luacheck: globals BCEDnDManager
+--
+-- luacheck: globals BCEDnDManager BCEManager
+-- luacheck: globals onInit onClose replaceAbilityScores
 local bMadNomadCharSheetEffectDisplay = false;
 local RulesetActorManager = nil;
 
@@ -13,7 +15,6 @@ end
 
 function onClose()
 end
-
 
 -- Any effect that modifies ability score and is coded with -X
 -- has the -X replaced with the targets ability score and then calculated

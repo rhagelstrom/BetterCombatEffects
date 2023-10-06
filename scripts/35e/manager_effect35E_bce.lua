@@ -2,6 +2,10 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+--
+-- luacheck: globals EffectManager35EBCE EffectManagerBCE BCEManager ActionSaveDnDBCE
+-- luacheck: globals onInit onClose customOnEffectAddIgnoreCheck addEffectPre35E moddedGetEffectsByType isValidCheckEffect
+-- luacheck: globals moddedHasEffectCondition moddedHasEffect kelGetEffectsByType kelHasEffectCondition kelHasEffect
 local bAdvancedEffects = nil;
 local bOverlays = nil;
 local getEffectsByType = nil;
@@ -9,13 +13,13 @@ local hasEffect = nil;
 local hasEffectCondition = nil;
 
 function onInit()
-    EffectManagerBCE.setCustomPreAddEffect(addEffectPre5E)
+    EffectManagerBCE.setCustomPreAddEffect(addEffectPre35E)
 
     bAdvancedEffects = BCEManager.hasExtension('FG-PFRPG-Advanced-Effects');
     bOverlays = (BCEManager.hasExtension('Feature: Extended automation and overlays') or
-                BCEManager.hasExtension('Feature: StrainInjury plus extended automation and alternative overlays') or
-                BCEManager.hasExtension('Feature: StrainInjury plus extended automation and overlays') or
-                BCEManager.hasExtension('Feature: Extended automation and alternative overlays'));
+                    BCEManager.hasExtension('Feature: StrainInjury plus extended automation and alternative overlays') or
+                    BCEManager.hasExtension('Feature: StrainInjury plus extended automation and overlays') or
+                    BCEManager.hasExtension('Feature: Extended automation and alternative overlays'));
 
     getEffectsByType = EffectManager35E.getEffectsByType;
     hasEffect = EffectManager35E.hasEffect;
@@ -26,9 +30,9 @@ function onInit()
         EffectManager35E.hasEffect = kelHasEffect;
         EffectManager35E.hasEffectCondition = kelHasEffectCondition;
     else
-        EffectManager35E.getEffectsByType = customGetEffectsByType;
-        EffectManager35E.hasEffect = customHasEffect;
-        EffectManager35E.hasEffectCondition = customHasEffectCondition;
+        EffectManager35E.getEffectsByType = moddedGetEffectsByType;
+        EffectManager35E.hasEffect = moddedHasEffect;
+        EffectManager35E.hasEffectCondition = moddedHasEffectCondition;
     end
 end
 
@@ -37,31 +41,30 @@ function onClose()
     EffectManager35E.hasEffect = hasEffect;
     EffectManager35E.hasEffectCondition = hasEffectCondition;
 
-    EffectManagerBCE.removeCustomPreAddEffect(addEffectPre35E);
+    EffectManagerBCE.removeCustomPreAddEffect(EffectManager35EBCE.addEffectPre35E);
 end
 
 -- This is likely where we will conflict with any other extensions
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
-	local sDuplicateMsg = nil
-	local nodeEffectsList = DB.getChild(nodeCT,"effects")
-	if not nodeEffectsList then
-		return sDuplicateMsg
-	end
-	if  not rEffect.sName:match("STACK") then
-		for _, nodeEffect in ipairs(DB.getChildList(nodeEffectsList)) do
-			if (DB.getValue(nodeEffect, "label", "") == rEffect.sName) and
-					(DB.getValue(nodeEffect, "init", 0) == rEffect.nInit) and
-					(DB.getValue(nodeEffect, "duration", 0) == rEffect.nDuration) and
-					(DB.getValue(nodeEffect,"source_name", "") == rEffect.sSource) then
-				sDuplicateMsg = string.format("%s ['%s'] -> [%s]", Interface.getString("effect_label"), rEffect.sName, Interface.getString("effect_status_exists"))
-				break
-			end
-		end
-	end
-	return sDuplicateMsg
+    local sDuplicateMsg = nil
+    local nodeEffectsList = DB.getChild(nodeCT, 'effects')
+    if not nodeEffectsList then
+        return sDuplicateMsg
+    end
+    if not rEffect.sName:match('STACK') then
+        for _, nodeEffect in ipairs(DB.getChildList(nodeEffectsList)) do
+            if (DB.getValue(nodeEffect, 'label', '') == rEffect.sName) and (DB.getValue(nodeEffect, 'init', 0) == rEffect.nInit) and
+                (DB.getValue(nodeEffect, 'duration', 0) == rEffect.nDuration) and (DB.getValue(nodeEffect, 'source_name', '') == rEffect.sSource) then
+                sDuplicateMsg = string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), rEffect.sName,
+                                              Interface.getString('effect_status_exists'))
+                break
+            end
+        end
+    end
+    return sDuplicateMsg
 end
 
---function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
+-- function addEffectPre35E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 function addEffectPre35E(_, _, nodeCT, rNewEffect, _)
     BCEManager.chat('addEffectPre35E : ');
     local rActor = ActorManager.resolveActor(nodeCT);
@@ -79,8 +82,8 @@ function addEffectPre35E(_, _, nodeCT, rNewEffect, _)
     -- Effect that has FROMAURA;
 
     if not rNewEffect.sName:upper():find('FROMAURA;') then
-        rNewEffect = moveModtoMod(rNewEffect); -- Eventually we can get rid of this. Used to replace old format with New
-        rNewEffect = replaceSaveDC(rNewEffect, rSource);
+        rNewEffect = ActionSaveDnDBCE.moveModtoMod(rNewEffect); -- Eventually we can get rid of this. Used to replace old format with New
+        rNewEffect = ActionSaveDnDBCE.replaceSaveDC(rNewEffect, rSource);
 
         local aOriginalComps = EffectManager.parseEffect(rNewEffect.sName);
 
@@ -94,7 +97,7 @@ function addEffectPre35E(_, _, nodeCT, rNewEffect, _)
     return false
 end
 
-function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly) -- luacheck: ignore (cyclomatic complexity)
+function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly) -- luacheck: ignore (cyclomatic complexity)
     local results = {}
     if not rActor then
         return results
@@ -290,7 +293,6 @@ function customGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 end
 
 ---	This function returns false if the effect is tied to an item and the item is not being used.
---	luacheck: globals isValidCheckEffect
 function isValidCheckEffect(rActor, nodeEffect)
     if DB.getValue(nodeEffect, 'isactive', 0) ~= 0 then
         local bActionItemUsed, bActionOnly = false, false
@@ -336,13 +338,12 @@ function isValidCheckEffect(rActor, nodeEffect)
     end
 end
 
-function customHasEffectCondition(rActor, sEffect)
+function moddedHasEffectCondition(rActor, sEffect)
     return EffectManager35E.hasEffect(rActor, sEffect, nil, false, true);
 end
 
-
 --	replace 3.5E EffectManager35E manager_effect_35E.lua hasEffect() with this
-function customHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
+function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
     if not sEffect or not rActor then
         return false
     end
@@ -434,6 +435,7 @@ end
 -------------------KELRUGEM START----------------------
 
 -- KEL add tags
+-- luacheck: push ignore 561
 function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly, rEffectSpell)
     if not rActor then
         return {};
@@ -569,6 +571,7 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                         while aComponents[j] do
                             if StringManager.contains(DataCommon.dmgtypes, aComponents[j]) or StringManager.contains(DataCommon.bonustypes, aComponents[j]) or
                                 aComponents[j] == 'all' then
+                                    j=j;
                                 -- Skip
                             elseif StringManager.contains(DataCommon.rangetypes, aComponents[j]) then
                                 table.insert(aEffectRangeFilter, aComponents[j]);
@@ -663,10 +666,11 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
 
     return results;
 end
+-- luacheck: pop
 
 -- KEL Adding tags and IFTAG to
 function kelHasEffectCondition(rActor, sEffect, rEffectSpell)
-    return  kelHasEffect(rActor, sEffect, nil, false, true, rEffectSpell);
+    return kelHasEffect(rActor, sEffect, nil, false, true, rEffectSpell);
 end
 -- KEL add counter to hasEffect needed for dis/adv
 function kelHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets, rEffectSpell)

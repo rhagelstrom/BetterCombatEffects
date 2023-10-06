@@ -1,3 +1,4 @@
+-- luacheck: globals onInit shouldLoadEffects
 local extensions = {}
 
 function onInit()

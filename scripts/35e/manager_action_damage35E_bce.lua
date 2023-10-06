@@ -2,6 +2,9 @@
 --	  	Copyright © 2021-2023
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
+--
+-- luacheck: globals ActionDamage35EBCE BCEManager ActionDamageDnDBCE
+-- luacheck: globals onInit onClose customApplyDamage applyDamage
 local applyDamageOriginal = nil;
 
 function onInit()
