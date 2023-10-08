@@ -55,7 +55,9 @@ function customEvalAction(rActor, nodePower, rAction)
         if rSave.saveBase == 'group' then
             local aPowerGroup = PowerManager.getPowerGroupRecord(rActor, nodePower);
             if aPowerGroup and aPowerGroup.sSaveDCStat then
-                nDC = 8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sSaveDCStat) + rSave.saveMod + nSDCBonus;
+                nDC =
+                    8 + aPowerGroup.nSaveDCMod + ActorManager5E.getAbilityBonus(rActor, aPowerGroup.sSaveDCStat) + rSave.saveMod +
+                        nSDCBonus;
                 if aPowerGroup.nSaveDCProf == 1 then
                     nDC = nDC + ActorManager5E.getAbilityBonus(rActor, 'prf');
                 end
@@ -124,7 +126,8 @@ function moddedParseEffects(sPowerName, aWords)
                     end
                     rCurrent.endindex = nTrigger;
 
-                    if StringManager.isWord(aWords[rCurrent.startindex - 1], 'takes') and StringManager.isWord(aWords[rCurrent.startindex - 2], 'and') and
+                    if StringManager.isWord(aWords[rCurrent.startindex - 1], 'takes') and
+                        StringManager.isWord(aWords[rCurrent.startindex - 2], 'and') and
                         StringManager.isWord(aWords[rCurrent.startindex - 3], DataCommon.conditions) then
                         rCurrent.startindex = rCurrent.startindex - 2;
                     end
@@ -169,7 +172,8 @@ function moddedParseEffects(sPowerName, aWords)
                 end
             end
             -- Handle ongoing saves
-        elseif StringManager.isWord(aWords[i], 'repeat') and StringManager.isWord(aWords[i + 2], 'saving') and StringManager.isWord(aWords[i + 3], 'throw') then
+        elseif StringManager.isWord(aWords[i], 'repeat') and StringManager.isWord(aWords[i + 2], 'saving') and
+            StringManager.isWord(aWords[i + 3], 'throw') then
             local tSaves = PowerManager.parseSaves(sPowerName, aWords, false, false);
             local aSave = tSaves[#tSaves];
             if not aSave then
@@ -255,7 +259,8 @@ function moddedParseEffects(sPowerName, aWords)
                     if #effects == 0 then
                         break
                     elseif effects[#effects].endindex ~= j - 1 then
-                        if not StringManager.isWord(aWords[i], 'unconscious') and not StringManager.isWord(aWords[j - 1], 'minutes') then
+                        if not StringManager.isWord(aWords[i], 'unconscious') and
+                            not StringManager.isWord(aWords[j - 1], 'minutes') then
                             break
                         end
                     end
@@ -264,7 +269,8 @@ function moddedParseEffects(sPowerName, aWords)
 
                 elseif StringManager.isWord(aWords[j], 'is') then
                     if bValidCondition or StringManager.isWord(aWords[i], 'prone') or
-                        (StringManager.isWord(aWords[i], 'invisible') and StringManager.isWord(aWords[j - 1], {'wearing', 'wears', 'carrying', 'carries'})) then
+                        (StringManager.isWord(aWords[i], 'invisible') and
+                            StringManager.isWord(aWords[j - 1], {'wearing', 'wears', 'carrying', 'carries'})) then
                         break
                     end
                     bValidCondition = true;
@@ -284,7 +290,8 @@ function moddedParseEffects(sPowerName, aWords)
                         break
                     end
 
-                elseif StringManager.isWord(aWords[j], {'knock', 'knocks', 'knocked', 'fall', 'falls'}) and StringManager.isWord(aWords[i], 'prone') then
+                elseif StringManager.isWord(aWords[j], {'knock', 'knocks', 'knocked', 'fall', 'falls'}) and
+                    StringManager.isWord(aWords[i], 'prone') then
                     bValidCondition = true;
                     nConditionStart = j;
 
@@ -294,7 +301,8 @@ function moddedParseEffects(sPowerName, aWords)
                         StringManager.isWord(aWords[j - 2], 'instead') then
                         break
                     end
-                    if StringManager.isWord(aWords[j], 'fall') and StringManager.isWord(aWords[j - 1], 'you') and StringManager.isWord(aWords[j - 1], 'if') then
+                    if StringManager.isWord(aWords[j], 'fall') and StringManager.isWord(aWords[j - 1], 'you') and
+                        StringManager.isWord(aWords[j - 1], 'if') then
                         break
                     end
                     if StringManager.isWord(aWords[j], 'falls') and StringManager.isWord(aWords[j - 1], 'or') then
@@ -311,7 +319,8 @@ function moddedParseEffects(sPowerName, aWords)
                     nConditionStart = j;
                     break
 
-                elseif StringManager.isWord(aWords[j], {'turns', 'become', 'becomes'}) and StringManager.isWord(aWords[i], {'invisible'}) then
+                elseif StringManager.isWord(aWords[j], {'turns', 'become', 'becomes'}) and
+                    StringManager.isWord(aWords[i], {'invisible'}) then
                     if StringManager.isWord(aWords[j - 1], {'can\'t', 'cannot'}) then
                         break
                     end
@@ -364,7 +373,8 @@ function moddedParseEffects(sPowerName, aWords)
         if StringManager.isWord(aWords[i], 'duration') and StringManager.isWord(aWords[i + 1], ':') then
             local j = i + 2;
             local bConc = false;
-            if StringManager.isWord(aWords[j], 'concentration') and StringManager.isWord(aWords[j + 1], 'up') and StringManager.isWord(aWords[j + 2], 'to') then
+            if StringManager.isWord(aWords[j], 'concentration') and StringManager.isWord(aWords[j + 1], 'up') and
+                StringManager.isWord(aWords[j + 2], 'to') then
                 bConc = true;
                 j = j + 3;
             end
@@ -411,8 +421,8 @@ end
 function getTurnModifier(aWords, i)
     local sRemoveTurn = '';
     while aWords[i] do
-        if StringManager.isWord(aWords[i], 'until') and StringManager.isWord(aWords[i + 1], 'the') and StringManager.isWord(aWords[i + 2], {'start', 'end'}) and
-            StringManager.isWord(aWords[i + 3], 'of') then
+        if StringManager.isWord(aWords[i], 'until') and StringManager.isWord(aWords[i + 1], 'the') and
+            StringManager.isWord(aWords[i + 2], {'start', 'end'}) and StringManager.isWord(aWords[i + 3], 'of') then
             if StringManager.isWord(aWords[i + 4], 'its') then
                 if StringManager.isWord(aWords[i + 2], 'start') then
                     sRemoveTurn = 'TURNRS';

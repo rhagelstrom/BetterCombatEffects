@@ -54,7 +54,8 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
     if not rEffect.sName:match('STACK') then
         for _, nodeEffect in ipairs(DB.getChildList(nodeEffectsList)) do
             if (DB.getValue(nodeEffect, 'label', '') == rEffect.sName) and (DB.getValue(nodeEffect, 'init', 0) == rEffect.nInit) and
-                (DB.getValue(nodeEffect, 'duration', 0) == rEffect.nDuration) and (DB.getValue(nodeEffect, 'source_name', '') == rEffect.sSource) then
+                (DB.getValue(nodeEffect, 'duration', 0) == rEffect.nDuration) and
+                (DB.getValue(nodeEffect, 'source_name', '') == rEffect.sSource) then
                 sDuplicateMsg = string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), rEffect.sName,
                                               Interface.getString('effect_status_exists'))
                 break
@@ -97,6 +98,7 @@ function addEffectPre35E(_, _, nodeCT, rNewEffect, _)
     return false
 end
 
+-- luacheck: push ignore 561
 function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly) -- luacheck: ignore (cyclomatic complexity)
     local results = {}
     if not rActor then
@@ -127,12 +129,13 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     -- Iterate through effects
     for _, v in pairs(aEffects) do
         local nActive = DB.getValue(v, 'isactive', 0);
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
 
         -- Check effect is from used weapon.
-        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or
-            (bAdvancedEffects and ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
+        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or (bAdvancedEffects and
+            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
             -- Check targeting
             local bTargeted = EffectManager.isTargetedEffect(v)
             if not bTargeted or EffectManager.isEffectTarget(v, rFilterActor) then
@@ -182,7 +185,8 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 repeat
                                     local nStartAND, nEndAND = vPhraseOR:find('%s+and%s+', nTempIndexAND)
                                     if nStartAND then
-                                        local sInsert = StringManager.trim(vPhraseOR:sub(nTempIndexAND, nStartAND - nTempIndexAND))
+                                        local sInsert =
+                                            StringManager.trim(vPhraseOR:sub(nTempIndexAND, nStartAND - nTempIndexAND))
                                         table.insert(aComponents, sInsert)
                                         nTempIndexAND = nEndAND
                                     else
@@ -194,8 +198,8 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                         end
                         local j = 1
                         while aComponents[j] do
-                            if StringManager.contains(DataCommon.dmgtypes, aComponents[j]) or StringManager.contains(DataCommon.bonustypes, aComponents[j]) or
-                                aComponents[j] == 'all' then -- luacheck: ignore
+                            if StringManager.contains(DataCommon.dmgtypes, aComponents[j]) or
+                                StringManager.contains(DataCommon.bonustypes, aComponents[j]) or aComponents[j] == 'all' then -- luacheck: ignore
                                 -- Skip
                             elseif StringManager.contains(DataCommon.rangetypes, aComponents[j]) then
                                 table.insert(aEffectRangeFilter, aComponents[j])
@@ -291,6 +295,7 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 
     return results
 end
+-- luacheck: pop
 
 ---	This function returns false if the effect is tied to an item and the item is not being used.
 function isValidCheckEffect(rActor, nodeEffect)
@@ -342,6 +347,7 @@ function moddedHasEffectCondition(rActor, sEffect)
     return EffectManager35E.hasEffect(rActor, sEffect, nil, false, true);
 end
 
+-- luacheck: push ignore 561
 --	replace 3.5E EffectManager35E manager_effect_35E.lua hasEffect() with this
 function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
     if not sEffect or not rActor then
@@ -361,14 +367,15 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     -- Iterate through effects
     for _, v in pairs(aEffects) do
         local nActive = DB.getValue(v, 'isactive', 0)
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
 
         -- COMPATIBILITY FOR ADVANCED EFFECTS
         -- to add support for AE in other extensions, make this change
         -- original line: if nActive ~= 0 then
-        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or
-            (bAdvancedEffects and ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
+        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or (bAdvancedEffects and
+            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
             -- END COMPATIBILITY FOR ADVANCED EFFECTS
 
             -- Parse each effect label
@@ -431,6 +438,7 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     end
     return false
 end
+-- luacheck: pop
 
 -------------------KELRUGEM START----------------------
 
@@ -470,15 +478,16 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
     for _, v in pairs(aEffects) do
         -- Check active
         local nActive = DB.getValue(v, 'isactive', 0);
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
 
         -- COMPATIBILITY FOR ADVANCED EFFECTS
         -- to add support for AE in other extensions, make this change
         -- Check effect is from used weapon.
         -- original line: if nActive ~= 0 then
-        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or
-            (bAdvancedEffects and ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
+        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or (bAdvancedEffects and
+            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
             -- END COMPATIBILITY FOR ADVANCED EFFECTS
 
             -- Check targeting
@@ -494,7 +503,8 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                     -- Handle conditionals
                     -- KEL adding TAG for SAVE
                     if rEffectComp.type == 'IF' then
-                        if not EffectManager35E.checkConditional(rActor, v, rEffectComp.remainder, rFilterActor, false, rEffectSpell) then
+                        if not EffectManager35E.checkConditional(rActor, v, rEffectComp.remainder, rFilterActor, false,
+                                                                 rEffectSpell) then
                             break
                         end
                     elseif rEffectComp.type == 'NIF' then
@@ -515,7 +525,8 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                         if not rFilterActor then
                             break
                         end
-                        if not EffectManager35E.checkConditional(rFilterActor, v, rEffectComp.remainder, rActor, false, rEffectSpell) then
+                        if not EffectManager35E.checkConditional(rFilterActor, v, rEffectComp.remainder, rActor, false,
+                                                                 rEffectSpell) then
                             break
                         end
                         bTargeted = true;
@@ -557,7 +568,8 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                                 repeat
                                     local nStartAND, nEndAND = vPhraseOR:find('%s+and%s+', nTempIndexAND);
                                     if nStartAND then
-                                        local sInsert = StringManager.trim(vPhraseOR:sub(nTempIndexAND, nStartAND - nTempIndexAND));
+                                        local sInsert =
+                                            StringManager.trim(vPhraseOR:sub(nTempIndexAND, nStartAND - nTempIndexAND));
                                         table.insert(aComponents, sInsert);
                                         nTempIndexAND = nEndAND;
                                     else
@@ -569,9 +581,9 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                         end
                         local j = 1;
                         while aComponents[j] do
-                            if StringManager.contains(DataCommon.dmgtypes, aComponents[j]) or StringManager.contains(DataCommon.bonustypes, aComponents[j]) or
-                                aComponents[j] == 'all' then
-                                    j=j;
+                            if StringManager.contains(DataCommon.dmgtypes, aComponents[j]) or
+                                StringManager.contains(DataCommon.bonustypes, aComponents[j]) or aComponents[j] == 'all' then
+                                j = j;
                                 -- Skip
                             elseif StringManager.contains(DataCommon.rangetypes, aComponents[j]) then
                                 table.insert(aEffectRangeFilter, aComponents[j]);
@@ -672,6 +684,7 @@ end
 function kelHasEffectCondition(rActor, sEffect, rEffectSpell)
     return kelHasEffect(rActor, sEffect, nil, false, true, rEffectSpell);
 end
+-- luacheck: push ignore 561
 -- KEL add counter to hasEffect needed for dis/adv
 function kelHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets, rEffectSpell)
     if not sEffect or not rActor then
@@ -690,13 +703,14 @@ function kelHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTarg
     end
     for _, v in pairs(aEffects) do
         local nActive = DB.getValue(v, 'isactive', 0);
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
         -- COMPATIBILITY FOR ADVANCED EFFECTS
         -- to add support for AE in other extensions, make this change
         -- original line: if nActive ~= 0 then
-        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or
-            (bAdvancedEffects and ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
+        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or (bAdvancedEffects and
+            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
             -- END COMPATIBILITY FOR ADVANCED EFFECTS
 
             -- Parse each effect label
@@ -792,4 +806,5 @@ function kelHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTarg
     end
     return false, 0;
 end
+-- luacheck: pop
 -------------------KELRUGEM END----------------------

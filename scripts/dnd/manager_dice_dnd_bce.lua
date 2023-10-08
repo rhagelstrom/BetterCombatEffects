@@ -50,7 +50,9 @@ function isDie(rTarget, rEffect, sNodeEffect)
         if #aWords > 0 then
             local sType = aWords[1]:match('^([^:]+):');
             -- Only roll dice for ability score mods
-            if sType and (sType == 'STR' or sType == 'DEX' or sType == 'CON' or sType == 'INT' or sType == 'WIS' or sType == 'CHA' or sType == 'DMGR') then
+            if sType and
+                (sType == 'STR' or sType == 'DEX' or sType == 'CON' or sType == 'INT' or sType == 'WIS' or sType == 'CHA' or sType ==
+                    'DMGR') then
                 local sValueCheck;
                 local sTypeRemainder = aWords[1]:sub(#sType + 2);
                 if sTypeRemainder == '' then

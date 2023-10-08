@@ -129,6 +129,7 @@ function addEffectPre4E(_, _, nodeCT, rNewEffect, _)
     return false;
 end
 
+-- luacheck: push ignore 561
 function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTargetedOnly)
     if not rActor then
         return {};
@@ -164,7 +165,8 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     for _, v in pairs(aEffects) do
         -- Check active
         local nActive = DB.getValue(v, 'isactive', 0);
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
         if (bActive or nActive ~= 0) then
             local sLabel = DB.getValue(v, 'label', '');
@@ -203,7 +205,8 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                         local aEffectRangeFilter = {};
                         local aEffectOtherFilter = {};
                         for _, v2 in pairs(rEffectComp.remainder) do
-                            if not (StringManager.contains(DataCommon.dmgtypes, v2) or StringManager.contains(DataCommon.bonustypes, v2) or v2 == 'all') then
+                            if not (StringManager.contains(DataCommon.dmgtypes, v2) or
+                                StringManager.contains(DataCommon.bonustypes, v2) or v2 == 'all') then
                                 -- Skip
                                 if StringManager.contains(DataCommon.rangetypes, v2) then
                                     table.insert(aEffectRangeFilter, v2);
@@ -298,18 +301,18 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
     end -- END EFFECT LOOP
     return results;
 end
+-- luacheck: pop
 
 function moddedHasEffectCondition(rActor, sEffect)
     return EffectManager4E.hasEffect(rActor, sEffect, nil, false, true);
 end
 
+-- luacheck: push ignore 561
 function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
     if not sEffect or not rActor then
         return false;
     end
     local tEffectCompParams = EffectManagerBCE.getEffectCompType(sEffect);
-
-
 
     -- Handle bloodied special case
     local sLowerEffect = sEffect:lower();
@@ -332,8 +335,9 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     local aMatch = {};
     for _, v in pairs(aEffects) do
         local nActive = DB.getValue(v, 'isactive', 0);
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
-        (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+                            (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
         if nActive ~= 0 or bActive then
             -- Parse each effect label
             local sLabel = DB.getValue(v, 'label', '');
@@ -400,3 +404,4 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     end
     return false;
 end
+-- luacheck: pop

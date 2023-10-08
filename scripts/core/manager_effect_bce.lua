@@ -7,8 +7,9 @@
 -- luacheck: globals onInit onClose moddedGetEffectsByType deleteStateModified
 -- luacheck: globals customAddEffectPre registerEffectCompType getEffectCompType getLabelShort initEffectHandlers deleteEffectHandlers
 -- luacheck: globals deleteEffectHandlers expireAddHelper expireAdd setCustomMatchEffect removeCustomMatchEffect onCustomMatchEffect
--- luacheck: globals setCustomPreAddEffect removeCustomPreAddEffect onCustomPreAddEffect setCustomPostAddEffect removeCustomPostAddEffect onCustomPostAddEffect
--- luacheck: globals addSourceTurnHandler modSourceTurnHandler clearSourceTurnHandler deleteSourceTurnHandler processSourceTurn addChangeStateHandler deleteState
+-- luacheck: globals setCustomPreAddEffect removeCustomPreAddEffect onCustomPreAddEffect setCustomPostAddEffect
+-- luacheck: globals removeCustomPostAddEffect onCustomPostAddEffect addSourceTurnHandler modSourceTurnHandler clearSourceTurnHandler
+-- luacheck: globals  deleteSourceTurnHandler processSourceTurn addChangeStateHandler deleteState
 -- luacheck: globals deleteChangeStateHandler stateModified changeState activateState deactivateState removeState unregisterCombatant
 ------------------ ORIGINALS ------------------
 local addEffect = nil;
@@ -181,8 +182,8 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
             (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) and
             (DB.getValue(v, 'apply', '') == rNewEffect.sApply) and (DB.getValue(v, 'changestate', '') == rNewEffect.sChangeState) then
             if rNewEffect.nDuration ~= 0 and
-                (rNewEffect.sChangeState == 'rs' or rNewEffect.sChangeState == 'srs' or rNewEffect.sChangeState == 're' or rNewEffect.sChangeState == 'sre') and
-                DB.getValue(v, 'source_name', '') == '' then
+                (rNewEffect.sChangeState == 'rs' or rNewEffect.sChangeState == 'srs' or rNewEffect.sChangeState == 're' or rNewEffect.sChangeState ==
+                    'sre') and DB.getValue(v, 'source_name', '') == '' then
                 DB.setValue(v, 'duration', 'number', rNewEffect.nDuration + 1);
             end
             nodeEffect = v;

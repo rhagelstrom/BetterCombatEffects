@@ -5,8 +5,9 @@
 --
 -- luacheck: globals BCEManager BinarySearchManager
 -- luacheck: globals chat console getExtensions hasExtension getEffectName effectAdded effectDeleted effectIntegrityChange effectUpdated matchEffect
--- luacheck: globals sendOOB handlerCheck handleUpdateEffect handleRemoveEffect handleDeactivateEffect handleAddEffect handleActivateEffect updateEffect activateEffect modifyEffect
--- luacheck: globals notifyAddEffect getRulesetEffectManager getRulesetActorManager removeNodeHandlers addNodeLabelHandlers addNodeHandlers removeEffectHandlers printGlobalEffects
+-- luacheck: globals sendOOB handlerCheck handleUpdateEffect handleRemoveEffect handleDeactivateEffect handleAddEffect handleActivateEffect
+-- luacheck: globals updateEffect activateEffect modifyEffect notifyAddEffect getRulesetEffectManager getRulesetActorManager removeNodeHandlers
+-- luacheck: globals  addNodeLabelHandlers addNodeHandlers removeEffectHandlers printGlobalEffects
 -- luacheck: globals initGlobalEffects onModuleLoad onModuleUnload onInit onClose
 OOB_MSGTYPE_BCEACTIVATE = 'activateeffect';
 OOB_MSGTYPE_BCEDEACTIVATE = 'deactivateeffect';
@@ -21,7 +22,8 @@ local tEffectsLookup = {};
 local bDebug = false;
 
 function onInit()
-    OptionsManager.registerOption2('DEPRECATE_CHANGE_STATE', false, 'option_Better_Combat_Effects', 'option_Deprecate_Change_State', 'option_entry_cycler',
+    OptionsManager.registerOption2('DEPRECATE_CHANGE_STATE', false, 'option_Better_Combat_Effects', 'option_Deprecate_Change_State',
+                                   'option_entry_cycler',
                                    {labels = 'option_val_on', values = 'on', baselabel = 'option_val_off', baseval = 'off', default = 'off'});
     if Session.IsHost then
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEACTIVATE, handleActivateEffect);
@@ -98,7 +100,8 @@ end
 
 -- function effectAdded(nodeRoot, nodeEffect)
 function effectAdded(_, nodeEffect)
-    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'insert', DB.getPath(nodeEffect));
+    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'insert',
+                                                              DB.getPath(nodeEffect));
     tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
     if not tSearchEffect then
         BCEManager.console('Problem added effect: ' .. DB.getValue(nodeEffect, 'label', ''));
@@ -108,7 +111,8 @@ function effectAdded(_, nodeEffect)
 end
 
 function effectDeleted(nodeEffect)
-    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'remove', DB.getPath(nodeEffect));
+    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'remove',
+                                                              DB.getPath(nodeEffect));
     tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
     if not tSearchEffect then
         BCEManager.chat('Problem deleting effect: ' .. DB.getValue(nodeEffect, 'label', ''));
@@ -339,7 +343,8 @@ function activateEffect(nodeActor, nodeEffect)
     local sEffect = DB.getValue(nodeEffect, 'label', '');
     local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect);
     DB.setValue(nodeEffect, 'isactive', 'number', 1);
-    local sMessage = string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), sEffect, Interface.getString('effect_status_activated'));
+    local sMessage =
+        string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), sEffect, Interface.getString('effect_status_activated'));
     EffectManager.message(sMessage, nodeActor, bGMOnly);
 end
 

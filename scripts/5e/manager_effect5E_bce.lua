@@ -16,18 +16,41 @@ local encodeEffectForCT = nil;
 local decodeEffectFromCT = nil;
 
 function onInit()
-    OptionsManager.registerOption2('ALLOW_DUPLICATE_EFFECT', false, 'option_Better_Combat_Effects', 'option_Allow_Duplicate', 'option_entry_cycler',
-                                   {labels = 'option_val_off', values = 'off', baselabel = 'option_val_on', baseval = 'on', default = 'on'});
+    OptionsManager.registerOption2('ALLOW_DUPLICATE_EFFECT', false, 'option_Better_Combat_Effects', 'option_Allow_Duplicate',
+                                   'option_entry_cycler', {
+        labels = 'option_val_off',
+        values = 'off',
+        baselabel = 'option_val_on',
+        baseval = 'on',
+        default = 'on'
+    });
 
-    OptionsManager.registerOption2('CONSIDER_DUPLICATE_DURATION', false, 'option_Better_Combat_Effects', 'option_Consider_Duplicate_Duration',
-                                   'option_entry_cycler',
-                                   {labels = 'option_val_on', values = 'on', baselabel = 'option_val_off', baseval = 'off', default = 'off'});
+    OptionsManager.registerOption2('CONSIDER_DUPLICATE_DURATION', false, 'option_Better_Combat_Effects',
+                                   'option_Consider_Duplicate_Duration', 'option_entry_cycler', {
+        labels = 'option_val_on',
+        values = 'on',
+        baselabel = 'option_val_off',
+        baseval = 'off',
+        default = 'off'
+    });
 
-    OptionsManager.registerOption2('RESTRICT_CONCENTRATION', false, 'option_Better_Combat_Effects', 'option_Concentrate_Restrict', 'option_entry_cycler',
-                                   {labels = 'option_val_on', values = 'on', baselabel = 'option_val_off', baseval = 'off', default = 'off'});
+    OptionsManager.registerOption2('RESTRICT_CONCENTRATION', false, 'option_Better_Combat_Effects', 'option_Concentrate_Restrict',
+                                   'option_entry_cycler', {
+        labels = 'option_val_on',
+        values = 'on',
+        baselabel = 'option_val_off',
+        baseval = 'off',
+        default = 'off'
+    });
 
-    OptionsManager.registerOption2('AUTOPARSE_EFFECTS', false, 'option_Better_Combat_Effects', 'option_Autoparse_Effects', 'option_entry_cycler',
-                                   {labels = 'option_val_on', values = 'on', baselabel = 'option_val_off', baseval = 'off', default = 'off'});
+    OptionsManager.registerOption2('AUTOPARSE_EFFECTS', false, 'option_Better_Combat_Effects', 'option_Autoparse_Effects',
+                                   'option_entry_cycler', {
+        labels = 'option_val_on',
+        values = 'on',
+        baselabel = 'option_val_off',
+        baseval = 'off',
+        default = 'off'
+    });
 
     EffectManagerBCE.setCustomPreAddEffect(EffectManager5EBCE.addEffectPre5E)
     EffectManager.setCustomOnEffectAddIgnoreCheck(EffectManager5EBCE.customOnEffectAddIgnoreCheck)
@@ -143,7 +166,8 @@ function dropConcentration(rNewEffect, nDuration)
                 local sEffect = DB.getValue(nodeEffect, 'label', '');
                 tEffectComps = EffectManager.parseEffect(sEffect);
                 local sEffectTag = tEffectComps[1];
-                if (sEffect:match('%(C%)') and (DB.getValue(nodeEffect, 'source_name', '') == sSource)) and (sEffectTag ~= sNewEffectTag) or
+                if (sEffect:match('%(C%)') and (DB.getValue(nodeEffect, 'source_name', '') == sSource)) and
+                    (sEffectTag ~= sNewEffectTag) or
                     ((sEffectTag == sNewEffectTag and (DB.getValue(nodeEffect, 'duration', 0) ~= nDuration))) then
                     BCEManager.modifyEffect(nodeEffect, 'Remove', sEffect);
                 end
@@ -192,11 +216,12 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
         -- Check active
         local nActive = DB.getValue(v, 'isactive', 0);
         -- BCEManager.chat(v)
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
 
-        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or
-            (bAdvancedEffects and ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or EffectManagerADND.isValidCheckEffect(rActor, v))) then
+        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or (bAdvancedEffects and
+            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or EffectManagerADND.isValidCheckEffect(rActor, v))) then
             local sLabel = DB.getValue(v, 'label', '');
             local sApply = DB.getValue(v, 'apply', '');
             -- IF COMPONENT WE ARE LOOKING FOR SUPPORTS TARGETS, THEN CHECK AGAINST OUR TARGET
@@ -247,9 +272,10 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                             if #s > 0 and ((s:sub(1, 1) == '!') or (s:sub(1, 1) == '~')) then
                                 s = s:sub(2);
                             end
-                            if StringManager.contains(DataCommon.bonustypes, s) or StringManager.contains(DataCommon.connectors, s) then
+                            if StringManager.contains(DataCommon.bonustypes, s) or
+                                StringManager.contains(DataCommon.connectors, s) then
                                 -- SKIP
-                                j=j;
+                                j = j;
                             elseif StringManager.contains(DataCommon.conditions, s) then
                                 table.insert(aEffectConditionFilter, s);
                             elseif StringManager.contains(DataCommon.dmgtypes, s) or s == 'all' then
@@ -385,6 +411,7 @@ function moddedHasEffectCondition(rActor, sEffect)
     return EffectManager5E.hasEffect(rActor, sEffect, nil, false, true);
 end
 
+-- luacheck: push ignore 561
 function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTargets)
     if not sEffect or not rActor then
         return false;
@@ -402,10 +429,11 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     end
     for _, v in pairs(aEffects) do
         local nActive = DB.getValue(v, 'isactive', 0);
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
-        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or
-            (bAdvancedEffects and ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or EffectManagerADND.isValidCheckEffect(rActor, v))) then
+        if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or (bAdvancedEffects and
+            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or EffectManagerADND.isValidCheckEffect(rActor, v))) then
             -- Parse each effect label
             local sLabel = DB.getValue(v, 'label', '');
             local bTargeted = EffectManager.isTargetedEffect(v);
@@ -478,6 +506,7 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
     end
     return false;
 end
+-- luacheck: pop
 
 function customEncodeEffectForCT(rEffect)
     BCEManager.chat('customEncodeEffectForCT : ', rEffect);
