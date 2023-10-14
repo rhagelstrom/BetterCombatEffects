@@ -58,7 +58,7 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
                 (DB.getValue(nodeEffect, 'source_name', '') == rEffect.sSource) then
                 sDuplicateMsg = string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), rEffect.sName,
                                               Interface.getString('effect_status_exists'))
-                break
+                break;
             end
         end
     end
@@ -149,14 +149,14 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                     -- Handle conditionals
                     if rEffectComp.type == 'IF' then
                         if not EffectManager35E.checkConditional(rActor, v, rEffectComp.remainder) then
-                            break
+                            break;
                         end
                     elseif rEffectComp.type == 'IFT' then
                         if not rFilterActor then
-                            break
+                            break;
                         end
                         if not EffectManager35E.checkConditional(rFilterActor, v, rEffectComp.remainder, rActor) then
-                            break
+                            break;
                         end
                         bTargeted = true
 
@@ -227,7 +227,7 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 for _, v2 in pairs(aRangeFilter) do
                                     if StringManager.contains(aEffectRangeFilter, v2) then
                                         bRangeMatch = true
-                                        break
+                                        break;
                                     end
                                 end
                                 if not bRangeMatch then
@@ -243,16 +243,16 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                         for _, v3 in pairs(v2) do
                                             if not StringManager.contains(aEffectOtherFilter, v3) then
                                                 bOtherTableMatch = false
-                                                break
+                                                break;
                                             end
                                         end
                                         if bOtherTableMatch then
                                             bOtherMatch = true
-                                            break
+                                            break;
                                         end
                                     elseif StringManager.contains(aEffectOtherFilter, v2) then
                                         bOtherMatch = true
-                                        break
+                                        break;
                                     end
                                 end
                                 if not bOtherMatch then
@@ -390,14 +390,14 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
                 -- Check conditionals
                 if rEffectComp.type == 'IF' then
                     if not EffectManager35E.checkConditional(rActor, v, rEffectComp.remainder) then
-                        break
+                        break;
                     end
                 elseif rEffectComp.type == 'IFT' then
                     if not rTarget then
-                        break
+                        break;
                     end
                     if not EffectManager35E.checkConditional(rTarget, v, rEffectComp.remainder, rActor) then
-                        break
+                        break;
                     end
 
                     -- Check for match
@@ -505,39 +505,39 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                     if rEffectComp.type == 'IF' then
                         if not EffectManager35E.checkConditional(rActor, v, rEffectComp.remainder, rFilterActor, false,
                                                                  rEffectSpell) then
-                            break
+                            break;
                         end
                     elseif rEffectComp.type == 'NIF' then
                         if EffectManager35E.checkConditional(rActor, v, rEffectComp.remainder, rFilterActor, false, rEffectSpell) then
-                            break
+                            break;
                         end
                     elseif rEffectComp.type == 'IFTAG' then
                         if not rEffectSpell then
-                            break
+                            break;
                         elseif not EffectManager35E.checkTagConditional(rEffectComp.remainder, rEffectSpell) then
-                            break
+                            break;
                         end
                     elseif rEffectComp.type == 'NIFTAG' then
                         if EffectManager35E.checkTagConditional(rEffectComp.remainder, rEffectSpell) then
-                            break
+                            break;
                         end
                     elseif rEffectComp.type == 'IFT' then
                         if not rFilterActor then
-                            break
+                            break;
                         end
                         if not EffectManager35E.checkConditional(rFilterActor, v, rEffectComp.remainder, rActor, false,
                                                                  rEffectSpell) then
-                            break
+                            break;
                         end
                         bTargeted = true;
                     elseif rEffectComp.type == 'NIFT' then
                         if rActor.aTargets and not rFilterActor then
                             -- if ( #rActor.aTargets[1] > 0 ) and not rFilterActor then
-                            break
+                            break;
                             -- end
                         end
                         if EffectManager35E.checkConditional(rFilterActor, v, rEffectComp.remainder, rActor, false, rEffectSpell) then
-                            break
+                            break;
                         end
                         if rFilterActor then
                             bTargeted = true;
@@ -611,7 +611,7 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                                 for _, v2 in pairs(aRangeFilter) do
                                     if StringManager.contains(aEffectRangeFilter, v2) then
                                         bRangeMatch = true;
-                                        break
+                                        break;
                                     end
                                 end
                                 if not bRangeMatch then
@@ -626,16 +626,16 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                                         for _, v3 in pairs(v2) do
                                             if not StringManager.contains(aEffectOtherFilter, v3) then
                                                 bOtherTableMatch = false;
-                                                break
+                                                break;
                                             end
                                         end
                                         if bOtherTableMatch then
                                             bOtherMatch = true;
-                                            break
+                                            break;
                                         end
                                     elseif StringManager.contains(aEffectOtherFilter, v2) then
                                         bOtherMatch = true;
-                                        break
+                                        break;
                                     end
                                 end
                                 if not bOtherMatch then
@@ -728,41 +728,41 @@ function kelHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTarg
                 -- KEL Adding TAG for SIMMUNE
                 if rEffectComp.type == 'IF' then
                     if not EffectManager35E.checkConditional(rActor, v, rEffectComp.remainder, rTarget, false, rEffectSpell) then
-                        break
+                        break;
                     end
                 elseif rEffectComp.type == 'NIF' then
                     if EffectManager35E.checkConditional(rActor, v, rEffectComp.remainder, rTarget, false, rEffectSpell) then
-                        break
+                        break;
                     end
                 elseif rEffectComp.type == 'IFT' then
                     if not rTarget then
-                        break
+                        break;
                     end
                     if not EffectManager35E.checkConditional(rTarget, v, rEffectComp.remainder, rActor, false, rEffectSpell) then
-                        break
+                        break;
                     end
                     bIFT = true;
                 elseif rEffectComp.type == 'NIFT' then
                     if rActor.aTargets and not rTarget then
                         -- if ( #rActor.aTargets[1] > 0 ) and not rTarget then
-                        break
+                        break;
                         -- end
                     end
                     if EffectManager35E.checkConditional(rTarget, v, rEffectComp.remainder, rActor, false, rEffectSpell) then
-                        break
+                        break;
                     end
                     if rTarget then
                         bIFT = true;
                     end
                 elseif rEffectComp.type == 'IFTAG' then
                     if not rEffectSpell then
-                        break
+                        break;
                     elseif not EffectManager35E.checkTagConditional(rEffectComp.remainder, rEffectSpell) then
-                        break
+                        break;
                     end
                 elseif rEffectComp.type == 'NIFTAG' then
                     if EffectManager35E.checkTagConditional(rEffectComp.remainder, rEffectSpell) then
-                        break
+                        break;
                     end
 
                     -- Check for match

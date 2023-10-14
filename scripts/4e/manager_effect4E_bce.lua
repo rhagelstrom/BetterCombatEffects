@@ -183,19 +183,19 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                     local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
                     -- Check for follw on effects and ignore the rest
                     if StringManager.contains({'AFTER', 'FAIL'}, rEffectComp.type) then
-                        break
+                        break;
 
                         -- Handle conditionals
                     elseif rEffectComp.type == 'IF' then
                         if not EffectManager4E.checkConditional(rActor, v, rEffectComp) then
-                            break
+                            break;
                         end
                     elseif rEffectComp.type == 'IFT' then
                         if not rFilterActor then
-                            break
+                            break;
                         end
                         if not EffectManager4E.checkConditional(rFilterActor, v, rEffectComp, rActor) then
-                            break
+                            break;
                         end
                         bTargeted = true;
 
@@ -233,7 +233,7 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 for _, v2 in pairs(aRangeFilter) do
                                     if StringManager.contains(aEffectRangeFilter, v2) then
                                         bRangeMatch = true;
-                                        break
+                                        break;
                                     end
                                 end
                                 if not bRangeMatch then
@@ -249,16 +249,16 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                         for _, v3 in pairs(v2) do
                                             if not StringManager.contains(aEffectOtherFilter, v3) then
                                                 bOtherTableMatch = false;
-                                                break
+                                                break;
                                             end
                                         end
                                         if bOtherTableMatch then
                                             bOtherMatch = true;
-                                            break
+                                            break;
                                         end
                                     elseif StringManager.contains(aEffectOtherFilter, v2) then
                                         bOtherMatch = true;
-                                        break
+                                        break;
                                     end
                                 end
                                 if not bOtherMatch then
@@ -350,19 +350,19 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
                 local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
                 -- Check follow on effect tags, and ignore the rest
                 if rEffectComp.type == 'AFTER' or rEffectComp.type == 'FAIL' then
-                    break
+                    break;
 
                     -- Check conditionals
                 elseif rEffectComp.type == 'IF' then
                     if not EffectManager4E.checkConditional(rActor, v, rEffectComp) then
-                        break
+                        break;
                     end
                 elseif rEffectComp.type == 'IFT' then
                     if not rTarget then
-                        break
+                        break;
                     end
                     if not EffectManager4E.checkConditional(rTarget, v, rEffectComp, rActor) then
-                        break
+                        break;
                     end
 
                     -- Check for match

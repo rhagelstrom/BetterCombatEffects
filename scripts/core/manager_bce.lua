@@ -80,7 +80,7 @@ function hasExtension(sName)
         for _, tExtension in pairs(tExtensions) do
             if tExtension.name == sName then
                 bReturn = true;
-                break
+                break;
             end
         end
     end

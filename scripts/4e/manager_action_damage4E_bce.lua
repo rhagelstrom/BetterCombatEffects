@@ -97,7 +97,7 @@ function checkNumericalReductionTypeHelper(rMatch, aDmgType, nLimit)
         for _, vNeg in pairs(rMatch.aNegatives) do
             if StringManager.contains(aDmgType, vNeg) then
                 bMatchNegative = true;
-                break
+                break;
             end
         end
         if not bMatchNegative then

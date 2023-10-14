@@ -338,7 +338,7 @@ function replaceSaveDC(rNewEffect, rActor)
                     local sStat = sDesc:match('(%w+) is your spellcasting ability') or '';
                     nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat);
                     -- savemod is the db tag in the power group to get the power modifier
-                    break
+                    break;
                 end
             end
         elseif sNodeType == 'ct' or sNodeType == 'npc' then
@@ -350,7 +350,7 @@ function replaceSaveDC(rNewEffect, rActor)
                     local sStat = sDesc:match('spellcasting ability is (%w+)') or '';
                     nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat);
                     bNewSpellcasting = false;
-                    break
+                    break;
                 end
             end
             if bNewSpellcasting then
@@ -359,7 +359,7 @@ function replaceSaveDC(rNewEffect, rActor)
                     if sActionName == 'spellcasting' then
                         local sDesc = DB.getValue(nodeAction, 'desc', ''):lower();
                         nSpellcastingDC = nDC + (tonumber(sDesc:match('spell save dc (%d+)')) or 0);
-                        break
+                        break;
                     end
                 end
             end

@@ -191,7 +191,7 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
             EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
             EffectManagerBCE.addSourceTurnHandler(nodeCT, nodeEffect);
             EffectManagerBCE.onCustomPostAddEffect(nodeCT, nodeEffect);
-            break
+            break;
         end
     end
 end
@@ -277,7 +277,7 @@ function expireAdd(nodeEffect)
             local tEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
             if tEffectComp.type == 'EXPIREADD' then
                 BCEManager.notifyAddEffect(nodeCT, sourceNode, StringManager.combine(' ', unpack(tEffectComp.remainder)));
-                break
+                break;
             end
         end
     end
