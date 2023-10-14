@@ -38,7 +38,7 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 |<span style="color:green">TDMGADDS</span>|(-)| [effect] |TARGET of the attack will add an effect to the SOURCE of the attack when damage is done|5E 4E 3.5E PFRPG|
 |<span style="color:green">SDMGADDT</span>|(-)| [effect] |SOURCE of the attack will add an effect to the TARGET when damage is done|5E 4E 3.5E PFRPG|
 |<span style="color:green">SDMGADDS</span>|(-)| [effect] |SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done|5E 4E 3.5E PFRPG|
-|<span style="color:purple">DMGR</span>|(D)| [damage type]*,all, [range]* |Reduce the damage taken by the specified damage type(s) by (D)|5E 4E|
+|<span style="color:purple">DMGR</span>|(D)| [damage type]* ,all, [range]* |Reduce the damage taken by the specified damage type(s) by (D)|5E 4E|
 |<span style="color:crimson">SAVEONDMG</span>|(N) or [SDC]|[ability] (R) (RA) (D) (H) (M) (F)|Roll ongoing save when the  Actor's takes damage where (N) is a number or [SDC]|5E 3.5E PFRPG|
 | **Expire Effect** | | | | |
 |<span style="color:green">EXPIREADD</span>|(-)| [effect] or [condition] |Add effect or condition when this effect expires|5E 4E 3.5E PFRPG|
@@ -97,7 +97,7 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 **(H)** will deal half damage on a successful ongoing save. \
 **(M)** will indicate this is magical so any creature will magic resistance will gain proper advantage on the save \
 **(F)** will invert the roll. SAVEDMG, (R), (RA), (D), (H) will be performed on a failed save rather than successful one \
-***** = Multiple entries of this descriptor type allowed \
+***** = Multiple entries of this descriptor type allowed
 
 ## Change State
 A change state cycler has been added to the combat tracker, custom effects list, and Effect Dialog.
@@ -125,9 +125,6 @@ Additionally, DUSE has been added to the APPLY cycler \
 |--|--|--|
 |![](.resource/../graphics/icons/button_toggle_duse.png)|DUSE|DEACTIVATE effect when the effect has been used|
 
-
-
-
 ## Examples
 
 |Power [Source]| Effect Code | Duration/Target/Expend|Notes|
@@ -149,6 +146,7 @@ Additionally, DUSE has been added to the APPLY cycler \
 | Shield of the 300 [Item]| Shield of the 300; TDMGADDT: Shield of the 300 Bonus| Targeting=self|Shield of the 300 Bonus is an effect in the custom effects list|
 | Shield of the 300 [Item]| Shield of the 300 Bonus; AC: 1; STACK|ChangeState=RS ||
 | Sleep [Spell]|Sleep; Unconscious; DMGRT|Duration=1 Min| |
+| Spirit Guardians (Spell)| Spirit Guardians; (C); AURA: 15 enemy,neutral,single; ($) Spirit Guardians; IF: FACTION(!self); SAVEA: [SDC] WIS (M) (H); SAVES: [SDC] WIS (M) (H); SAVEDMG: 3d8 radiant|Targeting=Self|Requires Aura Extension |
 | Storm Desert [Class - Barbarian]|AURA: 10 all; Barbarian Raging Storm Desert; DMGA: 2 fire|Targeting=Self|Requires Aura Extension |
 | Stunning Strike [Class - Monk]|Stunning Strike; Stunned;| Duration=1 Rnd, ChangeState=SRE | |
 | Vitriolic Sphere [Spell]|Vitriolic Sphere; DMGOE: 5d4 acid| Duration=2 Rnd | |
@@ -168,7 +166,7 @@ Preview will produce a story entry of the migration changes without writing thos
 
 If the suggested changes are acceptable, use Migrate to migrate effects to the new change state cycyler. This will also create a story entry detailing the changes made to the database. You may want to delete these story entries after the migration, especially if you are creating a module for distribution.
 
-You can also bring up the migrate effects popup with the slash command: <b>/migrate_effects</b>
+You can also bring up the migrate effects popup with the slash command: **/migrate_effects**
 ## Options
 
 | Name| Default | Options | Notes | Ruleset|
