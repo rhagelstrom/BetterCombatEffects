@@ -8,7 +8,7 @@
 -- luacheck: globals sendOOB handlerCheck handleUpdateEffect handleRemoveEffect handleDeactivateEffect handleAddEffect handleActivateEffect
 -- luacheck: globals updateEffect activateEffect modifyEffect notifyAddEffect getRulesetEffectManager getRulesetActorManager removeNodeHandlers
 -- luacheck: globals  addNodeLabelHandlers addNodeHandlers removeEffectHandlers printGlobalEffects
--- luacheck: globals initGlobalEffects onModuleLoad onModuleUnload onInit onClose
+-- luacheck: globals initGlobalEffects customOnModuleLoad customOnModuleUnload onInit onClose
 OOB_MSGTYPE_BCEACTIVATE = 'activateeffect';
 OOB_MSGTYPE_BCEDEACTIVATE = 'deactivateeffect';
 OOB_MSGTYPE_BCEREMOVE = 'removeeffect';
@@ -18,7 +18,8 @@ OOB_MSGTYPE_BCEADD = 'addeffectbce';
 local tExtensions = {};
 local tGlobalEffects = {};
 local tEffectsLookup = {};
-
+local onModuleLoad = nil;
+local onModuleUnload = nil;
 local bDebug = false;
 
 function onInit()
@@ -34,8 +35,10 @@ function onInit()
 
         BCEManager.initGlobalEffects();
         DB.addHandler('effects', 'onChildAdded', effectAdded);
-        Module.onModuleLoad = onModuleLoad;
-        Module.onModuleUnload = onModuleUnload;
+        onModuleLoad = Module.onModuleLoad ;
+        onModuleUnload = Module.onModuleUnload;
+        Module.onModuleLoad = customOnModuleLoad;
+        Module.onModuleUnload = customOnModuleUnload;
     end
 
     tExtensions = BCEManager.getExtensions();
@@ -44,6 +47,8 @@ end
 function onClose()
     if Session.IsHost then
         BCEManager.removeEffectHandlers();
+        Module.onModuleLoad = onModuleLoad;
+        Module.onModuleUnload = onModuleUnload;
     end
 end
 
@@ -163,7 +168,7 @@ function matchEffect(sEffect)
     return rEffect;
 end
 
-function onModuleLoad(sModule)
+function customOnModuleLoad(sModule)
     local nodeRoot = DB.getRoot(sModule);
     if nodeRoot then
         BCEManager.chat('Module Load: ' .. sModule)
@@ -171,15 +176,21 @@ function onModuleLoad(sModule)
             BCEManager.effectAdded(nodeRoot, nodeEffect);
         end
     end
+    if (onModuleLoad) then
+        onModuleLoad(sModule);
+    end
 end
 
-function onModuleUnload(sModule)
+function customOnModuleUnload(sModule)
     local nodeRoot = DB.getRoot(sModule);
     if nodeRoot then
         BCEManager.chat('Module Unload: ' .. sModule)
         for _, nodeEffect in ipairs(DB.getChildList(nodeRoot, 'effects')) do
             BCEManager.effectDeleted(nodeEffect);
         end
+    end
+    if (onModuleUnload) then
+        onModuleUnload(sModule);
     end
 end
 
