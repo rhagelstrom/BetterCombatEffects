@@ -285,7 +285,7 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                         elseif sApply == 'single' or tEffectCompParams.bOneShot then
                             EffectManager.notifyExpire(v, nMatch, true)
                         elseif not tEffectCompParams.bNoDUSE and sApply == 'duse' then
-                            BCEManager.modifyEffect(DB.getPath(v), 'Deactivate');
+                            BCEManager.modifyEffect(v, 'Deactivate');
                         end
                     end
                 end
@@ -426,7 +426,7 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
                     elseif sApply == 'single' or tEffectCompParams.bOneShot then
                         EffectManager.notifyExpire(v, nMatch, true)
                     elseif not tEffectCompParams.bNoDUSE and sApply == 'duse' then
-                        BCEManager.modifyEffect(DB.getPath(v), 'Deactivate');
+                        BCEManager.modifyEffect(v, 'Deactivate');
                     end
                 end
             end
@@ -668,7 +668,7 @@ function kelGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTarget
                         elseif sApply == 'single' or tEffectCompParams.bOneShot then
                             EffectManager.notifyExpire(v, nMatch, true);
                         elseif not tEffectCompParams.bNoDUSE and sApply == 'duse' then
-                            BCEManager.modifyEffect(DB.getPath(v), 'Deactivate');
+                            BCEManager.modifyEffect(v, 'Deactivate');
                         end
                     end
                 end
@@ -794,7 +794,7 @@ function kelHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectTarg
                     elseif sApply == 'single' or tEffectCompParams.bOneShot then
                         EffectManager.notifyExpire(v, nMatch, true);
                     elseif not tEffectCompParams.bNoDUSE and sApply == 'duse' then
-                        BCEManager.modifyEffect(DB.getPath(v), 'Deactivate');
+                        BCEManager.modifyEffect(v, 'Deactivate');
                     end
                 end
             end
