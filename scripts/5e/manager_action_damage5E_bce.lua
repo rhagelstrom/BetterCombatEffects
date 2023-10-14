@@ -21,11 +21,11 @@ function onClose()
 end
 
 function customApplyDamage(rSource, rTarget, rRoll, ...)
-    ActionDamageDnDBCE.applyDamageBCE(rSource, rTarget, rRoll, ...)
+    ActionDamageDnDBCE.applyDamageBCE(rSource, rTarget, rRoll, ...);
 end
 
 function applyDamage(rSource, rTarget, rRoll, ...)
-    applyDamageOriginal(rSource, rTarget, rRoll.bSecret, rRoll.sType, rRoll.sDesc, rRoll.nTotal, ...);
+    applyDamageOriginal(rSource, rTarget, rRoll, ...);
 end
 
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
