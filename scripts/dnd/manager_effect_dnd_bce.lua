@@ -86,7 +86,6 @@ function addEffectPost(nodeActor, nodeEffect)
     else
         rSource = ActorManager.resolveActor(rEffect.sSource);
     end
-
     local aTags = {'REGENA', 'TREGENA', 'DMGA'};
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);

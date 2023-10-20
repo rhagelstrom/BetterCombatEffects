@@ -24,7 +24,7 @@ function customRest(nodeActor, bLong, bMilestone)
     local rSource = ActorManager.resolveActor(nodeActor);
 
     local aTags = {'RESTS'};
-    if bLong == true then
+    if bLong == true or User.getRulesetName() == 'SFRPG' then
         table.insert(aTags, 'RESTL');
     end
     for _, sTag in pairs(aTags) do

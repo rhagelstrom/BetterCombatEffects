@@ -184,18 +184,17 @@ function saveEffect(rTarget, rEffectComp)
         rSource = ActorManager.resolveActor(rEffect.sSource);
     end
 
-    local aParsedRemiander = StringManager.parseWords(rEffectComp.remainder[1]);
+    local aParsedRemainder = StringManager.parseWords(rEffectComp.remainder[1]);
     local sAbility;
     if User.getRulesetName() == '5E' then
-        sAbility = DataCommon.ability_stol[aParsedRemiander[1]];
+        sAbility = DataCommon.ability_stol[aParsedRemainder[1]:upper()];
     else
-        sAbility = DataCommon.save_stol[aParsedRemiander[1]];
+        sAbility = DataCommon.save_stol[aParsedRemainder[1]:upper()];
     end
-
     if sAbility and sAbility ~= '' then
         local bSecret = false;
         local rAction = {};
-        rAction.savemod = tonumber(aParsedRemiander[2]);
+        rAction.savemod = tonumber(aParsedRemainder[2]);
 
         if not rAction.savemod then
             rAction.savemod = rEffectComp.mod;
@@ -214,7 +213,7 @@ function saveEffect(rTarget, rEffectComp)
             rSaveVsRoll = ActionSpell.getSaveVsRoll(rSource, rAction);
         end
 
-        rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [' .. StringManager.capitalize(aParsedRemiander[1]) .. ' DC ' .. rSaveVsRoll.nMod .. ']';
+        rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [' .. StringManager.capitalize(sAbility) .. ' DC ' .. rSaveVsRoll.nMod .. ']';
         if DB.getValue(nodeEffect, 'isgmonly', 0) == 1 then
             bSecret = true;
         end
