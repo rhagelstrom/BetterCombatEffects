@@ -1,7 +1,7 @@
 [![Build FG Extension](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml) [![Luacheckrc](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml)
 # Better Combat Effects
 
-**Current Version:** 4.20
+**Current Version:** 4.21
 **Updated:** 09/25/23
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added.
@@ -15,8 +15,7 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 
 | Color| Rulesets Supported |
 |---|---|
-|<span style="color:crimson">Crimson</span>|5E, 3.5E, PFRPG|
-|<span style="color:green">Green</span>|5E, 4E, 3.5E, PFRPG|
+|<span style="color:crimson">Crimson</span>|5E, 3.5E, PFRPG, SFRPG|
 |<span style="color:magenta">Magenta</span>|4E|
 |<span style="color:orange">Orange</span>|5E|
 |<span style="color:purple">Purple</span>|5E, 4E|
@@ -24,59 +23,59 @@ Better Combat Effects supports Effect Builder, a GUI for building effects
 | Modifier | Value | Descriptors | Notes | Ruleset|
 | --- | ---| ---| ---| ---|
 | **Add Effect** | | | | |
-|<span style="color:green">DMGA</span>|(D)| [damage type]* |Apply damage when the effect is added|5E 4E 3.5E PFRPG|
-|<span style="color:green">REGENA</span>|(D)| |One time regeneration when the effect is added|5E 4E 3.5E PFRPG|
-|<span style="color:crimson">SAVEA</span>|(N) or [SDC]| [ability] (R) (RA) (D) (H) (M) (F) |Roll ongoing save when effect is added where (N) is a number or [SDC]|5E 3.5E PFRPG|
-|<span style="color:green">TREGENA</span>|(D)| |One time regeneration to temporary HP when the effect is added|5E 4E 3.5E PFRPG|
+|DMGA|(D)| [damage type]* |Apply damage when the effect is added||
+|REGENA|(D)| |One time regeneration when the effect is added||
+|<span style="color:crimson">SAVEA</span>|(N) or [SDC]| [ability] (R) (RA) (D) (H) (M) (F) |Roll ongoing save when effect is added where (N) is a number or [SDC]|5E 3.5E PFRPG SFRPG|
+|TREGENA|(D)| |One time regeneration to temporary HP when the effect is added||
 | **Attack** | | | | |
 |<span style="color:magenta">ATKDS</span>|(-)| |DEACTIVATE effect if the source of the effect is attacked|4E|
 | **Damage** | | | | |
-|<span style="color:green">DMGAT</span>|(-)| |Activate effect when damage is taken|5E 4E 3.5E PFRPG|
-|<span style="color:green">DMGDT</span>|(-)| |Deactivate effect when damage is taken|5E 4E 3.5E PFRPG|
-|<span style="color:green">DMGRT</span>|(-)| |Remove effect when damage is take|5E 4E 3.5E PFRPG|
-|<span style="color:green">TDMGADDT</span>|(-)| [effect] |TARGET of the attack will add an effect to the TARGET (itself) when damage is done|5E 4E 3.5E PFRPG|
-|<span style="color:green">TDMGADDS</span>|(-)| [effect] |TARGET of the attack will add an effect to the SOURCE of the attack when damage is done|5E 4E 3.5E PFRPG|
-|<span style="color:green">SDMGADDT</span>|(-)| [effect] |SOURCE of the attack will add an effect to the TARGET when damage is done|5E 4E 3.5E PFRPG|
-|<span style="color:green">SDMGADDS</span>|(-)| [effect] |SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done|5E 4E 3.5E PFRPG|
+|DMGAT|(-)| |Activate effect when damage is taken||
+|DMGDT|(-)| |Deactivate effect when damage is taken||
+|DMGRT|(-)| |Remove effect when damage is take||
+|TDMGADDT|(-)| [effect] |TARGET of the attack will add an effect to the TARGET (itself) when damage is done||
+|TDMGADDS|(-)| [effect] |TARGET of the attack will add an effect to the SOURCE of the attack when damage is done||
+|SDMGADDT|(-)| [effect] |SOURCE of the attack will add an effect to the TARGET when damage is done||
+|SDMGADDS|(-)| [effect] |SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done||
 |<span style="color:purple">DMGR</span>|(D)| [damage type]* ,all, [range]* |Reduce the damage taken by the specified damage type(s) by (D)|5E 4E|
-|<span style="color:crimson">SAVEONDMG</span>|(N) or [SDC]|[ability] (R) (RA) (D) (H) (M) (F)|Roll ongoing save when the  Actor's takes damage where (N) is a number or [SDC]|5E 3.5E PFRPG|
+|<span style="color:crimson">SAVEONDMG</span>|(N) or [SDC]|[ability] (R) (RA) (D) (H) (M) (F)|Roll ongoing save when the  Actor's takes damage where (N) is a number or [SDC]|5E 3.5E PFRPG SFRPG|
 | **Expire Effect** | | | | |
-|<span style="color:green">EXPIREADD</span>|(-)| [effect] or [condition] |Add effect or condition when this effect expires|5E 4E 3.5E PFRPG|
+|EXPIREADD|(-)| [effect] or [condition] |Add effect or condition when this effect expires||
 | **Misc** | | | | |
 |<span style="color:orange">DC</span>|(N)|  |(N) will be added  to the [SDC] when [SDC] is automatically replaced|5E|
-|<span style="color:green">DUR</span>|(N)|(-)|Sets this effects duration to (N) when applied|5E 4E 3.5E PFRPG|
+|DUR|(N)|(-)|Sets this effects duration to (N) when applied||
 | **Ongoing Damage** | | | | |
-|<span style="color:green">DMGOE</span>|(D)|[damage type]* |Apply ongoing damage at the END of the Actor's turn|5E 4E 3.5E PFRPG|
-|<span style="color:green">SDMGOS</span>|(D)|[damage type]* |Apply ongoing damage at the START of the Actor's turn who applied the effect|5E 4E 3.5E PFRPG|
-|<span style="color:green">SDMGOE</span>|(D)|[damage type]* |Apply ongoing damage at the END of the Actor's turn who applied the effect|5E 4E 3.5E PFRPG|
+|DMGOE|(D)|[damage type]* |Apply ongoing damage at the END of the Actor's turn||
+|SDMGOS|(D)|[damage type]* |Apply ongoing damage at the START of the Actor's turn who applied the effect||
+|SDMGOE|(D)|[damage type]* |Apply ongoing damage at the END of the Actor's turn who applied the effect||
 | **Ongoing Regeneration** | | | | |
-|<span style="color:green">REGENE</span>|(D)| |Apply regeneration at the END of the Actor's turn|5E 4E 3.5E PFRPG|
-|<span style="color:green">SREGENS</span>|(D)| |Apply regeneration at the START of the Actor's turn who applied the effect|5E 4E 3.5E PFRPG|
-|<span style="color:green">SREGENE</span>|(D)| |Apply regeneration at the END of the Actor's turn who applied the effect|5E 4E 3.5E PFRPG|
-|<span style="color:green">STREGENS</span>|(D)| |Apply regeneration to temporary HP at the START of the Actor's turn who applied the effect|5E 4E 3.5E PFRPG|
-|<span style="color:green">STREGENE</span>|(D)| |Apply regeneration to temporary HP at the END of the Actor's turn who applied the effect|5E 4E 3.5E PFRPG|
-|<span style="color:green">TREGENS</span>|(D)| |Apply regeneration to temporary HP at the START of the Actor's turn|5E 4E 3.5E PFRPG|
-|<span style="color:green">TREGENE</span>|(D)| |Apply regeneration to temporary HP at the END of the Actor's turn|5E 4E 3.5E PFRPG|
+|REGENE|(D)| |Apply regeneration at the END of the Actor's turn||
+|SREGENS|(D)| |Apply regeneration at the START of the Actor's turn who applied the effect||
+|SREGENE|(D)| |Apply regeneration at the END of the Actor's turn who applied the effect||
+|STREGENS|(D)| |Apply regeneration to temporary HP at the START of the Actor's turn who applied the effect||
+|STREGENE|(D)| |Apply regeneration to temporary HP at the END of the Actor's turn who applied the effect||
+|TREGENS|(D)| |Apply regeneration to temporary HP at the START of the Actor's turn||
+|TREGENE|(D)| |Apply regeneration to temporary HP at the END of the Actor's turn||
 | **Ongoing Save** | | | | |
-|<span style="color:crimson">SAVES</span>|(N) or [SDC]|[ability] (R) (RA) (D) (H) (M) (F)|Roll ongoing save at the START of the Actor's turn where (N) is a number or [SDC]|5E 3.5E PFRPG|
-|<span style="color:crimson">SAVEE</span>|(N) or [SDC]|[ability] (R) (RA) (D) (H) (M) (F)|Roll ongoing save at the END of the Actor's turn where (N) is a number or [SDC]where (N) is a number or [SDC]|5E 3.5E PFRPG|
-|<span style="color:crimson">SAVEDMG</span>|(D)|[damage type]* |Damage done on failed ongoing save|5E 3.5E PFRPG|
-|<span style="color:crimson">SAVEADD</span>|(-)|[effect] or [condition] |Add effect or condition on a failed ongoing save|5E 3.5E PFRPG|
-|<span style="color:crimson">SAVEADDP</span>|(-)|[effect] or [condition] |Add effect or condition on a successful ongoing save|5E 3.5E PFRPG|
+|<span style="color:crimson">SAVES</span>|(N) or [SDC]|[ability] (R) (RA) (D) (H) (M) (F)|Roll ongoing save at the START of the Actor's turn where (N) is a number or [SDC]|5E 3.5E PFRPG SFRPG|
+|<span style="color:crimson">SAVEE</span>|(N) or [SDC]|[ability] (R) (RA) (D) (H) (M) (F)|Roll ongoing save at the END of the Actor's turn where (N) is a number or [SDC]where (N) is a number or [SDC]|5E 3.5E PFRPG SFRPG|
+|<span style="color:crimson">SAVEDMG</span>|(D)|[damage type]* |Damage done on failed ongoing save|5E 3.5E PFRPG SFRPG|
+|<span style="color:crimson">SAVEADD</span>|(-)|[effect] or [condition] |Add effect or condition on a failed ongoing save|5E 3.5E PFRPG SFRPG|
+|<span style="color:crimson">SAVEADDP</span>|(-)|[effect] or [condition] |Add effect or condition on a successful ongoing save|5E 3.5E PFRPG SFRPG|
 | **Rest** | | | | |
-|<span style="color:green">RESTS</span>|(-)| |Remove effect when the Actor takes a short rest|5E 4E 3.5E PFRPG|
-|<span style="color:green">RESTL</span>|(-)| |Remove effect when the Actor takes a short or long rest|5E 4E 3.5E PFRPG|
+|RESTS|(-)| |Remove effect when the Actor takes a short rest||
+|RESTL|(-)| |Remove effect when the Actor takes a short or long rest||
 | **Stack**| | | | |
-|<span style="color:crimson">STACK</span>|(-)| | Multiple of this effect is allow to be applied. The option "Allow Duplicate Effects" must be set to off|5E 3.5E PFRPG|
+|<span style="color:crimson">STACK</span>|(-)| | Multiple of this effect is allow to be applied. The option "Allow Duplicate Effects" must be set to off|5E 3.5E PFRPG SFRPG|
 | **Turn** | | | | |
-|<span style="color:green">TURNAS</span>|(-)| |DEPRECATED -  ACTIVATE effect on the START of the Actor’s turn|5E 4E 3.5E PFRPG|
-|<span style="color:green">TURNDS</span>|(-) | |DEPRECATED -  DEACTIVATE effect on the START of the Actor’s turn|5E 4E 3.5E PFRPG|
-|<span style="color:green">TURNRS</span>|(-)| |DEPRECATED -  REMOVE effect on the START of the Actor’s turn if current duration is 1|5E 4E 3.5E PFRPG|
-|<span style="color:green">TURNAE</span>|(-)| |DEPRECATED -  ACTIVATE effect on the END of the Actor’s turn|5E 4E 3.5E PFRPG|
-|<span style="color:green">TURNDE</span>|(-)| |DEPRECATED -  DEACTIVATE effect on the END of the Actor’s turn|5E 4E 3.5E PFRPG|
-|<span style="color:green">TURNRE</span>|(-)| |DEPRECATED -  REMOVE effect on the END of the Actor’s turn if current duration is 1|5E 4E 3.5E PFRPG|
-|<span style="color:green">STURNRS</span>|(-)| |DEPRECATED -  REMOVE effect on the START of the Actor’s turn who applied the effect if current duration is 1|5E 4E 3.5E PFRPG|
-|<span style="color:green">STURNRE</span>|(-)| |DEPRECATED -  REMOVE effect on the END of the Actor’s turn who applied the effect if current duration is 1|5E 4E 3.5E PFRPG|
+|TURNAS|(-)| |DEPRECATED -  ACTIVATE effect on the START of the Actor’s turn||
+|TURNDS(-) | |DEPRECATED -  DEACTIVATE effect on the START of the Actor’s turn||
+|TURNRS|(-)| |DEPRECATED -  REMOVE effect on the START of the Actor’s turn if current duration is 1||
+|TURNAE|(-)| |DEPRECATED -  ACTIVATE effect on the END of the Actor’s turn||
+|TURNDE|(-)| |DEPRECATED -  DEACTIVATE effect on the END of the Actor’s turn||
+|TURNRE|(-)| |DEPRECATED -  REMOVE effect on the END of the Actor’s turn if current duration is 1||
+|STURNRS|(-)| |DEPRECATED -  REMOVE effect on the START of the Actor’s turn who applied the effect if current duration is 1||
+|STURNRE|(-)| |DEPRECATED -  REMOVE effect on the END of the Actor’s turn who applied the effect if current duration is 1||
 
 **DEPRECATED** = Will be removed in the future. Use Change State Cycler (see below) \
 **(D)** = Dice and numbers supported for value attribute \
@@ -173,10 +172,10 @@ You can also bring up the migrate effects popup with the slash command: **/migra
 |---|---|---|---|---|
 |Allow Duplicate Effects| on| off/on| When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor| 5E|
 |Consider Duplicate Duration| off| off/on| When on, considers Concentration duration when determining if previous concentration effects should expire| 5E|
-|Deprecate Change State Tags| off| off/on| When on, TURNAS, TURNDS, TURNRS, TURNAE, TURNDE, TURNRE, STURNRS, STURNRE will no longer process and there is a performance increase on change of turn|5E 4E 3.5E PFRPG|
+|Deprecate Change State Tags| off| off/on| When on, TURNAS, TURNDS, TURNRS, TURNAE, TURNDE, TURNRE, STURNRS, STURNRE will no longer process and there is a performance increase on change of turn||
 |Experimental: Autoparse NPC Powers| off| off/on| When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, SAVES, SAVEE| 5E|
 |Restrict Concentration| off| off/on| When on, expires any previous spells with concentration (C) when a new concentration spell is cast| 5E|
-|TempHP Reduction is Damage| on| off/on| For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage|5E 4E 3.5E PFRPG|
+|TempHP Reduction is Damage| on| off/on| For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage||
 ### Add Effect on Damage Modifiers
 
 Effects can be automatically added to the source or the target on the damage by either the source of the damage or the target of the damage. For this to work we need two different effects.  Example:

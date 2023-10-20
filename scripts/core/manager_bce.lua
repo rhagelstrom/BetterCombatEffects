@@ -266,6 +266,7 @@ end
 -- luacheck: globals ActorManager5E
 -- luacheck: globals ActorManager4E
 -- luacheck: globals ActorManager35E
+-- luacheck: globals ActorManagerSFRPG
 -- luacheck: globals ActorManager
 function getRulesetActorManager()
     local Manager;
@@ -275,6 +276,8 @@ function getRulesetActorManager()
         Manager = ActorManager4E;
     elseif User.getRulesetName() == '3.5E' or User.getRulesetName() == 'PFRPG' then
         Manager = ActorManager35E;
+    elseif User.getRulesetName() == 'SFRPG' then
+        Manager = ActorManagerSFRPG;
     else
         Manager = ActorManager;
     end
@@ -284,6 +287,7 @@ end
 -- luacheck: globals EffectManager5E
 -- luacheck: globals EffectManager4E
 -- luacheck: globals EffectManager35E
+-- luacheck: globals EffectManagerSFRPG
 -- luacheck: globals EffectManager
 function getRulesetEffectManager()
     local Manager;
@@ -293,6 +297,8 @@ function getRulesetEffectManager()
         Manager = EffectManager4E;
     elseif User.getRulesetName() == '3.5E' or User.getRulesetName() == 'PFRPG' then
         Manager = EffectManager35E;
+    elseif User.getRulesetName() == 'SFRPG' then
+        Manager = EffectManagerSFRPG;
     else
         Manager = EffectManager;
     end

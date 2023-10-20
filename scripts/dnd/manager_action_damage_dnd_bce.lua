@@ -4,7 +4,7 @@
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 --
 -- luacheck: globals ActionDamageDnDBCE BCEManager ActionDamage5EBCE ActionDamage4EBCE ActionDamage35EBCE EffectManagerBCE
--- luacheck: globals onInit onClose onTabletopInit setProcessEffectOnDamage applyDamageBCE getTempHPAndWounds
+-- luacheck: globals ActionDamageSFRPGBCE onInit onClose onTabletopInit setProcessEffectOnDamage applyDamageBCE getTempHPAndWounds
 local RulesetEffectManager = nil;
 local RulesetActionDamageManager = nil
 local fProcessEffectOnDamage;
@@ -17,6 +17,8 @@ function onInit()
         RulesetActionDamageManager = ActionDamage4EBCE;
     elseif User.getRulesetName() == '3.5E' or User.getRulesetName() == 'PFRPG' then
         RulesetActionDamageManager = ActionDamage35EBCE;
+    elseif User.getRulesetName() == 'SFRPG' then
+        RulesetActionDamageManager = ActionDamageSFRPGBCE;
     end
 
     OptionsManager.registerOption2('TEMP_IS_DAMAGE', false, 'option_Better_Combat_Effects', 'option_Temp_Is_Damage', 'option_entry_cycler',

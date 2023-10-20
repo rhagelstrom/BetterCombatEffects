@@ -27,7 +27,7 @@ function customResetHealth(nodeCT, bLong)
     local rSource = ActorManager.resolveActor(nodeCT)
 
     local aTags = {'RESTS'};
-    if bLong == true then
+    if bLong == true or User.getRulesetName() == 'SFRPG' then
         table.insert(aTags, 'RESTL');
     end
 
