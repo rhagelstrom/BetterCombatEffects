@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<root version="3.3">
+    <script name="ManagerAbilitySFRPGBCE"  file="scripts/sfrpg/manager_abilitySFRPG_bce.lua" />
+    <script name="ActionDamageSFRPGBCE"   file="scripts/sfrpg/manager_action_damageSFRPG_bce.lua" />
+    <script name="EffectManagerSFRPGBCE"  file="scripts/sfrpg/manager_effectSFRPG_bce.lua" />
+    <script name="ManagerSpellSFRPGBCE"  file="scripts/sfrpg/manager_spellSFRPG_bce.lua" />
+</root>
