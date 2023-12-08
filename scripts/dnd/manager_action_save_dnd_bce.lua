@@ -321,7 +321,8 @@ end
 
 function replaceSaveDC(rNewEffect, rActor)
     BCEManager.chat('replaceSaveDC : ');
-    if rNewEffect.sName:match('%[SDC]') and
+   -- Debug.chat(rNewEffect)
+    if rNewEffect.sName:match('%[SDC]') or rNewEffect.sName:match('%(SDC%)') and
         (rNewEffect.sName:match('SAVEE%s*:') or rNewEffect.sName:match('SAVES%s*:') or rNewEffect.sName:match('SAVEA%s*:') or
             rNewEffect.sName:match('SAVEONDMG%s*:')) then
         local sNodeType, nodeActor = ActorManager.getTypeAndNode(rActor);
@@ -341,15 +342,31 @@ function replaceSaveDC(rNewEffect, rActor)
                 end
             end
         elseif sNodeType == 'ct' or sNodeType == 'npc' then
+            local aSpells = {};
+            local aInnateSpells = {};
+            for _, nodeSpell in ipairs(DB.getChildList(nodeActor, 'innatespells')) do
+                table.insert(aInnateSpells, DB.getValue(nodeSpell, 'name', ''))
+            end
+            for _, nodeSpell in ipairs(DB.getChildList(nodeActor, 'spells')) do
+                table.insert(aSpells, DB.getValue(nodeSpell, 'name', ''))
+            end
+            local nInnateBonus
+            local nSpellBonus
+            -- Debug.chat(aInnateSpells)
+            -- Debug.chat(aSpells)
+
             nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf') + nDC;
             for _, nodeTrait in ipairs(DB.getChildList(nodeActor, 'traits')) do
                 local sTraitName = StringManager.trim(DB.getValue(nodeTrait, 'name', ''):lower());
                 if sTraitName == 'spellcasting' or string.find(sTraitName, 'innate spellcasting') then
                     local sDesc = DB.getValue(nodeTrait, 'desc', ''):lower();
                     local sStat = sDesc:match('spellcasting ability is (%w+)') or '';
-                    nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat);
+                    if sTraitName == 'spellcasting'  then
+                        nSpellBonus = RulesetActorManager.getAbilityBonus(rActor, sStat);
+                    else
+                        nInnateBonus = RulesetActorManager.getAbilityBonus(rActor, sStat);
+                    end
                     bNewSpellcasting = false;
-                    break;
                 end
             end
             if bNewSpellcasting then
@@ -361,12 +378,30 @@ function replaceSaveDC(rNewEffect, rActor)
                         break;
                     end
                 end
+            else
+                local bInnate = false
+                for _, sInnateSpell in ipairs(aInnateSpells) do
+                    if string.find(sInnateSpell, rNewEffect.label) then
+                        nSpellcastingDC = nSpellcastingDC + nInnateBonus
+                        bInnate = true
+                        break;
+                    end
+                end
+                if not bInnate then
+                    for _, sSpell in ipairs(aSpells) do
+                        if string.find(sSpell, rNewEffect.label) then
+                            nSpellcastingDC = nSpellcastingDC + nSpellBonus
+                            break;
+                        end
+                    end
+                end
             end
         end
         local tMatch = RulesetEffectManager.getEffectsByType(rActor, 'SDC');
         for _, tEffect in pairs(tMatch) do
             nSpellcastingDC = nSpellcastingDC + tEffect.mod;
         end
+        rNewEffect.sName = rNewEffect.sName:gsub('%(SDC%)', tostring(nSpellcastingDC));
         rNewEffect.sName = rNewEffect.sName:gsub('%[SDC]', tostring(nSpellcastingDC));
     end
     return rNewEffect;
