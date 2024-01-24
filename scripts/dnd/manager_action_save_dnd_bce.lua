@@ -321,7 +321,6 @@ end
 
 function replaceSaveDC(rNewEffect, rActor)
     BCEManager.chat('replaceSaveDC : ');
-   -- Debug.chat(rNewEffect)
     if rNewEffect.sName:match('%[SDC]') or rNewEffect.sName:match('%(SDC%)') and
         (rNewEffect.sName:match('SAVEE%s*:') or rNewEffect.sName:match('SAVES%s*:') or rNewEffect.sName:match('SAVEA%s*:') or
             rNewEffect.sName:match('SAVEONDMG%s*:')) then
@@ -352,9 +351,6 @@ function replaceSaveDC(rNewEffect, rActor)
             end
             local nInnateBonus
             local nSpellBonus
-            -- Debug.chat(aInnateSpells)
-            -- Debug.chat(aSpells)
-
             nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf') + nDC;
             for _, nodeTrait in ipairs(DB.getChildList(nodeActor, 'traits')) do
                 local sTraitName = StringManager.trim(DB.getValue(nodeTrait, 'name', ''):lower());
@@ -381,7 +377,7 @@ function replaceSaveDC(rNewEffect, rActor)
             else
                 local bInnate = false
                 for _, sInnateSpell in ipairs(aInnateSpells) do
-                    if string.find(sInnateSpell, rNewEffect.label) then
+                    if string.find(sInnateSpell, rNewEffect.sName) then
                         nSpellcastingDC = nSpellcastingDC + nInnateBonus
                         bInnate = true
                         break;
@@ -389,7 +385,7 @@ function replaceSaveDC(rNewEffect, rActor)
                 end
                 if not bInnate then
                     for _, sSpell in ipairs(aSpells) do
-                        if string.find(sSpell, rNewEffect.label) then
+                        if string.find(sSpell, rNewEffect.sName) then
                             nSpellcastingDC = nSpellcastingDC + nSpellBonus
                             break;
                         end
