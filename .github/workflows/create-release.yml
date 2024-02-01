@@ -6,29 +6,65 @@ on:
 
 name: Build FG Extension
 
+permissions: write-all
+
 env:
   EXTENSION: '.ext'
+  FG_USER_PASS: ${{ secrets.FORGE_USER_PASS }}
+  FG_USER_NAME: ${{ secrets.FORGE_USER_NAME }}
+  FG_ITEM_ID: ${{ secrets.FORGE_ITEM_ID }}
+#  FG_README_UPDATE: 'FALSE'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
     - name: Checkout Repo Assets
-      uses: actions/checkout@v3
-    - name: Create GitHub Release
+      uses: actions/checkout@v4
+
+    - name: Zip Assets Into ${{ github.event.repository.name }}${{ env.EXTENSION }} File
+      uses: thedoctor0/zip-release@0.7.6
+      with:
+        filename: ${{ github.event.repository.name }}${{ env.EXTENSION }}
+        exclusions: '*.git* *.css* *.resources* *.vscode* *.yml /*node_modules/* .editorconfig body.md *.psd *.xcf *.mod forge-thumbnail.png  *.pdf LICENSE *.DS_Store*'
+
+    - name: Add ${{ github.event.repository.name }}${{ env.EXTENSION }} File to Release
       uses: ncipollo/release-action@v1
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Zip Assets Into .ext File
-      uses: thedoctor0/zip-release@master
+        artifacts: ${{ github.event.repository.name }}${{ env.EXTENSION }}
+
+    - uses: actions/upload-artifact@v4
       with:
-        filename: ${{ github.event.repository.name }}${{ env.EXTENSION }}])
-        exclusions: '*.git* *.css* *.resources* *.vscode* *.yml /*node_modules/* .editorconfig body.md *.psd *.xcf *.mod forge-thumbnail.png *.md *.pdf LICENSE *.DS_Store*'
-    - name: Add .ext File to Release
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: ${{ github.event.repository.name }}${{ env.EXTENSION }}])
-        token: ${{ secrets.GITHUB_TOKEN }}
-        allowUpdates: true
+        name: ${{ github.event.repository.name }}${{ env.EXTENSION }}
+        path: ${{ github.event.repository.name }}${{ env.EXTENSION }}
+
+  upload:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Add upload path to environment variables
+        run: |
+          echo "FG_UL_FILE=${{ github.event.repository.name }}${{ env.EXTENSION }}" >> $GITHUB_ENV
+
+      - name: Checkout FG-Forge-Updater repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'rhagelstrom/FG-Forge-Updater'
+
+      - name: Set up python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install general dependencies
+        run: |
+          pip install -U pip
+          pip install .
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}${{ env.EXTENSION }}
+
+      - name: Upload ${{ github.event.repository.name }}${{ env.EXTENSION }} File to FG Forge
+        run: |
+          python src/main.py
