@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Lint README.md file
       uses: avto-dev/markdown-lint@v1.5.0
       with:
-        config: '.resources/markdown_lint_rules.json'
+        config: '.github/configs/markdown_lint_rules.json'
         args: 'README.md'
 

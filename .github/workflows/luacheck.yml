@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Determine extension name
       - name: Get Extension Name from XML
@@ -111,7 +111,7 @@ jobs:
     needs: getnames
     steps:
       - name: Checkout default branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Lua/LuaJIT
         uses: leafo/gh-actions-lua@v9
