@@ -247,9 +247,11 @@ end
 
 function saveRemoveDisable(sNodeEffect, rEffectComp, bRAOnly, rRoll)
     BCEManager.chat('saveRemoveDisable : ', rRoll);
-    if not bRAOnly and ((rEffectComp and rEffectComp.original:match('%(R%)')) or (rRoll and rRoll.sSaveDesc:match('%[REMOVE ON SAVE%]'))) then
+    if not bRAOnly and
+        ((rEffectComp and rEffectComp.original:match('%(R%)')) or (rRoll and rRoll.sSaveDesc:match('%[REMOVE ON SAVE%]'))) then
         BCEManager.modifyEffect(sNodeEffect, 'Remove');
-    elseif not bRAOnly and ((rEffectComp and rEffectComp.original:match('%(D%)')) or (rRoll and rRoll.sSaveDesc:match('%[DISABLE ON SAVE%]'))) then
+    elseif not bRAOnly and
+        ((rEffectComp and rEffectComp.original:match('%(D%)')) or (rRoll and rRoll.sSaveDesc:match('%[DISABLE ON SAVE%]'))) then
         BCEManager.modifyEffect(sNodeEffect, 'Deactivate');
     elseif (rEffectComp and (rEffectComp.original:match('%(RA%)')) or (rRoll and rRoll.sSaveDesc:match('%[REMOVE ANY SAVE%]'))) then
         BCEManager.modifyEffect(sNodeEffect, 'Remove');
@@ -306,7 +308,8 @@ function moveModtoMod(rEffect)
     local aEffectComps = EffectManager.parseEffect(rEffect.sName);
     for i, sEffectComp in ipairs(aEffectComps) do
         local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
-        if rEffectComp.type == 'SAVEE' or rEffectComp.type == 'SAVES' or rEffectComp.type == 'SAVEA' or rEffectComp.type == 'SAVEONDMG' then
+        if rEffectComp.type == 'SAVEE' or rEffectComp.type == 'SAVES' or rEffectComp.type == 'SAVEA' or rEffectComp.type ==
+            'SAVEONDMG' then
             local aSplitString = StringManager.splitTokens(sEffectComp);
             if StringManager.contains(aMatch, aSplitString[2]) then
                 table.insert(aSplitString, 2, aSplitString[3]);
@@ -337,7 +340,7 @@ function replaceSaveDC(rNewEffect, rActor)
                     local sStat = sDesc:match('(%w+) is your spellcasting ability') or '';
                     nSpellcastingDC = nSpellcastingDC + RulesetActorManager.getAbilityBonus(rActor, sStat);
                     -- savemod is the db tag in the power group to get the power modifier
-                    break;
+                    break
                 end
             end
         elseif sNodeType == 'ct' or sNodeType == 'npc' then
@@ -357,7 +360,7 @@ function replaceSaveDC(rNewEffect, rActor)
                 if sTraitName == 'spellcasting' or string.find(sTraitName, 'innate spellcasting') then
                     local sDesc = DB.getValue(nodeTrait, 'desc', ''):lower();
                     local sStat = sDesc:match('spellcasting ability is (%w+)') or '';
-                    if sTraitName == 'spellcasting'  then
+                    if sTraitName == 'spellcasting' then
                         nSpellBonus = RulesetActorManager.getAbilityBonus(rActor, sStat);
                     else
                         nInnateBonus = RulesetActorManager.getAbilityBonus(rActor, sStat);
@@ -371,7 +374,7 @@ function replaceSaveDC(rNewEffect, rActor)
                     if sActionName == 'spellcasting' then
                         local sDesc = DB.getValue(nodeAction, 'desc', ''):lower();
                         nSpellcastingDC = nDC + (tonumber(sDesc:match('spell save dc (%d+)')) or 0);
-                        break;
+                        break
                     end
                 end
             else
@@ -380,14 +383,14 @@ function replaceSaveDC(rNewEffect, rActor)
                     if string.find(sInnateSpell, rNewEffect.sName) then
                         nSpellcastingDC = nSpellcastingDC + nInnateBonus
                         bInnate = true
-                        break;
+                        break
                     end
                 end
                 if not bInnate then
                     for _, sSpell in ipairs(aSpells) do
                         if string.find(sSpell, rNewEffect.sName) then
                             nSpellcastingDC = nSpellcastingDC + nSpellBonus
-                            break;
+                            break
                         end
                     end
                 end

@@ -116,7 +116,7 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf, sLabel)
     aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ','));
     table.insert(rAction.clauses, aClause);
     if not sLabel and rEffectComp.sEffectNode then
-        sLabel = DB.getValue(rEffectComp.sEffectNode .. ".label", 'Ongoing Damage');
+        sLabel = DB.getValue(rEffectComp.sEffectNode .. '.label', 'Ongoing Damage');
     elseif not sLabel then
         sLabel = 'Ongoing Damage';
     end
@@ -139,7 +139,7 @@ function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp)
     aClause.modifier = rEffectComp.mod;
     table.insert(rAction.clauses, aClause);
 
-    rAction.label = DB.getValue(rEffectComp.sEffectNode .. ".label", '')
+    rAction.label = DB.getValue(rEffectComp.sEffectNode .. '.label', '')
     if bTemp == true then
         rAction.subtype = 'temp';
     end

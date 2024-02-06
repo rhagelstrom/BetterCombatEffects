@@ -23,9 +23,14 @@ local onModuleUnload = nil;
 local bDebug = false;
 
 function onInit()
-    OptionsManager.registerOption2('DEPRECATE_CHANGE_STATE', false, 'option_Better_Combat_Effects', 'option_Deprecate_Change_State',
-                                   'option_entry_cycler',
-                                   {labels = 'option_val_on', values = 'on', baselabel = 'option_val_off', baseval = 'off', default = 'off'});
+    OptionsManager.registerOption2('DEPRECATE_CHANGE_STATE', false, 'option_Better_Combat_Effects',
+                                   'option_Deprecate_Change_State', 'option_entry_cycler', {
+        labels = 'option_val_on',
+        values = 'on',
+        baselabel = 'option_val_off',
+        baseval = 'off',
+        default = 'off'
+    });
     if Session.IsHost then
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEACTIVATE, handleActivateEffect);
         OOBManager.registerOOBMsgHandler(OOB_MSGTYPE_BCEDEACTIVATE, handleDeactivateEffect);
@@ -35,7 +40,7 @@ function onInit()
 
         BCEManager.initGlobalEffects();
         DB.addHandler('effects', 'onChildAdded', effectAdded);
-        onModuleLoad = Module.onModuleLoad ;
+        onModuleLoad = Module.onModuleLoad;
         onModuleUnload = Module.onModuleUnload;
         Module.onModuleLoad = customOnModuleLoad;
         Module.onModuleUnload = customOnModuleUnload;
@@ -85,7 +90,7 @@ function hasExtension(sName)
         for _, tExtension in pairs(tExtensions) do
             if tExtension.name == sName then
                 bReturn = true;
-                break;
+                break
             end
         end
     end
@@ -105,8 +110,8 @@ end
 
 -- function effectAdded(nodeRoot, nodeEffect)
 function effectAdded(_, nodeEffect)
-    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'insert',
-                                                              DB.getPath(nodeEffect));
+    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')),
+                                                              'insert', DB.getPath(nodeEffect));
     tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
     if not tSearchEffect then
         BCEManager.console('Problem added effect: ' .. DB.getValue(nodeEffect, 'label', ''));
@@ -116,8 +121,8 @@ function effectAdded(_, nodeEffect)
 end
 
 function effectDeleted(nodeEffect)
-    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'remove',
-                                                              DB.getPath(nodeEffect));
+    local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')),
+                                                              'remove', DB.getPath(nodeEffect));
     tSearchEffect = BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
     if not tSearchEffect then
         BCEManager.chat('Problem deleting effect: ' .. DB.getValue(nodeEffect, 'label', ''));
@@ -196,8 +201,8 @@ end
 
 function initGlobalEffects()
     for _, nodeEffect in pairs(DB.getChildrenGlobal('effects')) do
-        local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')), 'insert',
-                                                                  DB.getPath(nodeEffect));
+        local tSearchEffect = BinarySearchManager.constructSearch(BCEManager.getEffectName(DB.getValue(nodeEffect, 'label', '')),
+                                                                  'insert', DB.getPath(nodeEffect));
         tEffectsLookup[tSearchEffect.sPath] = tSearchEffect.sName;
         BCEManager.addNodeHandlers(tSearchEffect.sPath, tSearchEffect.sName);
         BinarySearchManager.binarySearch(tGlobalEffects, tSearchEffect, 1, #tGlobalEffects);
@@ -360,8 +365,8 @@ function activateEffect(nodeActor, nodeEffect)
     local sEffect = DB.getValue(nodeEffect, 'label', '');
     local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect);
     DB.setValue(nodeEffect, 'isactive', 'number', 1);
-    local sMessage =
-        string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), sEffect, Interface.getString('effect_status_activated'));
+    local sMessage = string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), sEffect,
+                                   Interface.getString('effect_status_activated'));
     EffectManager.message(sMessage, nodeActor, bGMOnly);
 end
 
@@ -370,7 +375,8 @@ function updateEffect(nodeActor, nodeEffect, sLabel)
         return true;
     end
     local bGMOnly = EffectManager.isGMEffect(nodeActor, nodeEffect);
-    local sMessage = string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), sLabel, Interface.getString('effect_status_updated'));
+    local sMessage = string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), sLabel,
+                                   Interface.getString('effect_status_updated'));
     DB.setValue(nodeEffect, 'label', 'string', sLabel);
     EffectManager.message(sMessage, nodeActor, bGMOnly);
 end

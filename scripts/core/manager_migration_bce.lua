@@ -62,7 +62,8 @@ function migration(bShouldWrite)
     nodeStory = DB.createChild('encounter');
     if nodeStory then
         local tDate = os.date('*t');
-        local sDate = tDate.month .. '/' .. tDate.day .. '/' .. tDate.year .. ' ' .. tDate.hour .. ':' .. tDate.min .. ':' .. tDate.sec;
+        local sDate = tDate.month .. '/' .. tDate.day .. '/' .. tDate.year .. ' ' .. tDate.hour .. ':' .. tDate.min .. ':' ..
+                          tDate.sec;
         if bWrite then
             DB.setValue(nodeStory, 'name', 'string', '00 - Better Combat Effects Migration ' .. sDate);
         else
@@ -94,15 +95,17 @@ function migrateItems()
                 if bFirst then
                     sDesc = sDesc .. '<link class="item" recordname=\"' .. DB.getPath(nodeItem) .. '\"><b>' ..
                                 UtilityManager.encodeXML(DB.getValue(nodeItem, 'name', '')) .. '</b></link>';
-                    sDesc = sDesc .. '<table><tr><td  colspan=\"2\"><b>Original</b></td><td  colspan=\"2\"><b>Modified</b></td>' ..
-                                '<td><b>Apply</b></td><td><b>Change State</b></td></tr>';
+                    sDesc =
+                        sDesc .. '<table><tr><td  colspan=\"2\"><b>Original</b></td><td  colspan=\"2\"><b>Modified</b></td>' ..
+                            '<td><b>Apply</b></td><td><b>Change State</b></td></tr>';
                     bFirst = false;
                 end
                 if bWrite then
                     DB.setValue(nodeEffect, 'effect', 'string', sNameMod);
                 end
                 sDesc = sDesc .. '<tr><td colspan=\"2\">' .. UtilityManager.encodeXML(sName) .. '</td><td colspan=\"2\">' ..
-                            UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState .. '</td></tr>';
+                            UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState ..
+                            '</td></tr>';
             end
         end
         if not bFirst then
@@ -132,7 +135,8 @@ function migrateSpells()
                         DB.setValue(nodeAction, 'label', 'string', sNameMod);
                     end
                     sDesc = sDesc .. '<tr><td colspan=\"2\">' .. UtilityManager.encodeXML(sName) .. '</td><td colspan=\"2\">' ..
-                                UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState .. '</td></tr>';
+                                UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState ..
+                                '</td></tr>';
                 end
             end
         end
@@ -197,8 +201,9 @@ function migrateCombatTracker()
                 if bWrite then
                     DB.setValue(nodeEffect, 'label', 'string', sName);
                 end
-                sDesc = sDesc .. '<tr><td colspan=\"2\">' .. UtilityManager.encodeXML(rEffect.sName) .. '</td><td colspan=\"2\">' ..
-                            UtilityManager.encodeXML(sName) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState .. '</td></tr>';
+                sDesc =
+                    sDesc .. '<tr><td colspan=\"2\">' .. UtilityManager.encodeXML(rEffect.sName) .. '</td><td colspan=\"2\">' ..
+                        UtilityManager.encodeXML(sName) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState .. '</td></tr>';
             end
         end
         if not bFirstActor then
@@ -251,7 +256,8 @@ function migratePowers(nodeActor)
                         DB.setValue(nodeAction, 'label', 'string', sNameMod);
                     end
                     sDesc = sDesc .. '<tr><td colspan=\"2\">' .. UtilityManager.encodeXML(sName) .. '</td><td colspan=\"2\">' ..
-                                UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState .. '</td></tr>';
+                                UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState ..
+                                '</td></tr>';
                 end
             end
         end
@@ -288,8 +294,9 @@ function migrateAdvancedEffects(nodeActor, bPrintActor)
             if bWrite then
                 DB.setValue(nodeEffect, 'effect', 'string', sNameMod);
             end
-            sDesc = sDesc .. '<tr><td colspan=\"2\">' .. sName .. '</td><td colspan=\"2\">' .. sNameMod .. '</td><td>' .. sApply .. '</td><td>' ..
-                        sChangeState .. '</td></tr>';
+            sDesc =
+                sDesc .. '<tr><td colspan=\"2\">' .. sName .. '</td><td colspan=\"2\">' .. sNameMod .. '</td><td>' .. sApply ..
+                    '</td><td>' .. sChangeState .. '</td></tr>';
         end
     end
     if not bFirst then
@@ -304,8 +311,8 @@ function migrateAdvancedEffects(nodeActor, bPrintActor)
             if sName ~= sNameMod then
                 if bFirst then
                     sDesc = sDesc .. '<link class=\"item\" recordname=\"' .. DB.getPath(nodeItem) .. '\"><b>' ..
-                                UtilityManager.encodeXML(DB.getValue(nodeItem, 'name', '')) .. '[' .. DB.getValue(nodeActor, 'name', '') .. ']' ..
-                                '</b></link>'
+                                UtilityManager.encodeXML(DB.getValue(nodeItem, 'name', '')) .. '[' ..
+                                DB.getValue(nodeActor, 'name', '') .. ']' .. '</b></link>'
                     sDesc = sDesc .. '<table><tr><td colspan=\"6\"><b>Advanced Effects (Item)</b></td></tr>';
                     sDesc = sDesc .. '<tr><td  colspan=\"2\"><b>Original</b></td><td  colspan=\"2\"><b>Modified</b>' ..
                                 '</td><td><b>Apply</b></td><td><b>Change State</b></td></tr>';
@@ -315,7 +322,8 @@ function migrateAdvancedEffects(nodeActor, bPrintActor)
                     DB.setValue(nodeEffect, 'effect', 'string', sNameMod);
                 end
                 sDesc = sDesc .. '<tr><td colspan=\"2\">' .. UtilityManager.encodeXML(sName) .. '</td><td colspan=\"2\">' ..
-                            UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState .. '</td></tr>';
+                            UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState ..
+                            '</td></tr>';
             end
         end
         if not bFirst then
@@ -343,7 +351,8 @@ function migrateKnK(nodeItem)
                         DB.setValue(nodeAction, 'label', 'string', sNameMod);
                     end
                     sDesc = sDesc .. '<tr><td colspan=\"2\">' .. UtilityManager.encodeXML(sName) .. '</td><td colspan=\"2\">' ..
-                                UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState .. '</td></tr>';
+                                UtilityManager.encodeXML(sNameMod) .. '</td><td>' .. sApply .. '</td><td>' .. sChangeState ..
+                                '</td></tr>';
                 end
             end
         end
@@ -363,7 +372,8 @@ function migrationHelper(nodeEffect, sName)
         rEffectComp.original = StringManager.trim(rEffectComp.original:upper());
         rEffectComp.type = rEffectComp.type:upper();
         if StringManager.contains(aMigrate, rEffectComp.original) or StringManager.contains(aMigrate, rEffectComp.type) then
-            local sRetApply, sRetChangeState = MigrationManagerBCE.migrateEffect(nodeEffect, aEffectComps, kEffectComp, rEffectComp);
+            local sRetApply, sRetChangeState = MigrationManagerBCE.migrateEffect(nodeEffect, aEffectComps, kEffectComp,
+                                                                                 rEffectComp);
             if sRetApply ~= '' then
                 sApply = sRetApply;
             end

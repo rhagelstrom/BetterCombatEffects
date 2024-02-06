@@ -49,7 +49,7 @@ function customEvalAction(rActor, nodePower, rAction)
                     rSave.saveStat = DB.getValue(nodeChild, 'savedcstat', '');
                     rSave.saveProf = DB.getValue(nodeChild, 'savedcprof', 1);
                 end
-                break;
+                break
             end
         end
         if rSave.saveBase == 'group' then
@@ -177,7 +177,7 @@ function moddedParseEffects(sPowerName, aWords)
             local tSaves = PowerManager.parseSaves(sPowerName, aWords, false, false);
             local aSave = tSaves[#tSaves];
             if not aSave then
-                break;
+                break
             end
             if not aSave.savemod then
                 aSave.savemod = 0;
@@ -229,13 +229,13 @@ function moddedParseEffects(sPowerName, aWords)
                     if StringManager.isWord(aWords[j - 1], 'or') then
                         bValidCondition = true;
                         nConditionStart = j;
-                        break;
+                        break
                     end
 
                 elseif StringManager.isWord(aWords[j], 'being') and StringManager.isWord(aWords[j - 1], 'against') then
                     bValidCondition = true;
                     nConditionStart = j;
-                    break;
+                    break
 
                     -- elseif StringManager.isWord(aWords[j], { "also", "magically" }) then
 
@@ -243,11 +243,11 @@ function moddedParseEffects(sPowerName, aWords)
                 elseif StringManager.isWord(aWords[j], 'or') and StringManager.isWord(aWords[j - 1], DataCommon.conditions) and
                     StringManager.isWord(aWords[j - 2], 'either') and StringManager.isWord(aWords[j - 3], 'is') then
                     bValidCondition = true;
-                    break;
+                    break
 
                 elseif StringManager.isWord(aWords[j], {'while', 'when', 'cannot', 'not', 'if', 'be', 'or'}) then
                     bValidCondition = false;
-                    break;
+                    break
 
                 elseif StringManager.isWord(aWords[j], {'target', 'creature', 'it'}) then
                     if StringManager.isWord(aWords[j - 1], 'the') then
@@ -257,11 +257,11 @@ function moddedParseEffects(sPowerName, aWords)
 
                 elseif StringManager.isWord(aWords[j], 'and') then
                     if #effects == 0 then
-                        break;
+                        break
                     elseif effects[#effects].endindex ~= j - 1 then
                         if not StringManager.isWord(aWords[i], 'unconscious') and
                             not StringManager.isWord(aWords[j - 1], 'minutes') then
-                            break;
+                            break
                         end
                     end
                     bValidCondition = true;
@@ -271,23 +271,23 @@ function moddedParseEffects(sPowerName, aWords)
                     if bValidCondition or StringManager.isWord(aWords[i], 'prone') or
                         (StringManager.isWord(aWords[i], 'invisible') and
                             StringManager.isWord(aWords[j - 1], {'wearing', 'wears', 'carrying', 'carries'})) then
-                        break;
+                        break
                     end
                     bValidCondition = true;
                     nConditionStart = j;
 
                 elseif StringManager.isWord(aWords[j], DataCommon.conditions) then
-                    break;
+                    break
 
                 elseif StringManager.isWord(aWords[i], 'poisoned') then
                     if (StringManager.isWord(aWords[j], 'instead') and StringManager.isWord(aWords[j - 1], 'is')) then
                         bValidCondition = true;
                         nConditionStart = j - 1;
-                        break;
+                        break
                     elseif StringManager.isWord(aWords[j], 'become') then
                         bValidCondition = true;
                         nConditionStart = j;
-                        break;
+                        break
                     end
 
                 elseif StringManager.isWord(aWords[j], {'knock', 'knocks', 'knocked', 'fall', 'falls'}) and
@@ -299,30 +299,30 @@ function moddedParseEffects(sPowerName, aWords)
                     StringManager.isWord(aWords[i], 'unconscious') then
                     if StringManager.isWord(aWords[j], 'falling') and StringManager.isWord(aWords[j - 1], 'of') and
                         StringManager.isWord(aWords[j - 2], 'instead') then
-                        break;
+                        break
                     end
                     if StringManager.isWord(aWords[j], 'fall') and StringManager.isWord(aWords[j - 1], 'you') and
                         StringManager.isWord(aWords[j - 1], 'if') then
-                        break;
+                        break
                     end
                     if StringManager.isWord(aWords[j], 'falls') and StringManager.isWord(aWords[j - 1], 'or') then
-                        break;
+                        break
                     end
                     bValidCondition = true;
                     nConditionStart = j;
                     if StringManager.isWord(aWords[j], 'fall') and StringManager.isWord(aWords[j - 1], 'or') then
-                        break;
+                        break
                     end
 
                 elseif StringManager.isWord(aWords[j], {'become', 'becomes'}) and StringManager.isWord(aWords[i], 'frightened') then
                     bValidCondition = true;
                     nConditionStart = j;
-                    break;
+                    break
 
                 elseif StringManager.isWord(aWords[j], {'turns', 'become', 'becomes'}) and
                     StringManager.isWord(aWords[i], {'invisible'}) then
                     if StringManager.isWord(aWords[j - 1], {'can\'t', 'cannot'}) then
-                        break;
+                        break
                     end
                     bValidCondition = true;
                     nConditionStart = j;
@@ -330,10 +330,10 @@ function moddedParseEffects(sPowerName, aWords)
                     -- Special handling: Blindness/Deafness
                 elseif StringManager.isWord(aWords[j], 'either') and StringManager.isWord(aWords[j - 1], 'is') then
                     bValidCondition = true;
-                    break;
+                    break
 
                 else
-                    break;
+                    break
                 end
                 j = j - 1;
             end

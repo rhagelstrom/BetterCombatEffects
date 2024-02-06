@@ -75,7 +75,8 @@ function checkNumericalReductionType(aReduction, aDmgType, nLimit)
         if nLimit then
             local nSpecificAdjust = ActionDamage4EBCE.checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType, nLimit);
             nAdjust = nAdjust + nSpecificAdjust;
-            local nGlobalAdjust = ActionDamage4EBCE.checkNumericalReductionTypeHelper(aReduction['all'], aDmgType, nLimit - nSpecificAdjust);
+            local nGlobalAdjust = ActionDamage4EBCE.checkNumericalReductionTypeHelper(aReduction['all'], aDmgType,
+                                                                                      nLimit - nSpecificAdjust);
             nAdjust = nAdjust + nGlobalAdjust;
         else
             nAdjust = nAdjust + ActionDamage4EBCE.checkNumericalReductionTypeHelper(aReduction[sDmgType], aDmgType);
@@ -97,7 +98,7 @@ function checkNumericalReductionTypeHelper(rMatch, aDmgType, nLimit)
         for _, vNeg in pairs(rMatch.aNegatives) do
             if StringManager.contains(aDmgType, vNeg) then
                 bMatchNegative = true;
-                break;
+                break
             end
         end
         if not bMatchNegative then

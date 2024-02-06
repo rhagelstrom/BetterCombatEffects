@@ -94,7 +94,7 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
 
                 sDuplicateMsg = string.format('%s [\'%s\'] -> [%s]', Interface.getString('effect_label'), rEffect.sName,
                                               Interface.getString('effect_status_exists'));
-                break;
+                break
             end
         end
     end
@@ -236,26 +236,26 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                     -- Handle conditionals
                     if rEffectComp.type == 'IF' then
                         if not EffectManager5E.checkConditional(rActor, v, rEffectComp.remainder) then
-                            break;
+                            break
                         end
                     elseif bUntrueEffects and rEffectComp.type == 'IFN' then
                         if EffectManager5E.checkConditional(rActor, v, rEffectComp.remainder) then
-                            break;
+                            break
                         end
                     elseif rEffectComp.type == 'IFT' then
                         if not rFilterActor then
-                            break;
+                            break
                         end
                         if not EffectManager5E.checkConditional(rFilterActor, v, rEffectComp.remainder, rActor) then
-                            break;
+                            break
                         end
                         bTargeted = true;
                     elseif bUntrueEffects and rEffectComp.type == 'IFTN' then
                         if --[[OptionsManager.isOption('NO_TARGET', 'off') and]] not rFilterActor then
-                            break;
+                            break
                         end
                         if EffectManager5E.checkConditional(rFilterActor, v, rEffectComp.remainder, rActor) then
-                            break;
+                            break
                         end
                         bTargeted = true;
 
@@ -307,7 +307,7 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 for _, v2 in pairs(aRangeFilter) do
                                     if StringManager.contains(aEffectRangeFilter, v2) then
                                         bRangeMatch = true;
-                                        break;
+                                        break
                                     end
                                 end
                                 if not bRangeMatch then
@@ -324,16 +324,16 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                         for _, v3 in pairs(v2) do
                                             if not StringManager.contains(aEffectOtherFilter, v3) then
                                                 bOtherTableMatch = false;
-                                                break;
+                                                break
                                             end
                                         end
                                         if bOtherTableMatch then
                                             bOtherMatch = true;
-                                            break;
+                                            break
                                         end
                                     elseif StringManager.contains(aEffectOtherFilter, v2) then
                                         bOtherMatch = true;
-                                        break;
+                                        break
                                     end
                                 end
                                 if not bOtherMatch then
@@ -346,7 +346,7 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 for _, v2 in pairs(aConditionFilter) do
                                     if StringManager.contains(aEffectConditionFilter, v2) then
                                         bConditionMatch = true;
-                                        break;
+                                        break
                                     end
                                 end
                                 if not bConditionMatch then
@@ -359,7 +359,7 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                                 for _, v2 in pairs(aDamageFilter) do
                                     if StringManager.contains(aEffectDamageFilter, v2) then
                                         bDamageMatch = true;
-                                        break;
+                                        break
                                     end
                                 end
                                 if not bDamageMatch then
@@ -446,25 +446,25 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
                 -- Handle conditionals
                 if rEffectComp.type == 'IF' then
                     if not EffectManager5E.checkConditional(rActor, v, rEffectComp.remainder) then
-                        break;
+                        break
                     end
                 elseif bUntrueEffects and rEffectComp.type == 'IFN' then
                     if EffectManager5E.checkConditional(rActor, v, rEffectComp.remainder) then
-                        break;
+                        break
                     end
                 elseif rEffectComp.type == 'IFT' then
                     if not rTarget then
-                        break;
+                        break
                     end
                     if not EffectManager5E.checkConditional(rTarget, v, rEffectComp.remainder, rActor) then
-                        break;
+                        break
                     end
                 elseif bUntrueEffects and rEffectComp.type == 'IFTN' then
                     if OptionsManager.isOption('NO_TARGET', 'off') and not rTarget then
-                        break;
+                        break
                     end
                     if EffectManager5E.checkConditional(rTarget, v, rEffectComp.remainder, rActor) then
-                        break;
+                        break
                     end
 
                     -- Check for match

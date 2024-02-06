@@ -31,11 +31,13 @@ function moddedOnPowerAbilityAction(draginfo, nodeAbility, subtype)
     local sAbilityType = DB.getValue(nodeAbility, 'type', '');
     if sAbilityType == 'attack' then
         if subtype == 'damage' then
-            local rActor, rAction, rFocus = CharManager.getAdvancedRollStructures('damage', nodeAbility, CharManager.getPowerFocus(nodeAbility));
+            local rActor, rAction, rFocus = CharManager.getAdvancedRollStructures('damage', nodeAbility,
+                                                                                  CharManager.getPowerFocus(nodeAbility));
             ActionDamage.performRoll(draginfo, rActor, rAction, rFocus);
             return true;
         end
-        local rActor, rAction, rFocus = CharManager.getAdvancedRollStructures('attack', nodeAbility, CharManager.getPowerFocus(nodeAbility));
+        local rActor, rAction, rFocus = CharManager.getAdvancedRollStructures('attack', nodeAbility,
+                                                                              CharManager.getPowerFocus(nodeAbility));
         ActionAttack.performRoll(draginfo, rActor, rAction, rFocus);
         return true;
     elseif sAbilityType == 'heal' then

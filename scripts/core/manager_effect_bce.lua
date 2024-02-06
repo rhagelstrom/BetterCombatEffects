@@ -100,7 +100,8 @@ function moddedGetEffectsByType(rActor, sEffectCompType, rFilterActor, bTargeted
     for _, v in pairs(aEffects) do
         -- Check active
         local nActive = DB.getValue(v, 'isactive', 0);
-        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
+        local bActive = (tEffectCompParams.bIgnoreExpire and (nActive == 1)) or
+                            (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
         if bActive or nActive ~= 0 then
             -- If effect type we are looking for supports targets, then check targeting
@@ -182,8 +183,8 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
             (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) and
             (DB.getValue(v, 'apply', '') == rNewEffect.sApply) and (DB.getValue(v, 'changestate', '') == rNewEffect.sChangeState) then
             if rNewEffect.nDuration ~= 0 and
-                (rNewEffect.sChangeState == 'rs' or rNewEffect.sChangeState == 'srs' or rNewEffect.sChangeState == 're' or rNewEffect.sChangeState ==
-                    'sre') and DB.getValue(v, 'source_name', '') == '' then
+                (rNewEffect.sChangeState == 'rs' or rNewEffect.sChangeState == 'srs' or rNewEffect.sChangeState == 're' or
+                    rNewEffect.sChangeState == 'sre') and DB.getValue(v, 'source_name', '') == '' then
                 DB.setValue(v, 'duration', 'number', rNewEffect.nDuration + 1);
             end
             nodeEffect = v;
@@ -191,7 +192,7 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
             EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
             EffectManagerBCE.addSourceTurnHandler(nodeCT, nodeEffect);
             EffectManagerBCE.onCustomPostAddEffect(nodeCT, nodeEffect);
-            break;
+            break
         end
     end
 end
@@ -277,7 +278,7 @@ function expireAdd(nodeEffect)
             local tEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
             if tEffectComp.type == 'EXPIREADD' then
                 BCEManager.notifyAddEffect(nodeCT, sourceNode, StringManager.combine(' ', unpack(tEffectComp.remainder)));
-                break;
+                break
             end
         end
     end

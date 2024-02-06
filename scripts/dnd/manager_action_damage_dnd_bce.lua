@@ -21,8 +21,14 @@ function onInit()
         RulesetActionDamageManager = ActionDamageSFRPGBCE;
     end
 
-    OptionsManager.registerOption2('TEMP_IS_DAMAGE', false, 'option_Better_Combat_Effects', 'option_Temp_Is_Damage', 'option_entry_cycler',
-                                   {labels = 'option_val_off', values = 'off', baselabel = 'option_val_on', baseval = 'on', default = 'on'});
+    OptionsManager.registerOption2('TEMP_IS_DAMAGE', false, 'option_Better_Combat_Effects', 'option_Temp_Is_Damage',
+                                   'option_entry_cycler', {
+        labels = 'option_val_off',
+        values = 'off',
+        baselabel = 'option_val_on',
+        baseval = 'on',
+        default = 'on'
+    });
 end
 
 function onClose()
