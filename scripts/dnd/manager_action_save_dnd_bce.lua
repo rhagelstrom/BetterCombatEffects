@@ -169,7 +169,9 @@ end
 
 function saveAddEffect(nodeSource, nodeTarget, rEffectComp)
     BCEManager.chat('saveAddEffect : ');
-    BCEManager.notifyAddEffect(nodeSource, nodeTarget, rEffectComp.remainder[1]);
+    for _,remainder in pairs(rEffectComp.remainder) do
+        BCEManager.notifyAddEffect(nodeSource, nodeTarget, remainder);
+    end
 end
 
 function saveEffect(rTarget, rEffectComp)
@@ -184,22 +186,28 @@ function saveEffect(rTarget, rEffectComp)
         rSource = ActorManager.resolveActor(rEffect.sSource);
     end
 
-    local aParsedRemainder = StringManager.parseWords(rEffectComp.remainder[1]);
     local sAbility;
     if User.getRulesetName() == '5E' then
-        sAbility = DataCommon.ability_stol[aParsedRemainder[1]:upper()];
+        for _,remainder in pairs(rEffectComp.remainder) do
+            if DataCommon.ability_stol[remainder:upper()] then
+                sAbility = DataCommon.ability_stol[remainder:upper()];
+                break;
+            end
+        end
     else
-        sAbility = DataCommon.save_stol[aParsedRemainder[1]:upper()];
+        for _,remainder in pairs(rEffectComp.remainder) do
+            if DataCommon.save_stol[remainder:upper()] then
+                sAbility = DataCommon.save_stol[remainder:upper()];
+                break;
+            end
+        end
     end
     if sAbility and sAbility ~= '' then
         local bSecret = false;
         local rAction = {};
-        rAction.savemod = tonumber(aParsedRemainder[2]);
 
-        if not rAction.savemod then
-            rAction.savemod = rEffectComp.mod;
-        end
-        rAction.label = rEffectComp.remainder[1];
+        rAction.savemod = rEffectComp.mod;
+        rAction.label = sAbility;
         if rEffectComp.original:match('%(M%)') then
             rAction.magic = true;
         end

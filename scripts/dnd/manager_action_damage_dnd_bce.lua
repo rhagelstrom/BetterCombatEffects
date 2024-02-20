@@ -113,10 +113,14 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
         for _, tEffect in pairs(tMatch) do
             if sTag == 'TDMGADDT' then
                 BCEManager.chat('TDMGADDT: ');
-                BCEManager.notifyAddEffect(nodeTarget, nodeTarget, tEffect.remainder[1]);
+                for _,remainder in pairs(tEffect.remainder) do
+                    BCEManager.notifyAddEffect(nodeTarget, nodeTarget, remainder);
+                end
             elseif sTag == 'TDMGADDS' then
                 BCEManager.chat('TDMGADDS: ');
-                BCEManager.notifyAddEffect(nodeSource, nodeTarget, tEffect.remainder[1]);
+                for _,remainder in pairs(tEffect.remainder) do
+                    BCEManager.notifyAddEffect(nodeSource, nodeTarget, remainder);
+                end
             end
         end
     end
@@ -126,11 +130,14 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
         for _, tEffect in pairs(tMatch) do
             if sTag == 'SDMGADDT' then
                 BCEManager.chat('SDMGADDT: ');
-
-                BCEManager.notifyAddEffect(nodeTarget, nodeSource, tEffect.remainder[1]);
+                for _,remainder in pairs(tEffect.remainder) do
+                    BCEManager.notifyAddEffect(nodeTarget, nodeSource, remainder);
+                end
             elseif sTag == 'SDMGADDS' then
                 BCEManager.chat('SDMGADDS: ');
-                BCEManager.notifyAddEffect(nodeSource, nodeSource, tEffect.remainder[1]);
+                for _,remainder in pairs(tEffect.remainder) do
+                    BCEManager.notifyAddEffect(nodeSource, nodeSource, remainder);
+                end
             end
         end
     end

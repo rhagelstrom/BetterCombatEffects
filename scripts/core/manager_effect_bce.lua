@@ -277,7 +277,10 @@ function expireAdd(nodeEffect)
         for _, sEffectComp in ipairs(aEffectComps) do
             local tEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
             if tEffectComp.type == 'EXPIREADD' then
-                BCEManager.notifyAddEffect(nodeCT, sourceNode, StringManager.combine(' ', unpack(tEffectComp.remainder)));
+                for _,remainder in pairs(tEffectComp.remainder) do
+                    BCEManager.notifyAddEffect(nodeCT, sourceNode, remainder);
+                end
+                -- BCEManager.notifyAddEffect(nodeCT, sourceNode, StringManager.combine(' ', unpack(tEffectComp.remainder)));
                 break
             end
         end
