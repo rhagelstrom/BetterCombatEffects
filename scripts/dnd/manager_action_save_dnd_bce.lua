@@ -189,6 +189,7 @@ function saveEffect(rTarget, rEffectComp)
     local sAbility;
     if User.getRulesetName() == '5E' then
         for _,remainder in pairs(rEffectComp.remainder) do
+            remainder = StringManager.sanitize(remainder);
             if DataCommon.ability_stol[remainder:upper()] then
                 sAbility = DataCommon.ability_stol[remainder:upper()];
                 break;
@@ -196,6 +197,7 @@ function saveEffect(rTarget, rEffectComp)
         end
     else
         for _,remainder in pairs(rEffectComp.remainder) do
+            remainder = StringManager.sanitize(remainder);
             if DataCommon.save_stol[remainder:upper()] then
                 sAbility = DataCommon.save_stol[remainder:upper()];
                 break;
