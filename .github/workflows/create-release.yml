@@ -10,15 +10,47 @@ permissions: write-all
 
 env:
   EXTENSION:  '.ext'
-  FILE_TYPE_EXLUSIONS: '*.git* *.css* *.resources* *.vscode* *.yml /*node_modules/* .editorconfig body.md *.psd *.xcf *.mod forge-thumbnail.png *.pdf LICENSE *.DS_Store*'
-  MODULE_PATH: '.resources/'
+  PDF: '.pdf'
+  MARKDOWN: '.md'
+  README: 'README'
+  FILE_TYPE_EXLUSIONS: '*.git* *.css* *.resources* *.vscode* *.yml /*node_modules/* ./graphics/documentation/* .editorconfig body.md *.psd *.xcf *.mod forge-thumbnail.png *.pdf LICENSE *.DS_Store*'
+  RESOURCES: './resources/'
+  THEME: '.css/torillic.css'
+  GRAPHICS: './graphics'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Get current Date
+      run: echo "DATE=$(date +'%m/%d/%y')" >> $GITHUB_ENV
+
     - name: Checkout Repo Assets
       uses: actions/checkout@v4
+
+    - name: Replace Date
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        find: '~date~'
+        exclude: ${{ env.FILE_TYPE_EXLUSIONS }}
+        replace: ${{ env.DATE }}
+
+    - name: Replace Version
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        find: '~dev_version~'
+        exclude: ${{ env.FILE_TYPE_EXLUSIONS }}
+        replace: ${{github.ref_name}}
+
+    - name: Markdown to PDF
+      uses: BaileyJM02/markdown-to-pdf@v1
+      with:
+        input_path: ${{ env.README }}${{ env.MARKDOWN }}
+        output_dir: ${{ env.RESOURCES }}
+        theme: ${{ env.THEME }}
+        image_import: ${{ env.GRAPHICS }}
+        build_html: false
+        #image_import: '.resources'
 
     - name: Zip Assets Into ${{ github.event.repository.name }}${{ env.EXTENSION }} File
       uses: thedoctor0/zip-release@0.7.6
@@ -26,15 +58,21 @@ jobs:
         filename: ${{ github.event.repository.name }}${{ env.EXTENSION }}
         exclusions: ${{ env.FILE_TYPE_EXLUSIONS }}
 
-    - name: Add ${{ github.event.repository.name }}${{ env.EXTENSION }}, ${{ vars.MODULE }}' to Release
+    - name: Add ${{ github.event.repository.name }}${{ env.EXTENSION }}, ${{ env.README }}${{ env.PDF }} to Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: ${{ github.event.repository.name }}${{ env.EXTENSION }}
+        artifacts: ${{ github.event.repository.name }}${{ env.EXTENSION }},${{ env.RESOURCES }}${{ env.README }}${{ env.PDF }}
 
     - uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}${{ env.EXTENSION }}
         path: ${{ github.event.repository.name }}${{ env.EXTENSION }}
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.README }}${{ env.PDF }}
+        path: ${{ env.RESOURCES }}${{ env.README }}${{ env.PDF }}
+
 
   upload:
     if: ${{ ! contains(github.ref_name,'-rc') }} # Don't update the Forge on test builds. Tags with -rc
