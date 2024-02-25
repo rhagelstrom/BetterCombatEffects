@@ -47,6 +47,9 @@ function onInit()
     end
 
     tExtensions = BCEManager.getExtensions();
+    if PowerUp then
+        PowerUp.registerExtension('BetterCombatEffects', '~dev_version~');
+    end
 end
 
 function onClose()
