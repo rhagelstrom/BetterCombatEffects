@@ -3,7 +3,7 @@
 
 [![Build FG Extension](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/create-release.yml) [![Luacheckrc](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/luacheck.yml) [![Markdownlint](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/rhagelstrom/BetterCombatEffects/actions/workflows/markdownlint.yml)
 
-**Current Version:** ~dev_version~
+**Current Version:** ~dev_version~ \
 **Updated:** ~date~
 
 Better Combat Effects is an extension that allows for fine tuning of when effects are enabled, disabled, removed, and added. \

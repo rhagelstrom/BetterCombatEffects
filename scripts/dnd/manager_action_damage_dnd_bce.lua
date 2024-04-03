@@ -61,6 +61,7 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     end
     local nodeTarget = ActorManager.getCTNode(rTarget);
     local nodeSource = ActorManager.getCTNode(rSource);
+    local nodeCharTarget = ActorManager.getCreatureNode(rTarget);
     if User.getRulesetName() == '5E' then
         -- Get the advanced effects info we snuck on the roll from the client
         rSource.itemPath = rRoll.itemPath;
@@ -70,18 +71,20 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     end
     -- save off temp hp and wounds before damage
     local nTempHPPrev, nWoundsPrev = ActionDamageDnDBCE.getTempHPAndWounds(rTarget);
+    local nTotalSPPrev = DB.getValue(nodeCharTarget, "sp.fatique", 0); -- Starfinder
     RulesetActionDamageManager.applyDamage(rSource, rTarget, rRoll, ...);
 
     -- get temp hp and wounds after damage
     local nTempHP, nWounds = ActionDamageDnDBCE.getTempHPAndWounds(rTarget);
+    local  nTotalSP = DB.getValue(nodeCharTarget, "sp.fatique", 0); -- Starfinder
 
     if OptionsManager.isOption('TEMP_IS_DAMAGE', 'on') then
         -- If no damage was applied then return
-        if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP then
+        if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP and nTotalSP <= nTotalSPPrev then
             return;
         end
         -- return if no damage was applied then return
-    elseif nWoundsPrev >= nWounds then
+    elseif nWoundsPrev >= nWounds and nTotalSP <= nTotalSPPrev then
         return;
     end
 

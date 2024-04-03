@@ -14,9 +14,9 @@ env:
   MARKDOWN: '.md'
   README: 'README'
   FILE_TYPE_EXLUSIONS: '*.git* *.css* *.resources* *.vscode* *.yml /*node_modules/* ./graphics/documentation/* .editorconfig body.md *.psd *.xcf *.mod forge-thumbnail.png *.pdf LICENSE *.DS_Store*'
-  RESOURCES: './resources/'
+  RESOURCES: '.resources/'
   THEME: '.css/torillic.css'
-  GRAPHICS: './graphics'
+  GRAPHICS: 'graphics/'
 
 jobs:
   build:
@@ -42,6 +42,13 @@ jobs:
         exclude: ${{ env.FILE_TYPE_EXLUSIONS }}
         replace: ${{github.ref_name}}
 
+    - name: Replace Backslashes
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        find: '\\'
+        include: ${{ env.README }}${{ env.MARKDOWN }}
+        replace: '  '
+
     - name: Markdown to PDF
       uses: BaileyJM02/markdown-to-pdf@v1
       with:
@@ -50,7 +57,7 @@ jobs:
         theme: ${{ env.THEME }}
         image_import: ${{ env.GRAPHICS }}
         build_html: false
-        #image_import: '.resources'
+        # image_import:  ${{ env.RESOURCES }}
 
     - name: Zip Assets Into ${{ github.event.repository.name }}${{ env.EXTENSION }} File
       uses: thedoctor0/zip-release@0.7.6
