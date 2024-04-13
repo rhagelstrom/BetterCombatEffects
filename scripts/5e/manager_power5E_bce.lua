@@ -30,7 +30,7 @@ function customEvalAction(rActor, nodePower, rAction)
     BCEManager.chat('customEvalAction : ');
     if rAction.type == 'effect' and (rAction.sName:match('%[SDC]') or rAction.sName:match('%(SDC%)')) then
         local aNodeActionChild = DB.getChildList(DB.getChild(nodePower, 'actions'));
-        local rSave = {saveMod = 0, saveBase = '', saveStat = '', saveProf = 0};
+        local rSave = {saveMod = 0, saveBase = 'group', saveStat = '', saveProf = 0};
         local nDC = 0;
         local tMatch = EffectManager5E.getEffectsByType(rActor, 'SDC');
         local nSDCBonus = 0;
@@ -74,6 +74,8 @@ function customEvalAction(rActor, nodePower, rAction)
         end
         rAction.sName = rAction.sName:gsub('%[SDC]', tostring(nDC));
         rAction.sName = rAction.sName:gsub('%(SDC%)', tostring(nDC));
+    elseif rAction.type == 'effect' then
+        rAction = ActionSaveDnDBCE.replaceSaveDC(rAction, rActor);
     end
 
     evalAction(rActor, nodePower, rAction);

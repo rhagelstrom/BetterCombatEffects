@@ -9,7 +9,7 @@ name: Release Build
 permissions: write-all
 
 env:
-  EXTENSION:  '.ext'
+  EXTENSION: '.ext'
   PDF: '.pdf'
   MARKDOWN: '.md'
   README: 'README'

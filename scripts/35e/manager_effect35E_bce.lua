@@ -83,7 +83,6 @@ function addEffectPre35E(_, _, nodeCT, rNewEffect, _)
     -- Effect that has FROMAURA;
 
     if not rNewEffect.sName:upper():find('FROMAURA;') then
-        -- rNewEffect = ActionSaveDnDBCE.moveModtoMod(rNewEffect); -- Eventually we can get rid of this. Used to replace old format with New
         rNewEffect = ActionSaveDnDBCE.replaceSaveDC(rNewEffect, rSource);
 
         local aOriginalComps = EffectManager.parseEffect(rNewEffect.sName);
