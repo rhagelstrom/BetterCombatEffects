@@ -85,7 +85,7 @@ Better Combat Effects supports Effect Builder, a GUI for building effects \
 * **[skill]** = any skill name
 * **[effect]** = Any effect label in the custom effect list. Effect label is defined as anything before the first ; i.e. My Custom; ATKDS; "My Custom" would be the effect label
 * **[condition]** = Any condition as noted above except exhaustion. Note [condition] must be all lower case
-* **[SDC]** = (5E only) [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF]
+* **[SDC]** = (5E only) [SDC] will be replaced by the 8 + Actors spellcasting ability modifier + [PRF]. Alternatively [SDC] can be explicitly defined such as 8,[INT],[PRF] or if [SDC] is to be calcualated by a particular stat, such as STR or INT, [SDC] can be written as [SDCSTR] or [SDCINT]
 * **(R)** will remove the save effect on a successful save
 * **(RA)** will remove the save effect on any save
 * **(D)** will disable the save effect on a successful save

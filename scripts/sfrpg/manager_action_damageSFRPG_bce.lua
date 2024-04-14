@@ -23,8 +23,6 @@ function customApplyDamage(rSource, rTarget, bSecret, sRollType, sDamage, nTotal
     rRoll.nTotal = nTotal;
     rRoll.bSecret = bSecret;
     ActionDamageDnDBCE.applyDamageBCE(rSource, rTarget, rRoll, ...);
-    local nTotalSP = DB.getValue(nodeTarget, "sp", 0);
-
 end
 
 function applyDamage(rSource, rTarget, rRoll, ...)

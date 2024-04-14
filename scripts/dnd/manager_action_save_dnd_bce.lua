@@ -6,6 +6,7 @@
 -- luacheck: globals ActionSaveDnDBCE BCEManager EffectManagerBCE EffectManagerDnDBCE CombatManagerBCE ActionDamageDnDBCE
 -- luacheck: globals onInit onTabletopInit onClose processEffectTurnStartSave processEffectTurnEndSave onSaveRollHandler
 -- luacheck: globals saveAddEffect saveEffect saveRemoveDisable onDamage addEffectPost getDCEffectMod replaceSaveDC
+-- luacheck: globals replaceSaveDCPCHelper replaceSaveDCNPCHelper
 local onSave = nil;
 local RulesetEffectManager = nil;
 local RulesetActorManager = nil;
