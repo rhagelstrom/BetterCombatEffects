@@ -6,6 +6,7 @@
 -- luacheck: globals EffectManagerDnDBCE BCEManager BCEDnDManager EffectManagerBCE DiceManagerDnDBCE
 -- luacheck: globals onInit onClose onTabletopInit onEffectRollHandler addEffectPre addEffectPost
 -- luacheck: globals applyOngoingDamage applyOngoingRegen customOnEffectTextDecode customOnEffectTextEncode
+-- luacheck: globals splitTagByComma
 local RulesetEffectManager = nil;
 
 local onEffectTextDecode = nil;
@@ -212,4 +213,9 @@ function customOnEffectTextEncode(rEffect)
         sReturn = sReturn .. string.format(' [%s]', rEffect.sChangeState:upper());
     end
     return sReturn;
+end
+
+function splitTagByComma(sEffect)
+    local sRemainder = sEffect:match("^%w+%s*:(.+)");
+    return StringManager.split(sRemainder, ",", true);
 end
