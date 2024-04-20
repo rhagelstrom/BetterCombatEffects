@@ -3,7 +3,7 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 --
--- luacheck: globals EffectManagerBCE BCEManager CombatManagerDnDBCE
+-- luacheck: globals EffectManagerBCE BCEManager CombatManagerDnDBCE EffectManagerDnDBCE
 -- luacheck: globals onInit onClose moddedGetEffectsByType deleteStateModified
 -- luacheck: globals customAddEffectPre registerEffectCompType getEffectCompType getLabelShort initEffectHandlers deleteEffectHandlers
 -- luacheck: globals deleteEffectHandlers expireAddHelper expireAdd setCustomMatchEffect removeCustomMatchEffect onCustomMatchEffect
