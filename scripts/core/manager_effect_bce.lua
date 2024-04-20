@@ -184,8 +184,8 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
             (DB.getValue(v, 'apply', '') == rNewEffect.sApply) and (DB.getValue(v, 'changestate', '') == rNewEffect.sChangeState) then
             if rNewEffect.nDuration ~= 0 and
                 (rNewEffect.sChangeState == 'rs' or rNewEffect.sChangeState == 'srs' or rNewEffect.sChangeState == 're' or
-                    rNewEffect.sChangeState == 'sre') and DB.getValue(v, 'source_name', '') == '' then
-                DB.setValue(v, 'duration', 'number', rNewEffect.nDuration + 1);
+                rNewEffect.sChangeState == 'sre') then
+                    DB.setValue(v, 'duration', 'number', rNewEffect.nDuration + 1);
             end
             nodeEffect = v;
             DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
@@ -277,7 +277,8 @@ function expireAdd(nodeEffect)
         for _, sEffectComp in ipairs(aEffectComps) do
             local tEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
             if tEffectComp.type == 'EXPIREADD' then
-                for _,remainder in pairs(tEffectComp.remainder) do
+                local aRemainders = EffectManagerDnDBCE.splitTagByComma(sEffectComp);
+                for _,remainder in pairs(aRemainders) do
                     BCEManager.notifyAddEffect(nodeCT, sourceNode, remainder);
                 end
                 -- BCEManager.notifyAddEffect(nodeCT, sourceNode, StringManager.combine(' ', unpack(tEffectComp.remainder)));
