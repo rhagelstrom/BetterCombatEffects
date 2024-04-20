@@ -1,5 +1,5 @@
 --  	Author: Ryan Hagelstrom
---	  	Copyright © 2021-2023
+--	  	Copyright © 2021-2024
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 --
