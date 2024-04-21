@@ -10,29 +10,23 @@
 			<dynamic />
 		</sizelimits>
 		<sheetdata>
-			<windowtitlebar name="title">
+			<windowtitlebar_utilitybox name="title">
 				<resource>migrate_effects</resource>
-			</windowtitlebar>
+			</windowtitlebar_utilitybox>
+			<windowmenubar_utilitybox name="menubar" />
 			<anchor_content_utilitybox_top />
-			<sub_content_framed_groupbox_top name="groupbox_top">
-				<!-- <sheetdata>
-				<anchor_content_top />
-			        <stringc_content_column_noframe_static>
-				    <readonly />
-				    <center />
-				    <static textres="migrate_msg_1" />
-			    </stringc_content_column_noframe_static>
-				</sheetdata> -->
-				<class>bce_migrate_msg</class>
-			</sub_content_framed_groupbox_top>
 			<anchor_content_utilitybox_bottom />
-			<!-- <sub_content_framed_groupbox_bottom name="groupbox_bottom">
-			</sub_content_framed_groupbox_bottom> -->
-			<sub_content_framed_groupbox name="sub_buttons">
+			<sub_content_buttons_groupbox_bottom name="sub_buttons">
 				<class>bce_migrate_effects_bottom</class>
-			</sub_content_framed_groupbox>
+			</sub_content_buttons_groupbox_bottom>
+			<area_content_framed_groupbox name="contentframe" />
+			<subwindow name="bcemigratemsg">
+				<anchored to="contentframe" position="over" />
+				<class>bce_migrate_msg</class>
+				<fastinit />
+				<activate />
+			</subwindow>
 			<resize_utilitybox />
-			<close_utilitybox />
 		</sheetdata>
 	</windowclass>
 
@@ -52,33 +46,29 @@
 	</windowclass>
 
 	<windowclass name="bce_migrate_warning_subwindow">
-		<!-- <backcolor >fb9e8e</backcolor> -->
 		<sheetdata>
 			<anchor_content_top />
 			<header_content_framed_headersimple name="header">
 				<static textres="migrate_effects_warning" />
 			</header_content_framed_headersimple>
-			<stringc_content_noframe_static_top>
-				<readonly />
+			<stringc_content_noframe_noscroll_static_top>
 				<center />
 				<static textres="migrate_warning_msg" />
-			</stringc_content_noframe_static_top>
+			</stringc_content_noframe_noscroll_static_top>
 		</sheetdata>
 	</windowclass>
 
 	<windowclass name="bce_migrate_msg">
 		<sheetdata>
 			<anchor_content_top />
-			<stringc_content_noframe_static_top>
-				<readonly />
+			<stringc_content_noframe_noscroll_static_top>
 				<center />
 				<static textres="migrate_msg_1" />
-			</stringc_content_noframe_static_top>
-			<stringc_content_noframe_static_top>
-				<readonly />
+			</stringc_content_noframe_noscroll_static_top>
+			<stringc_content_noframe_noscroll_static_top name="migrate_msg_2">
 				<center />
 				<static textres="migrate_msg_2" />
-			</stringc_content_noframe_static_top>
+			</stringc_content_noframe_noscroll_static_top>
 			<sub_content_top name="sub_system">
 				<anchored>
 					<right anchor="left" offset="100%" />
