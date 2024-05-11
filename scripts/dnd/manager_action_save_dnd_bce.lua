@@ -339,12 +339,14 @@ function replaceSaveDC(rNewEffect, rActor)
             aSaveStat = DataCommon.save_ltos;
         end
 
-        for _,sStat in pairs(aSaveStat) do
+        for _, sStat in pairs(aSaveStat) do
             if rNewEffect.sName:match('%[SDC' .. sStat .. ']') or rNewEffect.sName:match('%(SDC' .. sStat .. '%)') then
                 if User.getRulesetName() == '5E' then
-                    nSpellcastingDC = nSpellcastingDCBase + RulesetActorManager.getAbilityBonus(rActor,  DataCommon.ability_stol[sStat]);
+                    nSpellcastingDC = nSpellcastingDCBase +
+                                          RulesetActorManager.getAbilityBonus(rActor, DataCommon.ability_stol[sStat]);
                 else
-                    nSpellcastingDC = nSpellcastingDCBase + RulesetActorManager.getAbilityBonus(rActor,  DataCommon.save_ltos[sStat]);
+                    nSpellcastingDC = nSpellcastingDCBase +
+                                          RulesetActorManager.getAbilityBonus(rActor, DataCommon.save_ltos[sStat]);
                 end
                 rNewEffect.sName = rNewEffect.sName:gsub('%(SDC' .. sStat .. '%)', tostring(nSpellcastingDC));
                 rNewEffect.sName = rNewEffect.sName:gsub('%[SDC' .. sStat .. ']', tostring(nSpellcastingDC));
@@ -382,9 +384,9 @@ function replaceSaveDCNPCHelper(rNewEffect, rActor, nodeActor)
     for _, nodeSpell in ipairs(DB.getChildList(nodeActor, 'spells')) do
         table.insert(aSpells, DB.getValue(nodeSpell, 'name', ''))
     end
-    local nInnateBonus
-    local nSpellBonus
-    local nSpellcastingDC = 8 + RulesetActorManager.getAbilityBonus(rActor, 'prf');
+    local nInnateBonus = 0;
+    local nSpellBonus = 0;
+    local nSpellcastingDC = 0;
     for _, nodeTrait in ipairs(DB.getChildList(nodeActor, 'traits')) do
         local sTraitName = StringManager.trim(DB.getValue(nodeTrait, 'name', ''):lower());
         if sTraitName == 'spellcasting' or string.find(sTraitName, 'innate spellcasting') then
@@ -409,6 +411,7 @@ function replaceSaveDCNPCHelper(rNewEffect, rActor, nodeActor)
         end
     else
         local bInnate = false;
+        local bSpellcasting = false;
         for _, sInnateSpell in ipairs(aInnateSpells) do
             if string.find(sInnateSpell, rNewEffect.sName) then
                 nSpellcastingDC = nSpellcastingDC + nInnateBonus;
@@ -420,8 +423,19 @@ function replaceSaveDCNPCHelper(rNewEffect, rActor, nodeActor)
             for _, sSpell in ipairs(aSpells) do
                 if string.find(sSpell, rNewEffect.sName) then
                     nSpellcastingDC = nSpellcastingDC + nSpellBonus;
+                    bSpellcasting = true;
                     break
                 end
+            end
+        end
+
+        -- didn't find the spell so we will just assume old format
+        -- shouldn't be a thing because an NPC should match
+        if not bInnate and not bSpellcasting then
+            if nSpellBonus > nInnateBonus then
+                nSpellcastingDC = nSpellcastingDC + nSpellBonus;
+            else
+                nSpellcastingDC = nSpellcastingDC + nInnateBonus;
             end
         end
     end
