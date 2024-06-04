@@ -71,13 +71,18 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     end
     -- save off temp hp and wounds before damage
     local nTempHPPrev, nWoundsPrev = ActionDamageDnDBCE.getTempHPAndWounds(rTarget);
-    local nTotalSPPrev = DB.getValue(nodeCharTarget, "sp.fatique", 0); -- Starfinder
+    local nTotalSPPrev = 0
+    local nTotalSP = 0
+    if nodeCharTarget and User.getRulesetName() == 'SFRPG' then
+         nTotalSPPrev = DB.getValue(nodeCharTarget, "sp.fatique", 0); -- Starfinder
+    end
     RulesetActionDamageManager.applyDamage(rSource, rTarget, rRoll, ...);
 
     -- get temp hp and wounds after damage
     local nTempHP, nWounds = ActionDamageDnDBCE.getTempHPAndWounds(rTarget);
-    local  nTotalSP = DB.getValue(nodeCharTarget, "sp.fatique", 0); -- Starfinder
-
+    if nodeCharTarget and User.getRulesetName() == 'SFRPG' then
+        nTotalSP = DB.getValue(nodeCharTarget, "sp.fatique", 0); -- Starfinder
+    end
     if OptionsManager.isOption('TEMP_IS_DAMAGE', 'on') then
         -- If no damage was applied then return
         if nWoundsPrev >= nWounds and nTempHPPrev <= nTempHP and nTotalSP <= nTotalSPPrev then
