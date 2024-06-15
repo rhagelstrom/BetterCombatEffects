@@ -124,6 +124,15 @@ Additionally, DUSE has been added to the APPLY cycler
 | --- | --- | --- |
 | ![Alt](./graphics/icons/button_toggle_duse.png "DUSE") | DUSE | DEACTIVATE effect when the effect has been used |
 
+### Inline
+
+Inline effects using the Change State cycler are written (S:<shorthand>) where <shorthand> is the shorthand notation. For Example:
+
+```text
+[EFF: SomeEfffect; ATK: 1; (C) (D:10 MIN) (T:SELF) (A:ROLL) (S:AS)]
+```
+
+
 <div style="page-break-afterpage;"></div>
 
 ## Examples
