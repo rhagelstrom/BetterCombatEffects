@@ -5,7 +5,7 @@
 --
 -- luacheck: globals ActionDamage4EBCE BCEManager ActionDamageDnDBCE
 -- luacheck: globals onInit onClose customApplyDamage applyDamage customGetDamageAdjust checkNumericalReductionType
--- luacheck: globals checkNumericalReductionTypeHelper getReductionType
+-- luacheck: globals checkNumericalReductionTypeHelper getReductionType reductionHelper
 local getDamageAdjust = nil;
 local applyDamageOriginal = nil;
 
@@ -123,21 +123,26 @@ end
 function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
     local tEffects = EffectManager4E.getEffectsByType(rTarget, sEffectType, rDamageOutput.tDamageFilter, rSource)
     local aFinal = {};
-    for _, v in pairs(tEffects) do
+    local aDamageTypes = UtilityManager.copyDeep(rDamageOutput.aDamageTypes);
+    local nTotalDamage = rDamageOutput.nVal;
+    for _, tEffect in pairs(tEffects) do
         local rReduction = {};
-        if v.mod < 1 and v.mod > 0 then
-            local nReduce = math.floor(v.mod * rDamageOutput.nVal);
-            for _,sDescriptor in ipairs(v.remainder) do
+        if tEffect.mod < 1 and tEffect.mod > 0 then
+            local nReduce = math.floor(tEffect.mod * nTotalDamage);
+            for _, sDescriptor in ipairs(tEffect.remainder) do
                 if rDamageOutput.aDamageTypes[sDescriptor] then
-                    nReduce =  math.floor(v.mod * rDamageOutput.aDamageTypes[sDescriptor]);
+                    nReduce = math.floor(tEffect.mod * aDamageTypes[sDescriptor]);
                     break
                 end
             end
-            v.mod = nReduce;
+            tEffect.mod = nReduce;
         end
-        rReduction.mod = v.mod;
+        rReduction.mod = tEffect.mod;
         rReduction.aNegatives = {};
-        for _, vType in pairs(v.remainder) do
+        if not next(tEffect.remainder) then
+            table.insert(tEffect.remainder, 'all');
+        end
+        for _, vType in pairs(tEffect.remainder) do
             if #vType > 1 and ((vType:sub(1, 1) == '!') or (vType:sub(1, 1) == '~')) then
                 if StringManager.contains(DataCommon.dmgtypes, vType:sub(2)) then
                     table.insert(rReduction.aNegatives, vType:sub(2));
@@ -145,7 +150,7 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
             end
         end
 
-        for _, vType in pairs(v.remainder) do
+        for _, vType in pairs(tEffect.remainder) do
             if vType ~= 'untyped' and vType ~= '' and vType:sub(1, 1) ~= '!' and vType:sub(1, 1) ~= '~' then
                 if StringManager.contains(DataCommon.dmgtypes, vType) or vType == 'all' then
                     if aFinal[vType] then
@@ -155,6 +160,45 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
                 end
             end
         end
+        local aFinalCopy = UtilityManager.copyDeep(aFinal);
+        nTotalDamage = ActionDamage4EBCE.reductionHelper(aDamageTypes, aFinalCopy, nTotalDamage)
     end
+
     return aFinal;
+end
+
+-- Needed to get the stacking of DMGR correct.
+function reductionHelper(aDamageTypes, aFinalCopy, nTotalDamage)
+    for sDamageKey, _ in pairs(aDamageTypes) do
+        for sFinalKey, _ in pairs(aFinalCopy) do
+            if sFinalKey == 'all' then
+                local nDamagetoReduce = aFinalCopy[sFinalKey].mod;
+                local bDone = false;
+                while not bDone do
+                    bDone = true;
+                    for sDecrementKey, nDamage in pairs(aDamageTypes) do
+                        if nDamage ~= 0 then
+                            aDamageTypes[sDecrementKey] = aDamageTypes[sDecrementKey] - 1;
+                            aFinalCopy[sFinalKey].mod = aFinalCopy[sFinalKey].mod - 1;
+                            nTotalDamage = math.max(nTotalDamage - 1, 0);
+                            nDamagetoReduce = math.max(nDamagetoReduce - 1, 0);
+                            if nDamagetoReduce ~= 0 then
+                                bDone = false;
+                            end
+                        end
+                        if aFinalCopy[sFinalKey].mod == 0 then
+                            break
+                        end
+                    end
+                end
+            elseif sFinalKey == sDamageKey then
+                aDamageTypes[sDamageKey] = math.max(aDamageTypes[sDamageKey] - aFinalCopy[sFinalKey].mod, 0);
+                nTotalDamage = math.max(nTotalDamage - aFinalCopy[sFinalKey].mod, 0);
+            end
+            if aFinalCopy[sFinalKey].mod == 0 then
+                break
+            end
+        end
+    end
+    return nTotalDamage;
 end
