@@ -33,7 +33,7 @@ Better Combat Effects supports Effect Builder, a GUI for building effects \
 | TDMGADDS | (-) | [effect]\* or [condition]\* | TARGET of the attack will add an  effect to the SOURCE of the attack when damage is done | |
 | SDMGADDT | (-) | [effect]\* or [condition]\* | SOURCE of the attack will add an effect to the TARGET when damage is done | |
 | SDMGADDS | (-) | [effect]\* or [condition]\* | SOURCE of the attack will add an effect to the SOURCE (itself) when damage is done | |
-| DMGR |(D) | [damage type]\* ,all, [range]\* | Reduce the damage taken by the specified damage type(s) by (D) | 5E 4E |
+| DMGR |(D) or (.N) | [damage type]\* ,all, [range]\* | Reduce the damage taken by the specified damage type(s) by (D) or when a decimal between 0-1 reduce damage by percentage| 5E 4E |
 | SAVEONDMG | (N) or [SDC] | [ability] (R) (RA) (D) (H) (M) (F) | Roll ongoing save when the  Actor's takes damage where (N) is a number or [SDC] | 5E 3.5E PFRPG SFRPG |
 | **Expire Effect** | | | | |
 | EXPIREADD | (-) | [effect]\* or [condition]\* | Add effect or condition when this effect expires | |

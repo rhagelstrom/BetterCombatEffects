@@ -31,7 +31,7 @@ end
 function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
     BCEManager.chat('customGetDamageAdjust : ');
     local nReduce = 0;
-    local aReduce = getReductionType(rSource, rTarget, 'DMGR', rDamageOutput);
+    local aReduce = ActionDamage5EBCE.getReductionType(rSource, rTarget, 'DMGR', rDamageOutput);
     for k, v in pairs(rDamageOutput.aDamageTypes) do
         -- Get individual damage types for each damage clause
         local aSrcDmgClauseTypes = {};
@@ -67,7 +67,9 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
     local aFinal = {};
     for _, v in pairs(tEffects) do
         local rReduction = {};
-
+        if v.mod < 1 and v.mod > 0 then
+            v.mod = math.max(v.mod * rDamageOutput.nVal)
+        end
         rReduction.mod = v.mod;
         rReduction.aNegatives = {};
         if not next(v.remainder) then
