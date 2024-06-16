@@ -126,7 +126,14 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
     for _, v in pairs(tEffects) do
         local rReduction = {};
         if v.mod < 1 and v.mod > 0 then
-            v.mod = math.max(v.mod * rDamageOutput.nVal)
+            local nReduce = math.floor(v.mod * rDamageOutput.nVal);
+            for _,sDescriptor in ipairs(v.remainder) do
+                if rDamageOutput.aDamageTypes[sDescriptor] then
+                    nReduce =  math.floor(v.mod * rDamageOutput.aDamageTypes[sDescriptor]);
+                    break
+                end
+            end
+            v.mod = nReduce;
         end
         rReduction.mod = v.mod;
         rReduction.aNegatives = {};
