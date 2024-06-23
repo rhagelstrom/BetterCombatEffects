@@ -42,6 +42,7 @@ function onTabletopInit()
         local nodeNoShow = DB.getChild(nodeMigrate, 'noshow');
         if not nodeNoShow then
             DB.setValue(nodeMigrate, 'noshow', 'number', 1);
+            nodeNoShow = DB.getChild(nodeMigrate, 'noshow');
         end
 
         if nodeMigrate and DB.getValue(nodeNoShow, '', 0) == 0 then
