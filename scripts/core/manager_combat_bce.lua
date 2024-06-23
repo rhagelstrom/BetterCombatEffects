@@ -87,7 +87,6 @@ function turnEnd(sourceNodeCT)
     if not sourceNodeCT then
         return;
     end
-    EffectManagerBCE.changeState(sourceNodeCT, false);
 
     local rSource = ActorManager.resolveActor(sourceNodeCT);
     if OptionsManager.isOption('DEPRECATE_CHANGE_STATE', 'on') then
@@ -132,6 +131,7 @@ function turnEnd(sourceNodeCT)
             end
         end
     end
+    EffectManagerBCE.changeState(sourceNodeCT, false);
 end
 
 ------------------ CUSTOM BCE FUNTION HOOKS ------------------
