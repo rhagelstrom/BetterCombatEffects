@@ -38,9 +38,13 @@ function onInit()
 end
 function onTabletopInit()
     if Session.IsHost then
-        local nodeMigrate = DB.getRoot().createChild('bce_migrate')
-        local nodeNoShow = DB.getChild(nodeMigrate, 'noshow')
-        if nodeMigrate and (not nodeNoShow or DB.getValue(nodeNoShow, '', 0) == 0) then
+        local nodeMigrate = DB.getRoot().createChild('bce_migrate');
+        local nodeNoShow = DB.getChild(nodeMigrate, 'noshow');
+        if not nodeNoShow then
+            DB.setValue(nodeMigrate, 'noshow', 'number', 1);
+        end
+
+        if nodeMigrate and DB.getValue(nodeNoShow, '', 0) == 0 then
             Interface.openWindow('bce_migrator', nodeMigrate);
         end
     end
