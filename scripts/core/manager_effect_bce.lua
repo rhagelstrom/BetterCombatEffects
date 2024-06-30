@@ -183,8 +183,9 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
             (DB.getValue(v, 'duration', 0) == rNewEffect.nDuration) and (DB.getValue(v, 'source_name', '') == rNewEffect.sSource) and
             (DB.getValue(v, 'apply', '') == rNewEffect.sApply) and (DB.getValue(v, 'changestate', '') == rNewEffect.sChangeState) then
             if rNewEffect.nDuration ~= 0 and
-                (rNewEffect.sChangeState == 'rs'  or rNewEffect.sChangeState == 're') and DB.getValue(v, 'source_name', '') == '' then
-                    DB.setValue(v, 'duration', 'number', rNewEffect.nDuration + 1);
+                (rNewEffect.sChangeState == 'rs' or rNewEffect.sChangeState == 're' or rNewEffect.sChangeState == 'srs' or
+                    rNewEffect.sChangeState == 'sre') then
+                DB.setValue(v, 'duration', 'number', rNewEffect.nDuration + 1);
             end
             nodeEffect = v;
             DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
@@ -277,7 +278,7 @@ function expireAdd(nodeEffect)
             local tEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
             if tEffectComp.type == 'EXPIREADD' then
                 local aRemainders = EffectManagerDnDBCE.splitTagByComma(sEffectComp);
-                for _,remainder in pairs(aRemainders) do
+                for _, remainder in pairs(aRemainders) do
                     BCEManager.notifyAddEffect(nodeCT, sourceNode, remainder);
                 end
                 -- BCEManager.notifyAddEffect(nodeCT, sourceNode, StringManager.combine(' ', unpack(tEffectComp.remainder)));
