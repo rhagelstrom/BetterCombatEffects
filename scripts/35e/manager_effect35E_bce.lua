@@ -51,7 +51,15 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
     if not nodeEffectsList then
         return sDuplicateMsg
     end
-    if not rEffect.sName:match('STACK') then
+    local bStack = false;
+    for _, sEffectComp in ipairs(EffectManager.parseEffect(rEffect.sName)) do
+        local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
+        if rEffectComp.original == 'STACK' then
+            bStack = true;
+            break
+        end
+    end
+    if not bStack then
         for _, nodeEffect in ipairs(DB.getChildList(nodeEffectsList)) do
             if (DB.getValue(nodeEffect, 'label', '') == rEffect.sName) and (DB.getValue(nodeEffect, 'init', 0) == rEffect.nInit) and
                 (DB.getValue(nodeEffect, 'duration', 0) == rEffect.nDuration) and

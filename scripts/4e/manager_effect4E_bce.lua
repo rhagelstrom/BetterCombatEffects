@@ -46,7 +46,15 @@ end
 function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
     local sDuplicateMsg;
     sDuplicateMsg = EffectManager4E.onEffectAddIgnoreCheck(nodeCT, rEffect);
-    if sDuplicateMsg and rEffect.sName:match('STACK') and sDuplicateMsg:match('ALREADY EXISTS') then
+    local bStack = false;
+    for _, sEffectComp in ipairs(EffectManager.parseEffect(rEffect.sName)) do
+        local rEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
+        if rEffectComp.original == 'STACK' then
+            bStack = true;
+            break
+        end
+    end
+    if sDuplicateMsg and bStack and sDuplicateMsg:match('ALREADY EXISTS') then
         sDuplicateMsg = nil;
     end
     return sDuplicateMsg;
