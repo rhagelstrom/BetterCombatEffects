@@ -3,7 +3,7 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 --
--- luacheck: globals EffectManager5EBCE BCEManager ActionSaveDnDBCE EffectManagerBCE
+-- luacheck: globals EffectManager5EBCE BCEManager ActionSaveDnDBCE EffectManagerBCE MigrationManagerBCE
 -- luacheck: globals onInit onClose customOnEffectAddIgnoreCheck addEffectPre5E dropConcentration
 -- luacheck: globals moddedGetEffectsByType moddedHasEffectCondition moddedHasEffect customEncodeEffectForCT customDecodeEffectFromCT
 local bAdvancedEffects = nil;

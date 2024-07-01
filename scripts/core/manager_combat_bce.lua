@@ -3,9 +3,9 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 --
--- luacheck: globals CombatManagerBCE BCEManager EffectManagerBCE
+-- luacheck: globals CombatManagerBCE BCEManager EffectManagerBCE MigrationManagerBCE
 -- luacheck: globals onInit onTabletopInit turnStart turnEnd
--- luacheck: globals setCustomProcessTurnStart removeCustomProcessTurnStart onCustomProcessTurnStart deprecateTagMsg
+-- luacheck: globals setCustomProcessTurnStart removeCustomProcessTurnStart onCustomProcessTurnStart
 -- luacheck: globals setCustomProcessTurnEnd removeCustomProcessTurnEnd onCustomProcessTurnEnd RulesetEffectManager
 ------------------ CUSTOM BCE FUNTION HOOKS ------------------
 local aCustomProcessTurnStartHandlers = {};
@@ -27,13 +27,6 @@ function onTabletopInit()
     EffectManagerBCE.registerEffectCompType('TURNAE', {bIgnoreDisabledCheck = true});
     EffectManagerBCE.registerEffectCompType('TURNRS', {bIgnoreDisabledCheck = true});
     EffectManagerBCE.registerEffectCompType('TURNRE', {bIgnoreDisabledCheck = true});
-end
-
-function deprecateTagMsg(sTag)
-    if sTag and sTag ~= '' then
-        local msgData = {text = sTag .. ' is deprecated. Use /migrate_effects to migrate BCE effects to new format.', font = 'narratorfont', icon = 'BetterCombatEffects'}
-        Comm.addChatMessage(msgData)
-    end
 end
 
 function turnStart(sourceNodeCT)
@@ -67,7 +60,7 @@ function turnStart(sourceNodeCT)
                             BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                         end
                     end
-                    CombatManagerBCE.deprecateTagMsg(sTag);
+                    MigrationManagerBCE.deprecateTagMsg(sTag);
                 end
             end
         end
@@ -83,7 +76,7 @@ function turnStart(sourceNodeCT)
                     if nDuration == 1 and sSource == DB.getPath(sourceNodeCT) then
                         BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                     end
-                    CombatManagerBCE.deprecateTagMsg('STURNRS');
+                    MigrationManagerBCE.deprecateTagMsg('STURNRS');
                 end
             end
         end
@@ -120,7 +113,7 @@ function turnEnd(sourceNodeCT)
                             BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                         end
                     end
-                    CombatManagerBCE.deprecateTagMsg(sTag);
+                    MigrationManagerBCE.deprecateTagMsg(sTag);
                 end
             end
 
@@ -136,7 +129,7 @@ function turnEnd(sourceNodeCT)
 
                             BCEManager.modifyEffect(tEffect.sEffectNode, 'Remove');
                         end
-                        CombatManagerBCE.deprecateTagMsg('STURNRE');
+                        MigrationManagerBCE.deprecateTagMsg('STURNRE');
                     end
                 end
             end

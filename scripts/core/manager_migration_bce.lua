@@ -6,7 +6,7 @@
 -- luacheck: globals MigrationManagerBCE BCEManager
 -- luacheck: globals migration migrateItems migrateSpells migrateCustomEffects migrateCombatTracker migrateCharSheet
 -- luacheck: globals migrateNPC migratePowers  migrateAdvancedEffects migrateKnK  migrationHelper migrateEffect
--- luacheck: globals slashOpen onClose onTabletopInit onInit
+-- luacheck: globals slashOpen onClose onTabletopInit onInit deprecateTagMsg
 local aMigrate = {
     'DUSE',
     'ATURN',
@@ -467,4 +467,15 @@ function migrateEffect(nodeEffect, aEffectComps, index, rEffectComp)
         -- end
     end
     return sApply:upper(), sChangeState:upper();
+end
+
+function deprecateTagMsg(sTag)
+    if sTag and sTag ~= '' then
+        local msgData = {
+            text = sTag .. ' is deprecated. Use /migrate_effects to migrate BCE effects to new format.',
+            font = 'narratorfont',
+            icon = 'BetterCombatEffects'
+        }
+        Comm.addChatMessage(msgData)
+    end
 end

@@ -3,7 +3,7 @@
 --	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 --	  	https://creativecommons.org/licenses/by-sa/4.0/
 --
--- luacheck: globals EffectManager35EBCE EffectManagerBCE BCEManager ActionSaveDnDBCE
+-- luacheck: globals EffectManager35EBCE EffectManagerBCE BCEManager ActionSaveDnDBCE MigrationManagerBCE
 -- luacheck: globals onInit onClose customOnEffectAddIgnoreCheck addEffectPre35E moddedGetEffectsByType isValidCheckEffect
 -- luacheck: globals moddedHasEffectCondition moddedHasEffect kelGetEffectsByType kelHasEffectCondition kelHasEffect
 local bAdvancedEffects = nil;
