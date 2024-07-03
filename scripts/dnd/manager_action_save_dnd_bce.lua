@@ -244,13 +244,6 @@ function saveEffect(rTarget, rEffectComp)
         local aSaveFilterAbility = {};
         table.insert(aSaveFilterAbility, sAbility:lower());
 
-        -- if we don't have a filter, modSave will figure out the other adv/dis later
-        if #(RulesetEffectManager.getEffectsByType(rTarget, 'ADVSAV', aSaveFilterAbility, rSource)) > 0 then
-            rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [ADV]';
-        end
-        if #(RulesetEffectManager.getEffectsByType(rTarget, 'DISSAV', aSaveFilterAbility, rSource)) > 0 then
-            rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [DIS]';
-        end
         rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [PATH]' .. rEffectComp.sEffectNode .. '[!PATH] [BCE]';
         ActionSave.performVsRoll(nil, rTarget, sAbility, rSaveVsRoll.nMod, bSecret, rSource, false, rSaveVsRoll.sDesc);
     end
