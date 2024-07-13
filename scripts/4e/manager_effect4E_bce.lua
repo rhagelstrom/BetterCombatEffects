@@ -72,7 +72,7 @@ function onAttack4E(rSource, rTarget, rRoll)
 end
 
 -- 4E is different enough that we need need to handle ongoing damage here
-function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf, sLabel)
+function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
     local rAction = {};
     local aClause = {};
     rAction.clauses = {};
@@ -86,10 +86,7 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf, sLabel)
     aClause.critdicestr = '';
 
     table.insert(rAction.clauses, aClause);
-    if not sLabel then
-        sLabel = 'Ongoing Effect';
-    end
-    rAction.name = sLabel;
+    rAction.name =  'Ongoing Effect';
 
     local rRoll = ActionDamage.getRoll(rTarget, rAction);
     if bHalf then

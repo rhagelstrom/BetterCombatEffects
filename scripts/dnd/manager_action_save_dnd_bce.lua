@@ -132,6 +132,8 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
 
             tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, aSaveFilter, rTarget);
             for _, tEffect in pairs(tMatch) do
+                local nodeEffectMatch = DB.findNode(tEffect.sEffectNode);
+                local sLabel = EffectManagerBCE.getLabelShort(nodeEffectMatch);
                 if tEffect.sEffectNode == sPath then
                     if sTag == 'SAVEADDP' then
                         BCEManager.chat('SAVEADDP : ', tEffect);
@@ -151,6 +153,8 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
         for _, sTag in pairs(aTags) do
             tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, aSaveFilter, rTarget);
             for _, tEffect in pairs(tMatch) do
+                local nodeEffectMatch = DB.findNode(tEffect.sEffectNode);
+                local sLabel = EffectManagerBCE.getLabelShort(nodeEffectMatch);
                 if tEffect.sEffectNode == sPath then
                     if sTag == 'SAVEADD' then
                         BCEManager.chat('SAVEADD : ', tEffect);
@@ -188,11 +192,13 @@ function saveEffect(rTarget, rEffectComp)
     end
 
     local sAbility;
+    local sAbilityShort;
     if User.getRulesetName() == '5E' then
         for _, remainder in pairs(rEffectComp.remainder) do
             remainder = StringManager.sanitize(remainder);
             if DataCommon.ability_stol[remainder:upper()] then
                 sAbility = DataCommon.ability_stol[remainder:upper()];
+                sAbilityShort = remainder:upper();
                 break
             end
         end
@@ -201,6 +207,7 @@ function saveEffect(rTarget, rEffectComp)
             remainder = StringManager.sanitize(remainder);
             if DataCommon.save_stol[remainder:upper()] then
                 sAbility = DataCommon.save_stol[remainder:upper()];
+                sAbilityShort = sAbility:upper();
                 break
             end
         end
@@ -210,7 +217,8 @@ function saveEffect(rTarget, rEffectComp)
         local rAction = {};
 
         rAction.savemod = rEffectComp.mod;
-        rAction.label = sAbility;
+
+        rAction.label = EffectManagerBCE.getLabelShort(nodeEffect);
         if rEffectComp.original:match('%(M%)') then
             rAction.magic = true;
         end
@@ -223,8 +231,7 @@ function saveEffect(rTarget, rEffectComp)
         else
             rSaveVsRoll = ActionSpell.getSaveVsRoll(rSource, rAction);
         end
-
-        rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [' .. StringManager.capitalize(sAbility) .. ' DC ' .. rSaveVsRoll.nMod .. ']';
+        rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [' .. sAbilityShort .. ' DC ' .. rSaveVsRoll.nMod .. ']';
         if DB.getValue(nodeEffect, 'isgmonly', 0) == 1 then
             bSecret = true;
         end

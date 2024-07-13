@@ -62,7 +62,7 @@ function processEffectTurnEndDND(rSource)
             local sLabel = EffectManagerBCE.getLabelShort(tEffect.sEffectNode);
             BCEManager.chat(tEffect.type .. '  : ');
             if sTag == 'DMGOE' then
-                EffectManagerDnDBCE.applyOngoingDamage(rSource, rSource, tEffect, false, sLabel);
+                EffectManagerDnDBCE.applyOngoingDamage(rSource, rSource, tEffect, false);
             elseif sTag == 'REGENE' then
                 EffectManagerDnDBCE.applyOngoingRegen(rSource, rSource, tEffect, false);
             elseif sTag == 'TREGENE' then

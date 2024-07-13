@@ -106,18 +106,19 @@ function addEffectPost(nodeActor, nodeEffect)
     return false;
 end
 
-function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf, sLabel)
+function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
     BCEManager.chat('applyOngoingDamage DND: ');
     local rAction = {};
     local aClause = {};
     rAction.clauses = {};
+    local sLabel;
 
     aClause.dice = rEffectComp.dice;
     aClause.modifier = rEffectComp.mod;
     aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ','));
     table.insert(rAction.clauses, aClause);
     if not sLabel and rEffectComp.sEffectNode then
-        sLabel = DB.getValue(rEffectComp.sEffectNode .. '.label', 'Ongoing Damage');
+        sLabel = EffectManagerBCE.getLabelShort(rEffectComp.sEffectNode);
     elseif not sLabel then
         sLabel = 'Ongoing Damage';
     end
@@ -140,7 +141,7 @@ function applyOngoingRegen(rSource, rTarget, rEffectComp, bTemp)
     aClause.modifier = rEffectComp.mod;
     table.insert(rAction.clauses, aClause);
 
-    rAction.label = DB.getValue(rEffectComp.sEffectNode .. '.label', '')
+    rAction.label = EffectManagerBCE.getLabelShort(rEffectComp.sEffectNode);
     if bTemp == true then
         rAction.subtype = 'temp';
     end
