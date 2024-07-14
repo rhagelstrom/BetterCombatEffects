@@ -96,7 +96,7 @@ function customOnEffectAddIgnoreCheck(nodeCT, rEffect)
     end
     if OptionsManager.isOption('ALLOW_DUPLICATE_EFFECT', 'off') and not bStack then
         for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
-            if (DB.getValue(nodeEffect, 'label', '') == rEffect.sName) and (DB.getValue(nodeEffect, 'init', 0) == rEffect.nInit) and
+            if (DB.getValue(nodeEffect, 'label', '') == rEffect.sName) and
                 (bIgnoreDuration or (DB.getValue(nodeEffect, 'duration', 0) == rEffect.nDuration)) and
                 (DB.getValue(nodeEffect, 'source_name', '') == rEffect.sSource) then
 
