@@ -111,18 +111,16 @@ function applyOngoingDamage(rSource, rTarget, rEffectComp, bHalf)
     local rAction = {};
     local aClause = {};
     rAction.clauses = {};
-    local sLabel;
 
     aClause.dice = rEffectComp.dice;
     aClause.modifier = rEffectComp.mod;
     aClause.dmgtype = string.lower(table.concat(rEffectComp.remainder, ','));
     table.insert(rAction.clauses, aClause);
-    if not sLabel and rEffectComp.sEffectNode then
-        sLabel = EffectManagerBCE.getLabelShort(rEffectComp.sEffectNode);
-    elseif not sLabel then
-        sLabel = 'Ongoing Damage';
+    if rEffectComp.sEffectNode then
+        rAction.label = EffectManagerBCE.getLabelShort(rEffectComp.sEffectNode);
+    else
+        rAction.label = 'Ongoing Damage';
     end
-    rAction.label = sLabel;
 
     local rRoll = ActionDamage.getRoll(rTarget, rAction);
     if bHalf then

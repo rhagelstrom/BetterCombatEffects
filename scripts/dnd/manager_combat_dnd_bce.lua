@@ -59,7 +59,6 @@ function processEffectTurnEndDND(rSource)
     for _, sTag in pairs(aTags) do
         local tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag);
         for _, tEffect in pairs(tMatch) do
-            local sLabel = EffectManagerBCE.getLabelShort(tEffect.sEffectNode);
             BCEManager.chat(tEffect.type .. '  : ');
             if sTag == 'DMGOE' then
                 EffectManagerDnDBCE.applyOngoingDamage(rSource, rSource, tEffect, false);

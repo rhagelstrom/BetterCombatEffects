@@ -132,8 +132,6 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
 
             tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, aSaveFilter, rTarget);
             for _, tEffect in pairs(tMatch) do
-                local nodeEffectMatch = DB.findNode(tEffect.sEffectNode);
-                local sLabel = EffectManagerBCE.getLabelShort(nodeEffectMatch);
                 if tEffect.sEffectNode == sPath then
                     if sTag == 'SAVEADDP' then
                         BCEManager.chat('SAVEADDP : ', tEffect);
@@ -153,8 +151,6 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
         for _, sTag in pairs(aTags) do
             tMatch = RulesetEffectManager.getEffectsByType(rSource, sTag, aSaveFilter, rTarget);
             for _, tEffect in pairs(tMatch) do
-                local nodeEffectMatch = DB.findNode(tEffect.sEffectNode);
-                local sLabel = EffectManagerBCE.getLabelShort(nodeEffectMatch);
                 if tEffect.sEffectNode == sPath then
                     if sTag == 'SAVEADD' then
                         BCEManager.chat('SAVEADD : ', tEffect);
