@@ -12,7 +12,6 @@ https://creativecommons.org/licenses/by-sa/4.0/
 	<string name="option_Concentrate_Restrict">Restrict Concentration</string>
 	<string name="option_Temp_Is_Damage">TempHP Reduction is Damage</string>
 	<string name="option_Autoparse_Effects">Experimental: Autoparse NPC Powers</string>
-	<string name="option_Deprecate_Change_State">Deprecate Change State Tags</string>
 	<string name="effect_status_activated">ACTIVATED</string>
 	<string name="effect_status_updated">UPDATED</string>
 	<string name="ct_error_effectclient">EFFECT_ERROR</string>

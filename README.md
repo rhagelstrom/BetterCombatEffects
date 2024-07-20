@@ -63,17 +63,8 @@ Better Combat Effects supports Effect Builder, a GUI for building effects \
 | RESTL | (-) | | Remove effect when the Actor takes a short or long rest | |
 | **Stack** | | | | |
 | STACK | (-) | | Multiple of this effect is allow to be applied. The option "Allow Duplicate Effects" must be set to off | 5E 3.5E PFRPG SFRPG |
-| **Turn** | | | | |
-| TURNAS | (-) | | DEPRECATED -  ACTIVATE effect on the START of the Actor’s turn | |
-| TURNDS | (-) | | DEPRECATED -  DEACTIVATE effect on the START of the Actor’s turn | |
-| TURNRS | (-) | | DEPRECATED -  REMOVE effect on the START of the Actor’s turn if current duration is 1 | |
-| TURNAE | (-) | | DEPRECATED -  ACTIVATE effect on the END of the Actor’s turn | |
-| TURNDE | (-) | | DEPRECATED -  DEACTIVATE effect on the END of the Actor’s turn | |
-| TURNRE | (-) | | DEPRECATED -  REMOVE effect on the END of the Actor’s turn if current duration is 1 | |
-| STURNRS | (-) | | DEPRECATED -  REMOVE effect on the START of the Actor’s turn who applied the effect if current duration is 1 | |
-| STURNRE | (-) | | DEPRECATED -  REMOVE effect on the END of the Actor’s turn who applied the effect if current duration is 1 | |
 
-* **DEPRECATED** = Will be removed in the future. Use Change State Cycler (see below)
+* **DEPRECATED** = Will be removed in the future.
 * **(D)** = Dice and numbers supported for value attribute
 * **(N)** = Only numbers supported for value attribute
 * **(-)** = Neither number nor dice supported for value attribute
@@ -184,7 +175,6 @@ You can also bring up the migrate effects popup with the slash command: **/migra
 | --- | --- | --- | --- | --- |
 | Allow Duplicate Effects | on | off/on | When off, will not allow duplicate effects (same name, duration, actor who applied the effect) on an Actor | 5E |
 | Consider Duplicate Duration | off | off/on | When on, considers Concentration duration when determining if previous concentration effects should expire | 5E |
-| Deprecate Change State Tags | off | off/on | When on, TURNAS, TURNDS, TURNRS, TURNAE, TURNDE, TURNRE, STURNRS, STURNRE will no longer process and there is a performance increase on change of turn | |
 | Experimental: Autoparse NPC Powers | off | off/on | When on, will autoparse powers and automatically create effects for: DMGOE, SDMGOS, SDMGEOE, TURNRS, TURNRE, STURNRS, STURNRE, SAVES, SAVEE | 5E |
 | Restrict Concentration | off | off/on| When on, expires any previous spells with concentration (C) when a new concentration spell is cast | 5E |
 | TempHP Reduction is Damage | on | off/on | For purposes of determining if something should happen if an actor takes damage. When off, if an actor takes damage that reduces their Temp HP only and NOT their HP (takes wounds), that reduction is not considered damage | |
