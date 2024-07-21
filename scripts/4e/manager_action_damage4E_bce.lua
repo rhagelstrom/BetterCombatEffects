@@ -61,7 +61,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput)
         nReduce = nReduce + nLocalReduce;
     end
     if (nReduce > 0) then
-        table.insert(rDamageOutput.tNotifications, '[REDUCED]');
+        table.insert(rDamageOutput.tNotifications, '[REDUCED:' .. tostring(nReduce) ..']');
     end
     nDamageAdjust, bVulnerable, bResist, nHalf = getDamageAdjust(rSource, rTarget, nDamage, rDamageOutput);
     nDamageAdjust = nDamageAdjust - nReduce;

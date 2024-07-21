@@ -51,7 +51,7 @@ function customGetDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)
         nReduce = nReduce + nLocalReduce;
     end
     if (nReduce > 0) then
-        table.insert(rDamageOutput.tNotifications, '[REDUCED]');
+        table.insert(rDamageOutput.tNotifications, '[REDUCED:' .. tostring(nReduce) ..']');
     end
     local results = {getDamageAdjust(rSource, rTarget, nDamage, rDamageOutput, ...)};
     -- By default FG returns the following values with anything else being another extension
@@ -70,6 +70,11 @@ function getReductionType(rSource, rTarget, sEffectType, rDamageOutput)
     local nTotalDamage = rDamageOutput.nVal;
     for _, tEffect in pairs(tEffects) do
         local rReduction = {};
+        if next(tEffect.dice) then
+            for _,die in ipairs(tEffect.dice) do
+                tEffect.mod = tEffect.mod + DiceManager.evalDie(die);
+            end
+        end
         if tEffect.mod < 1 and tEffect.mod > 0 then
             local nReduce = math.floor(tEffect.mod * nTotalDamage);
             for _, sDescriptor in ipairs(tEffect.remainder) do
