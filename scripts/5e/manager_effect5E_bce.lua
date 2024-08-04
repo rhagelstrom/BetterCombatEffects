@@ -112,12 +112,14 @@ end
 -- function addEffectPre5E(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
 function addEffectPre5E(_, _, nodeCT, rNewEffect, _)
     BCEManager.chat('addEffectPre5E : ');
-    local rActor = ActorManager.resolveActor(nodeCT);
+    local nodeSource;
     local rSource;
+    local rActor = ActorManager.resolveActor(nodeCT);
     if not rNewEffect.sSource or rNewEffect.sSource == '' then
-        rSource = rActor;
+        nodeSource = nodeCT;
+        rSource = ActorManager.resolveActor(nodeCT);
     else
-        local nodeSource = DB.findNode(rNewEffect.sSource);
+        nodeSource = DB.findNode(rNewEffect.sSource);
         rSource = ActorManager.resolveActor(nodeSource);
     end
     -- Save off original so we can match the name. Rebuilding a fully parsed effect
@@ -139,11 +141,7 @@ function addEffectPre5E(_, _, nodeCT, rNewEffect, _)
     end
 
     if OptionsManager.isOption('RESTRICT_CONCENTRATION', 'on') then
-        local nDuration = rNewEffect.nDuration;
-        if rNewEffect.sUnits == 'minute' then
-            nDuration = nDuration * 10;
-        end
-        EffectManager5EBCE.dropConcentration(rNewEffect, nDuration);
+        EffectManager5EBCE.dropConcentration(nodeSource, rNewEffect);
     end
 
     return false;
@@ -151,20 +149,19 @@ end
 
 -- 5E Only - Check if this effect has concentration and drop all previous effects of concentration from the source
 -- TODO: This is really old code and written when I was green. I should take another look at if this whole thing is actually needed
-function dropConcentration(rNewEffect, nDuration)
+function dropConcentration(nodeSource, rNewEffect)
     BCEManager.chat('dropConcentration : ');
     if (rNewEffect.sName:match('%(C%)')) then
-        local nodeCT = CombatManager.getActiveCT();
         local sSourceName = rNewEffect.sSource;
         if sSourceName == '' then
-            sSourceName = ActorManager.getCTPathFromActorNode(nodeCT);
+            sSourceName = ActorManager.getCTPathFromActorNode(nodeSource);
         end
         local sSource;
         local ctEntries = CombatManager.getSortedCombatantList();
         local tEffectComps = EffectManager.parseEffect(rNewEffect.sName);
         local sNewEffectTag = tEffectComps[1];
         for _, nodeCTConcentration in pairs(ctEntries) do
-            if nodeCT == nodeCTConcentration then
+            if nodeSource == nodeCTConcentration then
                 sSource = '';
             else
                 sSource = sSourceName;
@@ -174,8 +171,7 @@ function dropConcentration(rNewEffect, nDuration)
                 tEffectComps = EffectManager.parseEffect(sEffect);
                 local sEffectTag = tEffectComps[1];
                 if (sEffect:match('%(C%)') and (DB.getValue(nodeEffect, 'source_name', '') == sSource)) and
-                    (sEffectTag ~= sNewEffectTag) or
-                    ((sEffectTag == sNewEffectTag and (DB.getValue(nodeEffect, 'duration', 0) ~= nDuration))) then
+                    (sEffectTag ~= sNewEffectTag) then
                     BCEManager.modifyEffect(nodeEffect, 'Remove', sEffect);
                 end
             end
