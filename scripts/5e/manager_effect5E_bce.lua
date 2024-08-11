@@ -114,7 +114,6 @@ function addEffectPre5E(_, _, nodeCT, rNewEffect, _)
     BCEManager.chat('addEffectPre5E : ');
     local nodeSource;
     local rSource;
-    local rActor = ActorManager.resolveActor(nodeCT);
     if not rNewEffect.sSource or rNewEffect.sSource == '' then
         nodeSource = nodeCT;
         rSource = ActorManager.resolveActor(nodeCT);
