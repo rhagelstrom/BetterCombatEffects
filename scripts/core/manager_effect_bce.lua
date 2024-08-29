@@ -6,7 +6,7 @@
 -- luacheck: globals EffectManagerBCE BCEManager CombatManagerDnDBCE EffectManagerDnDBCE MigrationManagerBCE
 -- luacheck: globals onInit onClose moddedGetEffectsByType deleteStateModified
 -- luacheck: globals customAddEffectPre registerEffectCompType getEffectCompType getLabelShort initEffectHandlers deleteEffectHandlers
--- luacheck: globals deleteEffectHandlers expireAddHelper expireAdd setCustomMatchEffect removeCustomMatchEffect onCustomMatchEffect
+-- luacheck: globals deleteEffectHandlers expireAdd setCustomMatchEffect removeCustomMatchEffect onCustomMatchEffect
 -- luacheck: globals setCustomPreAddEffect removeCustomPreAddEffect onCustomPreAddEffect setCustomPostAddEffect
 -- luacheck: globals removeCustomPostAddEffect onCustomPostAddEffect addSourceTurnHandler modSourceTurnHandler clearSourceTurnHandler
 -- luacheck: globals  deleteSourceTurnHandler processSourceTurn addChangeStateHandler deleteState
@@ -188,7 +188,6 @@ function customAddEffectPre(sUser, sIdentity, nodeCT, rNewEffect, bShowMsg)
                 DB.setValue(v, 'duration', 'number', rNewEffect.nDuration + 1);
             end
             nodeEffect = v;
-            DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
             EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
             EffectManagerBCE.addSourceTurnHandler(nodeCT, nodeEffect);
             EffectManagerBCE.onCustomPostAddEffect(nodeCT, nodeEffect);
@@ -238,11 +237,9 @@ function initEffectHandlers()
     local ctEntries = CombatManager.getCombatantNodes();
     for _, nodeCT in pairs(ctEntries) do
         for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
-            DB.addHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
             EffectManagerBCE.addChangeStateHandler(nodeCT, nodeEffect);
             EffectManagerBCE.addSourceTurnHandler(nodeCT, nodeEffect);
         end
-        DB.addHandler(DB.getPath(nodeCT, 'effects.*.label'), 'onAdd', expireAddHelper);
     end
 end
 
@@ -250,16 +247,9 @@ function deleteEffectHandlers()
     local ctEntries = CombatManager.getCombatantNodes();
     for _, nodeCT in pairs(ctEntries) do
         for _, nodeEffect in ipairs(DB.getChildList(nodeCT, 'effects')) do
-            DB.removeHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
             EffectManagerBCE.deleteChangeStateHandler(nodeCT, nodeEffect);
         end
-        DB.removeHandler(DB.getPath(nodeCT, 'effects.*.label'), 'onAdd', expireAdd);
     end
-end
-
-function expireAddHelper(nodeLabel)
-    DB.removeHandler(DB.getPath(nodeLabel), 'onAdd', expireAddHelper);
-    DB.addHandler(DB.getPath(DB.getChild(nodeLabel, '..')), 'onDelete', expireAdd);
 end
 
 function expireAdd(nodeEffect)
@@ -281,12 +271,10 @@ function expireAdd(nodeEffect)
                 for _, remainder in pairs(aRemainders) do
                     BCEManager.notifyAddEffect(nodeCT, sourceNode, remainder);
                 end
-                -- BCEManager.notifyAddEffect(nodeCT, sourceNode, StringManager.combine(' ', unpack(tEffectComp.remainder)));
                 break
             end
         end
     end
-    DB.removeHandler(DB.getPath(nodeEffect), 'onDelete', expireAdd);
 end
 
 ------------------ CUSTOM BCE FUNTION HOOKS ------------------
@@ -425,7 +413,7 @@ function deleteSourceTurnHandler(nodeEffectLabel)
     if sSource == '' then
         sSource = sNode;
     end
-
+    EffectManagerBCE.expireAdd(nodeEffect);
     EffectManagerBCE.clearSourceTurnHandler(sSource, DB.getPath(nodeEffect));
 end
 
