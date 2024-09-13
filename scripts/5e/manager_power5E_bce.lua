@@ -11,7 +11,7 @@ local getPCPowerAction = nil;
 
 function onInit()
     evalAction = PowerManager.evalAction;
-    parseEffects = PowerManager.parseEffects;
+    -- parseEffects = PowerManager.parseEffects;
     getPCPowerAction = PowerManager.getPCPowerAction;
 
     PowerManager.evalAction = customEvalAction;
@@ -21,7 +21,7 @@ end
 
 function onClose()
     PowerManager.evalAction = evalAction;
-    PowerManager.parseEffects = parseEffects;
+    -- PowerManager.parseEffects = parseEffects;
     PowerManager.getPCPowerAction = getPCPowerAction;
 end
 
