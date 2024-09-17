@@ -15,7 +15,7 @@ function onInit()
     getPCPowerAction = PowerManager.getPCPowerAction;
 
     PowerManager.evalAction = customEvalAction;
-    PowerManager.parseEffects = moddedParseEffects;
+    -- PowerManager.parseEffects = moddedParseEffects;
     PowerManager.getPCPowerAction = customGetPCPowerAction;
 end
 
@@ -93,7 +93,7 @@ end
 -- luacheck: push ignore 561
 function moddedParseEffects(sPowerName, aWords)
     if OptionsManager.isOption('AUTOPARSE_EFFECTS', 'off') then
-        return parseEffects(sPowerName, aWords)
+        return PowerManager.parseEffects(sPowerName, aWords)
     end
     local effects = {};
     local rCurrent = nil;
