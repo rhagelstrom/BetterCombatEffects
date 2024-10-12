@@ -6,7 +6,7 @@
 -- luacheck: globals EffectManagerDnDBCE BCEManager BCEDnDManager EffectManagerBCE DiceManagerDnDBCE
 -- luacheck: globals onInit onClose onTabletopInit onEffectRollHandler addEffectPre addEffectPost
 -- luacheck: globals applyOngoingDamage applyOngoingRegen customOnEffectTextDecode customOnEffectTextEncode
--- luacheck: globals splitTagByComma
+-- luacheck: globals splitTagByComma ActionSaveDnDBCE
 local RulesetEffectManager = nil;
 
 local onEffectTextDecode = nil;
@@ -87,9 +87,14 @@ function addEffectPost(nodeActor, nodeEffect)
     else
         rSource = ActorManager.resolveActor(rEffect.sSource);
     end
-    local aTags = {'REGENA', 'TREGENA', 'DMGA'};
+    local aTags = {'REGENA', 'TREGENA', 'DMGA', 'SAVEA'};
     for _, sTag in pairs(aTags) do
-        local tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
+        local tMatch;
+        if sTag == 'SAVEA' then
+            tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, ActionSaveDnDBCE.aSaveFilter);
+        else
+            tMatch = RulesetEffectManager.getEffectsByType(rTarget, sTag, nil, rSource);
+        end
         for _, tEffect in pairs(tMatch) do
             if sTag == 'REGENA' then
                 BCEManager.chat('REGENA: ');
@@ -100,6 +105,11 @@ function addEffectPost(nodeActor, nodeEffect)
             elseif sTag == 'DMGA' then
                 BCEManager.chat('DMGA: ');
                 EffectManagerDnDBCE.applyOngoingDamage(rSource, rTarget, tEffect);
+            elseif sTag == 'SAVEA' then
+                for _, tEffect in pairs(tMatch) do
+                    BCEManager.chat('SAVEA : ', tEffect);
+                    ActionSaveDnDBCE.saveEffect(rTarget, tEffect);
+                end
             end
         end
     end

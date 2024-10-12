@@ -5,7 +5,7 @@
 --
 -- luacheck: globals PowerManager5EBCE BCEManager ActionSaveDnDBCE
 -- luacheck: globals onInit onClose customEvalAction customGetPCPowerAction moddedParseEffects getTurnModifier
-local parseEffects = nil;
+-- local parseEffects = nil;
 local evalAction = nil;
 local getPCPowerAction = nil;
 

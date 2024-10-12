@@ -6,19 +6,18 @@
 -- luacheck: globals ActionSaveDnDBCE BCEManager EffectManagerBCE EffectManagerDnDBCE CombatManagerBCE ActionDamageDnDBCE
 -- luacheck: globals onInit onTabletopInit onClose processEffectTurnStartSave processEffectTurnEndSave onSaveRollHandler
 -- luacheck: globals saveAddEffect saveEffect saveRemoveDisable onDamage addEffectPost getDCEffectMod replaceSaveDC
--- luacheck: globals replaceSaveDCPCHelper replaceSaveDCNPCHelper
+-- luacheck: globals replaceSaveDCPCHelper replaceSaveDCNPCHelper aSaveFilter
 local onSave = nil;
 local RulesetEffectManager = nil;
 local RulesetActorManager = nil;
 
-local aSaveFilter = {}
+aSaveFilter = {}
 
 function onInit()
     RulesetEffectManager = BCEManager.getRulesetEffectManager();
     RulesetActorManager = BCEManager.getRulesetActorManager();
 
     ActionsManager.registerResultHandler('save', onSaveRollHandler);
-    EffectManagerBCE.setCustomPostAddEffect(addEffectPost);
 
     onSave = ActionSave.onSave;
     ActionSave.onSave = onSaveRollHandler;
@@ -278,20 +277,6 @@ function onDamage(rSource, rTarget, _)
     tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEONDMG', aSaveFilter, rSource);
     for _, tEffect in pairs(tMatch) do
         BCEManager.chat('SAVEONDMG : ', tEffect);
-        ActionSaveDnDBCE.saveEffect(rTarget, tEffect);
-    end
-    return false;
-end
-
--- function addEffectPost(nodeActor, nodeEffect)
-function addEffectPost(nodeActor, _)
-    BCEManager.chat('addEffectPost : ');
-    local rTarget = ActorManager.resolveActor(nodeActor);
-    local tMatch;
-
-    tMatch = RulesetEffectManager.getEffectsByType(rTarget, 'SAVEA', aSaveFilter);
-    for _, tEffect in pairs(tMatch) do
-        BCEManager.chat('SAVEA : ', tEffect);
         ActionSaveDnDBCE.saveEffect(rTarget, tEffect);
     end
     return false;
