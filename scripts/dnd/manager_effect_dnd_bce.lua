@@ -106,10 +106,8 @@ function addEffectPost(nodeActor, nodeEffect)
                 BCEManager.chat('DMGA: ');
                 EffectManagerDnDBCE.applyOngoingDamage(rSource, rTarget, tEffect);
             elseif sTag == 'SAVEA' then
-                for _, tEffect in pairs(tMatch) do
-                    BCEManager.chat('SAVEA : ', tEffect);
-                    ActionSaveDnDBCE.saveEffect(rTarget, tEffect);
-                end
+                BCEManager.chat('SAVEA : ', tEffect);
+                ActionSaveDnDBCE.saveEffect(rTarget, tEffect);
             end
         end
     end
