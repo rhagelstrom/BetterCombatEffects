@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <root version="3.3">
-	<icon name="BetterCombatEffects" file="graphics/icons/bce.png" />
+	<icon name="BetterCombatEffects" file="graphics/icons/bce.webp" />
 	<icon name="bce_save" file="graphics/icons/bce_save.png" />
 	<icon name="button_toggle_ae" file="graphics/icons/button_toggle_ae.png" />
 	<icon name="button_toggle_de" file="graphics/icons/button_toggle_de.png" />
