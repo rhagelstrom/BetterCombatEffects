@@ -1,7 +1,7 @@
 --  	Author: Ryan Hagelstrom
---	  	Copyright © 2021
---	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
---	  	https://creativecommons.org/licenses/by-sa/4.0/
+--      Copyright © 2021-2024
+--      Please see the license file included with this distribution for
+--      attribution and copyright information.
 --
 -- luacheck: globals EffectManager4EBCE BCEManager EffectManagerBCE EffectManagerDnDBCE
 -- luacheck: globals onInit onClose onAttack4E applyOngoingDamage applyOngoingRegen addEffectPre4E

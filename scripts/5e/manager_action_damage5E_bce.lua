@@ -1,7 +1,6 @@
 --  	Author: Ryan Hagelstrom
---	  	Copyright © 2021-2024
---	  	This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
---	  	https://creativecommons.org/licenses/by-sa/4.0/
+--      Please see the license file included with this distribution for
+--      attribution and copyright information.
 --
 -- luacheck: globals ActionDamage5EBCE BCEManager ActionDamageDnDBCE
 -- luacheck: globals onInit onClose customApplyDamage customGetDamageAdjust getReductionType applyDamage
