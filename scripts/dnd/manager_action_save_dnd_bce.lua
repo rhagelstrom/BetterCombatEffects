@@ -183,6 +183,9 @@ function saveEffect(rTarget, rEffectComp)
         rSource = rTarget;
     else
         rSource = ActorManager.resolveActor(rEffect.sSource);
+        if not rSource then
+            rSource = rTarget;
+        end
     end
 
     local sAbility;
