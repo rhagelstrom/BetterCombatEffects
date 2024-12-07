@@ -10,6 +10,7 @@ local RulesetEffectManager = nil;
 
 local onEffectTextDecode = nil;
 local onEffectTextEncode = nil;
+local b4E = false;
 
 function onInit()
     RulesetEffectManager = BCEManager.getRulesetEffectManager();
@@ -26,6 +27,9 @@ function onInit()
     RulesetEffectManager.onEffectTextEncode = customOnEffectTextEncode;
     EffectManager.setCustomOnEffectTextEncode(customOnEffectTextEncode);
     EffectManager.setCustomOnEffectTextDecode(customOnEffectTextDecode);
+    if User.getRulesetName() == '4E' then
+        b4E = true;
+    end
 end
 
 function onClose()
@@ -86,7 +90,10 @@ function addEffectPost(nodeActor, nodeEffect)
     else
         rSource = ActorManager.resolveActor(rEffect.sSource);
     end
-    local aTags = {'REGENA', 'TREGENA', 'DMGA', 'SAVEA'};
+    local aTags = {'REGENA', 'TREGENA', 'DMGA'};
+    if not b4E then
+        table.insert(aTags, 'SAVEA')
+    end
     for _, sTag in pairs(aTags) do
         local tMatch;
         if sTag == 'SAVEA' then
