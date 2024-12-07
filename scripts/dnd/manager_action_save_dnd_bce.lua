@@ -11,7 +11,6 @@ local RulesetEffectManager = nil;
 local RulesetActorManager = nil;
 
 aSaveFilter = {}
-local bOnDelay = false;
 
 function onInit()
     RulesetEffectManager = BCEManager.getRulesetEffectManager();
@@ -82,16 +81,12 @@ end
 function onSaveRollHandler(rSource, rTarget, rRoll)
     BCEManager.chat('onSaveRollHandler : ');
     if not rRoll.sSaveDesc or not rRoll.sSaveDesc:match('%[BCE]') then
-        EffectManager.endDelayedUpdates();
-        bOnDelay = false;
         return onSave(rSource, rTarget, rRoll);
     end
     -- Get the original save effect path so we can correlate with damage
     local sPath = rRoll.sSaveDesc:match('%[PATH%][%a%d%.%-]*%[!PATH%]');
     rRoll.sSaveDesc:gsub('%[PATH%][%a%d%.%-]*%[!PATH%]', '');
     if not sPath then
-        EffectManager.endDelayedUpdates();
-        bOnDelay = false;
         return onSave(rSource, rTarget, rRoll);
     end
     sPath = sPath:gsub('%[!*PATH%]', '');
@@ -101,8 +96,6 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
     rTarget = ActorManager.resolveActor(nodeTarget);
     -- something is wrong. Likely an extension messing with things
     if not rTarget or not rSource or not nodeTarget or not nodeSource then
-        EffectManager.endDelayedUpdates();
-        bOnDelay = false;
         return onSave(rSource, rTarget, rRoll);
     end
 
@@ -171,8 +164,6 @@ function onSaveRollHandler(rSource, rTarget, rRoll)
         end
     end
     ActionSaveDnDBCE.saveRemoveDisable(sPath, nil, (not bAct), rRoll);
-    EffectManager.endDelayedUpdates();
-    bOnDelay = false;
 end
 
 function saveAddEffect(nodeSource, nodeTarget, rEffectComp)
@@ -255,10 +246,6 @@ function saveEffect(rTarget, rEffectComp)
         table.insert(aSaveFilterAbility, sAbility:lower());
 
         rSaveVsRoll.sDesc = rSaveVsRoll.sDesc .. ' [PATH]' .. rEffectComp.sEffectNode .. '[!PATH] [BCE]';
-        if not bOnDelay then
-            bOnDelay = true;
-            EffectManager.startDelayedUpdates();
-        end
         ActionSave.performVsRoll(nil, rTarget, sAbility, rSaveVsRoll.nMod, bSecret, rSource, false, rSaveVsRoll.sDesc);
     end
 end
