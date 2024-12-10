@@ -409,8 +409,8 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 end
 -- luacheck: pop
 
-function moddedHasEffectCondition(rActor, sEffect)
-    return EffectManager5E.hasEffect(rActor, sEffect, nil, false, true);
+function moddedHasEffectCondition(rActor, sEffect, rTarget)
+    return EffectManager5E.hasEffect(rActor, sEffect, rTarget, false, true);
 end
 
 -- luacheck: push ignore 561
