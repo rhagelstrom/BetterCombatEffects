@@ -5,7 +5,7 @@
 -- luacheck: globals EffectManagerBCE BCEManager CombatManagerDnDBCE EffectManagerDnDBCE MigrationManagerBCE
 -- luacheck: globals onInit onClose moddedGetEffectsByType deleteStateModified
 -- luacheck: globals customAddEffectPre registerEffectCompType getEffectCompType getLabelShort initEffectHandlers deleteEffectHandlers
--- luacheck: globals deleteEffectHandlers expireAdd setCustomMatchEffect removeCustomMatchEffect onCustomMatchEffect
+-- luacheck: globals deleteEffectHandlers setCustomMatchEffect removeCustomMatchEffect onCustomMatchEffect
 -- luacheck: globals setCustomPreAddEffect removeCustomPreAddEffect onCustomPreAddEffect setCustomPostAddEffect
 -- luacheck: globals removeCustomPostAddEffect onCustomPostAddEffect addSourceTurnHandler modSourceTurnHandler clearSourceTurnHandler
 -- luacheck: globals  deleteSourceTurnHandler processSourceTurn addChangeStateHandler deleteState
@@ -251,31 +251,6 @@ function deleteEffectHandlers()
     end
 end
 
-function expireAdd(nodeEffect)
-    BCEManager.chat('expireAdd: ');
-    local sLabel = DB.getValue(nodeEffect, 'label', '', '');
-    if sLabel:match('EXPIREADD') then
-        local sActor = DB.getPath(DB.getChild(nodeEffect, '...'));
-        local nodeCT = DB.findNode(sActor);
-        local sSource = DB.getValue(nodeEffect, 'source_name', '');
-        local sourceNode = nodeCT;
-        if sSource ~= '' then
-            sourceNode = DB.findNode(sSource);
-        end
-        local aEffectComps = EffectManager.parseEffect(sLabel);
-        for _, sEffectComp in ipairs(aEffectComps) do
-            local tEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
-            if tEffectComp.type == 'EXPIREADD' then
-                local aRemainders = EffectManagerDnDBCE.splitTagByComma(sEffectComp);
-                for _, remainder in pairs(aRemainders) do
-                    BCEManager.notifyAddEffect(nodeCT, sourceNode, remainder);
-                end
-                break
-            end
-        end
-    end
-end
-
 ------------------ CUSTOM BCE FUNTION HOOKS ------------------
 function setCustomMatchEffect(f)
     table.insert(aCustomMatchEffectHandlers, f);
@@ -412,7 +387,7 @@ function deleteSourceTurnHandler(nodeEffectLabel)
     if sSource == '' then
         sSource = sNode;
     end
-    EffectManagerBCE.expireAdd(nodeEffect);
+    EffectManagerDnDBCE.expireAdd(nodeEffect);
     EffectManagerBCE.clearSourceTurnHandler(sSource, DB.getPath(nodeEffect));
 end
 

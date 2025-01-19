@@ -5,7 +5,7 @@
 -- luacheck: globals EffectManagerDnDBCE BCEManager BCEDnDManager EffectManagerBCE DiceManagerDnDBCE
 -- luacheck: globals onInit onClose onTabletopInit onEffectRollHandler addEffectPre addEffectPost
 -- luacheck: globals applyOngoingDamage applyOngoingRegen customOnEffectTextDecode customOnEffectTextEncode
--- luacheck: globals splitTagByComma ActionSaveDnDBCE
+-- luacheck: globals splitTagByComma ActionSaveDnDBCE expireAdd
 local RulesetEffectManager = nil;
 
 local onEffectTextDecode = nil;
@@ -231,4 +231,35 @@ end
 function splitTagByComma(sEffect)
     local sRemainder = sEffect:match("^%w+%s*:(.+)");
     return StringManager.split(sRemainder, ",", true);
+end
+
+function expireAdd(nodeEffect)
+    BCEManager.chat('expireAdd: ');
+    local sLabel = DB.getValue(nodeEffect, 'label', '', '');
+    if sLabel:match('EXPIREADD') then
+        local sActor = DB.getPath(DB.getChild(nodeEffect, '...'));
+        local nodeCT = DB.findNode(sActor);
+        local sSource = DB.getValue(nodeEffect, 'source_name', '');
+        local sourceNode = nodeCT;
+        if sSource ~= '' then
+            sourceNode = DB.findNode(sSource);
+        end
+        local aEffectComps = EffectManager.parseEffect(sLabel);
+        for _, sEffectComp in ipairs(aEffectComps) do
+            local tEffectComp = EffectManager.parseEffectCompSimple(sEffectComp);
+            if tEffectComp.type == "IFT" then
+                return false;
+            elseif tEffectComp.type == "IF" then
+                if not RulesetEffectManager.checkConditional(sActor, nodeEffect, tEffectComp.remainder) then
+                    return false;
+                end
+            elseif tEffectComp.type == 'EXPIREADD' then
+                local aRemainders = EffectManagerDnDBCE.splitTagByComma(sEffectComp);
+                for _, remainder in pairs(aRemainders) do
+                    BCEManager.notifyAddEffect(nodeCT, sourceNode, remainder);
+                end
+                break
+            end
+        end
+    end
 end
