@@ -240,6 +240,7 @@ function expireAdd(nodeEffect)
         local sActor = DB.getPath(DB.getChild(nodeEffect, '...'));
         local nodeCT = DB.findNode(sActor);
         local sSource = DB.getValue(nodeEffect, 'source_name', '');
+        local rActor = ActorManager.getCTNode(nodeCT)
         local sourceNode = nodeCT;
         if sSource ~= '' then
             sourceNode = DB.findNode(sSource);
@@ -250,7 +251,7 @@ function expireAdd(nodeEffect)
             if tEffectComp.type == "IFT" then
                 return false;
             elseif tEffectComp.type == "IF" then
-                if not RulesetEffectManager.checkConditional(sActor, nodeEffect, tEffectComp.remainder) then
+                if not RulesetEffectManager.checkConditional(rActor, nodeEffect, tEffectComp.remainder) then
                     return false;
                 end
             elseif tEffectComp.type == 'EXPIREADD' then
