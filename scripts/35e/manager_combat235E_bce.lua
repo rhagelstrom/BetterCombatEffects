@@ -18,7 +18,7 @@ function onClose()
 end
 
 function customRest(bShort)
-    rest(bShort);
+
 
     if not bShort then
 		for _,v in pairs(CombatManager.getCombatantNodes()) do
@@ -30,5 +30,7 @@ function customRest(bShort)
 				end
 			end
 		end
+	else
+		rest(bShort);
 	end
 end
