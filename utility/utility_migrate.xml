@@ -87,7 +87,7 @@
 			<script>
 				function onButtonPress()
 				    MigrationManagerBCE.migration(false);
-				    if super and super.onButtonPress() then
+				    if super and super.onButtonPress then
 				        super.onButtonPress();
 				    end
 				end
@@ -105,7 +105,7 @@
 				function onButtonPress()
 				    MigrationManagerBCE.migration(true);
 				    window.noshow.setValue(1);
-				    if super and super.onButtonPress() then
+				    if super and super.onButtonPress then
 				        super.onButtonPress();
 				    end
 				end
