@@ -65,8 +65,6 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
         -- Get the advanced effects info we snuck on the roll from the client
         rSource.itemPath = rRoll.itemPath;
         rSource.ammoPath = rRoll.ammoPath;
-        rRoll.itemPath = nil;
-        rRoll.ammoPath = nil;
     end
     -- save off temp hp and wounds before damage
     local nTempHPPrev, nWoundsPrev = ActionDamageDnDBCE.getTempHPAndWounds(rTarget);
