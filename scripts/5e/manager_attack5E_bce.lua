@@ -263,6 +263,7 @@ function customOnAttack(rSource, rTarget, rRoll)
     end
     if rSource then
         rSource.itemPath = rRoll.itemPath;
+        rSource.ammoPath = rRoll.ammoPath;
     end
     local tMatch;
     local aTags = {'ATKD', 'ATKA', 'ATKR'};
@@ -390,13 +391,15 @@ function customGetRoll(rActor, rAction)
     rRoll.bWeapon = (rAction.bWeapon or rAction.weapon);
     rRoll.bSpell = (rAction.bSpell or rAction.spell);
     rRoll.itemPath = rAction.itemPath;
+    rRoll.ammoPath = rAction.ammoPath;
     return rRoll;
 end
 
 function customPerformRoll(draginfo, rActor, rAction)
     BCEManager.chat('customPerformRoll ActionAttack : ');
-    if (draginfo and rAction.itemPath and rAction.itemPath ~= '') then
+    if (draginfo and ((rAction.itemPath and rAction.itemPath ~= '') or (rAction.ammoPath and rAction.ammoPath ~= ''))) then
         draginfo.setMetaData('itemPath', rAction.itemPath);
+        draginfo.setMetaData('ammoPath', rAction.ammoPath);
     end
     performRoll(draginfo, rActor, rAction);
 end

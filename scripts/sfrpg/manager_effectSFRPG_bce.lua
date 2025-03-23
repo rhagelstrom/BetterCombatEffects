@@ -291,53 +291,6 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
 end
 -- luacheck: pop
 
----	This function returns false if the effect is tied to an item and the item is not being used.
--- Dead code, for Advanced effects but does does Advance Effects support SFRPG?
-function isValidCheckEffect(rActor, nodeEffect)
-    if DB.getValue(nodeEffect, 'isactive', 0) ~= 0 then
-        local bActionItemUsed, bActionOnly = false, false
-        local sItemPath = ''
-
-        local sSource = DB.getValue(nodeEffect, 'source_name', '')
-        -- if source is a valid node and we can find "actiononly"
-        -- setting then we set it.
-        local node = DB.findNode(sSource)
-        if node then
-            local nodeItem = DB.getChild(node, '...')
-            if nodeItem then
-                sItemPath = DB.getPath(nodeItem)
-                bActionOnly = (DB.getValue(node, 'actiononly', 0) ~= 0)
-            end
-        end
-
-        if sItemPath and sItemPath ~= '' then
-            -- if there is a nodeWeapon do some sanity checking
-            if rActor.nodeItem then
-                -- here is where we get the node path of the item, not the
-                -- effectslist entry
-                if bActionOnly and (sItemPath == rActor.nodeItem) then
-                    bActionItemUsed = true
-                end
-            end
-
-            -- if there is a nodeAmmo do some sanity checking
-            if AmmunitionManager and rActor.nodeAmmo then
-                -- here is where we get the node path of the item, not the
-                -- effectslist entry
-                if bActionOnly and (sItemPath == rActor.nodeAmmo) then
-                    bActionItemUsed = true
-                end
-            end
-        end
-
-        if bActionOnly and not bActionItemUsed then
-            return false
-        else
-            return true
-        end
-    end
-end
-
 function moddedHasEffectCondition(rActor, sEffect)
     return EffectManagerSFRPG.hasEffect(rActor, sEffect, nil, false, true);
 end

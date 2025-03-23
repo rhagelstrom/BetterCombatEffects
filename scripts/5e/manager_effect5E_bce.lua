@@ -223,7 +223,7 @@ function moddedGetEffectsByType(rActor, sEffectType, aFilter, rFilterActor, bTar
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
 
         if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or (bAdvancedEffects and
-            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or EffectManagerADND.isValidCheckEffect(rActor, v))) then
+            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
             local sLabel = DB.getValue(v, 'label', '');
             local sApply = DB.getValue(v, 'apply', '');
             -- IF COMPONENT WE ARE LOOKING FOR SUPPORTS TARGETS, THEN CHECK AGAINST OUR TARGET
@@ -435,7 +435,7 @@ function moddedHasEffect(rActor, sEffect, rTarget, bTargetedOnly, bIgnoreEffectT
                             (not tEffectCompParams.bIgnoreExpire and (nActive ~= 0)) or
                             (tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0));
         if (not bAdvancedEffects and (nActive ~= 0 or bActive)) or (bAdvancedEffects and
-            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or EffectManagerADND.isValidCheckEffect(rActor, v))) then
+            ((tEffectCompParams.bIgnoreDisabledCheck and (nActive == 0)) or AdvancedEffects.isValidCheckEffect(rActor, v))) then
             -- Parse each effect label
             local sLabel = DB.getValue(v, 'label', '');
             local bTargeted = EffectManager.isTargetedEffect(v);

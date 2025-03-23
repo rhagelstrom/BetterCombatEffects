@@ -61,11 +61,11 @@ function applyDamageBCE(rSource, rTarget, rRoll, ...)
     local nodeTarget = ActorManager.getCTNode(rTarget);
     local nodeSource = ActorManager.getCTNode(rSource);
     local nodeCharTarget = ActorManager.getCreatureNode(rTarget);
-    if User.getRulesetName() == '5E' then
+    -- if User.getRulesetName() == '5E' then
         -- Get the advanced effects info we snuck on the roll from the client
         rSource.itemPath = rRoll.itemPath;
         rSource.ammoPath = rRoll.ammoPath;
-    end
+    -- end
     -- save off temp hp and wounds before damage
     local nTempHPPrev, nWoundsPrev = ActionDamageDnDBCE.getTempHPAndWounds(rTarget);
     local nTotalSPPrev = 0
